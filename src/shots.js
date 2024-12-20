@@ -154,15 +154,14 @@ export default class ShotsVideos extends HTMLElement {
 
   getShots = () => {
     return /* html */`
-      <div is="shot-video" link="https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8" thumb="../thumbs/thum.webp"></div>
       <div is="shot-video" link="https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8" thumb="../thumbs/thum.webp"></div>
       <div is="shot-video" link="../shots/shot9.m3u8" thumb="../thumbs/thum.webp"></div>
       <div is="shot-video" link="../shots/shot4.m3u8" thumb="../thumbs/thum.webp"></div>
-      <div is="shot-video" link="../shots/shot2.m3u8" thumb="../thumbs/thum.webp"></div>
       <div is="shot-video" link="../shots/shot5.m3u8" thumb="../thumbs/thum.webp"></div>
       <div is="shot-video" link="../shots/shot6.m3u8" thumb="../thumbs/thum.webp"></div>
       <div is="shot-video" link="../shots/shot8.m3u8" thumb="../thumbs/thum.webp"></div>
       <div is="shot-video" link="../shots/shot7.m3u8" thumb="../thumbs/thum.webp"></div>
+      <div is="shot-video" link="https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8" thumb="../thumbs/thum.webp"></div>
     `;
   }
 

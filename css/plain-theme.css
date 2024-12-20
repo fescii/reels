@@ -1,0 +1,197 @@
+/*
+
+Copyright: 2024 - Aduki Incorporation
+Name: Blog & Article Platform
+URL: https://github.com/fescii/zoanai.git
+Author: Fredrick Femar Ochieng
+Author URL: https://femar.co.ke
+
+
+/*
+
+  Fonts
+  =====
+
+*/
+
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap");
+
+/*
+
+  Variables
+  =========
+
+*/
+
+:root {
+  --tab-background: #d0d7de33;
+  --stat-background: #f1f1f1;
+
+  --font-main: "Inter";
+  --font-text: "DM Sans";
+  --font-mono: "Jetbrains Mono";
+  --font-read: "Work Sans";
+
+  --card-box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2);
+  --card-box-shadow-alt: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  --box-shadow: 0 0 0 1px #ffffff25, 0 2px 2px #0000000a,
+    0 8px 16px -4px #0000000a;
+
+  --scroll-bar-background: #ddddd7;
+  --scroll-bar-linear: linear-gradient(#53595f, #627ea0);
+
+  --section-border: 2px solid #0066c5cb;
+  --input-border: 1px solid #6b72805e;
+  --input-border-focus: 1px solid #18a5669a;
+  --input-border-error: 1px solid #ec4a1965;
+  --action-border: 1px solid #6b72803f;
+  --border: thin solid #6b72801a;
+  --border-button: thin solid #6b72801a;
+  --action-border: thin solid #627ea073;
+  --topic-border: thin solid #6b728046;
+  --topic-border-active: thin solid #21d02a7a;
+  --poll-border: thin solid #6b728025;
+  --border-mobile: thin solid #6b728036;
+  --border-header: 0.002rem solid #6b72809a;
+
+  --background: #ffffff;
+  --vh-height: 100dvh;
+
+  --label-focus-background: #eaf3ff;
+  --modal-background: #1d2534b3;
+  --action-background: #1d2c38d2;
+  --author-background: #f1f3f4;
+  --user-background: #f8f8f8;
+  --dot-background: #6b7280c9;
+  --hover-background: #f7f7f7;
+  --que-background: #e7e7e76c;
+  --poll-background: #e7e7e7d7;
+  --gray-background: #e7e7e7d7;
+  --logon-background: #f8f9fa;
+  --logon-image: radial-gradient(circle, #dee2e6 1px, rgba(0, 0, 0, 0) 1px);
+
+  --accent-color: #08b86f;
+  --accent-alt: #21d029;
+  --action-color: #627ea0;
+  --white-color: #ffffff;
+  --gray-color: #6b7280;
+  --add-color: #6b7280;
+  --text-color: #494d52;
+  --label-color: #3f4246;
+  --highlight-color: #494d52;
+  --read-color: #333333;
+  --editor-color: #333333;
+  --title-color: #1f2937;
+  --alt-color: #ff932f;
+  --error-color: #ec4b19;
+  --anchor-color: #0065c5;
+
+  --open-line: 2px solid #08b86f93;
+  --open-line-mobile: 2px solid #08b86fc5;
+  --close-line: 2px solid #6b72803a;
+
+  --modal-shadow: 0 12px 48px #6d758d33;
+  --modal-border: 1px solid #83858442;
+  --modal-overlay: #1d2534b3;
+
+  --action-linear: linear-gradient(#53595f, #627ea0);
+  --light-linear: linear-gradient(90deg, #e3ffe7 0%, #d9e7ff 100%);
+  --error-linear: linear-gradient(103.53deg, #fa6436 -6.72%, #ec4b19 109.77%);
+  --second-linear: linear-gradient(0deg, #df791a 0%, #f09c4e 100%);
+  --poll-linear: linear-gradient(0deg, #df791ace 0%, #f09c4ecc 100%);
+  --accent-linear: linear-gradient(103.53deg, #18a565 -6.72%, #21d029 109.77%);
+  --alt-linear: linear-gradient(
+    78deg,
+    rgb(31, 6, 71) -50%,
+    rgb(48, 0, 130) 28.67%,
+    rgb(143, 0, 153) 57.79%,
+    rgba(238, 0, 176, 0.85) 76.05%,
+    rgb(247, 95, 98) 88.54%,
+    rgb(255, 190, 20)
+  );
+  --loader-gradient: linear-gradient(
+    -45deg,
+    #ececec,
+    #f8f8f8,
+    #dddddd,
+    #f8f8f8,
+    #ececec
+  );
+  --fade-linear-gradient: linear-gradient(
+    180deg,
+    #ffffff02,
+    #ffffff2a,
+    #ffffff4d,
+    #ffffff69,
+    #ffffff83,
+    #ffffffc7,
+    #ffffffd5,
+    #ffffffea,
+    #fffffff6,
+    #ffffff
+  );
+  --controls-gradient-left: linear-gradient(
+    -90deg,
+    #ffffff02,
+    #ffffff2a,
+    #ffffff4d,
+    #ffffff69,
+    #ffffff83,
+    #ffffffc7,
+    #ffffffd5,
+    #ffffffea,
+    #fffffff6,
+    #ffffff
+  );
+
+  --controls-gradient-right: linear-gradient(
+    90deg,
+    #ffffff02,
+    #ffffff2a,
+    #ffffff4d,
+    #ffffff69,
+    #ffffff83,
+    #ffffffc7,
+    #ffffffd5,
+    #ffffffea,
+    #fffffff6,
+    #ffffff
+  );
+
+  /* Logon */
+  --loader-background: #ffffff38;
+  --logon-background: #ffffffec;
+  --logon-shadow: 1px 1px 30px 0 #00000010;
+  --stage-done-linear: linear-gradient(0deg, #3938381a 0%, #3938384d 100%);
+  --stage-active-linear: linear-gradient(0deg, #df791a 0%, #f09c4e 100%);
+  --stage-no-linear: linear-gradient(0deg, #18a565 0%, #21d029 100%);
+}
+
+*,
+*:after,
+*:before {
+  box-sizing: border-box;
+  font-family: inherit;
+  -webkit-box-sizing: border-box;
+}
+
+*:focus {
+  outline: inherit !important;
+}
+
+*::-webkit-scrollbar {
+  width: 3px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scroll-bar-background);
+}
+
+*::-webkit-scrollbar-thumb {
+  width: 3px;
+  background: var(--scroll-bar-linear);
+  border-radius: 50px;
+}

@@ -272,6 +272,7 @@ export default class ChatItem extends HTMLDivElement {
         :host {
           /* border: 1px solid blue;*/
           display: flex;
+          border-bottom: var(--border);
           font-family: var(--font-main), sans-serif;
           font-size: 16px;
           width: 100%;
@@ -520,6 +521,12 @@ export default class ChatItem extends HTMLDivElement {
 
         @media all and (max-width: 660px) {
           :host {
+          }
+
+          /* reset all cursor: pointer to cursor: default */
+          a, a:visited, a:link, a:hover, a:active,
+          button, button:active, button:focus, button:hover {
+            cursor: default !important;
           }
         }
         

@@ -200,11 +200,11 @@ export default class ChatsContainer extends HTMLElement {
           ]'>
       </div>
       <div is="chat-item" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Oliver"
-      user-name="Janet Doe" unread="0" active="true" you="true" message="I'll be there soon, wait for me!"
+      user-name="Janet Doe" unread="0" active="false" you="true" message="I'll be there soon, wait for me!"
       is-even="false" datetime="2024-12-20T12:20:15Z">
       </div>
-      <div is="chat-item" user-picture="https://randomuser.me/api/portraits/men/8.jpg"
-      user-name="Michael Scott" unread="0" active="false" you="false"
+      <div is="chat-item" user-picture="https://randomuser.me/api/portraits/men/1.jpg"
+      user-name="Michael Scott" unread="0" active="true" you="false"
       message="That's what she said!, See for yourself!" is-even="false" datetime="2024-11-15T16:30:15Z"
       images="https://images.unsplash.com/photo-1733077151673-c834c5613bbc?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://plus.unsplash.com/premium_photo-1733514691529-da25716e449b?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://images.unsplash.com/photo-1719937051176-9b98352a6cf4?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
       </div>
@@ -363,8 +363,9 @@ export default class ChatsContainer extends HTMLElement {
 
         form.search > .contents > input::placeholder {
           color: var(--gray-color);
-          font-size: 0.9rem;
           font-weight: 500;
+          font-family: var(--font-text), sans-serif;
+          font-size: 1rem;
           opacity: 0.8;
         }
 
@@ -452,6 +453,8 @@ export default class ChatsContainer extends HTMLElement {
         ul.tabs > li.tab.active {
           background: var(--tab-background);
           padding: 5px 10px;
+          display: flex;
+          text-align: center;
           color: var(--text-color);
         }
 
@@ -490,7 +493,7 @@ export default class ChatsContainer extends HTMLElement {
           background: var(--accent-linear);
           font-family: var(--font-text), sans-serif;
           color: var(--white-color);
-          padding: 1px 7px 2px;
+          padding: 2px 7px;
           border-radius: 10px;
         }
 
@@ -574,6 +577,12 @@ export default class ChatsContainer extends HTMLElement {
 
           div.chats {
             width: 100%;
+          }
+
+          /* reset all cursor: pointer to cursor: default */
+          a, button, input, label, select, textarea,
+          ul.tabs > li.tab, ul.tabs > li.tab.active {
+            cursor: default !important;
           }
         }
       </style>

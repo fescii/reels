@@ -58,6 +58,7 @@ export default class ChatsContainer extends HTMLElement {
     return /* html */`
       <div class="chats">
         ${this.getForm()}
+        ${this.getPins()}
         ${this.getTab()}
       </div>
       <div class="people">People</div>
@@ -117,11 +118,37 @@ export default class ChatsContainer extends HTMLElement {
     `;
   }
 
+  getPins = () => {
+    return /* html */`
+      <div class="pins-container">
+        <div class="head">
+          <span class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+              <path d="M3 21L8 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M13.2585 18.8714C9.51516 18.0215 5.97844 14.4848 5.12853 10.7415C4.99399 10.1489 4.92672 9.85266 5.12161 9.37197C5.3165 8.89129 5.55457 8.74255 6.03071 8.44509C7.10705 7.77265 8.27254 7.55888 9.48209 7.66586C11.1793 7.81598 12.0279 7.89104 12.4512 7.67048C12.8746 7.44991 13.1622 6.93417 13.7376 5.90269L14.4664 4.59604C14.9465 3.73528 15.1866 3.3049 15.7513 3.10202C16.316 2.89913 16.6558 3.02199 17.3355 3.26771C18.9249 3.84236 20.1576 5.07505 20.7323 6.66449C20.978 7.34417 21.1009 7.68401 20.898 8.2487C20.6951 8.8134 20.2647 9.05346 19.4039 9.53358L18.0672 10.2792C17.0376 10.8534 16.5229 11.1406 16.3024 11.568C16.0819 11.9955 16.162 12.8256 16.3221 14.4859C16.4399 15.7068 16.2369 16.88 15.5555 17.9697C15.2577 18.4458 15.1088 18.6839 14.6283 18.8786C14.1477 19.0733 13.8513 19.006 13.2585 18.8714Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <h3 class="title">Pinned chats</h3>
+        </div>
+        <div class="pins">
+          ${this.getPinnedChats()}
+        </div>
+      </div>
+    `;
+  }
+
+  getPinnedChats = () => {
+    return /* html */`
+      <div is="pin-chat" user-picture="https://randomuser.me/api/portraits/women/10.jpg"
+        user-name="Jane Doe" unread="2" active="true" last-message="Are you coming today">
+      </div>
+    `;
+  }
+
   getStyles = () => {
     return /* css */`
       <style>
         :host {
-          border: 2px solid blueviolet;
           display: flex;
           max-width: 70%;
           width: 70%;
@@ -365,6 +392,46 @@ export default class ChatsContainer extends HTMLElement {
           color: var(--white-color);
           padding: 1px 7px 2px;
           border-radius: 10px;
+        }
+
+        div.pins-container {
+          display: flex;
+          flex-flow: column;
+          align-items: start;
+          gap: 5px;
+          padding: 0;
+        }
+
+        div.pins-container > div.head {
+          display: flex;
+          flex-flow: row;
+          align-items: center;
+          justify-content: start;
+          gap: 5px;
+          padding: 10px 0;
+          width: 100%;
+        }
+
+        div.pins-container > div.head > span.icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--accent-color);
+          padding: 0;
+        }
+
+        div.pins-container > div.head > span.icon > svg {
+          width: 18px;
+          height: 18px;
+        }
+
+        div.pins-container > div.head > h3.title {
+          font-size: 1.2rem;
+          font-weight: 500;
+          padding: 0;
+          color: var(--title-color);
+          font-family: var(--font-read), sans-serif;
+          margin: 0;
         }
 
         @media screen and (max-width: 660px) {

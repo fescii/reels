@@ -26,6 +26,10 @@ body > section.content {
 }
 
 @media screen and (max-width: 660px) {
+  body {
+    padding: 0 10px;
+  }
+  
   body > section.content {
     width: 100%;
     border: none;

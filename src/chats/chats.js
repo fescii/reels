@@ -60,6 +60,9 @@ export default class ChatsContainer extends HTMLElement {
         ${this.getForm()}
         ${this.getPins()}
         ${this.getTab()}
+        <div class="chats-container">
+          ${this.getChats()}
+        </div>
       </div>
       <div class="people">People</div>
     `;
@@ -72,7 +75,7 @@ export default class ChatsContainer extends HTMLElement {
           <path d="M15.28 5.22a.75.75 0 0 1 0 1.06L9.56 12l5.72 5.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215l-6.25-6.25a.75.75 0 0 1 0-1.06l6.25-6.25a.75.75 0 0 1 1.06 0Z"></path>
         </svg>
         <div class="contents">
-          <input type="text" name="q" id="query" placeholder="What's your query?">
+          <input type="text" name="q" id="query" placeholder="Search your chats">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="11.7666" cy="11.7667" r="8.98856" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"  stroke-linejoin="round" />
             <path d="M18.0183 18.4853L21.5423 22.0001" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
@@ -139,8 +142,111 @@ export default class ChatsContainer extends HTMLElement {
 
   getPinnedChats = () => {
     return /* html */`
-      <div is="pin-chat" user-picture="https://randomuser.me/api/portraits/women/10.jpg"
-        user-name="Jane Doe" unread="2" active="true" last-message="Are you coming today">
+      <div is="pin-chat" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Aidan"
+        user-name="Alice Johnson" unread="0" active="true" last-message="Got it, thanks!"
+        is-even="true">
+      </div>
+      <div is="pin-chat" user-picture="https://randomuser.me/api/portraits/men/1.jpg"
+        user-name="Jane Doe" unread="2" active="false" last-message="Are you coming today"
+        is-even="true">
+      </div>
+      <div is="pin-chat" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Riley"
+        user-name="John Smith" unread="5" active="true" last-message="See you tomorrow"
+        is-even="false">
+      </div>
+      <div is="pin-chat" user-picture="https://randomuser.me/api/portraits/women/4.jpg"
+        user-name="Bob Brown" unread="0" active="false" last-message="Let's catch up later"
+        is-even="false">
+      </div>
+      <div is="pin-chat" user-picture="https://randomuser.me/api/portraits/men/5.jpg"
+        user-name="Charlie Davis" unread="3" active="true" last-message="I'll be there soon"
+        is-even="true">
+      </div>
+      <div is="pin-chat" user-picture="https://randomuser.me/api/portraits/women/6.jpg"
+        user-name="Diana Evans" unread="4" active="false" last-message="Can you send the file?"
+        is-even="false">
+      </div>
+      <div is="pin-chat" user-picture="https://randomuser.me/api/portraits/men/7.jpg"
+        user-name="Eve Foster" unread="2" active="true" last-message="Meeting at 3 PM"
+        is-even="true">
+      </div>
+    `;
+  }
+
+  getChats = () => {
+    return /* html */`
+      <div is="chat-item" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Aidan"
+        user-name="Alice Johnson" unread="0" active="true" you="false"
+        message="I have attached the needed documents below!" is-even="true" datetime="2024-12-24T09:25:15Z"
+        attachments='[
+          {
+            "name": "Meeting Notes.pdf",
+            "size": "1.2MB",
+            "type": "pdf",
+            "link": "https://example.com/meeting-notes.pdf"
+          },
+          {
+            "name": "Design Mockup.png",
+            "size": "2.4MB",
+            "type": "image",
+            "link": "https://example.com/design-mockup.png"
+          },
+          {
+            "name": "Project Proposal.docx",
+            "size": "3.6MB",
+            "type": "doc",
+            "link": "https://example.com/project-proposal.docx"
+          }
+          ]'>
+      </div>
+      <div is="chat-item" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Oliver"
+      user-name="Janet Doe" unread="0" active="true" you="true" message="I'll be there soon, wait for me!"
+      is-even="false" datetime="2024-12-20T12:20:15Z">
+      </div>
+      <div is="chat-item" user-picture="https://randomuser.me/api/portraits/men/8.jpg"
+      user-name="Michael Scott" unread="0" active="false" you="false"
+      message="That's what she said!, See for yourself!" is-even="false" datetime="2024-11-15T16:30:15Z"
+      images="https://images.unsplash.com/photo-1733077151673-c834c5613bbc?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://plus.unsplash.com/premium_photo-1733514691529-da25716e449b?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://images.unsplash.com/photo-1719937051176-9b98352a6cf4?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
+      </div>
+      <div is="chat-item" user-picture="https://api.dicebear.com/9.x/adventurer/svg?seed=Amaya"
+      user-name="Jim Halpert" unread="2" active="false" you="true"
+      message="Pranking Dwight again!" is-even="true" datetime="2024-09-20T14:40:15Z">
+      </div>
+      <div is="chat-item" user-picture="https://randomuser.me/api/portraits/women/9.jpg"
+      user-name="Pam Beesly" unread="0" active="true" you="false"
+      message="See you at the office." is-even="true" datetime="2024-10-01T08:35:15Z">
+      </div>
+      <div is="chat-item" user-picture="https://randomuser.me/api/portraits/men/10.jpg"
+      user-name="Jim Halpert" unread="2" active="false" you="true"
+      message="Pranking Dwight again!" is-even="false" datetime="2024-09-20T14:40:15Z">
+      </div>
+      <div is="chat-item" user-picture="https://randomuser.me/api/portraits/women/11.jpg"
+      user-name="Angela Martin" unread="3" active="true" you="false"
+      message="Cat party at my place." is-even="true" datetime="2024-08-05T11:45:15Z">
+      </div>
+      <div is="chat-item" user-picture="https://randomuser.me/api/portraits/men/12.jpg"
+      user-name="Dwight Schrute" unread="0" active="false" you="true"
+      message="Bears. Beets. Battlestar Galactica." is-even="false" datetime="2024-07-12T15:50:15Z">
+      </div>
+      <div is="chat-item" user-picture="https://randomuser.me/api/portraits/women/13.jpg"
+      user-name="Kelly Kapoor" unread="1" active="true" you="false"
+      message="Fashion show at lunch!" is-even="true" datetime="2024-06-30T10:55:15Z">
+      </div>
+      <div is="chat-item" user-picture="https://randomuser.me/api/portraits/men/14.jpg"
+      user-name="Ryan Howard" unread="2" active="false" you="true"
+      message="Just got promoted!" is-even="false" datetime="2024-05-25T13:00:15Z">
+      </div>
+      <div is="chat-item" user-picture="https://randomuser.me/api/portraits/women/15.jpg"
+      user-name="Phyllis Vance" unread="0" active="true" you="false"
+      message="Knitting club meeting." is-even="true" datetime="2024-04-18T09:05:15Z">
+      </div>
+      <div is="chat-item" user-picture="https://randomuser.me/api/portraits/men/16.jpg"
+      user-name="Stanley Hudson" unread="3" active="false" you="true"
+      message="Did I stutter?" is-even="false" datetime="2024-03-10T17:10:15Z">
+      </div>
+      <div is="chat-item" user-picture="https://randomuser.me/api/portraits/women/17.jpg"
+      user-name="Meredith Palmer" unread="1" active="true" you="false"
+      message="Party at my place!" is-even="true" datetime="2024-02-01T20:15:15Z">
       </div>
     `;
   }
@@ -238,11 +344,7 @@ export default class ChatsContainer extends HTMLElement {
           padding: 8px 10px 8px 35px;
           gap: 0;
           width: 100%;
-          border-radius: 18px;
-          -webkit-border-radius: 18px;
-          -moz-border-radius: 18px;
-          -ms-border-radius: 18px;
-          -o-border-radius: 18px;
+          border-radius: 15px;
         }
         
         form.search > .contents > input:-webkit-autofill,
@@ -306,16 +408,14 @@ export default class ChatsContainer extends HTMLElement {
           border-bottom: var(--border);
           display: flex;
           z-index: 1;
-          flex-flow: row;
+          flex-flow: row nowrap;
           gap: 15px;
           padding: 18px 0 10px;
           margin: 0;
           width: 100%;
           list-style: none;
           overflow-x: auto;
-          overflow-y: hidden;
-          white-space: nowrap;
-          scrollbar-width: 0;
+          scrollbar-width: none;
           -ms-overflow-style: none;
           z-index: 1;
           position: sticky;
@@ -434,11 +534,46 @@ export default class ChatsContainer extends HTMLElement {
           margin: 0;
         }
 
+        div.pins-container > div.pins {
+          display: flex;
+          flex-flow: row nowrap;
+          align-items: start;
+          gap: 10px;
+          padding: 0;
+          width: 100%;
+          overflow-x: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        div.pins-container > div.pins::-webkit-scrollbar {
+          display: none;
+          visibility: hidden;
+        }
+
+        div.chats-container {
+          display: flex;
+          flex-flow: column;
+          align-items: start;
+          gap: 0;
+          padding: 0;
+          width: 100%;
+        }
+
         @media screen and (max-width: 660px) {
           :host {
             width: 100%;
+            max-width: 100%;
             border: none;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: start;
+          }
+
+          div.chats {
+            width: 100%;
           }
         }
       </style>

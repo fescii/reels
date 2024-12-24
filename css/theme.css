@@ -99,6 +99,10 @@ Author URL: https://femar.co.ke
   --shot-background: #57575752;
   --shot-active-background: #ff932f5d;
 
+  --pin-linear-gradient: linear-gradient(to bottom,rgba(0,0,0,0),rgba(0,0,0,0.5));
+  --pin-text-color: #ececec;
+  --pin-gray-color: #c4c4c4;
+
   --open-line: 2px solid #08b86f93;
   --open-line-mobile: 2px solid #08b86fc5;
   --close-line: 2px solid #6b72803a;

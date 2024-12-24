@@ -1,0 +1,529 @@
+export default class ChatItem extends HTMLDivElement {
+  constructor() {
+    super();
+    this.shadow = this.attachShadow({ mode: 'open' });
+    this.render();
+  }
+
+  render() {
+    this.shadow.innerHTML = this.getTemplate();
+  }
+
+  strToInteger = str => {
+    try {
+      const num = parseInt(str);
+
+      if (isNaN(num)) {
+        return 0;
+      }
+
+      return num;
+    } catch (error) {
+      return 0;
+    }
+  }
+
+  formatDateTime = str => {
+		const date = new Date(str);
+
+		// get th, st, nd, rd for the date
+		const day = date.getDate();
+		const dayStr = day === 1 || day === 21 || day === 31 ? 'st' : day === 2 || day === 22 ? 'nd' : day === 3 || day === 23 ? 'rd' : 'th';
+		const diff = new Date() - date;
+
+    // if we are in the same minute: Just now
+    if (diff < 1000 * 60) {
+      return 'Just now';
+    }
+
+    // if we are in the same day: HH:MM AM/PM
+    if (diff < 1000 * 60 * 60 * 24) {
+      return date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true });
+    }
+
+    // if we are in the diff is less than 7 days: DAY HH:MM AM/PM
+    if (diff < 1000 * 60 * 60 * 24 * 7) {
+      return /* html */`
+        ${date.toLocaleString('default', { weekday: 'short' })} ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `;
+    }
+
+    // if we are in the same month AND year: 12th HH:MM AM/PM
+    if (new Date().getMonth() === date.getMonth() && new Date().getFullYear() === date.getFullYear()) {
+      return /* html */`
+        ${date.getDate()}${dayStr} ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `;
+    }
+
+    // if we are in the same year: 12th Jan
+    if (new Date().getFullYear() === date.getFullYear()) {
+      return /* html */`
+        ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })}
+      `;
+    }
+
+    // if we are in a different year: 12th Jan 2021
+		return /* html */`
+      ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}
+    `;
+	}
+  
+  getLapseTime = date => {
+    try {
+      date = new Date(date);
+      const now = new Date();
+      const diff = now - date;
+      const seconds = diff / 1000;
+      const minutes = seconds / 60;
+      const hours = minutes / 60;
+      const days = hours / 24;
+      const weeks = days / 7;
+      const months = weeks / 4;
+      const years = months / 12;
+
+      if (seconds < 60) {
+        return `${Math.floor(seconds)}s`;
+      } else if (minutes < 60) {
+        return `${Math.floor(minutes)}m`;
+      } else if (hours < 24) {
+        return `${Math.floor(hours)}h`;
+      } else if (days < 7) {
+        return `${Math.floor(days)}d`;
+      } else if (weeks < 4) {
+        return `${Math.floor(weeks)}w`;
+      } else if (months < 12) {
+        return `${Math.floor(months)}mo`;
+      } else {
+        return `${Math.floor(years)}y`;
+      }
+    } catch (error) {
+      return 'Today';
+    }
+  }
+
+  getTemplate = () => {
+    return /* html */`
+      ${this.getBody()}
+      ${this.getStyles()}
+    `;
+  }
+
+  getBody = () => {
+    const unread = this.strToInteger(this.getAttribute('unread')) > 0 ? 'unread' : '';
+    return /* html */`
+      <div class="wrapper ${unread}">
+        <div class="image">
+          <span class="online-status">
+            ${this.getActive(this.textToBoolean(this.getAttribute('active')))}
+          </span>
+          <div class="avatar">
+            ${this.getImage(this.getAttribute('user-picture'))}
+          </div>
+        </div>
+        <div class="content">
+          <span class="head">
+            <span class="name">${this.getAttribute('user-name')}</span>
+            <span class="time">${this.formatDateTime(this.getAttribute('datetime'))}</span>
+          </span>
+          <span class="text">
+            ${this.getUnread(this.textToBoolean(this.getAttribute('you')),this.strToInteger(this.getAttribute('unread')))}
+            ${this.getYou(this.textToBoolean(this.getAttribute('you')))}
+            <span class="message">${this.getAttribute('message')}</span>
+          </span>
+          ${this.getAttachements()}
+          ${this.getImages()}
+        </div>
+      </div>
+    `;
+  }
+
+  getUnread = (you,num) => {
+    if(!you) return '';
+    if(num > 0) {
+      return /* html */`
+      <span class="tick unread">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+          <path id="outer" d="M22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12Z" stroke="currentColor" stroke-width="1.8" />
+          <path d="M8 12.5L10.5 15L16 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </span>
+      `;
+    } else {
+      return /* html */`
+      <span class="tick read">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+          <path id="outer" d="M22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12Z" stroke="currentColor" stroke-width="1.8" />
+          <path d="M8 12.5L10.5 15L16 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </span>
+      `;
+    }
+  }
+
+  getYou = you => {
+    if (you) {
+      return /* html */`
+        <span class="you">You:</span>
+      `;
+    } else {
+      return '';
+    }
+  }
+
+  getImage = image => {
+    if (!image || image === '' || image === 'null') {
+      return /* html */`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+          <path d="M12 2.5a5.5 5.5 0 0 1 3.096 10.047 9.005 9.005 0 0 1 5.9 8.181.75.75 0 1 1-1.499.044 7.5 7.5 0 0 0-14.993 0 .75.75 0 0 1-1.5-.045 9.005 9.005 0 0 1 5.9-8.18A5.5 5.5 0 0 1 12 2.5ZM8 8a4 4 0 1 0 8 0 4 4 0 0 0-8 0Z"></path>
+        </svg>
+      `;
+    } else {
+      return /* html */`
+        <img src="${image}" alt="avatar">
+      `;
+    }
+  }
+
+  getActive = active => {
+    if (active) {
+      return /* html */`
+        <span class="active"></span>
+      `;
+    } else {
+      return /* html */`
+        <span class="inactive"></span>
+      `;
+    }
+  }
+
+  textToBoolean = text => {
+    return text === 'true' ? true : false;
+  }
+
+  getImages = () => {
+   const images = this.imagesArray();
+
+    if (images.length < 1) return '';
+
+    const innerImages = images.map(image => {
+      return /* html */`
+        <div class="image">
+          <img src="${image}" alt="Image attachment">
+        </div>
+      `;
+    }).join('');
+
+    return /* html */`
+      <div class="images">
+        ${innerImages}
+      </div>
+    `;
+  }
+
+  imagesArray = () => {
+    const images = this.getAttribute('images');
+
+    if (!images || images === '' || images === 'null') {
+      return [];
+    } else {
+      return images.split(',');
+    }
+  }
+
+  getAttachements = () => {
+    const attachements = this.attachementsArray();
+
+    if (attachements.length < 1) return '';
+
+    const innerAttachements = attachements.map(attachement => {
+      return /* html */`
+        <a href="${attachement.link}" target="_blank" download
+          title="${attachement.name}" size="${attachement.size}" type="${attachement.type}">
+          ${attachement.name}
+        </a>
+      `;
+    }).join('');
+
+    return /* html */`
+      <div class="attachements">
+        ${innerAttachements}
+      </div>
+    `;
+  }
+
+  attachementsArray = () => {
+    const attachements = this.getAttribute('attachments');
+
+    if (!attachements || attachements === '' || attachements === 'null') {
+      return [];
+    } else {
+      try {
+        return JSON.parse(attachements);
+      } catch (error) {
+        // console.error('Error parsing attachments', error);
+        return [];
+      }
+    }
+  }
+
+  getStyles = () => {
+    return /* css */`
+      <style>
+        :host {
+          /* border: 1px solid blue;*/
+          display: flex;
+          font-family: var(--font-main), sans-serif;
+          font-size: 16px;
+          width: 100%;
+          padding: 10px 0;
+        }
+
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          user-select: none;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+          -khtml-user-select: none;
+        }
+
+        .wrapper {
+          display: flex;
+          align-items: start;
+          justify-content: space-between;
+          width: 100%;
+          gap: 10px;
+        }
+
+        .wrapper > .image {
+          border: var(--border);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 45px;
+          height: 45px;
+          min-width: 45px;
+          min-height: 45px;
+          border-radius: 50px;
+          position: relative;
+        }
+
+        .wrapper > .image > .avatar {
+          width: 100%;
+          height: 100%;
+          min-width: 100%;
+          max-width: 100%;
+          min-height: 100%;
+          max-height: 100%;
+          border-radius: 50px;
+          overflow: hidden;
+        }
+
+        .wrapper > .image > .avatar > img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+
+        .wrapper > .image > .online-status {
+          border: var(--border);
+          display: flex;
+          background: var(--background);
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          height: 14px;
+          width: 14px;
+          min-width: 14px;
+          min-height: 14px;
+          max-width: 14px;
+          max-height: 14px;
+          border-radius: 50%;
+          padding: 0;
+          position: absolute;
+          top: 0;
+          right: -2px;
+        }
+
+        .wrapper > .image > .online-status > .active {
+          width: 10px;
+          height: 10px;
+          max-width: 10px;
+          max-height: 10px;
+          border-radius: 50%;
+          background: var(--accent-linear);
+        }
+
+        .wrapper > .image > .online-status > .inactive {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: var(--gray-background);
+        }
+
+        .wrapper > .content {
+          display: flex;
+          flex-direction: column;
+          width: calc(100% - 60px);
+          gap: 0;
+        }
+
+        .wrapper > .content > .head {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          gap: 5px;
+        }
+
+        .wrapper > .content > .head > .name {
+          font-family: var(--font-main), sans-serif;
+          font-weight: 500;
+          font-size: 1rem;
+          line-height: 1.4;
+          color: var(--text-color);
+
+          /** add ellipsis */
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .wrapper > .content > .head > .time {
+          font-family: var(--font-read), sans-serif;
+          font-weight: 500;
+          font-size: 0.85rem;
+          text-transform: uppercase;
+          color: var(--gray-color);
+        }
+
+        .wrapper > .content > .text {
+          display: flex;
+          justify-content: start;
+          align-items: center;
+          width: 100%;
+          gap: 2px;
+        }
+
+        .wrapper > .content > .text > .tick {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 18px;
+          height: 18px;
+          margin-left: -2px;
+        }
+
+        .wrapper > .content > .text > .tick > svg {
+          width: 100%;
+          height: 100%;
+          fill: var(--background);
+          color: var(--gray-color);
+        }
+
+        .wrapper > .content > .text > .tick.unread > svg {
+          color: var(--white-color);
+          fill: var(--accent-color);
+        }
+
+        .wrapper > .content > .text > .tick.unread > svg #outer {
+          stroke: var(--accent-color);
+        }
+
+        .wrapper > .content > .text > .you {
+          font-family: var(--font-main), sans-serif;
+          font-weight: 500;
+          font-size: 1rem;
+          color: var(--gray-color);
+        }
+
+        .wrapper > .content > .text > .message {
+          font-family: var(--font-main), sans-serif;
+          font-weight: 400;
+          font-size: 1rem;
+          color: var(--gray-color);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .wrapper > .content > .images {
+          display: flex;
+          justify-content: start;
+          align-items: center;
+          width: 100%;
+          gap: 5px;
+          margin-top: 5px;
+          overflow-x: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        .wrapper > .content > .images::-webkit-scrollbar {
+          display: none;
+          visibility: hidden;
+        }
+
+        .wrapper > .content > .images > .image {
+          width: max-content;
+          height: 40px;
+          min-width: 40px;
+          max-width: 40px;
+          min-height: 40px;
+          max-height: 40px;
+          border-radius: 10px;
+          overflow: hidden;
+        }
+
+        .wrapper > .content > .images > .image > img {
+          width: auto;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .wrapper > .content > .attachements {
+          display: flex;
+          flex-direction: row nowrap;
+          justify-content: start;
+          align-items: start;
+          width: 100%;
+          gap: 5px;
+          margin-top: 5px;
+          overflow-x: auto;
+          scrollbar-width: none;
+        }
+
+        .wrapper > .content > .attachements::-webkit-scrollbar {
+          display: none;
+          visibility: hidden;
+        }
+
+        .wrapper > .content > .attachements > a {
+          width: max-content;
+          display: flex;
+          justify-content: start;
+          align-items: center;
+          gap: 5px;
+          text-decoration: none;
+          color: var(--gray-color);
+          font-family: var(--font-read), sans-serif;
+          font-size: 0.85rem;
+          background: var(--gray-background);
+          border-radius: 8px;
+          padding: 2.5px 7px;
+
+          /** add ellipsis */
+          white-space: nowrap;
+        }
+
+        @media all and (max-width: 660px) {
+          :host {
+          }
+        }
+        
+      </style>
+    `;
+  }
+}

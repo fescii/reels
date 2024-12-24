@@ -6,7 +6,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #000;
+  /* background: #000; */
+  background: var(--background);
 }
 
 body > section.content {

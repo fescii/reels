@@ -1,5 +1,5 @@
 // import Router from "./router.js";
-import apps from "./apps/index.js";
+import app from "./apps/index.js";
 export default class App extends HTMLElement {
 	constructor() {
 		super();
@@ -22,7 +22,7 @@ export default class App extends HTMLElement {
 	}
 	
 	registerComponents() {
-		apps('Apps registered');
+		app('Apps registered');
 	}
 	
 	render() {

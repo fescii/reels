@@ -429,6 +429,8 @@ export default class ChatItem extends HTMLDivElement {
           display: flex;
           flex-direction: column;
           width: calc(100% - 60px);
+          max-width: calc(100% - 60px);
+          min-width: calc(100% - 60px);
           gap: 0;
           position: relative;
         }
@@ -438,11 +440,15 @@ export default class ChatItem extends HTMLDivElement {
           justify-content: space-between;
           align-items: center;
           width: 100%;
+          max-width: 100%;
           gap: 5px;
         }
 
         .wrapper > .content > .head > .name {
           font-family: var(--font-main), sans-serif;
+          width: calc(100% - 105px);
+          max-width: calc(100% - 105px);
+          min-width: calc(100% - 105px);
           font-weight: 500;
           font-size: 1.08rem;
           line-height: 1.4;
@@ -450,13 +456,14 @@ export default class ChatItem extends HTMLDivElement {
           display: flex;
           justify-content: start;
           align-items: center;
+          flex-flow: row nowrap;
           gap: 5px;
         }
 
         .wrapper > .content > .head > .name > .text {
-          display: flex;
-          justify-content: start;
-          align-items: center;
+          width: max-content;
+          max-width: calc(100% - 23px);
+          text-align: start;
           gap: 5px;
 
           /** add ellipsis */
@@ -466,6 +473,10 @@ export default class ChatItem extends HTMLDivElement {
         }
 
         .wrapper > .content > .head > .name > svg {
+          min-width: 18px;
+          max-width: 18px;
+          min-height: 18px;
+          max-height: 18px;
           width: 18px;
           height: 18px;
           margin-bottom: -1px;
@@ -487,6 +498,9 @@ export default class ChatItem extends HTMLDivElement {
         }
 
         .wrapper > .content > .head > .time {
+          min-width: 100px;
+          text-align: end;
+          max-width: 100px;
           font-family: var(--font-read), sans-serif;
           font-weight: 500;
           font-size: 0.85rem;

@@ -139,7 +139,7 @@ export default class ChatApp extends HTMLElement {
   getMessagingContainer = () => {
     return /* html */`
       <messaging-container user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Aidan"
-        user-name="Alice Johnson" unread="0" active="false" user-verified="true"
+        user-name="Alice Johnsonjg Hfgsgsfnah" unread="0" active="false" user-verified="true"
         message="I have attached the needed documents below!" last-active="2024-12-24T09:25:15Z">
       </messaging-container>
     `;
@@ -221,7 +221,7 @@ export default class ChatApp extends HTMLElement {
     return /* html */`
       <div is="pin-chat" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Aidan"
         user-name="Alice Johnson" unread="0" active="true" last-message="Got it, thanks!"
-        is-even="true">
+        is-even="true" user-verified="true">
       </div>
       <div is="pin-chat" user-picture="https://randomuser.me/api/portraits/men/1.jpg"
         user-name="Jane Doe" unread="2" active="false" last-message="Are you coming today"
@@ -229,7 +229,7 @@ export default class ChatApp extends HTMLElement {
       </div>
       <div is="pin-chat" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Riley"
         user-name="John Smith" unread="5" active="true" last-message="See you tomorrow"
-        is-even="false">
+        is-even="false" user-verified="true">
       </div>
       <div is="pin-chat" user-picture="https://randomuser.me/api/portraits/women/4.jpg"
         user-name="Bob Brown" unread="0" active="false" last-message="Let's catch up later"
@@ -241,7 +241,7 @@ export default class ChatApp extends HTMLElement {
       </div>
       <div is="pin-chat" user-picture="https://randomuser.me/api/portraits/women/6.jpg"
         user-name="Diana Evans" unread="4" active="false" last-message="Can you send the file?"
-        is-even="false">
+        is-even="false" user-verified="true">
       </div>
       <div is="pin-chat" user-picture="https://randomuser.me/api/portraits/men/7.jpg"
         user-name="Eve Foster" unread="2" active="true" last-message="Meeting at 3 PM"
@@ -277,7 +277,7 @@ export default class ChatApp extends HTMLElement {
           ]'>
       </div>
       <div is="chat-item" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Oliver"
-      user-name="Janet Doe" unread="0" active="false" you="true" message="I'll be there soon, wait for me!"
+      user-name="Janet Doerinailsisgsgsgsg" unread="0" active="false" you="true" message="I'll be there soon, wait for me!"
       is-even="false" datetime="2024-12-20T12:20:15Z" recieved="true" user-verified="true">
       </div>
       <div is="chat-item" user-picture="https://randomuser.me/api/portraits/men/1.jpg"

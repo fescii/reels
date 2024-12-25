@@ -98,7 +98,7 @@ export default class ChatApp extends HTMLElement {
   getBody = () => {
     return /* html */`
       <div class="main">
-        ${this.getEmptyChat()}
+        ${this.getMessagingContainer()}
       </div>
       <div class="chats">
         ${this.getForm()}
@@ -133,6 +133,15 @@ export default class ChatApp extends HTMLElement {
           </button>
         </div>
       </div>
+    `;
+  }
+
+  getMessagingContainer = () => {
+    return /* html */`
+      <messaging-container user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Aidan"
+        user-name="Alice Johnson" unread="0" active="true"
+        message="I have attached the needed documents below!" last-active="2024-12-24T09:25:15Z">
+      </messaging-container>
     `;
   }
 
@@ -269,7 +278,7 @@ export default class ChatApp extends HTMLElement {
       </div>
       <div is="chat-item" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Oliver"
       user-name="Janet Doe" unread="0" active="false" you="true" message="I'll be there soon, wait for me!"
-      is-even="false" datetime="2024-12-20T12:20:15Z" recieved="true">
+      is-even="false" datetime="2024-12-20T12:20:15Z" recieved="true" user-verified="true">
       </div>
       <div is="chat-item" user-picture="https://randomuser.me/api/portraits/men/1.jpg"
       user-name="Michael Scott" unread="78" active="true" you="false"
@@ -278,11 +287,11 @@ export default class ChatApp extends HTMLElement {
       </div>
       <div is="chat-item" user-picture="https://api.dicebear.com/9.x/adventurer/svg?seed=Amaya"
       user-name="Jim Halpert" unread="2" active="false" you="true"
-      message="Pranking Dwight again!" is-even="true" datetime="2024-09-20T14:40:15Z">
+      message="Pranking Dwight again!" is-even="true" datetime="2024-09-20T14:40:15Z" user-verified="true">
       </div>
       <div is="chat-item" user-picture="https://randomuser.me/api/portraits/women/9.jpg"
       user-name="Pam Beesly" unread="0" active="true" you="false"
-      message="See you at the office." is-even="true" datetime="2024-10-01T08:35:15Z">
+      message="See you at the office." is-even="true" datetime="2024-10-01T08:35:15Z" user-verified="false">
       </div>
       <div is="chat-item" user-picture="https://randomuser.me/api/portraits/men/10.jpg"
       user-name="Jim Halpert" unread="2" active="false" you="true"
@@ -290,7 +299,7 @@ export default class ChatApp extends HTMLElement {
       </div>
       <div is="chat-item" user-picture="https://randomuser.me/api/portraits/women/11.jpg"
       user-name="Angela Martin" unread="3" active="true" you="false"
-      message="Cat party at my place." is-even="true" datetime="2024-08-05T11:45:15Z">
+      message="Cat party at my place." is-even="true" datetime="2024-08-05T11:45:15Z" user-verified="true">
       </div>
       <div is="chat-item" user-picture="https://randomuser.me/api/portraits/men/12.jpg"
       user-name="Dwight Schrute" unread="0" active="false" you="true"
@@ -298,7 +307,7 @@ export default class ChatApp extends HTMLElement {
       </div>
       <div is="chat-item" user-picture="https://randomuser.me/api/portraits/women/13.jpg"
       user-name="Kelly Kapoor" unread="1" active="true" you="false"
-      message="Fashion show at lunch!" is-even="true" datetime="2024-06-30T10:55:15Z">
+      message="Fashion show at lunch!" is-even="true" datetime="2024-06-30T10:55:15Z" user-verified="true">
       </div>
       <div is="chat-item" user-picture="https://randomuser.me/api/portraits/men/14.jpg"
       user-name="Ryan Howard" unread="2" active="false" you="true"
@@ -310,7 +319,7 @@ export default class ChatApp extends HTMLElement {
       </div>
       <div is="chat-item" user-picture="https://randomuser.me/api/portraits/men/16.jpg"
       user-name="Stanley Hudson" unread="3" active="false" you="true"
-      message="Did I stutter?" is-even="false" datetime="2024-03-10T17:10:15Z">
+      message="Did I stutter?" is-even="false" datetime="2024-03-10T17:10:15Z" user-verified="true">
       </div>
       <div is="chat-item" user-picture="https://randomuser.me/api/portraits/women/17.jpg"
       user-name="Meredith Palmer" unread="1" active="true" you="false"
@@ -343,8 +352,8 @@ export default class ChatApp extends HTMLElement {
         }
 
         div.main {
-          width: 50%;
-          max-width: 50%;
+          width: calc(55% - 10px);
+          max-width: calc(55% - 10px);
           height: 100%;
           max-height: 100%;
           display: flex;
@@ -442,8 +451,8 @@ export default class ChatApp extends HTMLElement {
         }
 
         div.chats {
-          width: calc(50% - 10px);
-          max-width: calc(50% - 10px);
+          width: 45%;
+          max-width: 45%;
           height: 100%;
           max-height: 100%;
           display: flex;
@@ -469,7 +478,8 @@ export default class ChatApp extends HTMLElement {
         form.search {
           background: var(--background);
           padding: 0;
-          padding: 22px 0 10px;
+          margin: 10px 0 0;
+          padding: 10px 0 10px;
           display: flex;
           flex-flow: column;
           align-items: start;
@@ -607,7 +617,7 @@ export default class ChatApp extends HTMLElement {
           -ms-overflow-style: none;
           z-index: 1;
           position: sticky;
-          top: 55px;
+          top: 45px;
           background: var(--background);
         }
 
@@ -772,6 +782,10 @@ export default class ChatApp extends HTMLElement {
           a, button, input, label, select, textarea,
           ul.tabs > li.tab, ul.tabs > li.tab.active {
             cursor: default !important;
+          }
+
+          form.search {
+            margin: 0;
           }
 
           form.search > .contents {

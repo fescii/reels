@@ -349,12 +349,24 @@ export default class ChatItem extends HTMLDivElement {
           max-height: 100%;
           border-radius: 50px;
           overflow: hidden;
+          display: flex;
+          justify-content: center;
+          align-items: center;
         }
 
         .wrapper > .image > .avatar > img {
           width: 100%;
           height: 100%;
           object-fit: contain;
+        }
+
+        .wrapper > .image > .avatar > svg {
+          width: 80%;
+          height: 80%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          fill: var(--gray-color);
         }
 
         .wrapper > .image > .online-status {

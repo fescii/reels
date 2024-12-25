@@ -1,4 +1,4 @@
-export default class ChatsContainer extends HTMLElement {
+export default class ChatApp extends HTMLElement {
   constructor() {
     super();
     this.shadow = this.attachShadow({ mode: 'open' });
@@ -97,7 +97,9 @@ export default class ChatsContainer extends HTMLElement {
 
   getBody = () => {
     return /* html */`
-    <div class="main">People</div>
+      <div class="main">
+        ${this.getEmptyChat()}
+      </div>
       <div class="chats">
         ${this.getForm()}
         <div class="container">
@@ -106,6 +108,29 @@ export default class ChatsContainer extends HTMLElement {
           <div class="chats-container">
             ${this.getChats()}
           </div>
+        </div>
+      </div>
+    `;
+  }
+
+  getEmptyChat = () => {
+    return /* html */`
+      <div class="empty-chat">
+        <div class="head">
+          <h3 class="title">Select a chat to start messaging</h3>
+          <p class="subtitle">Your messages are private and secure</p>
+        </div>
+        <div class="image">
+          <img src="/thumbs/chat.png" alt="chat">
+        </div>
+        <div class="new">
+          <button>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+              <path d="M12 4V20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M4 12H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span class="text">New Chat</span>
+          </button>
         </div>
       </div>
     `;
@@ -299,8 +324,9 @@ export default class ChatsContainer extends HTMLElement {
       <style>
         :host {
           display: flex;
-          max-width: 70%;
-          width: 70%;
+          max-width: 100%;
+          width: 100%;
+          min-width: 100%;
           padding: 0;
           height: 100dvh;
           max-height: 100vh;
@@ -314,6 +340,105 @@ export default class ChatsContainer extends HTMLElement {
         * {
           box-sizing: border-box;
           font-family: var(--font-main), sans-serif;
+        }
+
+        div.main {
+          width: 50%;
+          max-width: 50%;
+          height: 100%;
+          max-height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 20px;
+        }
+
+        div.main > div.empty-chat {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 20px;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+        }
+
+        div.main > div.empty-chat > div.head {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 0;
+        }
+
+        div.main > div.empty-chat > div.head > h3.title {
+          font-size: 1.35rem;
+          margin: 0;
+          font-weight: 600;
+          line-height: 1.5;
+          font-family: var(--font-title);
+          color: var(--text-color);
+        }
+
+        div.main > div.empty-chat > div.head > p.subtitle {
+          font-size: 1rem;
+          margin: 0;
+          line-height: 1.5;
+          font-weight: 400;
+          color: var(--gray-color);
+        }
+
+        div.main > div.empty-chat > div.image {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+        }
+
+        div.main > div.empty-chat > div.image > img {
+          width: 100%;
+          max-width: 300px;
+          height: auto;
+          object-fit: contain;
+        }
+
+        div.main > div.empty-chat > div.new {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+        }
+
+        div.main > div.empty-chat > div.new > button {
+          border: none;
+          cursor: pointer;
+          color: var(--white-color);
+          background: var(--accent-linear);
+          height: 40px;
+          width: max-content;
+          padding: 0 20px;
+          font-size: 1rem;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+          border-radius: 12px;
+          -webkit-border-radius: 12px;
+          -moz-border-radius: 12px;
+        }
+
+        div.main > div.empty-chat > div.new > button > svg {
+          width: 20px;
+          height: 20px;
+        }
+
+        div.main > div.empty-chat > div.new > button > span.text {
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--white-color);
         }
 
         div.chats {
@@ -358,6 +483,7 @@ export default class ChatsContainer extends HTMLElement {
 
         form.search > svg {
           position: absolute;
+          display: none;
           left: -12px;
           top: calc(50% - 15px);
           color: var(--text-color);
@@ -377,8 +503,8 @@ export default class ChatsContainer extends HTMLElement {
           align-items: center;
           flex-wrap: nowrap;
           gap: 0;
-          margin: 0 0 0 28px;
-          width: calc(100% - 28px);
+          margin: 0;
+          width: 100%;
           position: relative;
         }
 
@@ -554,7 +680,7 @@ export default class ChatsContainer extends HTMLElement {
           background: var(--accent-linear);
           font-family: var(--font-text), sans-serif;
           color: var(--white-color);
-          padding: 2px 7px;
+          padding: 1px 7px 2.5px;
           border-radius: 10px;
         }
 
@@ -647,6 +773,34 @@ export default class ChatsContainer extends HTMLElement {
           ul.tabs > li.tab, ul.tabs > li.tab.active {
             cursor: default !important;
           }
+
+          form.search > .contents {
+            padding: 0;
+            display: flex;
+            flex-flow: row;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 0;
+            margin: 0 0 0 28px;
+            width: calc(100% - 28px);
+            position: relative;
+          }
+
+          form.search > svg {
+            position: absolute;
+            display: flex;
+            left: -12px;
+            top: calc(50% - 15px);
+            color: var(--text-color);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+          }
+
+          ul.tabs > li.tab > .count {
+            padding: 2px 7px;
+          }
+  
         }
       </style>
     `;

@@ -78,7 +78,7 @@ export default class AppMain extends HTMLElement {
           ${this.getMainNav()}
         </section>
         <section class="flow">
-          
+          ${this.getChatApp()}
         </section>
       `;
 		}
@@ -162,38 +162,14 @@ export default class AppMain extends HTMLElement {
             </li>
             <li class="search">
               <a href="/search">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#000000" fill="none">
-                  <path d="M17.5 17.5L22 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M20 11C20 6.02944 15.9706 2 11 2C6.02944 2 2 6.02944 2 11C2 15.9706 6.02944 20 11 20C15.9706 20 20 15.9706 20 11Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                  <path d="M17.5 17.5L22 22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M20 11C20 6.02944 15.9706 2 11 2C6.02944 2 2 6.02944 2 11C2 15.9706 6.02944 20 11 20C15.9706 20 20 15.9706 20 11Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
                 </svg>
               </a>
               <span class="tooltip">
                 <span class="arrow"></span>
                 <span class="text">Search</span>
-              </span>
-            </li>
-            <li class="apis">
-              <a href="/apis">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-                  <path d="M17 8L18.8398 9.85008C19.6133 10.6279 20 11.0168 20 11.5C20 11.9832 19.6133 12.3721 18.8398 13.1499L17 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M7 8L5.16019 9.85008C4.38673 10.6279 4 11.0168 4 11.5C4 11.9832 4.38673 12.3721 5.16019 13.1499L7 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M14.5 4L9.5 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </a>
-              <span class="tooltip">
-                <span class="arrow"></span>
-                <span class="text">APIs</span>
-              </span>
-            </li>
-            <li class="topics">
-              <a href="/topics">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-                  <path d="M15.6 8.40033V12.9003C15.6 14.3915 16.8088 15.6003 18.3 15.6003C19.7912 15.6003 21 14.3915 21 12.9003V12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21C14.0265 21 15.8965 20.3302 17.4009 19.2M15.6 12.0003C15.6 13.9886 13.9882 15.6003 12 15.6003C10.0118 15.6003 8.4 13.9886 8.4 12.0003C8.4 10.0121 10.0118 8.40033 12 8.40033C13.9882 8.40033 15.6 10.0121 15.6 12.0003Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                </svg>
-              </a>
-              <span class="tooltip">
-                <span class="arrow"></span>
-                <span class="text">Topics</span>
               </span>
             </li>
             <li class="articles">
@@ -209,6 +185,30 @@ export default class AppMain extends HTMLElement {
               <span class="tooltip">
                 <span class="arrow"></span>
                 <span class="text">Articles</span>
+              </span>
+            </li>
+            <li class="topics">
+              <a href="/topics">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                  <path d="M15.6 8.40033V12.9003C15.6 14.3915 16.8088 15.6003 18.3 15.6003C19.7912 15.6003 21 14.3915 21 12.9003V12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21C14.0265 21 15.8965 20.3302 17.4009 19.2M15.6 12.0003C15.6 13.9886 13.9882 15.6003 12 15.6003C10.0118 15.6003 8.4 13.9886 8.4 12.0003C8.4 10.0121 10.0118 8.40033 12 8.40033C13.9882 8.40033 15.6 10.0121 15.6 12.0003Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+              </a>
+              <span class="tooltip">
+                <span class="arrow"></span>
+                <span class="text">Topics</span>
+              </span>
+            </li>
+            <li class="apis">
+              <a href="/apis">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                  <path d="M17 8L18.8398 9.85008C19.6133 10.6279 20 11.0168 20 11.5C20 11.9832 19.6133 12.3721 18.8398 13.1499L17 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M7 8L5.16019 9.85008C4.38673 10.6279 4 11.0168 4 11.5C4 11.9832 4.38673 12.3721 5.16019 13.1499L7 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M14.5 4L9.5 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </a>
+              <span class="tooltip">
+                <span class="arrow"></span>
+                <span class="text">APIs</span>
               </span>
             </li>
           </ul>
@@ -334,6 +334,12 @@ export default class AppMain extends HTMLElement {
       </div>
     `;
 	}
+
+  getChatApp = () => {
+    return /* html */`
+      <chat-app all="628" unread="3" requests="2"></chat-app>
+    `;
+  }
 	
 	getFooter = () => {
 		const year = new Date().getFullYear();
@@ -492,11 +498,25 @@ export default class AppMain extends HTMLElement {
           height: 24px;
         }
 
+        section.nav > div.icons-nav ul.nav > li.avatar {
+          /*border: var(--input-border);*/
+          width: 100%;
+          display: flex;
+          justify-content: start;
+          align-items: center;
+          gap: 8px;
+          margin: 10px 0;
+          padding: 0 0 0 2px;
+          cursor: pointer;
+          color: var(--error-color);
+          border-radius: 7px;
+        }
+
         section.nav > div.icons-nav ul.nav > li.avatar > a {
-          width: 30px;
-          height: 30px;
+          width: 27px;
+          height: 27px;
           border-radius: 50%;
-          margin: 10px 0 0;
+          margin: 0;
           padding: 0;
           overflow: hidden;
           border: var(--input-border);
@@ -520,14 +540,13 @@ export default class AppMain extends HTMLElement {
         }
 
         section.flow {
-          border: thin solid green;
+         /* border: thin solid green;*/
           width: calc(100% - 220px);
           display: flex;
           flex-flow: column;
           gap: 0;
           padding: 0;
         }
-
 
         footer.footer > p {
           margin: 0;
@@ -565,59 +584,6 @@ export default class AppMain extends HTMLElement {
 
         footer.footer > ul.links > li > a:hover {
           color: var(--anchor-color);
-        }
-
-        section.flow >  div.side > ul.header {
-          padding: 10px 0 5px 0;
-          height: 55px;
-          margin: 0;
-          list-style-type: none;
-          width: 100%;
-          display: flex;
-          align-items: end;
-          justify-content: end;
-          gap: 20px;
-        }
-
-        section.flow >  div.side > ul.header > li.item {
-          padding: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 5px;
-          position: relative;
-          color: var(--icon-color);
-          transition: all 0.3s ease;
-        }
-
-        section.flow >  div.side > ul.header > li.item:hover,
-        section.flow >  div.side > ul.header > li.item.active {
-          color: var(--action-color);
-        }
-
-        section.flow >  div.side > ul.header > li.item > a {
-          padding: 0;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 0;
-          color: inherit;
-        }
-        
-        section.flow >  div.side > ul.header > li.item > a > svg {
-          width: 24px;
-          height: 24px;
-          color: inherit;
-        }
-
-        @media screen and (max-width:900px) {
-         .feeds {
-            width: 58%;
-          }
-
-          div.side {
-            width: 40%;
-          }
         }
 
 				@media screen and (max-width:660px) {
@@ -759,125 +725,8 @@ export default class AppMain extends HTMLElement {
 						flex-flow: column;
 						gap: 0;
 						height: max-content;
-						padding: 50px 0 55px 0;
+						padding: 0 0 55px 0;
 					}
-					
-					/* Feeds > Header */
-					header.mobile-header {
-						border-bottom: var(--border);
-						box-shadow: var(--header-shadow);
-						display: flex;
-						flex-flow: row;
-						justify-content: space-between;
-						align-items: center;
-						padding: 0 10px;
-						height: 50px;
-						background: var(--background);
-						position: fixed;
-						top: 0;
-						left: 0;
-						right: 0;
-						width: 100%;
-						z-index: 10;
-					}
-					
-					header.mobile-header > div.left {
-						display: flex;
-						flex-flow: row;
-						align-items: center;
-						gap: 0;
-						margin-left: -9px;
-					}
-					
-					header.mobile-header > div.left > span.icon {
-						display: flex;
-						flex-flow: column;
-						justify-content: center;
-						align-items: center;
-						gap: 0;
-						width: max-content;
-						height: 100%;
-						color: var(--icon-color);
-						position: relative;
-					}
-					
-					header.mobile-header > div.left > span.icon > svg {
-						min-width: 30px;
-						max-width: 30px;
-						height: 30px;
-					}
-					
-					header.mobile-header > div.left > h2.title {
-						font-family: var(--font-text), sans-serif;
-						font-size: 1.2rem;
-						font-weight: 500;
-						margin: 0;
-						color: var(--text-color);
-					}
-					
-					header.mobile-header > ul.links {
-						padding: 0;
-						margin: 0;
-						display: flex;
-						flex-flow: row;
-						gap: 20px;
-						height: 100%;
-						list-style-type: none;
-						align-items: center;
-						justify-content: center;
-					}
-					
-					header.mobile-header > ul.links > li.item {
-						padding: 0;
-						margin: 0;
-						list-style-type: none;
-						display: flex;
-						align-items: center;
-						justify-content: center;
-					}
-					
-					header.mobile-header > ul.links > li.item > a {
-						font-family: var(--font-read), sans-serif;
-						font-size: 0.9rem;
-						color: var(--gray-color);
-					}
-					
-					header.mobile-header > ul.links > li.item > a:hover {
-						color: var(--anchor-color);
-					}
-					
-					header.mobile-header > ul.links > li.item > a > svg {
-						width: 22px;
-						height: 22px;
-						color: inherit;
-					}
-					
-					header.mobile-header > ul.links > li.item.theme {
-						position: relative;
-						padding: 0;
-						width: max-content;
-						gap: 5px;
-						display: flex;
-						justify-content: center;
-						align-items: center;
-					}
-					
-					header.mobile-header > ul.links > li.item.theme >  span.icon {
-						color: var(--gray-color);
-						display: flex;
-						justify-content: center;
-						align-items: center;
-					}
-					
-					header.mobile-header > ul.links > li.item.theme > span.icon svg {
-						width: 22px;
-						height: 22px;
-						color: inherit;
-					}
-					
-					header.mobile-header > ul.links > li.item.theme >  span.icon.light {
-            display: none;
-          }
 				}
 	    </style>
     `;

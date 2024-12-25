@@ -122,13 +122,17 @@ export default class MessagingContainer extends HTMLElement {
               ${this.getImage(this.getAttribute('user-picture'))}
             </div>
             <span class="info">
-              <span class="name">${this.getAttribute('user-name')}</span>
+              <span class="name">
+                <span class="text">${this.getAttribute('user-name')}</span>
+                ${this.checkVerified(this.textToBoolean(this.getAttribute('user-verified')))}
+              </span>
               <span class="active">
                 ${this.getActive(this.textToBoolean(this.getAttribute('active')))}
               </span>
             </span>
           </div>
           <div class="actions">
+            ${this.getActions()}
           </div>
         </div>
       </header>
@@ -153,7 +157,7 @@ export default class MessagingContainer extends HTMLElement {
     if (verified) {
       return /* html */`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-        <path d="M18.9905 19H19M18.9905 19C18.3678 19.6175 17.2393 19.4637 16.4479 19.4637C15.4765 19.4637 15.0087 19.6537 14.3154 20.347C13.7251 20.9374 12.9337 22 12 22C11.0663 22 10.2749 20.9374 9.68457 20.347C8.99128 19.6537 8.52349 19.4637 7.55206 19.4637C6.76068 19.4637 5.63218 19.6175 5.00949 19C4.38181 18.3776 4.53628 17.2444 4.53628 16.4479C4.53628 15.4414 4.31616 14.9786 3.59938 14.2618C2.53314 13.1956 2.00002 12.6624 2 12C2.00001 11.3375 2.53312 10.8044 3.59935 9.73817C4.2392 9.09832 4.53628 8.46428 4.53628 7.55206C4.53628 6.76065 4.38249 5.63214 5 5.00944C5.62243 4.38178 6.7556 4.53626 7.55208 4.53626C8.46427 4.53626 9.09832 4.2392 9.73815 3.59937C10.8044 2.53312 11.3375 2 12 2C12.6625 2 13.1956 2.53312 14.2618 3.59937C14.9015 4.23907 15.5355 4.53626 16.4479 4.53626C17.2393 4.53626 18.3679 4.38247 18.9906 5C19.6182 5.62243 19.4637 6.75559 19.4637 7.55206C19.4637 8.55858 19.6839 9.02137 20.4006 9.73817C21.4669 10.8044 22 11.3375 22 12C22 12.6624 21.4669 13.1956 20.4006 14.2618C19.6838 14.9786 19.4637 15.4414 19.4637 16.4479C19.4637 17.2444 19.6182 18.3776 18.9905 19Z" stroke="currentColor" stroke-width="1.8" />
+        <path id="outer" d="M18.9905 19H19M18.9905 19C18.3678 19.6175 17.2393 19.4637 16.4479 19.4637C15.4765 19.4637 15.0087 19.6537 14.3154 20.347C13.7251 20.9374 12.9337 22 12 22C11.0663 22 10.2749 20.9374 9.68457 20.347C8.99128 19.6537 8.52349 19.4637 7.55206 19.4637C6.76068 19.4637 5.63218 19.6175 5.00949 19C4.38181 18.3776 4.53628 17.2444 4.53628 16.4479C4.53628 15.4414 4.31616 14.9786 3.59938 14.2618C2.53314 13.1956 2.00002 12.6624 2 12C2.00001 11.3375 2.53312 10.8044 3.59935 9.73817C4.2392 9.09832 4.53628 8.46428 4.53628 7.55206C4.53628 6.76065 4.38249 5.63214 5 5.00944C5.62243 4.38178 6.7556 4.53626 7.55208 4.53626C8.46427 4.53626 9.09832 4.2392 9.73815 3.59937C10.8044 2.53312 11.3375 2 12 2C12.6625 2 13.1956 2.53312 14.2618 3.59937C14.9015 4.23907 15.5355 4.53626 16.4479 4.53626C17.2393 4.53626 18.3679 4.38247 18.9906 5C19.6182 5.62243 19.4637 6.75559 19.4637 7.55206C19.4637 8.55858 19.6839 9.02137 20.4006 9.73817C21.4669 10.8044 22 11.3375 22 12C22 12.6624 21.4669 13.1956 20.4006 14.2618C19.6838 14.9786 19.4637 15.4414 19.4637 16.4479C19.4637 17.2444 19.6182 18.3776 18.9905 19Z" stroke="currentColor" stroke-width="1.8" />
         <path d="M9 12.8929C9 12.8929 10.2 13.5447 10.8 14.5C10.8 14.5 12.6 10.75 15 9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
       `;
@@ -170,7 +174,7 @@ export default class MessagingContainer extends HTMLElement {
       `;
     } else {
       return /* html */`
-        <span class="online-status"></span>
+        <span class="online-status">
           <span class="inactive"></span>
         </span>
         <span class="time offline">
@@ -188,6 +192,20 @@ export default class MessagingContainer extends HTMLElement {
           <path d="M11 8L13 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
           <path d="M2 11C2 7.70017 2 6.05025 3.02513 5.02513C4.05025 4 5.70017 4 9 4H10C13.2998 4 14.9497 4 15.9749 5.02513C17 6.05025 17 7.70017 17 11V13C17 16.2998 17 17.9497 15.9749 18.9749C14.9497 20 13.2998 20 10 20H9C5.70017 20 4.05025 20 3.02513 18.9749C2 17.9497 2 16.2998 2 13V11Z" stroke="currentColor" stroke-width="1.8" />
           <path d="M17 8.90585L17.1259 8.80196C19.2417 7.05623 20.2996 6.18336 21.1498 6.60482C22 7.02628 22 8.42355 22 11.2181V12.7819C22 15.5765 22 16.9737 21.1498 17.3952C20.2996 17.8166 19.2417 16.9438 17.1259 15.198L17 15.0941" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+      </button>
+      <button class="action search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+          <path d="M12 3.00366C11.4383 3.01203 10.3789 3.03449 9.8294 3.07102C5.64639 3.34908 2.31441 6.72832 2.04024 10.9707C1.98659 11.8009 1.98659 12.6606 2.04024 13.4908C2.1401 15.0359 2.82343 16.4665 3.62791 17.6746C4.09501 18.5203 3.78674 19.5758 3.30021 20.4978C2.94941 21.1625 2.77401 21.4949 2.91484 21.735C3.05568 21.9752 3.37026 21.9828 3.99943 21.9981C5.24367 22.0284 6.08268 21.6757 6.74868 21.1846C7.1264 20.906 7.31527 20.7668 7.44544 20.7508C7.5756 20.7347 7.83177 20.8403 8.34401 21.0512C8.8044 21.2408 9.33896 21.3579 9.8294 21.3905C11.2536 21.4851 12.7435 21.4853 14.1706 21.3905C18.3536 21.1124 21.6856 17.7332 21.9598 13.4908C21.9915 13.0001 22.0044 12.4991 21.9987 11.9999" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M8.5 15H15.5M8.5 10H12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M20.2649 7.27042L22 9M21.1714 5.08571C21.1714 3.38152 19.7899 2 18.0857 2C16.3815 2 15 3.38152 15 5.08571C15 6.78991 16.3815 8.17143 18.0857 8.17143C19.7899 8.17143 21.1714 6.78991 21.1714 5.08571Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <button class="action more">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+          <path d="M22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12Z" stroke="currentColor" stroke-width="1.8" />
+          <path d="M12.2422 17V12C12.2422 11.5286 12.2422 11.2929 12.0957 11.1464C11.9493 11 11.7136 11 11.2422 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M11.992 8H12.001" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </button>
     `;
@@ -217,16 +235,16 @@ export default class MessagingContainer extends HTMLElement {
         }
 
         header.header {
-          border: thin solid red;
+          border-bottom: var(--border);
           background: var(--background);
           padding: 0;
-          padding: 10px 0 10px;
+          padding: 15px 0 10px;
           display: flex;
           flex-flow: column;
           align-items: start;
           flex-wrap: nowrap;
           gap: 5px;
-          margin: 0 0 0 28px;
+          margin: 0;
           z-index: 6;
           width: 100%;
           position: sticky;
@@ -235,17 +253,232 @@ export default class MessagingContainer extends HTMLElement {
 
         header.header > svg {
           position: absolute;
-          display: flex;
+          display: none;
           left: -12px;
-          top: calc(50% - 15px);
+          margin: 2px 0 0;
+          top: 50%;
+          transform: translateY(-50%);
           color: var(--text-color);
           cursor: pointer;
           width: 40px;
           height: 40px;
+          justify-content: center;
+          align-items: center;
         }
 
         header.header > svg:hover {
           color: var(--accent-color);
+        }
+
+        header.header > .contents {
+          display: flex;
+          flex-flow: row;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: nowrap;
+          gap: 10px;
+          margin: 0;
+          width: 100%;
+          position: relative;
+        }
+
+        header.header > .contents > .profile {
+          display: flex;
+          flex-flow: row;
+          align-items: center;
+          flex-wrap: nowrap;
+          gap: 10px;
+        }
+
+        header.header > .contents > .profile > .avatar {
+          border: var(--border);
+          width: 45px;
+          height: 45px;
+          max-width: 45px;
+          max-height: 45px;
+          min-width: 45px;
+          min-height: 45px;
+          border-radius: 50%;
+          overflow: hidden;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        header.header > .contents > .profile > .avatar > img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        header.header > .contents > .profile > .avatar > svg {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 80%;
+          height: 80%;
+          fill: var(--gray-color);
+        }
+
+        header.header > .contents > .profile > .info {
+          display: flex;
+          flex-flow: column;
+          align-items: start;
+          flex-wrap: nowrap;
+          gap: 0;
+        }
+
+        header.header > .contents > .profile > .info > .name {
+          font-family: var(--font-main), sans-serif;
+          font-weight: 500;
+          font-size: 1.08rem;
+          line-height: 1.4;
+          color: var(--text-color);
+          display: flex;
+          justify-content: start;
+          align-items: center;
+          gap: 5px;
+        }
+
+        header.header > .contents > .profile > .info > .name > .text {
+          display: flex;
+          justify-content: start;
+          align-items: center;
+          gap: 5px;
+
+          /** add ellipsis */
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        header.header > .contents > .profile > .info > .name > svg {
+          width: 18px;
+          height: 18px;
+          margin-bottom: -1px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: var(--white-color);
+          fill: var(--accent-color);
+        }
+
+        header.header > .contents > .profile > .info > .name > svg > path#outer {
+          stroke: var(--accent-color);
+          color: var(--accent-color);
+        }
+
+        header.header > .contents > .profile > .info > .active {
+          display: flex;
+          justify-content: start;
+          align-items: center;
+          gap: 5px;
+        }
+
+        header.header > .contents > .profile > .info > .active > .online-status {
+          border: var(--border);
+          display: flex;
+          background: var(--background);
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          height: 14px;
+          width: 14px;
+          min-width: 14px;
+          min-height: 14px;
+          max-width: 14px;
+          max-height: 14px;
+          border-radius: 50%;
+          padding: 3px;
+        }
+
+        header.header > .contents > .profile > .info > .active > .online-status > .active {
+          width: 8px;
+          height: 8px;
+          max-width: 8px;
+          max-height: 8px;
+          min-width: 8px;
+          min-height: 8px;
+          border-radius: 50%;
+          background: var(--accent-linear);
+        }
+
+        header.header > .contents > .profile > .info > .active > .online-status > .inactive {
+          width: 8px;
+          height: 8px;
+          max-width: 8px;
+          max-height: 8px;
+          min-width: 8px;
+          min-height: 8px;
+          border-radius: 50%;
+          background: var(--gray-background);
+        }
+
+        header.header > .contents > .profile > .info > .active > .time {
+          font-family: var(--font-read), sans-serif;
+          font-weight: 500;
+          font-size: 0.85rem;
+          text-transform: uppercase;
+          color: var(--gray-color);
+        }
+
+        header.header > .contents > .profile > .info > .active > .time.online {
+          color: var(--accent-color);
+          text-transform: capitalize;
+          font-family: var(--font-text), sans-serif;
+        }
+
+        header.header > .contents > .profile > .info > .active > .time.offline {
+          display: flex;
+          justify-content: start;
+          align-items: center;
+          gap: 5px;
+        }
+
+        header.header > .contents > .profile > .info > .active > .time.offline > .text {
+          display: flex;
+          justify-content: start;
+          align-items: center;
+          gap: 5px;
+          text-transform: capitalize;
+        }
+
+        header.header > .contents > .profile > .info > .active > .time.offline > .date {
+          font-family: var(--font-text), sans-serif;
+          font-weight: 400;
+          font-size: 0.85rem;
+          color: var(--gray-color);
+        }
+
+        header.header > .contents > .actions {
+          display: flex;
+          flex-flow: row;
+          align-items: center;
+          flex-wrap: nowrap;
+          gap: 10px;
+        }
+
+        header.header > .contents > .actions > button {
+          border: none;
+          display: flex;
+          background: var(--background);
+          justify-content: center;
+          align-items: center;
+          padding: 0;
+          cursor: pointer;
+          color: var(--text-color);
+        }
+
+        header.header > .contents > .actions > button:hover {
+          color: var(--accent-color);
+        }
+
+        header.header > .contents > .actions > button > svg {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 24px;
+          height: 24px;
         }
        
         @media screen and (max-width: 660px) {
@@ -259,27 +492,53 @@ export default class MessagingContainer extends HTMLElement {
             cursor: default !important;
           }
 
-          form.header > .contents {
+          header.header {
+            border-bottom: var(--border);
+            background: var(--background);
             padding: 0;
+            padding: 15px 0 10px;
             display: flex;
-            flex-flow: row;
-            align-items: center;
+            flex-flow: column;
+            align-items: start;
             flex-wrap: nowrap;
-            gap: 0;
+            gap: 5px;
             margin: 0 0 0 28px;
-            width: calc(100% - 28px);
-            position: relative;
+            z-index: 6;
+            width: 100%;
+            position: sticky;
+            top: 0;
           }
-
-          form.header > svg {
+  
+          header.header > svg {
             position: absolute;
             display: flex;
             left: -12px;
-            top: calc(50% - 15px);
+            margin: 2px 0 0;
+            top: 50%;
+            transform: translateY(-50%);
             color: var(--text-color);
-            cursor: pointer;
+            cursor: default !important;
             width: 40px;
             height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+  
+          header.header > svg:hover {
+            color: var(--accent-color);
+          }
+  
+          header.header > .contents {
+            display: flex;
+            flex-flow: row;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: nowrap;
+            gap: 10px;
+            margin: 0 0 0 28px;
+            width: calc(100% - 28px);
+            position: relative;
           }
         }
       </style>

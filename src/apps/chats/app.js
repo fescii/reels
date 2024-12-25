@@ -139,7 +139,7 @@ export default class ChatApp extends HTMLElement {
   getMessagingContainer = () => {
     return /* html */`
       <messaging-container user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Aidan"
-        user-name="Alice Johnson" unread="0" active="true"
+        user-name="Alice Johnson" unread="0" active="false" user-verified="true"
         message="I have attached the needed documents below!" last-active="2024-12-24T09:25:15Z">
       </messaging-container>
     `;

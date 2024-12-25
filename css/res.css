@@ -3,14 +3,14 @@
   html {
     width: 100%;
     max-width: 100%;
-    min-width: 100%;
     margin: 0;
-    padding:0 10%;
   }
 
   body {
     min-height: 100vh;
-    padding: 0;
+    width: calc(100% - 30px);
+    max-width: calc(100% - 30px);
+    padding: 0 15px;
   }
 }
 
@@ -24,9 +24,9 @@
   }
 
   body {
-    width: 96%;
-    max-width: 96%;
-    padding: 0 2%;
+    width: calc(100% - 30px);
+    max-width: calc(100% - 30px);
+    padding: 0 15px;
   }
 }
 
@@ -40,9 +40,9 @@
   }
 
   body {
-    width: 96%;
-    max-width: 96%;
-    padding: 0 2%;
+    width: calc(100% - 30px);
+    max-width: calc(100% - 30px);
+    padding: 0 15px;
   }
 }
 
@@ -55,9 +55,9 @@
   }
 
   body {
-    width: 98%;
-    max-width: 98%;
-    padding: 0 1%;
+    width: calc(100% - 30px);
+    max-width: calc(100% - 30px);
+    padding: 0 15px;
   }
 }
 

@@ -1,9 +1,12 @@
-import ShotVideo from "./shot.js";
-import ShotsVideos from "./shots.js";
-import chats from "./chats/index.js";
-
-export default function shots() {
-  customElements.define('shot-video', ShotVideo, { extends: 'div'});
-  customElements.define('shots-videos', ShotsVideos)
-  chats();
+import app from './app.js';
+export default function createApp(node) {
+	customElements.define('main-app', app);
+	const appElement = document.createElement('main-app');
+	window.app = appElement;
+	node.appendChild(appElement);
+	
+	// add app to widow object
+	window.app = appElement;
+	
+	return appElement;
 }

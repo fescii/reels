@@ -78,63 +78,10 @@ export default class AppMain extends HTMLElement {
           ${this.getMainNav()}
         </section>
         <section class="flow">
-          <div class="feeds">
-            <div class="feeds-wrapper">
-              <div class="content-wrapper">
-                container
-              </div>
-              ${this.getFooter()}
-            </div>
-          </div>
-          <div class="side">
-            ${this.getSideHeader()}
-          </div>
+          
         </section>
       `;
 		}
-	}
-
-	
-	getSideHeader = () => {
-		return /* html */`
-      <ul class="header">
-        <li class="item cart">
-          <a href="/cart">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-              <path d="M3.87289 17.0194L2.66933 9.83981C2.48735 8.75428 2.39637 8.21152 2.68773 7.85576C2.9791 7.5 3.51461 7.5 4.58564 7.5H19.4144C20.4854 7.5 21.0209 7.5 21.3123 7.85576C21.6036 8.21152 21.5126 8.75428 21.3307 9.83981L20.1271 17.0194C19.7282 19.3991 19.5287 20.5889 18.7143 21.2945C17.9 22 16.726 22 14.3782 22H9.62182C7.27396 22 6.10003 22 5.28565 21.2945C4.47127 20.5889 4.27181 19.3991 3.87289 17.0194Z" stroke="currentColor" stroke-width="1.8" />
-              <path d="M17.5 7.5C17.5 4.46243 15.0376 2 12 2C8.96243 2 6.5 4.46243 6.5 7.5" stroke="currentColor" stroke-width="1.8" />
-            </svg>
-          </a>
-        </li>
-        <li class="item contacts">
-          <a href="/contacts">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-              <rect x="4" y="2" width="17.5" height="20" rx="4" stroke="currentColor" stroke-width="1.8" />
-              <path d="M10.59 13.7408C9.96125 14.162 8.31261 15.0221 9.31674 16.0983C9.80725 16.624 10.3536 17 11.0404 17H14.9596C15.6464 17 16.1928 16.624 16.6833 16.0983C17.6874 15.0221 16.0388 14.162 15.41 13.7408C13.9355 12.7531 12.0645 12.7531 10.59 13.7408Z" stroke="currentColor" stroke-width="1.8" />
-              <path d="M15 9C15 10.1046 14.1046 11 13 11C11.8954 11 11 10.1046 11 9C11 7.89543 11.8954 7 13 7C14.1046 7 15 7.89543 15 9Z" stroke="currentColor" stroke-width="1.8" />
-              <path d="M5 6L2.5 6M5 12L2.5 12M5 18H2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </a>
-        </li>
-        <li class="item notifications">
-          <a href="/notifications">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-              <path d="M2.52992 14.7696C2.31727 16.1636 3.268 17.1312 4.43205 17.6134C8.89481 19.4622 15.1052 19.4622 19.5679 17.6134C20.732 17.1312 21.6827 16.1636 21.4701 14.7696C21.3394 13.9129 20.6932 13.1995 20.2144 12.5029C19.5873 11.5793 19.525 10.5718 19.5249 9.5C19.5249 5.35786 16.1559 2 12 2C7.84413 2 4.47513 5.35786 4.47513 9.5C4.47503 10.5718 4.41272 11.5793 3.78561 12.5029C3.30684 13.1995 2.66061 13.9129 2.52992 14.7696Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M8 19C8.45849 20.7252 10.0755 22 12 22C13.9245 22 15.5415 20.7252 16 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </a>
-        </li>
-        <li class="item messages">
-          <a href="/messages">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-              <path d="M21.9598 10.9707C22.0134 11.8009 22.0134 12.6607 21.9598 13.4909C21.6856 17.7332 18.3536 21.1125 14.1706 21.3905C12.7435 21.4854 11.2536 21.4852 9.8294 21.3905C9.33896 21.3579 8.8044 21.2409 8.34401 21.0513C7.83177 20.8403 7.5756 20.7348 7.44544 20.7508C7.31527 20.7668 7.1264 20.9061 6.74868 21.1846C6.08268 21.6757 5.24367 22.0285 3.99943 21.9982C3.37026 21.9829 3.05568 21.9752 2.91484 21.7351C2.77401 21.495 2.94941 21.1626 3.30021 20.4978C3.78674 19.5758 4.09501 18.5203 3.62791 17.6746C2.82343 16.4666 2.1401 15.036 2.04024 13.4909C1.98659 12.6607 1.98659 11.8009 2.04024 10.9707C2.31441 6.72838 5.64639 3.34913 9.8294 3.07107C11.0318 2.99114 11.2812 2.97856 12.5 3.03368" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M8.5 15H15.5M8.5 10H12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M22 5.5C22 7.433 20.433 9 18.5 9C16.567 9 15 7.433 15 5.5C15 3.567 16.567 2 18.5 2C20.433 2 22 3.567 22 5.5Z" stroke="currentColor" stroke-width="1.8" />
-            </svg>
-          </a>
-        </li>
-      </ul>
-    `;
 	}
 	
 	getMainNav = () => {
@@ -158,107 +105,110 @@ export default class AppMain extends HTMLElement {
                 <span class="text">Home</span>
               </span>
             </li>
-            <li class="active wallet">
-              <a href="/wallet">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" color="currentColor" fill="none">
-                  <rect width="24" height="24" fill="none" />
-                  <path d="M3 8.5H15C17.8284 8.5 19.2426 8.5 20.1213 9.37868C21 10.2574 21 11.6716 21 14.5V15.5C21 18.3284 21 19.7426 20.1213 20.6213C19.2426 21.5 17.8284 21.5 15 21.5H9C6.17157 21.5 4.75736 21.5 3.87868 20.6213C3 19.7426 3 18.3284 3 15.5V8.5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="round" />
-                  <path d="M15 8.49833V4.1103C15 3.22096 14.279 2.5 13.3897 2.5C13.1336 2.5 12.8812 2.56108 12.6534 2.67818L3.7623 7.24927C3.29424 7.48991 3 7.97203 3 8.49833" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <li class="messages active">
+              <a href="/messages">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                  <path d="M7.5 12H13.5M7.5 8H10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M8.5 20C9.55038 20.8697 10.8145 21.4238 12.2635 21.5188C13.4052 21.5937 14.5971 21.5936 15.7365 21.5188C16.1288 21.4931 16.5565 21.4007 16.9248 21.251C17.3345 21.0845 17.5395 21.0012 17.6437 21.0138C17.7478 21.0264 17.8989 21.1364 18.2011 21.3563C18.7339 21.744 19.4051 22.0225 20.4005 21.9986C20.9038 21.9865 21.1555 21.9804 21.2681 21.7909C21.3808 21.6013 21.2405 21.3389 20.9598 20.8141C20.5706 20.0862 20.324 19.2529 20.6977 18.5852C21.3413 17.6315 21.8879 16.5021 21.9678 15.2823C22.0107 14.6269 22.0107 13.9481 21.9678 13.2927C21.9146 12.4799 21.7173 11.7073 21.4012 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M12.345 17.4868C15.9006 17.2526 18.7328 14.4069 18.9658 10.8344C19.0114 10.1353 19.0114 9.41131 18.9658 8.71219C18.7328 5.13969 15.9006 2.29401 12.345 2.05985C11.132 1.97997 9.86553 1.98013 8.65499 2.05985C5.09943 2.29401 2.26725 5.13969 2.0342 8.71219C1.9886 9.41131 1.9886 10.1353 2.0342 10.8344C2.11908 12.1356 2.69992 13.3403 3.38372 14.3576C3.78076 15.0697 3.51873 15.9586 3.10518 16.735C2.807 17.2948 2.65791 17.5747 2.77762 17.7769C2.89732 17.9791 3.16472 17.9856 3.69951 17.9985C4.75712 18.024 5.47028 17.7269 6.03638 17.3134C6.35744 17.0788 6.51798 16.9615 6.62862 16.9481C6.73926 16.9346 6.957 17.0234 7.39241 17.2011C7.78374 17.3608 8.23812 17.4593 8.65499 17.4868C9.86553 17.5665 11.132 17.5666 12.345 17.4868Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
                 </svg>
               </a>
               <span class="tooltip">
                 <span class="arrow"></span>
-                <span class="text">Wallet</span>
+                <span class="text">Messages</span>
               </span>
             </li>
-            <li class="investment">
-              <a href="/investment">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" color="currentColor" fill="none">
-                  <path d="M14 18C18.4183 18 22 14.4183 22 10C22 5.58172 18.4183 2 14 2C9.58172 2 6 5.58172 6 10C6 14.4183 9.58172 18 14 18Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                  <path d="M13.1669 20.9689C12.063 21.6239 10.7742 22 9.3975 22C5.31197 22 2 18.688 2 14.6025C2 13.2258 2.37607 11.937 3.03107 10.8331" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            <li class="shots">
+              <a href="/shots">
+                <!--<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                  <path d="M18.8906 12.846C18.5371 14.189 16.8667 15.138 13.5257 17.0361C10.296 18.8709 8.6812 19.7884 7.37983 19.4196C6.8418 19.2671 6.35159 18.9776 5.95624 18.5787C5 17.6139 5 15.7426 5 12C5 8.2574 5 6.3861 5.95624 5.42132C6.35159 5.02245 6.8418 4.73288 7.37983 4.58042C8.6812 4.21165 10.296 5.12907 13.5257 6.96393C16.8667 8.86197 18.5371 9.811 18.8906 11.154C19.0365 11.7084 19.0365 12.2916 18.8906 12.846Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                </svg>-->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                  <path d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C15.0413 2 17.7655 3.35767 19.5996 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M20 2.5V6H16.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M15.9453 12.3577C15.7686 12.9844 14.9333 13.4273 13.2629 14.3131C11.648 15.1693 10.8406 15.5975 10.1899 15.4254C9.9209 15.3542 9.6758 15.2191 9.47812 15.0329C9 14.5827 9 13.7094 9 11.9629C9 10.2163 9 9.34307 9.47812 8.89284C9.6758 8.7067 9.9209 8.57157 10.1899 8.50042C10.8406 8.32833 11.648 8.75646 13.2629 9.61272C14.9333 10.4985 15.7686 10.9414 15.9453 11.5681C16.0182 11.8268 16.0182 12.099 15.9453 12.3577Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </a>
               <span class="tooltip">
                 <span class="arrow"></span>
-                <span class="text">Investment</span>
-              </span>
-            <li class="funding">
-              <a href="/funding">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" color="currentColor" fill="none">
-                  <path d="M20.9427 16.8354C20.2864 12.8866 18.2432 9.94613 16.467 8.219C15.9501 7.71642 15.6917 7.46513 15.1208 7.23257C14.5499 7 14.0592 7 13.0778 7H10.9222C9.94081 7 9.4501 7 8.87922 7.23257C8.30834 7.46513 8.04991 7.71642 7.53304 8.219C5.75682 9.94613 3.71361 12.8866 3.05727 16.8354C2.56893 19.7734 5.27927 22 8.30832 22H15.6917C18.7207 22 21.4311 19.7734 20.9427 16.8354Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M7.25662 4.44287C7.05031 4.14258 6.75128 3.73499 7.36899 3.64205C8.00392 3.54651 8.66321 3.98114 9.30855 3.97221C9.89237 3.96413 10.1898 3.70519 10.5089 3.33548C10.8449 2.94617 11.3652 2 12 2C12.6348 2 13.1551 2.94617 13.4911 3.33548C13.8102 3.70519 14.1076 3.96413 14.6914 3.97221C15.3368 3.98114 15.9961 3.54651 16.631 3.64205C17.2487 3.73499 16.9497 4.14258 16.7434 4.44287L15.8105 5.80064C15.4115 6.38146 15.212 6.67187 14.7944 6.83594C14.3769 7 13.8373 7 12.7582 7H11.2418C10.1627 7 9.6231 7 9.20556 6.83594C8.78802 6.67187 8.5885 6.38146 8.18945 5.80064L7.25662 4.44287Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
-                  <path d="M13.6267 12.9186C13.4105 12.1205 12.3101 11.4003 10.9892 11.9391C9.66829 12.4778 9.45847 14.2113 11.4565 14.3955C12.3595 14.4787 12.9483 14.2989 13.4873 14.8076C14.0264 15.3162 14.1265 16.7308 12.7485 17.112C11.3705 17.4932 10.006 16.8976 9.85742 16.0517M11.8417 10.9927V11.7531M11.8417 17.2293V17.9927" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </a>
-              <span class="tooltip">
-                <span class="arrow"></span>
-                <span class="text">Funding</span>
+                <span class="text">Shots</span>
               </span>
             </li>
-            <li class="action">
-              <a href="/action-centers">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" color="currentColor" fill="none">
-                  <path d="M3 11C3 7.25027 3 5.3754 3.95491 4.06107C4.26331 3.6366 4.6366 3.26331 5.06107 2.95491C6.3754 2 8.25027 2 12 2C15.7497 2 17.6246 2 18.9389 2.95491C19.3634 3.26331 19.7367 3.6366 20.0451 4.06107C21 5.3754 21 7.25027 21 11V13C21 16.7497 21 18.6246 20.0451 19.9389C19.7367 20.3634 19.3634 20.7367 18.9389 21.0451C17.6246 22 15.7497 22 12 22C8.25027 22 6.3754 22 5.06107 21.0451C4.6366 20.7367 4.26331 20.3634 3.95491 19.9389C3 18.6246 3 16.7497 3 13V11Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M16 9.5L8 9.5M13.5 14.5H10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <li class="comics">
+              <a href="/comics">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                  <path d="M18 12.5743C18 12.2721 18 12.1209 18.0416 11.9862C18.1626 11.5947 18.4814 11.4428 18.8009 11.2838C19.1599 11.1049 19.3395 11.0155 19.5174 10.9998C19.7193 10.9819 19.9217 11.0295 20.0943 11.1354C20.3232 11.2759 20.4828 11.5427 20.6462 11.7597C21.4008 12.7619 21.7782 13.263 21.9162 13.8155C22.0277 14.2614 22.0277 14.7279 21.9162 15.1738C21.7148 15.9797 21.0786 16.6554 20.6077 17.2807C20.3668 17.6007 20.2464 17.7606 20.0943 17.8539C19.9217 17.9598 19.7193 18.0074 19.5174 17.9895C19.3395 17.9738 19.1599 17.8844 18.8009 17.7055C18.4814 17.5465 18.1626 17.3946 18.0416 17.0031C18 16.8684 18 16.7172 18 16.415V12.5743Z" stroke="currentColor" stroke-width="1.8" />
+                  <path d="M5.99978 12.5745C5.99978 12.1937 5.99 11.8517 5.70853 11.584C5.60615 11.4867 5.47041 11.419 5.19896 11.2839C4.83986 11.1051 4.66031 11.0157 4.4824 10.9999C3.94863 10.9527 3.66145 11.3511 3.35363 11.7598C2.59897 12.762 2.22164 13.263 2.08357 13.8156C1.97214 14.2615 1.97214 14.7278 2.08357 15.1738C2.28495 15.9797 2.92117 16.6553 3.3921 17.2806C3.68894 17.6748 3.9725 18.0345 4.4824 17.9894C4.66031 17.9737 4.83986 17.8843 5.19896 17.7055C5.47041 17.5702 5.60615 17.5026 5.70853 17.4053C5.99 17.1377 5.99978 16.7955 5.99978 16.4149V12.5745Z" stroke="currentColor" stroke-width="1.8" />
+                  <path d="M19.9991 10.9958V9.87129C19.9991 5.52383 16.4176 1.99951 11.9996 1.99951C7.58152 1.99951 4 5.52383 4 9.87129V10.9958" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="round" />
+                  <path d="M11.9977 13.4592C10.752 12.8002 7.99771 11.6788 6.73429 12.0203C6.49453 12.1204 5.99805 12.4652 5.99805 13.6189L6.09383 19.5962C6.09975 19.9659 6.38606 20.2689 6.74809 20.32C7.98052 20.4942 10.0798 20.9935 11.9977 22.0002M11.9977 13.4592V22.0002M11.9977 13.4592C13.2434 12.8002 15.9988 11.6788 17.2623 12.0203C17.502 12.1204 17.9985 12.4652 17.9985 13.6189L17.9027 19.5962C17.8968 19.9659 17.6105 20.2689 17.2485 20.32C16.016 20.4942 13.9156 20.9935 11.9977 22.0002" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </a>
               <span class="tooltip">
                 <span class="arrow"></span>
-                <span class="text">Action Centers</span>
+                <span class="text">Comics</span>
               </span>
             </li>
-            <li class="formation">
-              <a href="/formation">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" color="currentColor" fill="none">
-                  <rect width="24" height="24" fill="none" />
-                  <path d="M2 14C2 11.1911 2 9.78661 2.67412 8.77772C2.96596 8.34096 3.34096 7.96596 3.77772 7.67412C4.78661 7 6.19108 7 9 7H15C17.8089 7 19.2134 7 20.2223 7.67412C20.659 7.96596 21.034 8.34096 21.3259 8.77772C22 9.78661 22 11.1911 22 14C22 16.8089 22 18.2134 21.3259 19.2223C21.034 19.659 20.659 20.034 20.2223 20.3259C19.2134 21 17.8089 21 15 21H9C6.19108 21 4.78661 21 3.77772 20.3259C3.34096 20.034 2.96596 19.659 2.67412 19.2223C2 18.2134 2 16.8089 2 14Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M16 7C16 5.11438 16 4.17157 15.4142 3.58579C14.8284 3 13.8856 3 12 3C10.1144 3 9.17157 3 8.58579 3.58579C8 4.17157 8 5.11438 8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M6 11L6.65197 11.202C10.0851 12.266 13.9149 12.266 17.348 11.202L18 11M12 12V14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <li class="create">
+              <a href="/create">
+                <svg width="24" id="outside" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 22.0001C4.617 22.0001 2 19.3831 2 12.0001C2 4.61712 4.617 2.00012 12 2.00012C12.414 2.00012 12.75 2.33612 12.75 2.75012C12.75 3.16412 12.414 3.50012 12 3.50012C5.486 3.50012 3.5 5.48612 3.5 12.0001C3.5 18.5141 5.486 20.5001 12 20.5001C18.514 20.5001 20.5 18.5141 20.5 12.0001C20.5 11.5861 20.836 11.2501 21.25 11.2501C21.664 11.2501 22 11.5861 22 12.0001C22 19.3831 19.383 22.0001 12 22.0001Z" fill="currentColor"></path>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M19.2365 9.38606L20.2952 8.19072C21.4472 6.88972 21.3252 4.89472 20.0252 3.74172C19.3952 3.18372 18.5812 2.90372 17.7452 2.95572C16.9052 3.00672 16.1352 3.38272 15.5772 4.01272L9.6932 10.6607C7.8692 12.7187 9.1172 15.4397 9.1712 15.5547C9.2602 15.7437 9.4242 15.8877 9.6232 15.9497C9.6802 15.9687 10.3442 16.1717 11.2192 16.1717C12.2042 16.1717 13.4572 15.9127 14.4092 14.8367L19.0774 9.56571C19.1082 9.54045 19.1374 9.51238 19.1646 9.4815C19.1915 9.45118 19.2155 9.41925 19.2365 9.38606ZM10.4082 14.5957C11.0352 14.7097 12.4192 14.8217 13.2862 13.8427L17.5371 9.04299L15.0656 6.85411L10.8172 11.6557C9.9292 12.6567 10.2122 13.9917 10.4082 14.5957ZM16.0596 5.73076L18.5322 7.91938L19.1722 7.19672C19.7752 6.51472 19.7122 5.46872 19.0312 4.86572C18.7002 4.57372 18.2712 4.42472 17.8362 4.45272C17.3962 4.48072 16.9932 4.67672 16.7002 5.00672L16.0596 5.73076Z" fill="currentColor"></path>
                 </svg>
               </a>
               <span class="tooltip">
                 <span class="arrow"></span>
-                <span class="text">Formation</span>
+                <span class="text">Create</span>
               </span>
             </li>
-            <li class="offices">
-              <a href="/offices">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" color="currentColor" fill="none">
-                  <path d="M14 22V8C14 5.17157 14 3.75736 13.1213 2.87868C12.2426 2 10.8284 2 8 2C5.17157 2 3.75736 2 2.87868 2.87868C2 3.75736 2 5.17157 2 8V16C2 18.8284 2 20.2426 2.87868 21.1213C3.75736 22 5.17157 22 8 22H14Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                  <path d="M6.5 11H5.5M10.5 11H9.5M6.5 7H5.5M6.5 15H5.5M10.5 7H9.5M10.5 15H9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                  <path d="M18.5 15H17.5M18.5 11H17.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                  <path d="M18 8H14V22H18C19.8856 22 20.8284 22 21.4142 21.4142C22 20.8284 22 19.8856 22 18V12C22 10.1144 22 9.17157 21.4142 8.58579C20.8284 8 19.8856 8 18 8Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            <li class="search">
+              <a href="/search">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#000000" fill="none">
+                  <path d="M17.5 17.5L22 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M20 11C20 6.02944 15.9706 2 11 2C6.02944 2 2 6.02944 2 11C2 15.9706 6.02944 20 11 20C15.9706 20 20 15.9706 20 11Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
                 </svg>
               </a>
               <span class="tooltip">
                 <span class="arrow"></span>
-                <span class="text">Offices</span>
+                <span class="text">Search</span>
               </span>
             </li>
-            <li class="market">
-              <a href="/market">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" color="currentColor" fill="none">
-                  <path d="M5 20L7.41286 17.5871M7.41286 17.5871C8.21715 18.3914 9.32826 18.8889 10.5556 18.8889C13.0102 18.8889 15 16.899 15 14.4444C15 11.9898 13.0102 10 10.5556 10C8.10096 10 6.11111 11.9898 6.11111 14.4444C6.11111 15.6717 6.60857 16.7829 7.41286 17.5871Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                  <path d="M3 15.1877C2.36394 14.0914 2 12.8191 2 11.4623C2 7.34099 5.35786 4 9.5 4H14.5C18.6421 4 22 7.34099 22 11.4623C22 14.7114 19.913 17.4756 17 18.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            <li class="apis">
+              <a href="/apis">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                  <path d="M17 8L18.8398 9.85008C19.6133 10.6279 20 11.0168 20 11.5C20 11.9832 19.6133 12.3721 18.8398 13.1499L17 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M7 8L5.16019 9.85008C4.38673 10.6279 4 11.0168 4 11.5C4 11.9832 4.38673 12.3721 5.16019 13.1499L7 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M14.5 4L9.5 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </a>
               <span class="tooltip">
                 <span class="arrow"></span>
-                <span class="text">Market</span>
+                <span class="text">APIs</span>
               </span>
             </li>
-            <li class="tools">
-              <a href="/tools">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" color="currentColor" fill="none">
-                  <circle cx="6.25" cy="6.25" r="4.25" stroke="currentColor" stroke-width="1.8" />
-                  <path d="M18 9.35714V10.5M18 9.35714C16.9878 9.35714 16.0961 8.85207 15.573 8.08517M18 9.35714C19.0122 9.35714 19.9039 8.85207 20.427 8.08517M18 3.64286C19.0123 3.64286 19.9041 4.148 20.4271 4.915M18 3.64286C16.9877 3.64286 16.0959 4.148 15.5729 4.915M18 3.64286V2.5M21.5 4.21429L20.4271 4.915M14.5004 8.78571L15.573 8.08517M14.5 4.21429L15.5729 4.915M21.4996 8.78571L20.427 8.08517M20.4271 4.915C20.7364 5.36854 20.9167 5.91364 20.9167 6.5C20.9167 7.08643 20.7363 7.63159 20.427 8.08517M15.5729 4.915C15.2636 5.36854 15.0833 5.91364 15.0833 6.5C15.0833 7.08643 15.2637 7.63159 15.573 8.08517" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                  <circle cx="17.75" cy="17.75" r="4.25" stroke="currentColor" stroke-width="1.8" />
-                  <circle cx="6.25" cy="17.75" r="4.25" stroke="currentColor" stroke-width="1.8" />
+            <li class="topics">
+              <a href="/topics">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                  <path d="M15.6 8.40033V12.9003C15.6 14.3915 16.8088 15.6003 18.3 15.6003C19.7912 15.6003 21 14.3915 21 12.9003V12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21C14.0265 21 15.8965 20.3302 17.4009 19.2M15.6 12.0003C15.6 13.9886 13.9882 15.6003 12 15.6003C10.0118 15.6003 8.4 13.9886 8.4 12.0003C8.4 10.0121 10.0118 8.40033 12 8.40033C13.9882 8.40033 15.6 10.0121 15.6 12.0003Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
                 </svg>
               </a>
               <span class="tooltip">
                 <span class="arrow"></span>
-                <span class="text">Tools</span>
+                <span class="text">Topics</span>
+              </span>
+            </li>
+            <li class="articles">
+              <a href="/articles">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                  <path d="M18 15V9C18 6.17157 18 4.75736 17.1213 3.87868C16.2426 3 14.8284 3 12 3H8C5.17157 3 3.75736 3 2.87868 3.87868C2 4.75736 2 6.17157 2 9V15C2 17.8284 2 19.2426 2.87868 20.1213C3.75736 21 5.17157 21 8 21H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M6 8L14 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M6 12L14 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M6 16L10 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M18 8H19C20.4142 8 21.1213 8 21.5607 8.43934C22 8.87868 22 9.58579 22 11V19C22 20.1046 21.1046 21 20 21C18.8954 21 18 20.1046 18 19V8Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </a>
+              <span class="tooltip">
+                <span class="arrow"></span>
+                <span class="text">Articles</span>
               </span>
             </li>
           </ul>
@@ -279,8 +229,8 @@ export default class AppMain extends HTMLElement {
                 <span class="text">Updates</span>
               </span>
             </li>
-            <li class="appearance">
-              <a href="/appearance">
+            <li class="themes">
+              <a href="/themes">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" color="currentColor" fill="none">
                   <path d="M14 19L11.1069 10.7479C9.76348 6.91597 9.09177 5 8 5C6.90823 5 6.23652 6.91597 4.89309 10.7479L2 19M4.5 12H11.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                   <path d="M21.9692 13.9392V18.4392M21.9692 13.9392C22.0164 13.1161 22.0182 12.4891 21.9194 11.9773C21.6864 10.7709 20.4258 10.0439 19.206 9.89599C18.0385 9.75447 17.1015 10.055 16.1535 11.4363M21.9692 13.9392L19.1256 13.9392C18.6887 13.9392 18.2481 13.9603 17.8272 14.0773C15.2545 14.7925 15.4431 18.4003 18.0233 18.845C18.3099 18.8944 18.6025 18.9156 18.8927 18.9026C19.5703 18.8724 20.1955 18.545 20.7321 18.1301C21.3605 17.644 21.9692 16.9655 21.9692 15.9392V13.9392Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
@@ -288,7 +238,7 @@ export default class AppMain extends HTMLElement {
               </a>
               <span class="tooltip">
                 <span class="arrow"></span>
-                <span class="text">Appearance</span>
+                <span class="text">Themes</span>
               </span>
             </li>
             <li class="settings">
@@ -313,18 +263,6 @@ export default class AppMain extends HTMLElement {
               </span>
             </li>
           </ul>
-        </div>
-      </div>
-      <div class="details-nav">
-        <div class="title">
-          <span class="text">My Wallet</span>
-          <span class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" color="currentColor" fill="none">
-              <path d="M15.1528 4.28405C13.9789 3.84839 13.4577 2.10473 12.1198 2.00447C12.0403 1.99851 11.9603 1.99851 11.8808 2.00447C10.5429 2.10474 10.0217 3.84829 8.8478 4.28405C7.60482 4.74524 5.90521 3.79988 4.85272 4.85239C3.83967 5.86542 4.73613 7.62993 4.28438 8.84747C3.82256 10.0915 1.89134 10.6061 2.0048 12.1195C2.10506 13.4574 3.84872 13.9786 4.28438 15.1525C4.73615 16.37 3.83962 18.1346 4.85272 19.1476C5.90506 20.2001 7.60478 19.2551 8.8478 19.7159C10.0214 20.1522 10.5431 21.8954 11.8808 21.9955C11.9603 22.0015 12.0403 22.0015 12.1198 21.9955C13.4575 21.8954 13.9793 20.1521 15.1528 19.7159C16.3704 19.2645 18.1351 20.1607 19.1479 19.1476C20.2352 18.0605 19.1876 16.2981 19.762 15.042C20.2929 13.8855 22.1063 13.3439 21.9958 11.8805C21.8957 10.5428 20.1525 10.021 19.7162 8.84747C19.2554 7.60445 20.2004 5.90473 19.1479 4.85239C18.0955 3.79983 16.3958 4.74527 15.1528 4.28405Z" stroke="currentColor" stroke-width="1.8" />
-              <path d="M12.2422 16V12C12.2422 11.5286 12.2422 11.2929 12.0957 11.1464C11.9493 11 11.7136 11 11.2422 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M11.9922 8H12.0012" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </span>
         </div>
       </div>
     `;
@@ -463,7 +401,7 @@ export default class AppMain extends HTMLElement {
         }
 
         section.nav {
-          width: 300px;
+          width: 200px;
           display: flex;
           flex-flow: row;
           gap: 5px;
@@ -489,14 +427,14 @@ export default class AppMain extends HTMLElement {
           flex-flow: column;
           justify-content: space-between;
           align-items: center;
-          width: 40px;
+          width: 100%;
         }
 
         section.nav > div.icons-nav > div.top,
         section.nav > div.icons-nav > div.bottom {
           display: flex;
           flex-flow: column;
-          align-items: center;
+          align-items: start;
           gap: 0;
           width: 100%;
           min-width: 100%;
@@ -517,20 +455,22 @@ export default class AppMain extends HTMLElement {
         }
 
         section.nav > div.icons-nav  ul.nav > li {
+          /*border: thin solid black;*/
           padding: 0;
           width: 100%;
           display: flex;
-          justify-content: center;
+          justify-content: start;
           align-items: center;
           gap: 5px;
-          position: relative;
-          color: var(--icon-color);
+          cursor: pointer;
+          color: var(--text-color);
           transition: all 0.3s ease;
+          border-radius: 7px;
         }
 
         section.nav > div.icons-nav  ul.nav > li:hover,
         section.nav > div.icons-nav  ul.nav > li.active {
-          color: var(--action-color);
+          color: var(--accent-color);
         }
 
         section.nav > div.icons-nav ul.nav > li > a {
@@ -543,19 +483,20 @@ export default class AppMain extends HTMLElement {
           border-radius: 7px;
         }
 
-        section.nav > div.icons-nav ul.nav > li.active > a {
-          background: var(--nav-background);
+        section.nav > div.icons-nav ul.nav > li.active {
+          background: var(--tab-background);
         }
 
         section.nav > div.icons-nav ul.nav > li > a > svg {
-          width: 22px;
-          height: 22px;
+          width: 24px;
+          height: 24px;
         }
 
         section.nav > div.icons-nav ul.nav > li.avatar > a {
           width: 30px;
           height: 30px;
           border-radius: 50%;
+          margin: 10px 0 0;
           padding: 0;
           overflow: hidden;
           border: var(--input-border);
@@ -571,286 +512,22 @@ export default class AppMain extends HTMLElement {
           border-radius: 50%;
         }
 
-        section.nav > div.icons-nav ul.nav > li > span.tooltip {
-          position: absolute;
-          background: var(--background);
-          z-index: 10;
-          top: calc(50% - 10px);
-          left: calc(100% + 5px);
-          color: var(--gray-color);
-          display: none;
-          max-width: 150px;
-          align-items: center;
-          justify-content: center;
-          padding: 2px 7px 3px 5px;
-          box-shadow: var(--box-shadow);
-          height: 26px;
-          border: var(--border);
-          border-radius: 7px;
-          transition: all 0.3s ease;
-        }
-
-        section.nav > div.icons-nav ul.nav > li:hover > span.tooltip {
-          display: flex;
-        }
-
-        section.nav > div.icons-nav ul.nav > li.active > span.tooltip {
-          color: var(--action-color);
-        }
-
-        section.nav > div.icons-nav ul.nav > li > span.tooltip > span.arrow {
-          position: absolute;
-          background: var(--background);
-          display: inline-block;
-          width: 10px;
-          height: 10px;
-          top: calc(50% - 5px);
-          left: -5px;
-          border-left: var(--border);
-          border-top: var(--border);
-          rotate: -45deg;
-          clip-path: polygon(0 0, 100% 0, 0 100%);
-        }
-
         section.nav > div.icons-nav ul.nav > li > span.tooltip > span.text {
           color: inherit;
           font-family: var(--font-text), sans-serif;
-          font-size: 0.95rem;
-
-          /* add ellipsis */
-          white-space: nowrap;
-          overflow: hidden;
-        }
-
-        section.nav > div.details-nav {
-          padding: 0;
-          margin: 0;
-          width: calc(100% - 40px);
-          height: 100%;
-          display: flex;
-          flex-flow: column;
-          gap: 0;
-          overflow-y: scroll;
-          scrollbar-width: none;
-        }
-
-        section.nav > div.details-nav::-webkit-scrollbar {
-          visibility: hidden;
-          display: none;
-        }
-
-        section.nav > div.details-nav > div.title {
-          padding: 0 0 0 10px;
-          height: 55px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          border-bottom: var(--border);
-        }
-
-        section.nav > div.details-nav > div.title > span.text {
-          font-family: var(--font-text), sans-serif;
-          font-size: 1.2rem;
-          line-height: 1.5rem;
-          color: var(--text-color);
-          font-weight: 500;
-        }
-
-        section.nav > div.details-nav > div.title > span.icon {
-          padding: 0;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          cursor: pointer;
-          color: var(--icon-color);
-        }
-
-        section.nav > div.details-nav > div.title > span.icon:hover {
-          color: var(--action-color);
-        }
-
-        section.nav > div.details-nav > div.title > span.icon > svg {
-          width: 20px;
-          height: 20px;
-        }
-
-        section.nav > div.details-nav > div.container {
-          padding: 10px 0;
-          display: flex;
-          flex-flow: column;
-          gap: 10px;
-          width: 100%;
+          font-size: 1.05rem;
+          font-weight: 400;
         }
 
         section.flow {
-          /* border: thin solid green; */
-          width: calc(100% - calc(300px + 20px));
+          border: thin solid green;
+          width: calc(100% - 220px);
           display: flex;
-          flex-flow: row;
+          flex-flow: column;
           gap: 0;
-          padding: 0 10px;
-        }
-
-        section.flow > div.feeds {
           padding: 0;
-          width: 52%;
-          min-width: 550px;
-          display: flex;
-          flex-flow: column;
-          gap: 0;
-          align-items: center;
-          justify-content: start;
         }
 
-        section.flow > div.side {
-          padding: 0 10px;
-          margin: 0;
-          background-color: transparent;
-          width: 50%;
-          display: flex;
-          flex-flow: column;
-          gap: 20px;
-          position: sticky;
-          top: 0;
-          height: 100vh;
-          max-height: 100vh;
-          overflow-y: scroll;
-          scrollbar-width: none;
-        }
-
-        section.flow > div.side::-webkit-scrollbar {
-          visibility: hidden;
-          display: none;
-        }
-
-        section.flow > div.feeds > form.search {
-          padding: 15px 0 10px 0;
-          background: var(--background);
-          display: flex;
-          flex-flow: column;
-          align-items: center;
-          justify-content: center;
-          gap: 5px;
-          z-index: 6;
-          width: 100%;
-          position: sticky;
-          top: 0;
-        }
-
-        section.flow > div.feeds > form.search > svg {
-          position: absolute;
-          left: -12px;
-          top: calc(50% - 15px);
-          color: var(--text-color);
-          cursor: pointer;
-          width: 40px;
-          height: 40px;
-        }
-
-        section.flow > div.feeds > form.search > svg:hover {
-          color: var(--accent-color);
-        }
-
-        section.flow > div.feeds > form.search > .contents {
-          padding: 0;
-          display: flex;
-          flex-flow: row;
-          align-items: center;
-          flex-wrap: nowrap;
-          gap: 0;
-          margin: 0;
-          width: 100%;
-          position: relative;
-        }
-
-        section.flow > div.feeds > form.search > .contents > input {
-          border: var(--input-border);
-          background-color: var(--background) !important;
-          display: flex;
-          flex-flow: row;
-          align-items: center;
-          font-family: var(--font-text),sans-serif;
-          color: var(--text-color);
-          font-size: 1rem;
-          padding: 8px 10px 8px 35px;
-          gap: 0;
-          width: 100%;
-          border-radius: 12px;
-        }
-        
-        section.flow > div.feeds > form.search > .contents > input:-webkit-autofill,
-        section.flow > div.feeds > form.search > .contents > input:-webkit-autofill:hover, 
-        section.flow > div.feeds > form.search > .contents > input:-webkit-autofill:focus {
-          -webkit-box-shadow: 0 0 0 1000px var(--background) inset;
-          -webkit-text-fill-color: var(--text-color) !important;
-          transition: background-color 5000s ease-in-out 0s;
-          color: var(--text-color) !important;
-        }
-        
-        section.flow > div.feeds > form.search > .contents > input:-webkit-autofill {
-          filter: none;
-          color: var(--text-color) !important;
-        }
-
-        section.flow > div.feeds > form.search > .contents > svg {
-          position: absolute;
-          height: 18px;
-          color: var(--gray-color);
-          width: 18px;
-          left: 10px;
-          top: 50%;
-          transform: translateY(-50%);
-        }
-
-        section.flow > div.feeds > form.search > .contents > button {
-          position: absolute;
-          right: 10px;
-          top: calc(50% - 13px);
-          border: none;
-          cursor: pointer;
-          color: var(--white-color);
-          font-family: var(--font-text), sans-serif;
-          background: var(--accent-linear);
-          height: 26px;
-          width: max-content;
-          padding: 0 10px;
-          font-size: 0.9rem;
-          font-weight: 400;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0;
-          border-radius: 10px;
-        }
-
-        section.flow > div.feeds > div.feeds-wrapper {
-          display: flex;
-          flex-flow: column;
-          align-items: center;
-          justify-content: space-between;
-          gap: 0;
-          width: 100%;
-          min-height: calc(100vh - 55px);
-        }
-
-        section.flow > div.feeds > div.feeds-wrapper > div.content-wrapper {
-          display: flex;
-          flex-flow: column;
-          gap: 20px;
-          min-height: calc(100vh - 180px);
-          width: 100%;
-        }
-
-        footer.footer {
-          border-top: var(--border);
-          display: flex;
-          flex-flow: column;
-          align-items: start;
-          justify-content: start;
-          gap: 5px;
-          width: 100%;
-          padding: 10px 0 20px 0;
-        }
 
         footer.footer > p {
           margin: 0;

@@ -109,7 +109,10 @@ export default class ChatItem extends HTMLDivElement {
   }
 
   getBody = () => {
-    const unread = this.strToInteger(this.getAttribute('unread')) > 0 ? 'unread' : '';
+    let unread = this.strToInteger(this.getAttribute('unread')) > 0 ? 'unread' : '';
+    const recieved = this.textToBoolean(this.getAttribute('recieved'));
+    const you = this.textToBoolean(this.getAttribute('you'));
+    if (you) unread = '';
     return /* html */`
       <div class="wrapper ${unread}">
         <div class="image">
@@ -126,9 +129,10 @@ export default class ChatItem extends HTMLDivElement {
             <span class="time">${this.formatDateTime(this.getAttribute('datetime'))}</span>
           </span>
           <span class="text">
-            ${this.getUnread(this.textToBoolean(this.getAttribute('you')),this.strToInteger(this.getAttribute('unread')))}
+            ${this.getUnread(you,this.strToInteger(this.getAttribute('unread')), recieved)}
             ${this.getYou(this.textToBoolean(this.getAttribute('you')))}
             <span class="message">${this.getAttribute('message')}</span>
+            ${this.getUnreadMessages(you, this.strToInteger(this.getAttribute('unread')))}
           </span>
           ${this.getAttachements()}
           ${this.getImages()}
@@ -137,9 +141,32 @@ export default class ChatItem extends HTMLDivElement {
     `;
   }
 
-  getUnread = (you,num) => {
+  getUnreadMessages = (you, unread) => {
+    if (!you && unread > 0) {
+      return /* html */`
+        <span class="unread-no">${unread}</span>
+      `;
+    } else {
+      return '';
+    }
+  }
+
+  getUnread = (you, num, recieved) => {
+    // console.log('You:', you, 'Num:', num, 'Recieved:', recieved);
     if(!you) return '';
-    if(num > 0) {
+
+    if (recieved) {
+      return /* html */`
+        <span class="tick recieved">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path id="outer" d="M22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12Z" stroke="currentColor" stroke-width="1.8" />
+            <path d="M8 12.5L10.5 15L16 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+      `;
+    } 
+
+    if(num > 0 ) {
       return /* html */`
       <span class="tick unread">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
@@ -276,7 +303,7 @@ export default class ChatItem extends HTMLDivElement {
           font-family: var(--font-main), sans-serif;
           font-size: 16px;
           width: 100%;
-          padding: 10px 0;
+          padding: 0;
         }
 
         * {
@@ -295,7 +322,9 @@ export default class ChatItem extends HTMLDivElement {
           align-items: start;
           justify-content: space-between;
           width: 100%;
+          cursor: pointer;
           gap: 10px;
+          padding: 10px 0;
         }
 
         .wrapper > .image {
@@ -342,24 +371,30 @@ export default class ChatItem extends HTMLDivElement {
           max-width: 14px;
           max-height: 14px;
           border-radius: 50%;
-          padding: 0;
+          padding: 3px;
           position: absolute;
           top: 0;
           right: -2px;
         }
 
         .wrapper > .image > .online-status > .active {
-          width: 10px;
-          height: 10px;
-          max-width: 10px;
-          max-height: 10px;
+          width: 8px;
+          height: 8px;
+          max-width: 8px;
+          max-height: 8px;
+          min-width: 8px;
+          min-height: 8px;
           border-radius: 50%;
           background: var(--accent-linear);
         }
 
         .wrapper > .image > .online-status > .inactive {
-          width: 10px;
-          height: 10px;
+          width: 8px;
+          height: 8px;
+          max-width: 8px;
+          max-height: 8px;
+          min-width: 8px;
+          min-height: 8px;
           border-radius: 50%;
           background: var(--gray-background);
         }
@@ -369,6 +404,7 @@ export default class ChatItem extends HTMLDivElement {
           flex-direction: column;
           width: calc(100% - 60px);
           gap: 0;
+          position: relative;
         }
 
         .wrapper > .content > .head {
@@ -392,6 +428,11 @@ export default class ChatItem extends HTMLDivElement {
           text-overflow: ellipsis;
         }
 
+        .wrapper.unread > .content > .head > .name {
+          font-weight: 600;
+          color: var(--title-color);
+        }
+
         .wrapper > .content > .head > .time {
           font-family: var(--font-read), sans-serif;
           font-weight: 500;
@@ -400,12 +441,36 @@ export default class ChatItem extends HTMLDivElement {
           color: var(--gray-color);
         }
 
+        .wrapper.unread > .content > .head > .time {
+          font-weight: 600;
+          color: var(--text-color);
+        }
+
         .wrapper > .content > .text {
           display: flex;
           justify-content: start;
           align-items: center;
           width: 100%;
           gap: 2px;
+        }
+
+        .wrapper > .content > .text > .unread-no {
+          font-family: var(--font-read), sans-serif;
+          font-weight: 500;
+          font-size: 0.85rem;
+          color: var(--white-color);
+          background: var(--accent-linear);
+          border-radius: 20px;
+          padding: 2px 5px;
+          min-width: 20px;
+          width: max-content;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          position: absolute;
+          bottom: 0;
+          right: 0;
         }
 
         .wrapper > .content > .text > .tick {
@@ -429,6 +494,11 @@ export default class ChatItem extends HTMLDivElement {
           fill: var(--accent-color);
         }
 
+        .wrapper > .content > .text > .tick.recieved > svg {
+          color: var(--accent-color);
+          fill: none;
+        }
+
         .wrapper > .content > .text > .tick.unread > svg #outer {
           stroke: var(--accent-color);
         }
@@ -440,6 +510,11 @@ export default class ChatItem extends HTMLDivElement {
           color: var(--gray-color);
         }
 
+        .wrapper.unread > .content > .text > .you {
+          font-weight: 600;
+          color: var(--title-color);
+        }
+
         .wrapper > .content > .text > .message {
           font-family: var(--font-main), sans-serif;
           font-weight: 400;
@@ -448,6 +523,11 @@ export default class ChatItem extends HTMLDivElement {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+        }
+
+        .wrapper.unread > .content > .text > .message {
+          font-weight: 500;
+          color: var(--text-color);
         }
 
         .wrapper > .content > .images {
@@ -525,11 +605,11 @@ export default class ChatItem extends HTMLDivElement {
 
           /* reset all cursor: pointer to cursor: default */
           a, a:visited, a:link, a:hover, a:active,
-          button, button:active, button:focus, button:hover {
+          button, button:active, button:focus, button:hover,
+          .wrapper {
             cursor: default !important;
           }
         }
-        
       </style>
     `;
   }

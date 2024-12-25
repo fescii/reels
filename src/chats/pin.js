@@ -121,6 +121,7 @@ export default class PinChat extends HTMLDivElement {
           height: 170px;
           max-width: 140px;
           max-height: 170px;
+          cursor: pointer;
           position: relative;
           padding: 0;
           border-radius: 10px;
@@ -290,6 +291,7 @@ export default class PinChat extends HTMLDivElement {
             min-width: 150px;
             max-height: 200px;
             min-height: 200px;
+            cursor: default !important;
           }
         }
         

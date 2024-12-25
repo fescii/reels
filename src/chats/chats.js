@@ -2,6 +2,7 @@ export default class ChatsContainer extends HTMLElement {
   constructor() {
     super();
     this.shadow = this.attachShadow({ mode: 'open' });
+    this.active_tab = null;
     this.render();
   }
 
@@ -10,6 +11,46 @@ export default class ChatsContainer extends HTMLElement {
   }
 
   connectedCallback() {
+    const tabs = this.shadow.querySelector("ul.tabs");
+
+    // if tabs exist, activate the tab controller
+    if (tabs) this.activateTabController(tabs);
+  }
+
+  activateTabController = tabs => {
+    // get the active tab
+    this.getOrSetActiveTab(tabs);
+
+    // add click event listener to the tabs
+    tabs.querySelectorAll("li").forEach(tab => {
+      tab.addEventListener("click", e => {
+        e.preventDefault();
+        e.stopPropagation();
+        // remove the active class from the active tab
+        this.active_tab.classList.remove("active");
+
+        // set the new active tab
+        this.active_tab = tab;
+        this.active_tab.classList.add("active");
+
+        //TODO: hide the tab content
+      });
+    });
+  }
+
+  getOrSetActiveTab = tabs => {
+    // get the active tab
+    let activeTab = tabs.querySelector("li.active");
+
+    if (!activeTab) {
+      // if no active tab, set the first tab as active
+      activeTab = tabs.querySelector("li");
+      activeTab.classList.add("active");
+      this.active_tab = activeTab;
+    }
+
+    // else set the active tab
+    this.active_tab = activeTab;
   }
 
   formatNumber = numStr => {
@@ -56,15 +97,17 @@ export default class ChatsContainer extends HTMLElement {
 
   getBody = () => {
     return /* html */`
+    <div class="main">People</div>
       <div class="chats">
         ${this.getForm()}
-        ${this.getPins()}
-        ${this.getTab()}
-        <div class="chats-container">
-          ${this.getChats()}
+        <div class="container">
+          ${this.getPins()}
+          ${this.getTab()}
+          <div class="chats-container">
+            ${this.getChats()}
+          </div>
         </div>
       </div>
-      <div class="people">People</div>
     `;
   }
 
@@ -89,7 +132,7 @@ export default class ChatsContainer extends HTMLElement {
   getTab = () => {
     return /* html */`
       <ul class="tabs">
-        <li class="tab">
+        <li class="tab active">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
             <path d="M12.5 3H11.5C7.02166 3 4.78249 3 3.39124 4.39124C2 5.78249 2 8.02166 2 12.5C2 16.9783 2 19.2175 3.39124 20.6088C4.78249 22 7.02166 22 11.5 22C15.9783 22 18.2175 22 19.6088 20.6088C21 19.2175 21 16.9783 21 12.5V11.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
             <path d="M22 5.5C22 7.433 20.433 9 18.5 9C16.567 9 15 7.433 15 5.5C15 3.567 16.567 2 18.5 2C20.433 2 22 3.567 22 5.5Z" stroke="currentColor" stroke-width="1.8" />
@@ -99,7 +142,7 @@ export default class ChatsContainer extends HTMLElement {
           <span class="text">All</span>
           <span class="count">${this.formatNumber(this.getAttribute("all"))}</span>
         </li>
-        <li class="tab active">
+        <li class="tab">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
             <path d="M21.9598 10.9707C22.0134 11.8009 22.0134 12.6607 21.9598 13.4909C21.6856 17.7332 18.3536 21.1125 14.1706 21.3905C12.7435 21.4854 11.2536 21.4852 9.8294 21.3905C9.33896 21.3579 8.8044 21.2409 8.34401 21.0513C7.83177 20.8403 7.5756 20.7348 7.44544 20.7508C7.31527 20.7668 7.1264 20.9061 6.74868 21.1846C6.08268 21.6757 5.24367 22.0285 3.99943 21.9982C3.37026 21.9829 3.05568 21.9752 2.91484 21.7351C2.77401 21.495 2.94941 21.1626 3.30021 20.4978C3.78674 19.5758 4.09501 18.5203 3.62791 17.6746C2.82343 16.4666 2.1401 15.036 2.04024 13.4909C1.98659 12.6607 1.98659 11.8009 2.04024 10.9707C2.31441 6.72838 5.64639 3.34913 9.8294 3.07107C11.0318 2.99114 11.2812 2.97856 12.5 3.03368" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M8.5 15H15.5M8.5 10H12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
@@ -201,10 +244,10 @@ export default class ChatsContainer extends HTMLElement {
       </div>
       <div is="chat-item" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Oliver"
       user-name="Janet Doe" unread="0" active="false" you="true" message="I'll be there soon, wait for me!"
-      is-even="false" datetime="2024-12-20T12:20:15Z">
+      is-even="false" datetime="2024-12-20T12:20:15Z" recieved="true">
       </div>
       <div is="chat-item" user-picture="https://randomuser.me/api/portraits/men/1.jpg"
-      user-name="Michael Scott" unread="0" active="true" you="false"
+      user-name="Michael Scott" unread="78" active="true" you="false"
       message="That's what she said!, See for yourself!" is-even="false" datetime="2024-11-15T16:30:15Z"
       images="https://images.unsplash.com/photo-1733077151673-c834c5613bbc?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://plus.unsplash.com/premium_photo-1733514691529-da25716e449b?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://images.unsplash.com/photo-1719937051176-9b98352a6cf4?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
       </div>
@@ -258,10 +301,12 @@ export default class ChatsContainer extends HTMLElement {
           display: flex;
           max-width: 70%;
           width: 70%;
-          padding: 39px 0;
+          padding: 0;
+          height: 100dvh;
+          max-height: 100vh;
           display: flex;
           flex-direction: row;
-          align-items: center;
+          align-items: start;
           justify-content: space-between;
           gap: 20px;
         }
@@ -273,6 +318,12 @@ export default class ChatsContainer extends HTMLElement {
 
         div.chats {
           width: calc(50% - 10px);
+          max-width: calc(50% - 10px);
+          height: 100%;
+          max-height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: start;
           overflow-y: scroll;
           scrollbar-width: none;
           -webkit-overflow-scrolling: touch;
@@ -280,10 +331,10 @@ export default class ChatsContainer extends HTMLElement {
           scroll-snap-type: y mandatory;
         }
 
-        div.chats > div {
-          scroll-snap-align: start;
-          scroll-snap-stop: always;
-        }
+        /* div.chats > div {
+        //   scroll-snap-align: start;
+        //   scroll-snap-stop: always;
+        // } */
 
         div.chats::-webkit-scrollbar {
           display: none !important;
@@ -405,6 +456,16 @@ export default class ChatsContainer extends HTMLElement {
           -moz-border-radius: 50px;
         }
 
+        .chats > .container {
+          display: flex;
+          flex-flow: column;
+          align-items: start;
+          gap: 10px;
+          width: 100%;
+          max-width: 100%;
+          padding: 0;
+        }
+
         ul.tabs {
           border-bottom: var(--border);
           display: flex;
@@ -502,6 +563,8 @@ export default class ChatsContainer extends HTMLElement {
           flex-flow: column;
           align-items: start;
           gap: 5px;
+          width: 100%;
+          max-width: 100%;
           padding: 0;
         }
 

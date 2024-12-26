@@ -140,7 +140,7 @@ export default class ChatApp extends HTMLElement {
     return /* html */`
       <messaging-container user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Aidan"
         user-name="Alice Johnsonjg Hfgsgsfnah" unread="0" active="false" user-verified="true"
-        message="I have attached the needed documents below!" last-active="2024-12-24T09:25:15Z">
+        message="I have attached the needed documents below!" last-active="2024-12-26T01:25:15Z">
       </messaging-container>
     `;
   }
@@ -550,7 +550,6 @@ export default class ChatApp extends HTMLElement {
 
         form.search > .contents > input::placeholder {
           color: var(--gray-color);
-          font-weight: 500;
           font-family: var(--font-text), sans-serif;
           font-size: 1rem;
           opacity: 0.8;

@@ -65,35 +65,37 @@ export default class MessagingContainer extends HTMLElement {
       return 'Just now';
     }
 
-    // if we are in the same day: HH:MM AM/PM
+    // if we are in the same day: Today at HH:MM AM/PM
     if (diff < 1000 * 60 * 60 * 24) {
-      return date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true });
+      return /* html */`
+        Today at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `;
     }
 
-    // if we are in the diff is less than 7 days: DAY HH:MM AM/PM
+    // if we are in the diff is less than 7 days: DAY AT HH:MM AM/PM
     if (diff < 1000 * 60 * 60 * 24 * 7) {
       return /* html */`
-        ${date.toLocaleString('default', { weekday: 'short' })} ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        ${date.toLocaleString('default', { weekday: 'short' })} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
       `;
     }
 
-    // if we are in the same month AND year: 12th HH:MM AM/PM
+    // if we are in the same month AND year: 12th APR AT HH:MM AM/PM
     if (new Date().getMonth() === date.getMonth() && new Date().getFullYear() === date.getFullYear()) {
       return /* html */`
-        ${date.getDate()}${dayStr} ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
       `;
     }
 
-    // if we are in the same year: 12th Jan
+    // if we are in the same year: 12th Jan at 11:59 PM
     if (new Date().getFullYear() === date.getFullYear()) {
       return /* html */`
-        ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })}
+        ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
       `;
     }
 
-    // if we are in a different year: 12th Jan 2021
+    // if we are in a different year: 12th Jan 2021 at 11:59 PM
 		return /* html */`
-      ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}
+      ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
     `;
 	}
 
@@ -427,7 +429,7 @@ export default class MessagingContainer extends HTMLElement {
           min-width: 8px;
           min-height: 8px;
           border-radius: 50%;
-          background: var(--gray-background);
+          background: var(--gray-color);
         }
 
         header.header > .contents > .profile > .info > .active > .time {

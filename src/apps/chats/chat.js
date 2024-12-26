@@ -110,11 +110,12 @@ export default class ChatItem extends HTMLDivElement {
 
   getBody = () => {
     let unread = this.strToInteger(this.getAttribute('unread')) > 0 ? 'unread' : '';
+    const opened = this.textToBoolean(this.getAttribute('opened')) ? 'opened' : '';
     const recieved = this.textToBoolean(this.getAttribute('recieved'));
     const you = this.textToBoolean(this.getAttribute('you'));
     if (you) unread = '';
     return /* html */`
-      <div class="wrapper ${unread}">
+      <div class="wrapper ${unread} ${opened}">
         <div class="image">
           <span class="online-status">
             ${this.getActive(this.textToBoolean(this.getAttribute('active')))}
@@ -166,7 +167,6 @@ export default class ChatItem extends HTMLDivElement {
   }
 
   getUnread = (you, num, recieved) => {
-    // console.log('You:', you, 'Num:', num, 'Recieved:', recieved);
     if(!you) return '';
 
     if (recieved) {
@@ -313,11 +313,12 @@ export default class ChatItem extends HTMLDivElement {
         :host {
           /* border: 1px solid blue;*/
           display: flex;
-          border-bottom: var(--border);
           font-family: var(--font-main), sans-serif;
           font-size: 16px;
           width: 100%;
-          padding: 0;
+          display: flex;
+          justify-content: start;
+          align-items: center;
         }
 
         * {
@@ -339,6 +340,33 @@ export default class ChatItem extends HTMLDivElement {
           cursor: pointer;
           gap: 10px;
           padding: 10px 0;
+          transition: all 0.3s ease;
+        }
+
+        .wrapper.opened {
+          padding: 10px 5px 10px 8px;
+          border-radius: 10px;
+          background: #f0f2f5;
+          position: relative;
+        }
+
+        .wrapper.opened::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 0;
+          width: 2px;
+          height: 80%;
+          transition: all 0.3s ease;
+          transform: translateY(-50%);
+          background: var(--action-linear);
+          border-radius: 10px;
+        }
+
+        .wrapper:hover {
+          background: #f0f2f5;
+          border-radius: 10px;
+          padding: 10px 5px;
         }
 
         .wrapper > .image {
@@ -422,7 +450,7 @@ export default class ChatItem extends HTMLDivElement {
           min-width: 8px;
           min-height: 8px;
           border-radius: 50%;
-          background: var(--gray-background);
+          background: var(--gray-color);
         }
 
         .wrapper > .content {
@@ -664,6 +692,11 @@ export default class ChatItem extends HTMLDivElement {
 
           /** add ellipsis */
           white-space: nowrap;
+        }
+
+        .wrapper.opened > .content > .attachements > a,
+        .wrapper:hover > .content > .attachements > a {
+          background: var(--tab-background);
         }
 
         @media all and (max-width: 660px) {

@@ -109,6 +109,11 @@ export default class MessagingContainer extends HTMLElement {
   getBody = () => {
     return /* html */`
       ${this.getHeader()}
+      <main class="main">
+        <div class="messages">
+          ${this.getMessages()}
+        </div>
+      </main>
     `;
   }
 
@@ -218,6 +223,31 @@ export default class MessagingContainer extends HTMLElement {
     `;
   }
 
+  getMessages = () => {
+    return /* html */`
+      <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/men/1.jpg" datetime="2024-12-24T12:00:00Z"
+        you="false" verified="true" status="seen" active="true">
+        This is a message from John Doe, Please reply as soon as possible.
+      </div>
+      <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"
+        you="true" verified="false" status="seen" active="false">
+        This is a message from Jane Doe, Please reply as soon as possible.
+      </div>
+      <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/men/1.jpg" datetime="2024-12-24T12:00:00Z"
+        you="false" verified="true" status="delivered" active="true">
+        This is a message from John Doe, Please reply as soon as possible.
+      </div>
+      <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"
+        you="true" verified="false" status="delivered" active="false">
+        Thanks! I will reply as soon as possible.
+      </div>
+      <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"
+        you="true" verified="false" status="sent" active="false">
+        Rickoshea!!!!
+      </div>
+    `;
+  }
+
   getStyles = () => {
     return /* css */`
       <style>
@@ -230,10 +260,10 @@ export default class MessagingContainer extends HTMLElement {
           height: 100dvh;
           max-height: 100vh;
           display: flex;
-          flex-direction: row;
+          flex-direction: column;
           align-items: start;
           justify-content: space-between;
-          gap: 20px;
+          gap: 0;
         }
 
         * {
@@ -246,6 +276,8 @@ export default class MessagingContainer extends HTMLElement {
           background: var(--background);
           padding: 0;
           padding: 15px 0 10px;
+          height: 70px;
+          max-height: 70px;
           display: flex;
           flex-flow: column;
           align-items: start;
@@ -507,6 +539,27 @@ export default class MessagingContainer extends HTMLElement {
         header.header > .contents > .actions > button > svg.large {
           width: 22px;
           height: 22px;
+        }
+
+        main.main {
+          display: flex;
+          flex-flow: column;
+          align-items: start;
+          justify-content: start;
+          gap: 10px;
+          padding: 20px 0 0;
+          height: calc(100dvh - 70px);
+          max-height: calc(100vh - 70px);
+          width: 100%;
+          height: 100%;
+          overflow-y: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        main.main::-webkit-scrollbar {
+          display: none;
+          visibility: hidden;
         }
        
         @media screen and (max-width: 660px) {

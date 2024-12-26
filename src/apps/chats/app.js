@@ -253,7 +253,7 @@ export default class ChatApp extends HTMLElement {
   getChats = () => {
     return /* html */`
       <div is="chat-item" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Aidan"
-        user-name="Alice Johnson" unread="0" active="true" you="false"
+        user-name="Alice Johnson" unread="0" active="true" you="false" opened="true"
         message="I have attached the needed documents below!" is-even="true" datetime="2024-12-24T09:25:15Z"
         attachments='[
           {
@@ -286,7 +286,7 @@ export default class ChatApp extends HTMLElement {
       images="https://images.unsplash.com/photo-1733077151673-c834c5613bbc?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://plus.unsplash.com/premium_photo-1733514691529-da25716e449b?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://images.unsplash.com/photo-1719937051176-9b98352a6cf4?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
       </div>
       <div is="chat-item" user-picture="https://api.dicebear.com/9.x/adventurer/svg?seed=Amaya"
-      user-name="Jim Halpert" unread="2" active="false" you="true"
+      user-name="Jim Halpert" unread="2" active="false" you="true" opened="true"
       message="Pranking Dwight again!" is-even="true" datetime="2024-09-20T14:40:15Z" user-verified="true">
       </div>
       <div is="chat-item" user-picture="https://randomuser.me/api/portraits/women/9.jpg"

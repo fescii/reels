@@ -238,10 +238,18 @@ export default class MessagingContainer extends HTMLElement {
         This is a message from John Doe, Please reply as soon as possible.
       </div>
       <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"
-        you="true" verified="false" status="delivered" active="false">
+        you="true" verified="false" status="seen" active="false">
         Thanks! I will reply as soon as possible.
       </div>
+      <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/men/1.jpg" datetime="2024-12-24T12:00:00Z"
+        you="false" verified="true" status="delivered" active="true">
+        OMG! WWE is coming to town, are you ready?
+      </div>
       <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"
+        you="true" verified="false" status="delivered" active="false">
+        Did you get the news, apparently there is a new update on the way.
+      </div>
+      <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-26T17:10:00Z"
         you="true" verified="false" status="sent" active="false">
         Rickoshea!!!!
       </div>
@@ -562,18 +570,33 @@ export default class MessagingContainer extends HTMLElement {
           flex-flow: column;
           align-items: start;
           justify-content: start;
-          gap: 10px;
-          padding: 20px 0 0;
+          gap: 0;
+          padding: 0;
           height: calc(100dvh - 70px);
+          min-height: calc(100vh - 70px);
           max-height: calc(100vh - 70px);
           width: 100%;
+          height: calc(100dvh - 70px);
+        }
+
+        main.main > .messages {
+          border: 1px solid red;
+          display: flex;
+          flex-flow: column;
+          align-items: start;
+          justify-content: start;
+          gap: 10px;
+          padding: 10px 0 80px;
+          width: 100%;
           height: 100%;
+          min-height: 100%;
+          max-height: 100%;
           overflow-y: auto;
           scrollbar-width: none;
           -ms-overflow-style: none;
         }
 
-        main.main::-webkit-scrollbar {
+        main.main > .messages::-webkit-scrollbar {
           display: none;
           visibility: hidden;
         }
@@ -587,14 +610,14 @@ export default class MessagingContainer extends HTMLElement {
           /*background: rgb(226 232 240);*/
           border-radius: 15px;
           padding: 7px 9px;
-          margin: 0 0 0 5px;
+          margin: 10px 0 0 5px;
         }
 
         .typing-container .dot {
           border-radius: 50%;
-          height: 10px;
-          width: 10px;
-          background: rgba(148 163 184 / 1);
+          height: 12px;
+          width: 12px;
+          background: var(--typing-color);
           opacity: 0;
           animation: blink 1s infinite;
         }
@@ -610,7 +633,7 @@ export default class MessagingContainer extends HTMLElement {
       
         @keyframes blink {
           50% {
-              opacity: 1;
+            opacity: 1;
           }
         }
        

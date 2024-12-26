@@ -104,6 +104,7 @@ Author URL: https://femar.co.ke
   --pin-gray-color: #c4c4c4;
   --chat-background: #f0f2f5;
   --chat-hover: #f3f3f3;
+  --typing-color: rgba(148 163 184 / 1);
 
   --open-line: 2px solid #08b86f93;
   --open-line-mobile: 2px solid #08b86fc5;

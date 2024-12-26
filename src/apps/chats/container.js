@@ -11,6 +11,12 @@ export default class MessagingContainer extends HTMLElement {
   }
 
   connectedCallback() {
+    this.scrollMessages();
+  }
+
+  scrollMessages = () => {
+    const messages = this.shadow.querySelector('.messages');
+    messages.scrollTop = messages.scrollHeight;
   }
 
   textToBoolean = text => {
@@ -225,35 +231,53 @@ export default class MessagingContainer extends HTMLElement {
 
   getMessages = () => {
     return /* html */`
+      ${this.getDisclaimer()}
       <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/men/1.jpg" datetime="2024-12-24T12:00:00Z"
-        you="false" verified="true" status="seen" active="true">
+        you="false" verified="true" status="seen" active="true" kind="message">
         This is a message from John Doe, Please reply as soon as possible.
       </div>
       <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"
-        you="true" verified="false" status="seen" active="false">
+        you="true" verified="false" status="seen" active="false" kind="message">
         This is a message from Jane Doe, Please reply as soon as possible.
       </div>
       <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/men/1.jpg" datetime="2024-12-24T12:00:00Z"
-        you="false" verified="true" status="delivered" active="true">
+        you="false" verified="true" status="delivered" active="true" kind="message">
         This is a message from John Doe, Please reply as soon as possible.
       </div>
       <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"
-        you="true" verified="false" status="seen" active="false">
+        you="true" verified="false" status="seen" active="false" kind="message">
         Thanks! I will reply as soon as possible.
       </div>
       <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/men/1.jpg" datetime="2024-12-24T12:00:00Z"
-        you="false" verified="true" status="delivered" active="true">
+        you="false" verified="true" status="delivered" active="true" kind="reply" to-you="false" reply-to="John" reply-text="This is a message from Jane Doe, Please reply as soon as possible.">
         OMG! WWE is coming to town, are you ready?
       </div>
       <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"
-        you="true" verified="false" status="delivered" active="false">
+        you="true" verified="false" status="delivered" active="false" kind="message">
         Did you get the news, apparently there is a new update on the way.
       </div>
       <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-26T17:10:00Z"
-        you="true" verified="false" status="sent" active="false">
+        you="true" verified="false" status="sent" active="false" kind="reply" to-you="false" reply-to="John" reply-text="OMG! WWE is coming to town, are you ready?">
         Rickoshea!!!!
       </div>
+      <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-26T17:10:00Z"
+        you="true" verified="true" status="sent" active="false" kind="reply" to-you="true" reply-to="Jane" reply-text="Rickoshea!!!!">
+        I am so excited, I can't wait to see the show.
+      </div>
       ${this.getTyping()}
+    `;
+  }
+
+  getDisclaimer = () => {
+    return /* html */`
+      <div class="disclaimer">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+          <path d="M22 13.4908C21.7253 17.7331 18.3866 21.1124 14.1951 21.3904C12.7652 21.4853 11.2722 21.4851 9.84518 21.3904C9.35376 21.3578 8.81812 21.2408 8.3568 21.0512C7.84352 20.8402 7.58684 20.7347 7.45641 20.7507C7.32598 20.7667 7.13674 20.906 6.75825 21.1845C6.09091 21.6756 5.25021 22.0284 4.00346 21.9981C3.37302 21.9828 3.0578 21.9751 2.91669 21.735C2.77557 21.4949 2.95132 21.1625 3.30283 20.4977C3.79035 19.5757 4.09923 18.5202 3.63119 17.6745C2.82509 16.4665 2.14038 15.0359 2.04032 13.4908C1.98656 12.6606 1.98656 11.8008 2.04032 10.9706C2.31504 6.72826 5.65374 3.34901 9.84518 3.07095C10.7223 3.01277 11.6242 2.99027 12.5212 3.0036" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M8.5 14.9999H15.5M8.5 9.99988H12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M16.7374 5.17553L16.7374 3.78517C16.7374 3.5798 16.746 3.37188 16.8196 3.1801C17.0155 2.66962 17.5346 2.00085 18.4795 2.00085C19.4245 2.00085 19.9639 2.66962 20.1598 3.1801C20.2335 3.37188 20.242 3.5798 20.242 3.78517L20.242 5.17553M16.8069 10.9984H20.1929C21.1898 10.9984 21.9979 10.1918 21.9979 9.19686V7.19551C21.9979 6.20053 21.1898 5.39394 20.1929 5.39394H16.8069C15.8101 5.39394 15.002 6.20053 15.002 7.19551V9.19686C15.002 10.1918 15.8101 10.9984 16.8069 10.9984Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span>Messages and calls are end-to-end encrypted. No one outside of this chat can read or listen to them.</span>
+      </div>
     `;
   }
 
@@ -580,7 +604,6 @@ export default class MessagingContainer extends HTMLElement {
         }
 
         main.main > .messages {
-          border: 1px solid red;
           display: flex;
           flex-flow: column;
           align-items: start;
@@ -599,6 +622,29 @@ export default class MessagingContainer extends HTMLElement {
         main.main > .messages::-webkit-scrollbar {
           display: none;
           visibility: hidden;
+        }
+
+        main.main > .messages > div.disclaimer {
+          display: inline-block;
+          gap: 5px;
+          width: 70%;
+          align-self: center;
+          padding: 5px 10px;
+          background: var(--background);
+          color: var(--gray-color);
+          font-size: 0.9rem;
+          font-weight: 400;
+          font-family: var(--font-read), sans-serif;
+          text-align: center;
+          margin: 0 0 10px;
+        }
+
+        main.main > .messages > div.disclaimer > svg {
+          width: 16px;
+          height: 16px;
+          color: var(--accent-color);
+          display: inline-block;
+          margin-bottom: -2px;
         }
 
         .typing-container {

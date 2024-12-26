@@ -140,34 +140,52 @@ export default class Message extends HTMLDivElement {
 
   getMessage = () => {
     const you = this.textToBoolean(this.getAttribute('you')) ? 'you' : '';
+    const reply = this.getAttribute('kind');
+    if (you) {
+      return /* html */`
+        <div class="content ${you} ${reply}">
+          ${this.getMessageContent(you)}
+          ${this.getAvatar()}
+        </div>
+      `;
+    } else {
+      return /* html */`
+        <div class="content ${you} ${reply}">
+          ${this.getAvatar()}
+          ${this.getMessageContent(you)}
+
+        </div>
+      `;
+    }
+  }
+
+  getMessageContent = you => {
     return /* html */`
-      <div class="content ${you}">
-        ${this.getAvatar()}
-        <div class="message">
-          ${this.getTextMessge()}
-          <div class="actions">
-            ${this.getActions()}
-          </div>
-          <div class="time">
-            <span class="date">${this.formatDateTime(this.getAttribute('datetime'))}</span>
-            <span class="sp">•</span>
-            ${this.getStatus(you, this.getAttribute('status'))}
-          </div>
+      <div class="message">
+        ${this.getReply()}
+        ${this.getTextMessge()}
+        <div class="actions">
+          ${this.getActions()}
+        </div>
+        <div class="time">
+          <span class="date">${this.formatDateTime(this.getAttribute('datetime'))}</span>
+          <span class="sp">•</span>
+          ${this.getStatus(you, this.getAttribute('status'))}
         </div>
       </div>
     `;
   }
 
   getStatus = (you, status) => {
-    if (!you) return /* html */`<span class="status">Secured</span>`;
+    if (!you) return /* html */`<span class="status secured">Secured</span>`;
 
-    if (status === 'sent') return /* html */`<span class="status">Sent</span>`;
+    if (status === 'sent') return /* html */`<span class="status sent">Sent</span>`;
 
-    if (status === 'delivered') return /* html */`<span class="status">Delivered</span>`;
+    if (status === 'delivered') return /* html */`<span class="status delivered">Delivered</span>`;
 
-    if (status === 'seen') return /* html */`<span class="status">Seen</span>`;
+    if (status === 'seen') return /* html */`<span class="status seen">Seen</span>`;
 
-    return /* html */`<span class="status">Secured</span>`;
+    return /* html */`<span class="status secured">Secured</span>`;
   }
 
   getTextMessge = () => {
@@ -175,6 +193,45 @@ export default class Message extends HTMLDivElement {
       <div class="text">
         ${this.innerHTML}
         ${this.getUnread(this.textToBoolean(this.getAttribute('you')), this.getAttribute('status'))}
+      </div>
+    `;
+  }
+
+  getReply = () => {
+    const kind = this.getAttribute('kind');
+    const replyText = this.getAttribute('reply-text');
+
+    // if both are null or empty, return nothing
+    if (!kind || kind === '' || !replyText || replyText === '') return '';
+
+    const replyUser = this.getAttribute('reply-to');
+    const toYou = this.textToBoolean(this.getAttribute('to-you'));
+    const you = this.textToBoolean(this.getAttribute('you'));
+
+    let text = '';
+    if (toYou && you) {
+      text = 'You replied to yourself';
+    } else if (toYou && !you) {
+      text = `${replyUser} replied to you`;
+    } else if (!toYou && you) {
+      text = `You replied to ${replyUser}`;
+    } else {
+      text = `${replyUser} replied to their message`;
+    }
+
+    return /* html */`
+      <div class="reply">
+        <div class="head">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M21.7109 9.3871C21.8404 9.895 21.9249 10.4215 21.9598 10.9621C22.0134 11.7929 22.0134 12.6533 21.9598 13.4842C21.6856 17.7299 18.3536 21.1118 14.1706 21.3901C12.7435 21.485 11.2536 21.4848 9.8294 21.3901C9.33896 21.3574 8.8044 21.2403 8.34401 21.0505C7.83177 20.8394 7.5756 20.7338 7.44544 20.7498C7.31527 20.7659 7.1264 20.9052 6.74868 21.184C6.08268 21.6755 5.24367 22.0285 3.99943 21.9982C3.37026 21.9829 3.05568 21.9752 2.91484 21.7349C2.77401 21.4946 2.94941 21.1619 3.30021 20.4966C3.78674 19.5739 4.09501 18.5176 3.62791 17.6712C2.82343 16.4623 2.1401 15.0305 2.04024 13.4842C1.98659 12.6533 1.98659 11.7929 2.04024 10.9621C2.31441 6.71638 5.64639 3.33448 9.8294 3.05621C10.2156 3.03051 10.6067 3.01177 11 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M8.5 15H15.5M8.5 10H12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M14 4.5L22 4.5M14 4.5C14 3.79977 15.9943 2.49153 16.5 2M14 4.5C14 5.20023 15.9943 6.50847 16.5 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span class="text">${text}</span>
+        </div>
+        <div class="reply-text">
+          ${replyText}
+        </div>
       </div>
     `;
   }
@@ -339,7 +396,7 @@ export default class Message extends HTMLDivElement {
           position: relative;
           align-items: end;
           justify-content: ${this.textToBoolean(this.getAttribute('you')) ? 'flex-end' : 'flex-start'};
-          gap: 20px;
+          gap: 0;
         }
 
         * {
@@ -356,14 +413,19 @@ export default class Message extends HTMLDivElement {
           display: flex;
           flex-flow: row;
           align-items: start;
-          justify-content: space-between;
-          gap: 0;
+          justify-content: start;
+          position: relative;
+          gap: 8px;
         }
 
         .content.you {
-          align-self: flex-end;
-          justify-self: flex-end;
-          flex-flow: row-reverse;
+          justify-content: flex-end;
+          align-items: end;
+          flex-flow: row;
+        }
+
+        .content.reply {
+          padding: 40px 0 0 0;
         }
 
         .content:hover > .message > .time,
@@ -413,12 +475,14 @@ export default class Message extends HTMLDivElement {
         }
 
         .content > .message {
+          /* border: 1px solid red; */
           display: flex;
           flex-direction: column;
           align-items: start;
           gap: 5px;
           max-width: calc(100% - 40px);
-          width: calc(100% - 40px);
+          width: max-content;
+          position: static;
         }
 
         .content.you > .message {
@@ -510,7 +574,7 @@ export default class Message extends HTMLDivElement {
           box-sizing: border-box;
           gap: 5px;
           margin: 0;
-          padding: 5px 8px;
+          padding: 5px 10px;
           border-radius: 15px;
           width: max-content;
           max-width: 100%;
@@ -521,7 +585,15 @@ export default class Message extends HTMLDivElement {
         }
 
         .content.you > .message > .text {
-          background: var(--tab-background);
+          padding: 5px 9px 5px 12px;
+        }
+
+        .content.you > .message > .text {
+          /*background: var(--you-background);*/
+          color: var(--white-color);
+          background-color: rgb(255, 143, 178);
+          background-image: linear-gradient(rgb(255, 143, 178) 0%, rgb(167, 151, 255) 50%, rgb(0, 229, 255) 100%);
+          background-attachment: fixed;
         }
 
         .content > .message > .text  strong,
@@ -579,6 +651,10 @@ export default class Message extends HTMLDivElement {
           color: var(--gray-color);
         }
 
+        .content.you > .message > .text > span.tick svg {
+          color: var(--chat-you-svg);
+        }
+
         .content > .message > .text > span.tick.read > svg {
           color: var(--white-color);
           fill: var(--accent-color);
@@ -587,6 +663,10 @@ export default class Message extends HTMLDivElement {
         .content > .message > .text > span.tick.delivered > svg {
           color: var(--accent-color);
           fill: none;
+        }
+
+        .content.you > .message > .text > span.tick.delivered > svg {
+          color: var(--white-color);
         }
 
         .content > .message > .text > span.tick.read > svg #outer {
@@ -598,12 +678,90 @@ export default class Message extends HTMLDivElement {
           width: max-content;
           display: flex;
           align-items: center;
+          text-align: center;
           gap: 5px;
           font-family: var(--font-read), sans-serif;
           font-weight: 500;
           font-size: 0.8rem;
           text-transform: capitalize;
           color: var(--gray-color);
+        }
+
+        .content > .message > .time > .status.delivered,
+        .content > .message > .time > .status.seen {
+          color: var(--accent-color);
+        }
+
+        .content > .message > .time > .sp {
+          font-size: 0.95rem;
+          text-align: center;
+          display: inline-block;
+          margin: 0 0 1px 0;
+        }
+
+        .content > .message > .reply {
+          z-index: 0;
+          padding: 0;
+          border-radius: 15px;
+          margin: 5px 0 0 0;
+          width: max-content;
+          display: flex;
+          max-width: 100%;
+          flex-direction: column;
+          gap: 4px;
+          left: 38px;
+          position: absolute;
+          top: -15px;
+        }
+
+        .content.you > .message > .reply {
+          align-self: flex-end;
+          align-items: end;
+        }
+
+        .content.you > .message > .reply {
+          left: unset;
+          right: 38px;
+        }
+
+        .content > .message > .reply > .head {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          opacity: 0.8;
+          color: var(--gray-color);
+          font-family: var(--font-read), sans-serif;
+        }
+
+        .content > .message > .reply > .head > svg {
+          width: 16px;
+          height: 16px;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .content > .message > .reply > .head > .text {
+          font-size: 0.95rem;
+          font-weight: 400;
+          font-family: inherit;
+        }
+
+        .content > .message > .reply > .reply-text {
+          font-size: 0.9rem;
+          font-weight: 400;
+          width: max-content;
+          max-width: 100%;
+          background: #f8f8f8;
+          padding: 8px 10px 25px;
+          font-family: inherit;
+          color: var(--gray-color);
+          border-radius: 15px;
+          /* add ellipsis to the text */
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
       
         @media screen and (max-width: 660px) {

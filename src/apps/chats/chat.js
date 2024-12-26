@@ -346,7 +346,6 @@ export default class ChatItem extends HTMLDivElement {
         .wrapper.opened {
           padding: 10px 5px 10px 8px;
           border-radius: 10px;
-          background: #f0f2f5;
           position: relative;
         }
 
@@ -364,7 +363,7 @@ export default class ChatItem extends HTMLDivElement {
         }
 
         .wrapper:hover {
-          background: #f0f2f5;
+          background: var(--chat-background);
           border-radius: 10px;
           padding: 10px 5px;
         }
@@ -692,11 +691,6 @@ export default class ChatItem extends HTMLDivElement {
 
           /** add ellipsis */
           white-space: nowrap;
-        }
-
-        .wrapper.opened > .content > .attachements > a,
-        .wrapper:hover > .content > .attachements > a {
-          background: var(--tab-background);
         }
 
         @media all and (max-width: 660px) {

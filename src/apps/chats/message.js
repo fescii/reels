@@ -117,11 +117,25 @@ export default class Message extends HTMLDivElement {
             ${this.getActions()}
           </div>
           <div class="time">
-            ${this.formatDateTime(this.getAttribute('datetime'))}
+            <span class="date">${this.formatDateTime(this.getAttribute('datetime'))}</span>
+            <span class="sp">•</span>
+            ${this.getStatus(you, this.getAttribute('status'))}
           </div>
         </div>
       </div>
     `;
+  }
+
+  getStatus = (you, status) => {
+    if (!you) return /* html */`<span class="status">Secured</span>`;
+
+    if (status === 'sent') return /* html */`<span class="status">Sent</span>`;
+
+    if (status === 'delivered') return /* html */`<span class="status">Delivered</span>`;
+
+    if (status === 'seen') return /* html */`<span class="status">Seen</span>`;
+
+    return /* html */`<span class="status">Secured</span>`;
   }
 
   getTextMessge = () => {
@@ -209,6 +223,7 @@ export default class Message extends HTMLDivElement {
           <path d="M8 15C8.91212 16.2144 10.3643 17 12 17C13.6357 17 15.0879 16.2144 16 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           <path d="M8.00897 9L8 9M16 9L15.991 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
+        ${this.getActionInfo('React')}
       </div>
       <div class="action reply">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
@@ -216,6 +231,7 @@ export default class Message extends HTMLDivElement {
           <path d="M8.5 15H15.5M8.5 10H12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           <path d="M14 4.5L22 4.5M14 4.5C14 3.79977 15.9943 2.49153 16.5 2M14 4.5C14 5.20023 15.9943 6.50847 16.5 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
+        ${this.getActionInfo('Reply')}
       </div>
       <div class="action copy">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
@@ -223,6 +239,7 @@ export default class Message extends HTMLDivElement {
           <path d="M16.8538 7.43306C16.8538 8.24714 16.1901 8.90709 15.3714 8.90709C14.5527 8.90709 13.889 8.24714 13.889 7.43306C13.889 6.61898 14.5527 5.95904 15.3714 5.95904C16.1901 5.95904 16.8538 6.61898 16.8538 7.43306Z" stroke="currentColor" stroke-width="1.8" />
           <path d="M12 20.9463L11.0477 21.2056C8.35403 21.9391 7.00722 22.3059 5.94619 21.6833C4.88517 21.0608 4.52429 19.6921 3.80253 16.9547L2.78182 13.0834C2.06006 10.346 1.69918 8.97731 2.31177 7.89904C2.84167 6.96631 4 7.00027 5.5 7.00015" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
         </svg>
+        ${this.getActionInfo('Copy')}
       </div>
       <div class="action edit">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
@@ -230,6 +247,7 @@ export default class Message extends HTMLDivElement {
           <path d="M8.49997 15.0001H15.5M8.49997 10.0001H11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           <path d="M20.8683 2.43946L21.5607 3.13183C22.1465 3.71761 22.1465 4.66736 21.5607 5.25315L17.9333 8.94881C17.6479 9.23416 17.2829 9.42652 16.8863 9.50061L14.6381 9.98865C14.2832 10.0657 13.9671 9.75054 14.0431 9.39537L14.5216 7.16005C14.5957 6.76336 14.7881 6.39836 15.0734 6.11301L18.747 2.43946C19.3328 1.85368 20.2825 1.85368 20.8683 2.43946Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
+        ${this.getActionInfo('Edit')}
       </div>
       <div class="action delete">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
@@ -238,7 +256,17 @@ export default class Message extends HTMLDivElement {
           <path d="M9.5 16.5L9.5 10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
           <path d="M14.5 16.5L14.5 10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
         </svg>
+        ${this.getActionInfo('Delete')}
       </div>
+    `;
+  }
+
+  getActionInfo = text => {
+    return /* html */`
+      <span class="info">
+        <span class="arrow"></span>
+        <span class="text">${text}</span>
+      </span>
     `;
   }
 
@@ -250,7 +278,7 @@ export default class Message extends HTMLDivElement {
           max-width: 100%;
           width: 100%;
           min-width: 100%;
-          padding: 10px 0 25px 0;
+          padding: 10px 0;
           display: flex;
           flex-flow: row;
           position: relative;
@@ -266,13 +294,15 @@ export default class Message extends HTMLDivElement {
 
         .content {
           width: max-content;
-          max-width: 70%;
-          width: 70%;
+          max-width: 72%;
+          width: 72%;
+          padding: 0;
           cursor: pointer;
           display: flex;
           flex-flow: row;
           align-items: start;
-          gap: 8px;
+          justify-content: space-between;
+          gap: 0;
         }
 
         .content.you {
@@ -281,22 +311,25 @@ export default class Message extends HTMLDivElement {
           flex-flow: row-reverse;
         }
 
-        .content:hover > .message > .time {
+        .content:hover > .message > .time,
+        .content:hover > .message > .actions {
           display: flex;
-        }
+        } 
 
         .content > .avatar {
           display: flex;
           flex-direction: column;
           align-items: start;
           align-self: flex-end;
-          gap: 5px;
-          width: 32px;
-          height: 32px;
-          min-width: 32px;
-          min-height: 32px;
-          max-width: 32px;
-          max-height: 32px;
+          margin: 0 0 20px 0;
+          padding: 0;
+          gap: 0;
+          width: 30px;
+          height: 30px;
+          min-width: 30px;
+          min-height: 30px;
+          max-width: 30px;
+          max-height: 30px;
           position: relative;
           overflow: hidden;
           border-radius: 50%;
@@ -306,6 +339,8 @@ export default class Message extends HTMLDivElement {
           border-radius: 50%;
           width: 100%;
           height: 100%;
+          max-width: 100%;
+          max-height: 100%;
           color: var(--gray-color);
           object-fit: cover;
         }
@@ -327,21 +362,32 @@ export default class Message extends HTMLDivElement {
           flex-direction: column;
           align-items: start;
           gap: 5px;
-          max-width: calc(100% - 43px);
+          max-width: calc(100% - 40px);
+          width: calc(100% - 40px);
+        }
+
+        .content.you > .message {
+          align-items: end;
         }
 
         .content > .message > .actions {
+          z-index: 1;
           border: var(--border);
           background: var(--background);
           position: absolute;
-          top: -25px;
-          right: 0;
+          top: -10px;
+          left: 37px;
           padding: 0;
           display: none;
           flex-direction: row;
           align-items: center;
           gap: 0;
           border-radius: 15px;
+        }
+
+        .content.you > .message > .actions {
+          left: unset;
+          right: 37px;
         }
 
         .content > .message > .actions > .action {
@@ -354,11 +400,45 @@ export default class Message extends HTMLDivElement {
           color: var(--gray-color);
           cursor: pointer;
           border-radius: 15px;
+          position: relative;
         }
 
         .content > .message > .actions > .action:hover {
-          background: var(--gray-background);
-          color: var(--text-color);
+          background: var(--tab-background);
+          color: var(--accent-color);
+        }
+
+        .content > .message > .actions > .action > .info {
+          display: none;
+          position: absolute;
+          top: -35px;
+          left: 50%;
+          transform: translateX(-50%);
+          padding: 5px 10px;
+          background: var(--chat-hover);
+          border-radius: 10px;
+          color: inherit;
+          font-family: var(--font-main), sans-serif;
+          font-size: 0.85rem;
+          font-weight: 500;
+          box-shadow: var(--shadow);
+        }
+
+        .content > .message > .actions > .action:hover > .info {
+          display: flex;
+        }
+
+        .content > .message > .actions > .action > .info > .arrow {
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          display: inline-block;
+          transform: translateX(-50%);
+          width: 0;
+          height: 0;
+          border-left: 5px solid transparent;
+          border-right: 5px solid transparent;
+          border-top: 5px solid var(--chat-hover);
         }
 
         .content > .message > .actions > .action > svg {
@@ -371,12 +451,14 @@ export default class Message extends HTMLDivElement {
         }
 
         .content > .message > .text {
-          background: var(--gray-background);
+          background: var(--chat-background);
           box-sizing: border-box;
           gap: 5px;
+          margin: 0;
           padding: 5px 8px;
           border-radius: 15px;
-          width: 100%;
+          width: max-content;
+          max-width: 100%;
           color: var(--text-color);
           font-family: var(--font-main), sans-serif;
           line-height: 1.4;
@@ -457,16 +539,15 @@ export default class Message extends HTMLDivElement {
         }
 
         .content > .message > .time {
-          position: absolute;
-          top: -10px;
-          padding: 0 10px;
-          left: 50%;
-          display: none;
+          padding: 0 3.5px;
+          width: max-content;
+          display: flex;
           align-items: center;
+          gap: 5px;
           font-family: var(--font-read), sans-serif;
           font-weight: 500;
-          font-size: 0.85rem;
-          text-transform: uppercase;
+          font-size: 0.8rem;
+          text-transform: capitalize;
           color: var(--gray-color);
         }
       

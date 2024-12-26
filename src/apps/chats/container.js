@@ -245,6 +245,17 @@ export default class MessagingContainer extends HTMLElement {
         you="true" verified="false" status="sent" active="false">
         Rickoshea!!!!
       </div>
+      ${this.getTyping()}
+    `;
+  }
+
+  getTyping = () => {
+    return /* html */`
+      <div class="typing-container">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
     `;
   }
 
@@ -322,9 +333,9 @@ export default class MessagingContainer extends HTMLElement {
         }
 
         header.header > .contents > .profile {
-          width: calc(100% - 100px);
-          min-width: calc(100% - 140px);
-          max-width: calc(100% - 140px);
+          width: calc(100% - 150px);
+          min-width: calc(100% - 150px);
+          max-width: calc(100% - 150px);
           display: flex;
           flex-flow: row;
           align-items: center;
@@ -502,15 +513,16 @@ export default class MessagingContainer extends HTMLElement {
         }
 
         header.header > .contents > .actions {
+          /*border: var(--border);*/
           margin-bottom: -5px;
-          width: 130px;
-          min-width: 130px;
+          width: 140px;
+          min-width: 140px;
           display: flex;
           flex-flow: row;
           align-items: center;
           justify-content: end;
           flex-wrap: nowrap;
-          gap: 10px;
+          gap: 15px;
         }
 
         header.header > .contents > .actions > button {
@@ -537,8 +549,12 @@ export default class MessagingContainer extends HTMLElement {
         }
 
         header.header > .contents > .actions > button > svg.large {
-          width: 22px;
-          height: 22px;
+          width: 23px;
+          height: 23px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin: 0 0 3px;
         }
 
         main.main {
@@ -560,6 +576,42 @@ export default class MessagingContainer extends HTMLElement {
         main.main::-webkit-scrollbar {
           display: none;
           visibility: hidden;
+        }
+
+        .typing-container {
+          align-items: center;
+          display: flex;
+          justify-content: center;
+          gap: 0.25rem;
+          width: max-content;
+          /*background: rgb(226 232 240);*/
+          border-radius: 15px;
+          padding: 7px 9px;
+          margin: 0 0 0 5px;
+        }
+
+        .typing-container .dot {
+          border-radius: 50%;
+          height: 10px;
+          width: 10px;
+          background: rgba(148 163 184 / 1);
+          opacity: 0;
+          animation: blink 1s infinite;
+        }
+        .typing-container .dot:nth-child(1) {
+          animation-delay: 0.3333s;
+        }
+        .typing-container .dot:nth-child(2) {
+          animation-delay: 0.6666s;
+        }
+        .typing-container .dot:nth-child(3) {
+          animation-delay: 0.9999s;
+        }
+      
+        @keyframes blink {
+          50% {
+              opacity: 1;
+          }
         }
        
         @media screen and (max-width: 660px) {

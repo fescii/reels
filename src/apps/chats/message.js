@@ -438,7 +438,7 @@ export default class Message extends HTMLDivElement {
           flex-direction: column;
           align-items: start;
           align-self: flex-end;
-          margin: 0 0 20px 0;
+          margin: 0 0 23px 0;
           padding: 0;
           gap: 0;
           width: 30px;
@@ -591,9 +591,11 @@ export default class Message extends HTMLDivElement {
         .content.you > .message > .text {
           /*background: var(--you-background);*/
           color: var(--white-color);
-          background-color: rgb(255, 143, 178);
-          background-image: linear-gradient(rgb(255, 143, 178) 0%, rgb(167, 151, 255) 50%, rgb(0, 229, 255) 100%);
+          background-color: var(--accent-color);
+          background-image: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+          /*background-image: linear-gradient(rgb(255, 143, 178) 0%, rgb(167, 151, 255) 50%, rgb(0, 229, 255) 100%);*/
           background-attachment: fixed;
+          /*background-image: linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%);*/
         }
 
         .content > .message > .text  strong,
@@ -687,9 +689,17 @@ export default class Message extends HTMLDivElement {
           color: var(--gray-color);
         }
 
+        .content.you > .message > .time {
+          /* border: 1px solid var(--accent-color); */
+          padding: 0 7px 0 4px;
+        }
+
         .content > .message > .time > .status.delivered,
         .content > .message > .time > .status.seen {
-          color: var(--accent-color);
+          background-color: var(--accent-color);
+          color: transparent;
+          background-clip: text;
+          -webkit-background-clip: text;
         }
 
         .content > .message > .time > .sp {

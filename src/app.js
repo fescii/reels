@@ -4,8 +4,6 @@ export default class App extends HTMLElement {
 	constructor() {
 		super();
 		this.registerComponents();
-		this.routes = new Map();
-		this.initializeRoutes();
 	}
 	
 	// noinspection JSUnusedGlobalSymbols
@@ -27,7 +25,7 @@ export default class App extends HTMLElement {
 	
 	render() {
 		// this.innerHTML = this.getRoute(window.location.pathname);
-		this.innerHTML = this.getRoute('/');
+		this.innerHTML = '<app-main></app-main>';
 	}
 	
 	initializeRoutes() {

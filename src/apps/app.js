@@ -7,6 +7,7 @@ export default class AppMain extends HTMLElement {
 		this.shadowObj = this.attachShadow({ mode: "open" });
 		// register components
 		this.registerComponents();
+    window.app.main = this;
 		this.render();
 	}
 
@@ -35,8 +36,20 @@ export default class AppMain extends HTMLElement {
 	
 	// noinspection JSMethodCanBeStatic
 	connectedCallback() {
-
+    // show toast
+    // this.showToast(true, 'Hello World');
 	}
+
+  showToast = (success, message) => {
+    const x = this.shadowObj.querySelector("#toast");
+    const text = x.querySelector('#desc');
+    const icon = x.querySelector('#img');
+    text.textContent = message;
+    icon.innerHTML = success ? this.getSuccesToast() : this.getErrorToast();
+    x.className = "show";
+    x.classList.add(success ? 'success' : 'error');
+    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 5000);
+  }
 	
 	disconnectedCallback() {
 		this.enableScroll();
@@ -52,6 +65,7 @@ export default class AppMain extends HTMLElement {
 	getTemplate = () => {
 		// Show HTML Here
 		return `
+      ${this.getToast()}
       ${this.getBody()}
       ${this.getStyles()}
     `;
@@ -354,6 +368,31 @@ export default class AppMain extends HTMLElement {
       </footer>
     `;
 	}
+
+  getToast = (status, text) => {
+    return /* html */`
+      <div id="toast" class="${status === true ? 'success' : 'error'}">
+        <div id="img">${status === true ? this.getSuccesToast() : this.getErrorToast()}</div>
+        <div id="desc">${text}</div>
+      </div>
+    `;
+  }
+
+  getSuccesToast = () => {
+    return /* html */`
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="injected-svg" data-src="https://cdn.hugeicons.com/icons/checkmark-circle-02-solid-standard.svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" color="currentColor">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M11.75 22.5C5.81294 22.5 1 17.6871 1 11.75C1 5.81294 5.81294 1 11.75 1C17.6871 1 22.5 5.81294 22.5 11.75C22.5 17.6871 17.6871 22.5 11.75 22.5ZM16.5182 9.39018C16.8718 8.9659 16.8145 8.33534 16.3902 7.98177C15.9659 7.62821 15.3353 7.68553 14.9818 8.10981L10.6828 13.2686L8.45711 11.0429C8.06658 10.6524 7.43342 10.6524 7.04289 11.0429C6.65237 11.4334 6.65237 12.0666 7.04289 12.4571L10.0429 15.4571C10.2416 15.6558 10.5146 15.7617 10.7953 15.749C11.076 15.7362 11.3384 15.606 11.5182 15.3902L16.5182 9.39018Z" fill="currentColor"></path>
+      </svg>
+    `;
+  }
+
+  getErrorToast = () => {
+    return /* html */`
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="injected-svg" data-src="https://cdn.hugeicons.com/icons/cancel-circle-solid-standard.svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" color="currentColor">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M1.25 12C1.25 17.9371 6.06294 22.75 12 22.75C17.9371 22.75 22.75 17.9371 22.75 12C22.75 6.06294 17.9371 1.25 12 1.25C6.06294 1.25 1.25 6.06294 1.25 12ZM8.29293 8.29286C8.68348 7.90235 9.31664 7.90239 9.70714 8.29293L12 10.586L14.2929 8.29293C14.6834 7.90239 15.3165 7.90235 15.7071 8.29286C16.0976 8.68336 16.0976 9.31652 15.7071 9.70707L13.4141 12.0003L15.7065 14.2929C16.097 14.6835 16.097 15.3166 15.7064 15.7071C15.3159 16.0976 14.6827 16.0976 14.2922 15.7071L12 13.4146L9.70779 15.7071C9.31728 16.0976 8.68412 16.0976 8.29357 15.7071C7.90303 15.3166 7.90299 14.6835 8.2935 14.2929L10.5859 12.0003L8.29286 9.70707C7.90235 9.31652 7.90239 8.68336 8.29293 8.29286Z" fill="currentColor"></path>
+      </svg>
+    `;
+  }
 	
 	getStyles() {
 		return /* css */`
@@ -574,6 +613,112 @@ export default class AppMain extends HTMLElement {
 
         footer.footer > ul.links > li > a:hover {
           color: var(--anchor-color);
+        }
+
+        #toast {
+          visibility: hidden;
+          max-width: 50px;
+          height: 35px;
+          width: max-content;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 10px;
+          padding: 0 10px;
+          /*margin-left: -125px;*/
+          margin: auto;
+          color: var(--white-color);
+          text-align: center;
+          border-radius: 10px;
+          position: fixed;
+          z-index: 1;
+          left: 0;
+          right:0;
+          bottom: 30px;
+          font-size: 1rem;
+          white-space: nowrap;
+          background: var(--accent-linear);
+          overflow: hidden;
+          box-shadow: 0 0 10px 0 rgba(0,0,0,0.2);
+        }
+
+        #toast #img {
+          width: 24px;
+          height: 24px;       
+          float: left;
+          width: 24px;
+          max-width: 24px;        
+          padding: 0;     
+          box-sizing: border-box;
+          color: var(--white-color);
+        }
+
+        #toast #img svg {
+          width: 24px;
+          height: 24px;
+          color: var(--white-color);
+        }
+
+        #toast #desc {
+          color: var(--white-color);
+          padding: 0;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+      
+        #toast.show {
+          visibility: visible;
+          -webkit-animation: fadein 0.5s, expand 0.5s 0.5s,stay 3s 1s, shrink 0.5s 2s, fadeout 0.5s 2.5s;
+          animation: fadein 0.5s, expand 0.5s 0.5s,stay 3s 1s, shrink 0.5s 4s, fadeout 0.5s 4.5s;
+        }
+      
+        @-webkit-keyframes fadein {
+          from {bottom: 0; opacity: 0;} 
+          to {bottom: 30px; opacity: 1;}
+        }
+      
+        @keyframes fadein {
+          from {bottom: 0; opacity: 0;}
+          to {bottom: 30px; opacity: 1;}
+        }
+      
+        @-webkit-keyframes expand {
+          from { min-width: 50px } 
+          to { min-width: 350px }
+        }
+      
+        @keyframes expand {
+          from { min-width: 50px }
+          to {min-width: 350px}
+        }
+
+        @-webkit-keyframes stay {
+          from {min-width: 350px} 
+          to {min-width: 350px}
+        }
+      
+        @keyframes stay {
+          from {min-width: 350px}
+          to {min-width: 350px}
+        }
+        @-webkit-keyframes shrink {
+          from {min-width: 350px;} 
+          to {min-width: 50px;}
+        }
+      
+        @keyframes shrink {
+          from {min-width: 350px;} 
+          to {min-width: 50px;}
+        }
+      
+        @-webkit-keyframes fadeout {
+          from {bottom: 30px; opacity: 1;} 
+          to {bottom: 60px; opacity: 0;}
+        }
+      
+        @keyframes fadeout {
+          from {bottom: 30px; opacity: 1;}
+          to {bottom: 60px; opacity: 0;}
         }
 
 				@media screen and (max-width:660px) {

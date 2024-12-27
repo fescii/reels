@@ -2,6 +2,7 @@ export default class Message extends HTMLDivElement {
   constructor() {
     super();
     this.shadow = this.attachShadow({ mode: 'open' });
+    this.main = window.app.main;
     this.active_tab = null;
     this.editable = this.textToBoolean(this.getAttribute('you'));
     this.render();
@@ -13,6 +14,42 @@ export default class Message extends HTMLDivElement {
 
   connectedCallback() {
     this.setupEditAction();
+    // this.showActionsDropdown();
+    this.initalizeCopy();
+  }
+
+  initalizeCopy = () => {
+    const btns = this.shadow.querySelectorAll('.action.copy');
+    this.handleCopy(btns);
+  }
+
+  handleCopy = btns => {
+    // add events to copy buttons
+    btns.forEach(btn => {
+      btn.addEventListener('click', async e => {
+        const text = this.innerHTML;
+        navigator.clipboard.writeText(text);
+        await this.main.showToast(true, 'Message copied to clipboard');
+      });
+    });
+  }
+
+  /* on right click the div.content, show the actions dropdown */
+  showActionsDropdown = () => {
+    // add right click event listener to the div.content
+    this.shadow.querySelector('.content').addEventListener('contextmenu', e => {
+      e.preventDefault();
+
+      // get the actions dropdown
+      const actionsDropdown = this.shadow.querySelector('.actions-dropdown');
+
+      // show the actions dropdown
+      if (actionsDropdown.style.display === 'flex') {
+        actionsDropdown.style.display = 'none';
+      } else {
+        actionsDropdown.style.display = 'flex';
+      }
+    });
   }
 
   setupEditAction = () => {
@@ -167,6 +204,7 @@ export default class Message extends HTMLDivElement {
         <div class="actions">
           ${this.getActions()}
         </div>
+        ${this.getActionsDropdown()}
         <div class="time">
           <span class="date">${this.formatDateTime(this.getAttribute('datetime'))}</span>
           <span class="sp">•</span>
@@ -302,6 +340,91 @@ export default class Message extends HTMLDivElement {
       </svg>
       `;
     } else return '';
+  }
+
+  getActionsDropdown = () => {
+    const you = this.textToBoolean(this.getAttribute('you'));
+    const dateTime = this.getAttribute('datetime');
+    return /* html */`
+      <div class="actions-dropdown">
+        <div class="actions-container">
+          <div class="reactions">
+            <span class="reaction like" data-reaction="like" data-content="&#128077;">&#128077;</span>
+            <span class="reaction love" data-reaction="love" data-content="&#128525;">&#128525;</span>
+            <span class="reaction laugh" data-reaction="laugh" data-content="&#128514;">&#128514;</span>
+            <span class="reaction wow" data-reaction="wow" data-content="&#128558;">&#128558;</span>
+            <span class="reaction sad" data-reaction="sad" data-content="&#128546;">&#128546;</span>
+            <span class="reaction angry" data-reaction="angry" data-content="&#128544;">&#128544;</span>
+          </div>
+          <div class="actions">
+            <span class="action react" data-action="react">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M8 15C8.91212 16.2144 10.3643 17 12 17C13.6357 17 15.0879 16.2144 16 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M8.00897 9L8 9M16 9L15.991 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span class="text">React</span>
+            </span>
+            <span class="action reply" data-action="reply">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                <path d="M21.7109 9.3871C21.8404 9.895 21.9249 10.4215 21.9598 10.9621C22.0134 11.7929 22.0134 12.6533 21.9598 13.4842C21.6856 17.7299 18.3536 21.1118 14.1706 21.3901C12.7435 21.485 11.2536 21.4848 9.8294 21.3901C9.33896 21.3574 8.8044 21.2403 8.34401 21.0505C7.83177 20.8394 7.5756 20.7338 7.44544 20.7498C7.31527 20.7659 7.1264 20.9052 6.74868 21.184C6.08268 21.6755 5.24367 22.0285 3.99943 21.9982C3.37026 21.9829 3.05568 21.9752 2.91484 21.7349C2.77401 21.4946 2.94941 21.1619 3.30021 20.4966C3.78674 19.5739 4.09501 18.5176 3.62791 17.6712C2.82343 16.4623 2.1401 15.0305 2.04024 13.4842C1.98659 12.6533 1.98659 11.7929 2.04024 10.9621C2.31441 6.71638 5.64639 3.33448 9.8294 3.05621C10.2156 3.03051 10.6067 3.01177 11 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M8.5 15H15.5M8.5 10H12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M14 4.5L22 4.5M14 4.5C14 3.79977 15.9943 2.49153 16.5 2M14 4.5C14 5.20023 15.9943 6.50847 16.5 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span class="text">Reply</span>
+            </span>
+            <span class="action copy" data-action="copy">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                <path d="M17.0235 3.03358L16.0689 2.77924C13.369 2.05986 12.019 1.70018 10.9555 2.31074C9.89196 2.9213 9.53023 4.26367 8.80678 6.94841L7.78366 10.7452C7.0602 13.4299 6.69848 14.7723 7.3125 15.8298C7.92652 16.8874 9.27651 17.247 11.9765 17.9664L12.9311 18.2208C15.631 18.9401 16.981 19.2998 18.0445 18.6893C19.108 18.0787 19.4698 16.7363 20.1932 14.0516L21.2163 10.2548C21.9398 7.57005 22.3015 6.22768 21.6875 5.17016C21.0735 4.11264 19.7235 3.75295 17.0235 3.03358Z" stroke="currentColor" stroke-width="1.8" />
+                <path d="M16.8538 7.43306C16.8538 8.24714 16.1901 8.90709 15.3714 8.90709C14.5527 8.90709 13.889 8.24714 13.889 7.43306C13.889 6.61898 14.5527 5.95904 15.3714 5.95904C16.1901 5.95904 16.8538 6.61898 16.8538 7.43306Z" stroke="currentColor" stroke-width="1.8" />
+                <path d="M12 20.9463L11.0477 21.2056C8.35403 21.9391 7.00722 22.3059 5.94619 21.6833C4.88517 21.0608 4.52429 19.6921 3.80253 16.9547L2.78182 13.0834C2.06006 10.346 1.69918 8.97731 2.31177 7.89904C2.84167 6.96631 4 7.00027 5.5 7.00015" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+              <span class="text">Copy</span>
+            </span>
+            ${this.getDropDownYouActions(you, dateTime)}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  getDropDownYouActions = (you, dateTime) => {
+    if (!you) return '';
+    return /* html */`
+      ${this.getDropDownEdit(dateTime)}
+      <span class="action delete" data-action="delete">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+          <path d="M19.5 5.5L18.8803 15.5251C18.7219 18.0864 18.6428 19.3671 18.0008 20.2879C17.6833 20.7431 17.2747 21.1273 16.8007 21.416C15.8421 22 14.559 22 11.9927 22C9.42312 22 8.1383 22 7.17905 21.4149C6.7048 21.1257 6.296 20.7408 5.97868 20.2848C5.33688 19.3626 5.25945 18.0801 5.10461 15.5152L4.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          <path d="M3 5.5H21M16.0557 5.5L15.3731 4.09173C14.9196 3.15626 14.6928 2.68852 14.3017 2.39681C14.215 2.3321 14.1231 2.27454 14.027 2.2247C13.5939 2 13.0741 2 12.0345 2C10.9688 2 10.436 2 9.99568 2.23412C9.8981 2.28601 9.80498 2.3459 9.71729 2.41317C9.32164 2.7167 9.10063 3.20155 8.65861 4.17126L8.05292 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          <path d="M9.5 16.5L9.5 10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          <path d="M14.5 16.5L14.5 10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+        <span class="text">Delete</span>
+      </span>
+    `;
+  }
+
+  getDropDownEdit = date => {
+    // if the date is less than 15 minutes ago, show the edit action
+    try {
+      date = new Date(date);
+      const diff = new Date() - date;
+
+      if (diff < 1000 * 60 * 15) {
+        return /* html */`
+          <span class="action edit" data-action="edit">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+              <path d="M21.9165 10.5001C21.9351 10.6557 21.9495 10.8127 21.9598 10.9708C22.0134 11.801 22.0134 12.6608 21.9598 13.491C21.6856 17.7333 18.3536 21.1126 14.1706 21.3906C12.7435 21.4855 11.2536 21.4853 9.82937 21.3906C9.33893 21.358 8.80437 21.241 8.34398 21.0514C7.83174 20.8404 7.57557 20.7349 7.44541 20.7509C7.31524 20.7669 7.12637 20.9062 6.74865 21.1847C6.08265 21.6758 5.24364 22.0286 3.9994 21.9983C3.37023 21.983 3.05565 21.9753 2.91481 21.7352C2.77398 21.4951 2.94938 21.1627 3.30018 20.4979C3.78671 19.5759 4.09498 18.5204 3.62788 17.6747C2.8234 16.4667 2.14007 15.0361 2.04021 13.491C1.98656 12.6608 1.98656 11.801 2.04021 10.9708C2.31438 6.7285 5.64636 3.34925 9.82937 3.07119C11.0318 2.99126 12.2812 2.97868 13.5 3.0338" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M8.49997 15.0001H15.5M8.49997 10.0001H11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M20.8683 2.43946L21.5607 3.13183C22.1465 3.71761 22.1465 4.66736 21.5607 5.25315L17.9333 8.94881C17.6479 9.23416 17.2829 9.42652 16.8863 9.50061L14.6381 9.98865C14.2832 10.0657 13.9671 9.75054 14.0431 9.39537L14.5216 7.16005C14.5957 6.76336 14.7881 6.39836 15.0734 6.11301L18.747 2.43946C19.3328 1.85368 20.2825 1.85368 20.8683 2.43946Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span class="text">Edit</span>
+          </span>
+        `;
+      } else return '';
+    } catch (error) {
+      return '';
+    }
   }
 
   getActions = () => {
@@ -593,8 +716,10 @@ export default class Message extends HTMLDivElement {
           color: var(--white-color);
           background-color: var(--accent-color);
           background-image: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
-          /*background-image: linear-gradient(rgb(255, 143, 178) 0%, rgb(167, 151, 255) 50%, rgb(0, 229, 255) 100%);*/
+          background-image: linear-gradient(rgb(255, 143, 178) 0%, rgb(167, 151, 255) 50%, rgb(0, 229, 255) 100%);
           background-attachment: fixed;
+          /*background-color: #FBAB7E;*/
+          /*background-image: linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%);*/
           /*background-image: linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%);*/
         }
 
@@ -773,6 +898,82 @@ export default class Message extends HTMLDivElement {
           overflow: hidden;
           text-overflow: ellipsis;
         }
+
+        /* actions dropdown */
+        .content > .message > .actions-dropdown {
+          border: var(--border);
+          display: none;
+          flex-flow: column;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: max-content;
+          height: max-content;
+          background: var(--background);
+          border-radius: 15px;
+          z-index: 1;
+          overflow: hidden;
+        }
+
+        .content > .message > .actions-dropdown > .actions-container {
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+          padding: 0;
+          border-radius: 15px;
+        }
+
+        .content > .message > .actions-dropdown > .actions-container > .reactions {
+          display: flex;
+          flex-flow: row;
+          align-items: center;
+          justify-content: start;
+          gap: 0;
+          padding: 0;
+          border-top-left-radius: 15px;
+          border-bottom-left-radius: 15px;
+        }
+
+        .content > .message > .actions-dropdown > .actions-container > .reactions > .reaction {
+          display: flex;
+          flex-flow: row;
+          gap: 0;
+          font-size: 1.58rem;
+          padding: 5px;
+          border-radius: 15px;
+          cursor: pointer;
+        }
+
+        .content > .message > .actions-dropdown > .actions-container > .reactions > .reaction:hover {
+          background: var(--tab-background);
+          color: var(--accent-color);
+        }
+
+        .content > .message > .actions-dropdown > .actions-container > .actions {
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+          padding: 0;
+        }
+
+        .content > .message > .actions-dropdown > .actions-container > .actions > span.action {
+          display: flex;
+          flex-flow: row;
+          align-items: center;
+          justify-content: start;
+          gap: 8px;
+          color: var(--text-color);
+          font-family: var(--font-text), sans-serif;
+          padding: 10px 8px;
+          cursor: pointer;
+          border-radius: 0;
+        }
+
+        .content > .message > .actions-dropdown > .actions-container > .actions > span.action:hover {
+          background: var(--tab-background);
+          color: var(--accent-color);
+        }
+
       
         @media screen and (max-width: 660px) {
           :host {

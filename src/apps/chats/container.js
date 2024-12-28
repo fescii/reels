@@ -645,14 +645,14 @@ export default class MessagingContainer extends HTMLElement {
           width: max-content;
           /*background: rgb(226 232 240);*/
           border-radius: 15px;
-          padding: 7px 9px;
-          margin: 5px 0;
+          padding: 7px 20px;
+          margin: 5px 0 20px;
         }
 
         .typing-container .dot {
           border-radius: 50%;
-          height: 12px;
-          width: 12px;
+          height: 8px;
+          width: 8px;
           background: var(--typing-color);
           opacity: 0;
           animation: blink 1s infinite;

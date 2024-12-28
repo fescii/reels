@@ -668,6 +668,10 @@ export default class AppMain extends HTMLElement {
           box-shadow: 0 0 10px 0 rgba(0,0,0,0.2);
         }
 
+        #toast.error {
+          background: var(--error-linear);
+        }
+
         #toast #img {
           width: 24px;
           height: 24px;       

@@ -27,9 +27,13 @@ export default class Message extends HTMLDivElement {
     // add events to copy buttons
     btns.forEach(btn => {
       btn.addEventListener('click', async e => {
-        const text = this.innerHTML;
-        navigator.clipboard.writeText(text);
-        await this.main.showToast(true, 'Message copied to clipboard');
+        try {
+          const text = this.innerHTML;
+          navigator.clipboard.writeText(text);
+          await this.main.showToast(true, 'Message copied to clipboard');
+        } catch (error) {
+          await this.main.showToast(false, 'Failed to copy message');
+        }
       });
     });
   }
@@ -900,7 +904,7 @@ export default class Message extends HTMLDivElement {
           font-weight: 400;
           width: max-content;
           max-width: 100%;
-          background: #f8f8f8;
+          background: var(--reply-background);
           padding: 8px 10px 25px;
           font-family: inherit;
           color: var(--gray-color);
@@ -1010,6 +1014,22 @@ export default class Message extends HTMLDivElement {
             max-width: 85%;
             width: 85%;
             gap: 8px;
+          }
+
+          .content > .message > .text > span.tick {
+            float: right;
+            display: inline-block;
+            margin: 4px 0 0 5px;
+          }
+
+          .content > .message > .text > span.tick svg {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-color);
           }
         }
       </style>

@@ -3,7 +3,12 @@ export default class MessagingContainer extends HTMLElement {
     super();
     this.shadow = this.attachShadow({ mode: 'open' });
     this.active_tab = null;
+    this.openedContextMenu = null;
     this.render();
+  }
+
+  setOpenedContextMenu = node => {
+    this.openedContextMenu = node;
   }
 
   render() {
@@ -234,6 +239,10 @@ export default class MessagingContainer extends HTMLElement {
       <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"
         you="true" verified="false" status="seen" active="false" kind="message">
         This is a message from Jane Doe, Please reply as soon as possible.
+      </div>
+      <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"
+        you="false" verified="true" status="delivered" active="true" kind="reply" to-you="true" reply-to="John" reply-text="This is a message from Jane Doe, Please reply as soon as possible.">
+        OMG! WWE is coming to town, are you ready?
       </div>
       <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/men/1.jpg" datetime="2024-12-24T12:00:00Z"
         you="false" verified="true" status="delivered" active="true" kind="message">

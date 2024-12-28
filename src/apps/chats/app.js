@@ -170,7 +170,7 @@ export default class ChatApp extends HTMLElement {
   getMessagingContainer = () => {
     return /* html */`
       <messaging-container user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Aidan"
-        user-name="Alice Johnsonjg Hfgsgsfnah" unread="0" active="true" user-verified="true"
+        user-name="Alice Johnson" unread="0" active="true" user-verified="true"
         message="I have attached the needed documents below!" last-active="2024-12-26T01:25:15Z">
       </messaging-container>
     `;
@@ -798,8 +798,12 @@ export default class ChatApp extends HTMLElement {
             width: 100%;
             max-width: 100%;
             min-width: 100%;
-            max-height: calc(100dvh - 55px);
+            max-height: unset;
+            height: unset;
+            min-height: unset;
+            max-height: unset;
             padding: 0;
+            margin: 0;
             display: flex;
             flex-direction: column;
             align-items: start;
@@ -808,11 +812,13 @@ export default class ChatApp extends HTMLElement {
 
           div.chats,
           div.main {
-            /*border: 2px solid blue;*/
             width: 100%;
             min-width: 100%;
-            height: 100%;
-            max-height: 100%;
+            height: unset;
+            min-height: unset;
+            max-height: unset;
+            padding: 0;
+            margin: 0;
           }
 
           /* reset all cursor: pointer to cursor: default */

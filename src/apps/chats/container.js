@@ -15,7 +15,7 @@ export default class MessagingContainer extends HTMLElement {
   }
 
   scrollMessages = () => {
-    const messages = this.shadow.querySelector('.messages');
+    const messages = this.shadow.querySelector('main.main');
     messages.scrollTop = messages.scrollHeight;
   }
 
@@ -207,16 +207,18 @@ export default class MessagingContainer extends HTMLElement {
           <path d="M17 8.90585L17.1259 8.80196C19.2417 7.05623 20.2996 6.18336 21.1498 6.60482C22 7.02628 22 8.42355 22 11.2181V12.7819C22 15.5765 22 16.9737 21.1498 17.3952C20.2996 17.8166 19.2417 16.9438 17.1259 15.198L17 15.0941" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
         </svg>
       </button>
-      <button class="action favorite" title="Favorites">
-        <svg class="large" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-          <path d="M13.7276 3.44418L15.4874 6.99288C15.7274 7.48687 16.3673 7.9607 16.9073 8.05143L20.0969 8.58575C22.1367 8.92853 22.6167 10.4206 21.1468 11.8925L18.6671 14.3927C18.2471 14.8161 18.0172 15.6327 18.1471 16.2175L18.8571 19.3125C19.417 21.7623 18.1271 22.71 15.9774 21.4296L12.9877 19.6452C12.4478 19.3226 11.5579 19.3226 11.0079 19.6452L8.01827 21.4296C5.8785 22.71 4.57865 21.7522 5.13859 19.3125L5.84851 16.2175C5.97849 15.6327 5.74852 14.8161 5.32856 14.3927L2.84884 11.8925C1.389 10.4206 1.85895 8.92853 3.89872 8.58575L7.08837 8.05143C7.61831 7.9607 8.25824 7.48687 8.49821 6.99288L10.258 3.44418C11.2179 1.51861 12.7777 1.51861 13.7276 3.44418Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </button>
       <button class="action search" title="Search">
         <svg class="large" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
           <path d="M12 3.00366C11.4383 3.01203 10.3789 3.03449 9.8294 3.07102C5.64639 3.34908 2.31441 6.72832 2.04024 10.9707C1.98659 11.8009 1.98659 12.6606 2.04024 13.4908C2.1401 15.0359 2.82343 16.4665 3.62791 17.6746C4.09501 18.5203 3.78674 19.5758 3.30021 20.4978C2.94941 21.1625 2.77401 21.4949 2.91484 21.735C3.05568 21.9752 3.37026 21.9828 3.99943 21.9981C5.24367 22.0284 6.08268 21.6757 6.74868 21.1846C7.1264 20.906 7.31527 20.7668 7.44544 20.7508C7.5756 20.7347 7.83177 20.8403 8.34401 21.0512C8.8044 21.2408 9.33896 21.3579 9.8294 21.3905C11.2536 21.4851 12.7435 21.4853 14.1706 21.3905C18.3536 21.1124 21.6856 17.7332 21.9598 13.4908C21.9915 13.0001 22.0044 12.4991 21.9987 11.9999" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           <path d="M8.5 15H15.5M8.5 10H12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           <path d="M20.2649 7.27042L22 9M21.1714 5.08571C21.1714 3.38152 19.7899 2 18.0857 2C16.3815 2 15 3.38152 15 5.08571C15 6.78991 16.3815 8.17143 18.0857 8.17143C19.7899 8.17143 21.1714 6.78991 21.1714 5.08571Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <button class="action info" title="More">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+          <path d="M22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12Z" stroke="currentColor" stroke-width="1.8" />
+          <path d="M12.2422 17V12C12.2422 11.5286 12.2422 11.2929 12.0957 11.1464C11.9493 11 11.7136 11 11.2422 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M11.992 8H12.001" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </button>
     `;
@@ -359,9 +361,9 @@ export default class MessagingContainer extends HTMLElement {
         }
 
         header.header > .contents > .profile {
-          width: calc(100% - 150px);
-          min-width: calc(100% - 150px);
-          max-width: calc(100% - 150px);
+          width: calc(100% - 120px);
+          min-width: calc(100% - 120px);
+          max-width: calc(100% - 120px);
           display: flex;
           flex-flow: row;
           align-items: center;
@@ -371,12 +373,12 @@ export default class MessagingContainer extends HTMLElement {
 
         header.header > .contents > .profile > .avatar {
           border: var(--border);
-          width: 45px;
-          height: 45px;
-          max-width: 45px;
-          max-height: 45px;
-          min-width: 45px;
-          min-height: 45px;
+          width: 40px;
+          height: 40px;
+          max-width: 40px;
+          max-height: 40px;
+          min-width: 40px;
+          min-height: 40px;
           border-radius: 50%;
           overflow: hidden;
           display: flex;
@@ -400,9 +402,9 @@ export default class MessagingContainer extends HTMLElement {
         }
 
         header.header > .contents > .profile > .info {
-          width: calc(100% - 55px);
-          min-width: calc(100% - 55px);
-          max-width: calc(100% - 55px);
+          width: calc(100% - 50px);
+          min-width: calc(100% - 50px);
+          max-width: calc(100% - 50px);
           display: flex;
           flex-flow: column;
           align-items: start;
@@ -417,18 +419,18 @@ export default class MessagingContainer extends HTMLElement {
           max-width: 100%;
           font-family: var(--font-text), sans-serif;
           font-weight: 500;
-          font-size: 1.08rem;
+          font-size: 1rem;
           line-height: 1.4;
           color: var(--text-color);
           display: flex;
           justify-content: start;
           align-items: center;
-          gap: 5px;
+          gap: 2px;
         }
 
         header.header > .contents > .profile > .info > .name > .text {
           width: max-content;
-          max-width: calc(100% - 23px);
+          max-width: calc(100% - 28px);
           text-align: start;
           gap: 5px;
 
@@ -441,7 +443,7 @@ export default class MessagingContainer extends HTMLElement {
         header.header > .contents > .profile > .info > .name > svg {
           width: 18px;
           height: 18px;
-          margin-bottom: -1px;
+          margin-bottom: 0px;
           display: flex;
           justify-content: center;
           align-items: center;
@@ -539,10 +541,9 @@ export default class MessagingContainer extends HTMLElement {
         }
 
         header.header > .contents > .actions {
-          /*border: var(--border);*/
-          margin-bottom: -5px;
-          width: 140px;
-          min-width: 140px;
+          /* border: var(--border);*/
+          width: 100px;
+          min-width: 100px;
           display: flex;
           flex-flow: row;
           align-items: center;
@@ -559,7 +560,7 @@ export default class MessagingContainer extends HTMLElement {
           align-items: center;
           padding: 0;
           cursor: pointer;
-          color: var(--text-color);
+          color: var(--gray-color);
         }
 
         header.header > .contents > .actions > button:hover {
@@ -594,7 +595,14 @@ export default class MessagingContainer extends HTMLElement {
           min-height: calc(100vh - 70px);
           max-height: calc(100vh - 70px);
           width: 100%;
-          height: calc(100dvh - 70px);
+          overflow-y: scroll;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        main.main::-webkit-scrollbar {
+          display: none;
+          visibility: hidden;
         }
 
         main.main > .messages {
@@ -604,19 +612,6 @@ export default class MessagingContainer extends HTMLElement {
           justify-content: start;
           gap: 10px;
           padding: 10px 0 80px;
-          width: 100%;
-          height: 100%;
-          max-height: 100%;
-          min-height: 100%;
-          max-height: 100%;
-          overflow-y: scroll;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-
-        main.main > .messages::-webkit-scrollbar {
-          display: none;
-          visibility: hidden;
         }
 
         main.main > .messages > div.disclaimer {
@@ -651,7 +646,7 @@ export default class MessagingContainer extends HTMLElement {
           /*background: rgb(226 232 240);*/
           border-radius: 15px;
           padding: 7px 9px;
-          margin: 10px 0 0 5px;
+          margin: 5px 0;
         }
 
         .typing-container .dot {
@@ -680,8 +675,10 @@ export default class MessagingContainer extends HTMLElement {
        
         @media screen and (max-width: 660px) {
           :host {
-            height: calc(100dvh - 55px);
-            max-height: calc(100vh - 55px);
+            /* border: 2px solid green;*/
+            height: unset;
+            max-height: unset;
+            min-height: unset;
             width: 100%;
             min-width: 100%;
             max-width: 100%;
@@ -702,6 +699,8 @@ export default class MessagingContainer extends HTMLElement {
             flex-flow: column;
             align-items: start;
             flex-wrap: nowrap;
+            height: 60px;
+            max-height: 60px;
             gap: 5px;
             margin: 0;
             z-index: 6;
@@ -712,7 +711,7 @@ export default class MessagingContainer extends HTMLElement {
   
           header.header > svg {
             position: absolute;
-            left: -12px;
+            left: -15px;
             margin: 2px 0 0;
             top: 50%;
             transform: translateY(-50%);
@@ -736,27 +735,24 @@ export default class MessagingContainer extends HTMLElement {
             justify-content: space-between;
             flex-wrap: nowrap;
             gap: 10px;
-            margin: 0 0 0 28px;
-            width: calc(100% - 28px);
+            margin: 0 0 0 20px;
+            width: calc(100% - 20px);
             position: relative;
           }
 
           main.main {
-            max-height: calc(100% - 70px);
-            height: calc(100% - 70px);
+            /* border: 2px solid blue;*/
+            max-height: calc(100dvh - 60px);
+            height: calc(100dvh - 60px);
+            min-height: calc(100dvh - 60px);
             width: 100%;
           }
 
           main.main > .messages {
-            padding: 10px 0 70px;
+            padding: 10px 0 0;
+            /* border: 2px solid red; */
             width: 100%;
-            height: 100%;
-            max-height: 100%;
-            min-height: 100%;
-            max-height: 100%;
-            overflow-y: scroll;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
+            height: max-content;
           }
 
           main.main > .messages > div.disclaimer {

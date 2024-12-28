@@ -525,6 +525,13 @@ export default class Message extends HTMLDivElement {
         * {
           box-sizing: border-box;
           font-family: var(--font-main), sans-serif;
+
+          /* disable user selection */
+          user-select: none;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+          -khtml-user-select: none;
         }
 
         .content {
@@ -618,7 +625,7 @@ export default class Message extends HTMLDivElement {
           border: var(--border);
           background: var(--background);
           position: absolute;
-          top: 5px;
+          top: -15px;
           left: 0;
           padding: 0;
           display: none;
@@ -628,9 +635,13 @@ export default class Message extends HTMLDivElement {
           border-radius: 15px;
         }
 
+        .content.reply > .message > .actions {
+          top: 25px;
+        }
+
         .content.you > .message > .actions {
           left: unset;
-          right: 37px;
+          right: 0;
         }
 
         .content > .message > .actions > .action {
@@ -845,7 +856,7 @@ export default class Message extends HTMLDivElement {
           max-width: 100%;
           flex-direction: column;
           gap: 4px;
-          left: 38px;
+          left: 0;
           position: absolute;
           top: -15px;
         }
@@ -857,7 +868,7 @@ export default class Message extends HTMLDivElement {
 
         .content.you > .message > .reply {
           left: unset;
-          right: 38px;
+          right: 0;
         }
 
         .content > .message > .reply > .head {

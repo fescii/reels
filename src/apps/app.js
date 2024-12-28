@@ -8,6 +8,7 @@ export default class AppMain extends HTMLElement {
 		// register components
 		this.registerComponents();
     window.app.main = this;
+    this.mql = window.matchMedia('(max-width: 660px)');
 		this.render();
 	}
 
@@ -32,16 +33,34 @@ export default class AppMain extends HTMLElement {
 	
 	render() {
 		this.shadowObj.innerHTML = this.getTemplate();
+    // watch for media query changes
+    this.watchMeta(this.mql);
 	}
 	
 	// noinspection JSMethodCanBeStatic
 	connectedCallback() {
-    // show toast
-    // this.showToast(true, 'Hello World');
+
+
 	}
+
+  watchMeta = mql => {
+    mql.addEventListener('change', e => {
+      this.render();
+    })
+  }
 
   showToast = (success, message) => {
     const x = this.shadowObj.querySelector("#toast");
+
+    // set max-width to max-content
+    x.style.maxWidth = 'max-content';
+
+    // update animations to animate upto max-content:
+    // x.style.animation = 'none';
+    // x.offsetHeight; /* trigger reflow */
+    // x.style.animation = null;
+    
+
     const text = x.querySelector('#desc');
     const icon = x.querySelector('#img');
     text.textContent = message;
@@ -638,10 +657,10 @@ export default class AppMain extends HTMLElement {
           text-align: center;
           border-radius: 10px;
           position: fixed;
-          z-index: 1;
+          z-index: 1000;
           left: 0;
           right:0;
-          bottom: 30px;
+          top: 30px;
           font-size: 1rem;
           white-space: nowrap;
           background: var(--accent-linear);
@@ -680,52 +699,52 @@ export default class AppMain extends HTMLElement {
         }
       
         @-webkit-keyframes fadein {
-          from {bottom: 0; opacity: 0;} 
-          to {bottom: 30px; opacity: 1;}
+          from {top: 0; opacity: 0;} 
+          to {top: 30px; opacity: 1;}
         }
       
         @keyframes fadein {
-          from {bottom: 0; opacity: 0;}
-          to {bottom: 30px; opacity: 1;}
+          from {top: 0; opacity: 0;}
+          to {top: 30px; opacity: 1;}
         }
       
         @-webkit-keyframes expand {
           from { min-width: 50px } 
-          to { min-width: 350px }
+          to { min-width: max-content }
         }
       
         @keyframes expand {
           from { min-width: 50px }
-          to {min-width: 350px}
+          to {min-width: max-content}
         }
 
         @-webkit-keyframes stay {
-          from {min-width: 350px} 
-          to {min-width: 350px}
+          from {min-width: max-content}
+          to {min-width: min-content}
         }
       
         @keyframes stay {
-          from {min-width: 350px}
-          to {min-width: 350px}
+          from {min-width: max-content}
+          to {min-width: min-content}
         }
         @-webkit-keyframes shrink {
-          from {min-width: 350px;} 
+          from {min-width: max-content;}
           to {min-width: 50px;}
         }
       
         @keyframes shrink {
-          from {min-width: 350px;} 
+          from {min-width: max-content;} 
           to {min-width: 50px;}
         }
       
         @-webkit-keyframes fadeout {
-          from {bottom: 30px; opacity: 1;} 
-          to {bottom: 60px; opacity: 0;}
+          from {top: 30px; opacity: 1;} 
+          to {top: 60px; opacity: 0;}
         }
       
         @keyframes fadeout {
-          from {bottom: 30px; opacity: 1;}
-          to {bottom: 60px; opacity: 0;}
+          from {top: 30px; opacity: 1;}
+          to {top: -60px; opacity: 0;}
         }
 
 				@media screen and (max-width:660px) {
@@ -749,10 +768,10 @@ export default class AppMain extends HTMLElement {
           }
           
 					section.nav {
-						/*border-top: var(--border);*/
+						border-top: var(--border);
 						box-shadow: var(--footer-shadow);
 						width: 100%;
-						display: flex;
+						display: none;
 						padding: 0;
 						flex-flow: row;
 						gap: 0;
@@ -807,8 +826,9 @@ export default class AppMain extends HTMLElement {
 					
 					section.nav > div.mobile-nav > div.icons > span.icon.active > span.bar {
 						display: inline-block;
-						width: 100%;
-						height: 2px;
+            display: none;
+						width: 80%;
+						height: 3px;
 						border-radius: 5px;
 						position: absolute;
 						background: var(--accent-linear);
@@ -879,7 +899,7 @@ export default class AppMain extends HTMLElement {
 						flex-flow: column;
 						gap: 0;
 						height: max-content;
-						padding: 0 0 55px 0;
+						padding: 0 0;
 					}
 				}
 	    </style>

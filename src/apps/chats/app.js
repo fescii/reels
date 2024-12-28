@@ -89,9 +89,40 @@ export default class ChatApp extends HTMLElement {
   }
 
   getTemplate() {
+    const mql = window.matchMedia("(max-width: 660px)");
+    if (mql.matches) {
+      return /* html */`
+        ${this.getMain()}
+        ${this.getStyles()}
+      `;
+    } else {
+      return /* html */`
+        ${this.getBody()}
+        ${this.getStyles()}
+      `;
+    }
+  }
+
+  getMain = () => {
     return /* html */`
-      ${this.getBody()}
-      ${this.getStyles()}
+      <div class="main">
+        ${this.getEmptyChat()}
+      </div>
+    `;
+  }
+
+  getChats = () => {
+    return /* html */`
+      <div class="chats">
+        ${this.getForm()}
+        <div class="container">
+          ${this.getPins()}
+          ${this.getTab()}
+          <div class="chats-container">
+            ${this.getChats()}
+          </div>
+        </div>
+      </div>
     `;
   }
 

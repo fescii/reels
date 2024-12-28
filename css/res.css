@@ -84,3 +84,116 @@
     padding: 0 10px;
   }
 }
+
+#toast {
+  visibility: hidden;
+  max-width: max-content;
+  height: 35px;
+  width: max-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  /*margin-left: -125px;*/
+  margin: auto;
+  color: var(--white-color);
+  text-align: center;
+  border-radius: 10px;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  right:0;
+  top: 30px;
+  font-size: 1rem;
+  white-space: nowrap;
+  background: var(--accent-linear);
+  overflow: hidden;
+  box-shadow: 0 0 10px 0 rgba(0,0,0,0.2);
+}
+
+#toast.error {
+  background: var(--error-linear);
+}
+
+#toast #img {
+  width: 24px;
+  height: 24px;       
+  /*float: left;*/
+  width: 24px;
+  max-width: 24px;        
+  padding: 0;     
+  box-sizing: border-box;
+  color: var(--white-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#toast #img svg {
+  width: 24px;
+  height: 24px;
+  color: var(--white-color);
+}
+
+#toast #desc {
+  color: var(--white-color);
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+#toast.show {
+  visibility: visible;
+  -webkit-animation: fadein 0.5s, expand 0.5s 0.5s,stay 3s 1s, shrink 0.5s 2s, fadeout 0.5s 2.5s;
+  animation: fadein 0.5s, expand 0.5s 0.5s,stay 3s 1s, shrink 0.5s 4s, fadeout 0.5s 4.5s;
+}
+
+@-webkit-keyframes fadein {
+  from {top: 0; opacity: 0;} 
+  to {top: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+  from {top: 0; opacity: 0;}
+  to {top: 30px; opacity: 1;}
+}
+
+/*@-webkit-keyframes expand {
+  from { min-width: 50px } 
+  to { min-width: max-content }
+}
+
+@keyframes expand {
+  from { min-width: 50px }
+  to {min-width: max-content}
+}
+
+@-webkit-keyframes stay {
+  from {min-width: max-content}
+  to {min-width: min-content}
+}
+
+@keyframes stay {
+  from {min-width: max-content}
+  to {min-width: min-content}
+}
+@-webkit-keyframes shrink {
+  from {min-width: max-content;}
+  to {min-width: 50px;}
+}
+
+@keyframes shrink {
+  from {min-width: max-content;} 
+  to {min-width: 50px;}
+}*/
+
+@-webkit-keyframes fadeout {
+  from {top: 30px; opacity: 1;} 
+  to {top: 60px; opacity: 0;}
+}
+
+@keyframes fadeout {
+  from {top: 30px; opacity: 1;}
+  to {top: -60px; opacity: 0;}
+}

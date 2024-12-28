@@ -50,24 +50,39 @@ export default class AppMain extends HTMLElement {
   }
 
   showToast = (success, message) => {
-    const x = this.shadowObj.querySelector("#toast");
+    // const x = this.shadowObj.querySelector("#toast");
 
-    // set max-width to max-content
-    x.style.maxWidth = 'max-content';
-
-    // update animations to animate upto max-content:
-    // x.style.animation = 'none';
-    // x.offsetHeight; /* trigger reflow */
-    // x.style.animation = null;
     
 
-    const text = x.querySelector('#desc');
-    const icon = x.querySelector('#img');
-    text.textContent = message;
-    icon.innerHTML = success ? this.getSuccesToast() : this.getErrorToast();
-    x.className = "show";
-    x.classList.add(success ? 'success' : 'error');
-    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 5000);
+    // const text = x.querySelector('#desc');
+    // const icon = x.querySelector('#img');
+    // text.textContent = message;
+    // icon.innerHTML = success ? this.getSuccesToast() : this.getErrorToast();
+    // x.className = "show";
+    // x.classList.add(success ? 'success' : 'error');
+    // setTimeout(function(){ x.className = x.className.replace("show", ""); }, 5000);
+
+    // check if the toast is already open
+    const toastEl = document.querySelector('#toast');
+    if (toastEl) toastEl.remove();
+
+    // create the toast element
+    const toast = this.getToast(success, message);
+
+    // append the toast to the body
+    document.body.insertAdjacentHTML('beforeend', toast);
+
+    // add the show class to the toast
+    const addedToast = document.querySelector('#toast');
+    addedToast.classList.add('show');
+
+    // remove the toast after 5 seconds
+    setTimeout(() => {
+      addedToast.classList.remove('show');
+      setTimeout(() => {
+        addedToast.remove();
+      }, 300);
+    }, 5000);
   }
 	
 	disconnectedCallback() {
@@ -84,7 +99,6 @@ export default class AppMain extends HTMLElement {
 	getTemplate = () => {
 		// Show HTML Here
 		return `
-      ${this.getToast()}
       ${this.getBody()}
       ${this.getStyles()}
     `;
@@ -639,116 +653,6 @@ export default class AppMain extends HTMLElement {
 
         footer.footer > ul.links > li > a:hover {
           color: var(--anchor-color);
-        }
-
-        #toast {
-          visibility: hidden;
-          max-width: 50px;
-          height: 35px;
-          width: max-content;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 10px;
-          padding: 0 10px;
-          /*margin-left: -125px;*/
-          margin: auto;
-          color: var(--white-color);
-          text-align: center;
-          border-radius: 10px;
-          position: fixed;
-          z-index: 1000;
-          left: 0;
-          right:0;
-          top: 30px;
-          font-size: 1rem;
-          white-space: nowrap;
-          background: var(--accent-linear);
-          overflow: hidden;
-          box-shadow: 0 0 10px 0 rgba(0,0,0,0.2);
-        }
-
-        #toast.error {
-          background: var(--error-linear);
-        }
-
-        #toast #img {
-          width: 24px;
-          height: 24px;       
-          float: left;
-          width: 24px;
-          max-width: 24px;        
-          padding: 0;     
-          box-sizing: border-box;
-          color: var(--white-color);
-        }
-
-        #toast #img svg {
-          width: 24px;
-          height: 24px;
-          color: var(--white-color);
-        }
-
-        #toast #desc {
-          color: var(--white-color);
-          padding: 0;
-          overflow: hidden;
-          white-space: nowrap;
-        }
-      
-        #toast.show {
-          visibility: visible;
-          -webkit-animation: fadein 0.5s, expand 0.5s 0.5s,stay 3s 1s, shrink 0.5s 2s, fadeout 0.5s 2.5s;
-          animation: fadein 0.5s, expand 0.5s 0.5s,stay 3s 1s, shrink 0.5s 4s, fadeout 0.5s 4.5s;
-        }
-      
-        @-webkit-keyframes fadein {
-          from {top: 0; opacity: 0;} 
-          to {top: 30px; opacity: 1;}
-        }
-      
-        @keyframes fadein {
-          from {top: 0; opacity: 0;}
-          to {top: 30px; opacity: 1;}
-        }
-      
-        @-webkit-keyframes expand {
-          from { min-width: 50px } 
-          to { min-width: max-content }
-        }
-      
-        @keyframes expand {
-          from { min-width: 50px }
-          to {min-width: max-content}
-        }
-
-        @-webkit-keyframes stay {
-          from {min-width: max-content}
-          to {min-width: min-content}
-        }
-      
-        @keyframes stay {
-          from {min-width: max-content}
-          to {min-width: min-content}
-        }
-        @-webkit-keyframes shrink {
-          from {min-width: max-content;}
-          to {min-width: 50px;}
-        }
-      
-        @keyframes shrink {
-          from {min-width: max-content;} 
-          to {min-width: 50px;}
-        }
-      
-        @-webkit-keyframes fadeout {
-          from {top: 30px; opacity: 1;} 
-          to {top: 60px; opacity: 0;}
-        }
-      
-        @keyframes fadeout {
-          from {top: 30px; opacity: 1;}
-          to {top: -60px; opacity: 0;}
         }
 
 				@media screen and (max-width:660px) {

@@ -538,7 +538,7 @@ export default class Message extends HTMLDivElement {
           align-items: start;
           justify-content: start;
           position: relative;
-          gap: 8px;
+          gap: 0;
         }
 
         .content.you {
@@ -557,7 +557,7 @@ export default class Message extends HTMLDivElement {
         } 
 
         .content > .avatar {
-          display: flex;
+          display: none;
           flex-direction: column;
           align-items: start;
           align-self: flex-end;
@@ -603,7 +603,8 @@ export default class Message extends HTMLDivElement {
           flex-direction: column;
           align-items: start;
           gap: 5px;
-          max-width: calc(100% - 40px);
+          /* max-width: calc(100% - 40px); */
+          max-width: 100%;
           width: max-content;
           position: static;
         }
@@ -617,8 +618,8 @@ export default class Message extends HTMLDivElement {
           border: var(--border);
           background: var(--background);
           position: absolute;
-          top: -10px;
-          left: 37px;
+          top: 5px;
+          left: 0;
           padding: 0;
           display: none;
           flex-direction: row;
@@ -982,8 +983,22 @@ export default class Message extends HTMLDivElement {
 
           /* reset all cursor: pointer to cursor: default */
           a, button, input, label, select, textarea,
-          ul.tabs > li.tab, ul.tabs > li.tab.active {
+          ul.tabs > li.tab, ul.tabs > li.tab.active,
+          .content > .message > .actions > .action,
+          .content > .message > .actions-dropdown > .actions-container > .reactions > .reaction,
+          .content > .message > .actions-dropdown > .actions-container > .actions > span.action,
+          .content,
+          .content > .message > .text a,
+          .content > .message,
+          :host {
             cursor: default !important;
+          }
+
+          .content {
+            width: max-content;
+            max-width: 85%;
+            width: 85%;
+            gap: 8px;
           }
         }
       </style>

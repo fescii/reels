@@ -288,7 +288,6 @@ export default class MessagingContainer extends HTMLElement {
     return /* css */`
       <style>
         :host {
-          border: 1px solid red;
           display: flex;
           max-width: 100%;
           width: 100%;
@@ -607,9 +606,10 @@ export default class MessagingContainer extends HTMLElement {
           padding: 10px 0 80px;
           width: 100%;
           height: 100%;
+          max-height: 100%;
           min-height: 100%;
           max-height: 100%;
-          overflow-y: auto;
+          overflow-y: scroll;
           scrollbar-width: none;
           -ms-overflow-style: none;
         }
@@ -680,8 +680,8 @@ export default class MessagingContainer extends HTMLElement {
        
         @media screen and (max-width: 660px) {
           :host {
-            height: 100%;
-            max-height: 100%;
+            height: calc(100dvh - 55px);
+            max-height: calc(100vh - 55px);
             width: 100%;
             min-width: 100%;
             max-width: 100%;
@@ -697,7 +697,7 @@ export default class MessagingContainer extends HTMLElement {
             border-bottom: var(--border);
             background: var(--background);
             padding: 0;
-            padding: 15px 0 10px;
+            padding: 10px 0 10px;
             display: flex;
             flex-flow: column;
             align-items: start;
@@ -742,9 +742,32 @@ export default class MessagingContainer extends HTMLElement {
           }
 
           main.main {
-            max-height: 100%;
-            height: 100%;
+            max-height: calc(100% - 70px);
+            height: calc(100% - 70px);
             width: 100%;
+          }
+
+          main.main > .messages {
+            padding: 10px 0 70px;
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            min-height: 100%;
+            max-height: 100%;
+            overflow-y: scroll;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+
+          main.main > .messages > div.disclaimer {
+            width: 100%;
+            font-size: 0.8rem;
+          }
+
+          main.main > .messages > div.disclaimer > svg {
+            width: 14px;
+            height: 14px;
+            margin-bottom: -2.5px;
           }
         }
       </style>

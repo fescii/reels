@@ -22,43 +22,83 @@ export default class Message extends HTMLDivElement {
 
   initalizeCopy = mql => {
     if(mql.matches) {
-      return;
+      const btn = this.shadow.querySelector('.actions-dropdown > .actions-container > .actions > span.action.copy');
+      if(btn) this.handleCopy(btn, true);
     } else {
-      const btns = this.shadow.querySelectorAll('.action.copy');
-      if(btns) this.handleCopy(btns);
+      const btn = this.shadow.querySelector('.content > .message > .actions > .action.copy');
+      if(btn) this.handleCopy(btn, false);
     }
   }
 
-  handleCopy = btns => {
+  handleCopy = (btn, mobile) => {
     // add events to copy buttons
-    btns.forEach(btn => {
-      btn.addEventListener('click', async e => {
-        try {
-          const text = this.innerHTML;
-          navigator.clipboard.writeText(text);
-          await this.main.showToast(true, 'Message copied to clipboard');
-        } catch (error) {
-          await this.main.showToast(false, 'Failed to copy message');
-        }
-      });
+    btn.addEventListener('click', async e => {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        const text = this.innerHTML;
+        navigator.clipboard.writeText(text);
+        await this.main.showToast(true, 'Message copied to clipboard');
+      } catch (error) {
+        await this.main.showToast(false, 'Failed to copy message');
+      }
+
+      // if mobile, close the dropdown
+      if(mobile) this.closeContextMenu();
     });
+  }
+
+  closeContextMenu = () => {
+    this.container.openedContextNode = null;
+    const actionsDropdown = this.shadow.querySelector('.actions-dropdown');
+    if(actionsDropdown) actionsDropdown.style.display = 'none';
   }
 
   /* on right click the div.content, show the actions dropdown */
   showActionsDropdown = () => {
     // add right click event listener to the div.content
-    this.shadow.querySelector('.content').addEventListener('contextmenu', e => {
+    this.shadow.querySelector('.content > .message > .text').addEventListener('contextmenu', e => {
       e.preventDefault();
+      const openedContextNode = this.container.openedContextNode;
 
       // get the actions dropdown
       const actionsDropdown = this.shadow.querySelector('.actions-dropdown');
 
-      // show the actions dropdown
-      if (actionsDropdown.style.display === 'flex') {
-        actionsDropdown.style.display = 'none';
-      } else {
-        actionsDropdown.style.display = 'flex';
+      // if openedContextNode is not null close it
+      if(openedContextNode) {
+        openedContextNode.closeContextMenu()
       }
+
+      // if the openedContextNode is the same as this, set it to null and return
+      if(openedContextNode === this) return;
+
+      this.container.openedContextNode = this;
+
+      // check how (this) is positioned from to or bottom
+      const top = e.clientY;
+      const bottom = window.innerHeight - e.clientY;
+
+      // if the bottom is less than 200px, show the dropdown at the top
+      if (bottom > 200) {
+        actionsDropdown.style.top = '25px';
+        actionsDropdown.style.bottom = 'unset';
+      } else {
+        actionsDropdown.style.top = 'unset';
+        actionsDropdown.style.bottom = '25px'
+      }
+
+      // show the actions dropdown
+      actionsDropdown.style.display = 'flex';
+
+      // add click outside dropdown event listener to cloase the dropdown
+      document.addEventListener('click', e => {
+        if (e.target !== actionsDropdown && e.target !== this.shadow.querySelector('.actions-dropdown .actions-container')) {
+          this.closeContextMenu();
+          actionsDropdown.style.display = 'none';
+          this.container.openedContextNode = null;
+        }
+      })
     });
   }
 
@@ -367,14 +407,6 @@ export default class Message extends HTMLDivElement {
             <span class="reaction angry" data-reaction="angry" data-content="&#128544;">&#128544;</span>
           </div>
           <div class="actions">
-            <span class="action react" data-action="react">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M8 15C8.91212 16.2144 10.3643 17 12 17C13.6357 17 15.0879 16.2144 16 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M8.00897 9L8 9M16 9L15.991 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-              <span class="text">React</span>
-            </span>
             <span class="action reply" data-action="reply">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
                 <path d="M21.7109 9.3871C21.8404 9.895 21.9249 10.4215 21.9598 10.9621C22.0134 11.7929 22.0134 12.6533 21.9598 13.4842C21.6856 17.7299 18.3536 21.1118 14.1706 21.3901C12.7435 21.485 11.2536 21.4848 9.8294 21.3901C9.33896 21.3574 8.8044 21.2403 8.34401 21.0505C7.83177 20.8394 7.5756 20.7338 7.44544 20.7498C7.31527 20.7659 7.1264 20.9052 6.74868 21.184C6.08268 21.6755 5.24367 22.0285 3.99943 21.9982C3.37026 21.9829 3.05568 21.9752 2.91484 21.7349C2.77401 21.4946 2.94941 21.1619 3.30021 20.4966C3.78674 19.5739 4.09501 18.5176 3.62791 17.6712C2.82343 16.4623 2.1401 15.0305 2.04024 13.4842C1.98659 12.6533 1.98659 11.7929 2.04024 10.9621C2.31441 6.71638 5.64639 3.33448 9.8294 3.05621C10.2156 3.03051 10.6067 3.01177 11 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
@@ -969,7 +1001,6 @@ export default class Message extends HTMLDivElement {
           border: var(--border);
           padding: 0;
           border-radius: 15px;
-          border-radius: 15px;
         }
 
         .content > .message > .actions-dropdown > .actions-container > .reactions > .reaction {
@@ -977,7 +1008,8 @@ export default class Message extends HTMLDivElement {
           flex-flow: row;
           gap: 0;
           font-size: 1.58rem;
-          padding: 5px;
+          padding: 5px 6px;
+          height: max-content;
           border-radius: 15px;
           cursor: pointer;
         }

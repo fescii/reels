@@ -3,12 +3,12 @@ export default class MessagingContainer extends HTMLElement {
     super();
     this.shadow = this.attachShadow({ mode: 'open' });
     this.active_tab = null;
-    this.openedContextMenu = null;
+    this.openedContextNode = null;
     this.render();
   }
 
-  setOpenedContextMenu = node => {
-    this.openedContextMenu = node;
+  setOpenedContextNode = node => {
+    this.openedContextNode = node;
   }
 
   render() {

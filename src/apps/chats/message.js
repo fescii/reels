@@ -187,34 +187,34 @@ export default class Message extends HTMLDivElement {
     // if we are in the same day: Today at HH:MM AM/PM
     if (diff < 1000 * 60 * 60 * 24) {
       return /* html */`
-        Today at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        Today at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
       `;
     }
 
     // if we are in the diff is less than 7 days: DAY AT HH:MM AM/PM
     if (diff < 1000 * 60 * 60 * 24 * 7) {
       return /* html */`
-        ${date.toLocaleString('default', { weekday: 'short' })} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        ${date.toLocaleString('default', { weekday: 'short' })} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
       `;
     }
 
     // if we are in the same month AND year: 12th APR AT HH:MM AM/PM
     if (new Date().getMonth() === date.getMonth() && new Date().getFullYear() === date.getFullYear()) {
       return /* html */`
-        ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
       `;
     }
 
     // if we are in the same year: 12th Jan at 11:59 PM
     if (new Date().getFullYear() === date.getFullYear()) {
       return /* html */`
-        ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
       `;
     }
 
     // if we are in a different year: 12th Jan 2021 at 11:59 PM
 		return /* html */`
-      ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
     `;
 	}
 
@@ -873,7 +873,7 @@ export default class Message extends HTMLDivElement {
           font-family: var(--font-read), sans-serif;
           font-weight: 500;
           font-size: 0.8rem;
-          text-transform: capitalize;
+          /*text-transform: capitalize;*/
           color: var(--gray-color);
         }
 

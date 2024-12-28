@@ -256,15 +256,15 @@ export default class MessagingContainer extends HTMLElement {
         you="false" verified="true" status="delivered" active="true" kind="reply" to-you="false" reply-to="John" reply-text="This is a message from Jane Doe, Please reply as soon as possible.">
         OMG! WWE is coming to town, are you ready?
       </div>
-      <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"
+      <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-26T02:49:00Z"
         you="true" verified="false" status="delivered" active="false" kind="message">
         Did you get the news, apparently there is a new update on the way.
       </div>
-      <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-26T17:10:00Z"
+      <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-27T17:12:00Z"
         you="true" verified="false" status="sent" active="false" kind="reply" to-you="false" reply-to="John" reply-text="OMG! WWE is coming to town, are you ready?">
         Rickoshea!!!!
       </div>
-      <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-26T17:10:00Z"
+      <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-28T20:47:00Z"
         you="true" verified="true" status="sent" active="false" kind="reply" to-you="true" reply-to="Jane" reply-text="Rickoshea!!!!">
         I am so excited, I can't wait to see the show.
       </div>

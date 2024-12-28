@@ -50,18 +50,6 @@ export default class AppMain extends HTMLElement {
   }
 
   showToast = (success, message) => {
-    // const x = this.shadowObj.querySelector("#toast");
-
-    
-
-    // const text = x.querySelector('#desc');
-    // const icon = x.querySelector('#img');
-    // text.textContent = message;
-    // icon.innerHTML = success ? this.getSuccesToast() : this.getErrorToast();
-    // x.className = "show";
-    // x.classList.add(success ? 'success' : 'error');
-    // setTimeout(function(){ x.className = x.className.replace("show", ""); }, 5000);
-
     // check if the toast is already open
     const toastEl = document.querySelector('#toast');
     if (toastEl) toastEl.remove();

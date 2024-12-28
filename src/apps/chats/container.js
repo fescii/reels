@@ -219,13 +219,6 @@ export default class MessagingContainer extends HTMLElement {
           <path d="M20.2649 7.27042L22 9M21.1714 5.08571C21.1714 3.38152 19.7899 2 18.0857 2C16.3815 2 15 3.38152 15 5.08571C15 6.78991 16.3815 8.17143 18.0857 8.17143C19.7899 8.17143 21.1714 6.78991 21.1714 5.08571Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </button>
-      <button class="action more" title="More">
-        <svg class="large" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-          <path d="M22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12Z" stroke="currentColor" stroke-width="1.8" />
-          <path d="M12.2422 17V12C12.2422 11.5286 12.2422 11.2929 12.0957 11.1464C11.9493 11 11.7136 11 11.2422 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M11.992 8H12.001" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </button>
     `;
   }
 
@@ -295,6 +288,7 @@ export default class MessagingContainer extends HTMLElement {
     return /* css */`
       <style>
         :host {
+          border: 1px solid red;
           display: flex;
           max-width: 100%;
           width: 100%;
@@ -315,6 +309,7 @@ export default class MessagingContainer extends HTMLElement {
         }
 
         header.header {
+          box-sizing: border-box;
           border-bottom: var(--border);
           background: var(--background);
           padding: 0;
@@ -685,7 +680,11 @@ export default class MessagingContainer extends HTMLElement {
        
         @media screen and (max-width: 660px) {
           :host {
-            
+            height: 100%;
+            max-height: 100%;
+            width: 100%;
+            min-width: 100%;
+            max-width: 100%;
           }
 
           /* reset all cursor: pointer to cursor: default */
@@ -704,7 +703,7 @@ export default class MessagingContainer extends HTMLElement {
             align-items: start;
             flex-wrap: nowrap;
             gap: 5px;
-            margin: 0 0 0 28px;
+            margin: 0;
             z-index: 6;
             width: 100%;
             position: sticky;
@@ -713,7 +712,6 @@ export default class MessagingContainer extends HTMLElement {
   
           header.header > svg {
             position: absolute;
-            display: flex;
             left: -12px;
             margin: 2px 0 0;
             top: 50%;
@@ -741,6 +739,12 @@ export default class MessagingContainer extends HTMLElement {
             margin: 0 0 0 28px;
             width: calc(100% - 28px);
             position: relative;
+          }
+
+          main.main {
+            max-height: 100%;
+            height: 100%;
+            width: 100%;
           }
         }
       </style>

@@ -89,6 +89,7 @@ Author URL: https://femar.co.ke
   --alt-color: #ff932f;
   --error-color: #ec4b19;
   --anchor-color: #0065c5;
+  --icon-color: var(--text-color);
 
   --shot-text-color: #b9babc;
   --shot-read-color: #b5b3b3;

@@ -106,7 +106,7 @@ export default class ChatApp extends HTMLElement {
   getMain = () => {
     return /* html */`
       <div class="main">
-        ${this.getEmptyChat()}
+        ${this.getMessagingContainer()}
       </div>
     `;
   }
@@ -794,18 +794,25 @@ export default class ChatApp extends HTMLElement {
 
         @media screen and (max-width: 660px) {
           :host {
+            border: none;
             width: 100%;
             max-width: 100%;
-            border: none;
+            min-width: 100%;
+            max-height: calc(100dvh - 55px);
             padding: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: start;
             justify-content: start;
           }
 
-          div.chats {
+          div.chats,
+          div.main {
+            /*border: 2px solid blue;*/
             width: 100%;
+            min-width: 100%;
+            height: 100%;
+            max-height: 100%;
           }
 
           /* reset all cursor: pointer to cursor: default */

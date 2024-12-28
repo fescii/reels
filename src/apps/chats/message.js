@@ -1015,8 +1015,8 @@ export default class Message extends HTMLDivElement {
         }
 
         .content > .message > .actions-dropdown > .actions-container > .reactions > .reaction:hover {
-          background: var(--tab-background);
-          color: var(--accent-color);
+          /* background: var(--tab-background);
+          color: var(--accent-color); */
         }
 
         .content > .message > .actions-dropdown > .actions-container > .actions {
@@ -1045,8 +1045,8 @@ export default class Message extends HTMLDivElement {
         }
 
         .content > .message > .actions-dropdown > .actions-container > .actions > span.action:hover {
-          background: var(--tab-background);
-          color: var(--accent-color);
+         /* background: var(--tab-background);
+          color: var(--accent-color);*/
         }
 
       

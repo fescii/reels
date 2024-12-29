@@ -233,15 +233,18 @@ export default class MessagingContainer extends HTMLElement {
     return /* html */`
       ${this.getDisclaimer()}
       <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/men/1.jpg" datetime="2024-12-24T12:00:00Z"
-        you="false" verified="true" status="seen" active="true" kind="message">
+        you="false" verified="true" status="seen" active="true" kind="message"
+        reactions='{ "from": null, "to": "love" }'>
         This is a message from John Doe, Please reply as soon as possible.
       </div>
       <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"
-        you="true" verified="false" status="seen" active="false" kind="message">
+        you="true" verified="false" status="seen" active="false" kind="message"
+        reactions='{ "from": "angry", "to": null }'>
         This is a message from Jane Doe, Please reply as soon as possible.
       </div>
       <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"
-        you="false" verified="true" status="delivered" active="true" kind="reply" to-you="true" reply-to="John" reply-text="This is a message from Jane Doe, Please reply as soon as possible.">
+        you="false" verified="true" status="delivered" active="true" kind="reply" to-you="true" reply-to="John" reply-text="This is a message from Jane Doe, Please reply as soon as possible."
+        reactions='{ "from": "love", "to": "love" }'>
         OMG! WWE is coming to town, are you ready?
       </div>
       <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/men/1.jpg" datetime="2024-12-24T12:00:00Z"
@@ -249,7 +252,8 @@ export default class MessagingContainer extends HTMLElement {
         This is a message from John Doe, Please reply as soon as possible.
       </div>
       <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"
-        you="true" verified="false" status="seen" active="false" kind="message">
+        you="true" verified="false" status="seen" active="false" kind="message"
+        reactions='{ "from": "love", "to": "love" }'>
         Thanks! I will reply as soon as possible.
       </div>
       <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/men/1.jpg" datetime="2024-12-24T12:00:00Z"
@@ -265,7 +269,8 @@ export default class MessagingContainer extends HTMLElement {
         Rickoshea!!!!
       </div>
       <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-28T20:47:00Z"
-        you="true" verified="true" status="sent" active="false" kind="reply" to-you="true" reply-to="Jane" reply-text="Rickoshea!!!!">
+        you="true" verified="true" status="sent" active="false" kind="reply" to-you="true" reply-to="Jane" reply-text="Rickoshea!!!!"
+        reactions='{ "from": "angry", "to": "love" }'>
         I am so excited, I can't wait to see the show.
       </div>
       ${this.getTyping()}

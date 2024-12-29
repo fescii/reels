@@ -7,7 +7,37 @@ export default class Message extends HTMLDivElement {
     this.editable = this.textToBoolean(this.getAttribute('you'));
     this.mql = window.matchMedia('(max-width: 660px)');
     this.container = this.app = this.getRootNode().host;
+    this.reactions = this.getReaction(this.getAttribute('reactions'));
     this.render();
+  }
+
+  getReaction = str => {
+    if (!str || str === '' || str === 'null') {
+      return {
+        from: null,
+        to: null,
+      }
+    }
+    try {
+      let reaction = JSON.parse(str);
+      // validate the reactions in [like, love, laugh, wow, sad, angry]
+      if (!['like', 'love', 'laugh', 'wow', 'sad', 'angry'].includes(reaction?.from)) {
+        reaction.from = null;
+      }
+      if (!['like', 'love', 'laugh', 'wow', 'sad', 'angry'].includes(reaction?.to)) {
+        reaction.to = null;
+      }
+      return {
+        from: reaction?.from,
+        to: reaction?.to,
+      }
+    } catch (error) {
+      console.log('Error:', error);
+      return {
+        from: null,
+        to: null,
+      }
+    }
   }
 
   render() {
@@ -183,12 +213,18 @@ export default class Message extends HTMLDivElement {
     if (diff < 1000 * 60) {
       return 'Just now';
     }
-
     // if we are in the same day: Today at HH:MM AM/PM
     if (diff < 1000 * 60 * 60 * 24) {
-      return /* html */`
-        Today at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
-      `;
+      // check if dates are the same
+      if (new Date().getDate() === date.getDate()) {
+        return /* html */`
+          Today at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
+        `;
+      } else {
+        return /* html */`
+          Yesterday at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
+        `;
+      }
     }
 
     // if we are in the diff is less than 7 days: DAY AT HH:MM AM/PM
@@ -393,18 +429,19 @@ export default class Message extends HTMLDivElement {
   getActionsDropdown = mql => {
     // if mql does not match, return nothing
     if (!mql.matches) return '';
+    const reactions = this.reactions;
     const you = this.textToBoolean(this.getAttribute('you'));
     const dateTime = this.getAttribute('datetime');
     return /* html */`
       <div class="actions-dropdown">
         <div class="actions-container">
           <div class="reactions">
-            <span class="reaction like" data-reaction="like" data-content="&#128077;">&#128077;</span>
-            <span class="reaction love" data-reaction="love" data-content="&#128525;">&#128525;</span>
-            <span class="reaction laugh" data-reaction="laugh" data-content="&#128514;">&#128514;</span>
-            <span class="reaction wow" data-reaction="wow" data-content="&#128558;">&#128558;</span>
-            <span class="reaction sad" data-reaction="sad" data-content="&#128546;">&#128546;</span>
-            <span class="reaction angry" data-reaction="angry" data-content="&#128544;">&#128544;</span>
+            <span class="reaction like ${this.checkActiveReaction(reactions, 'like', you)}" data-reaction="like" data-content="&#128077;">&#128077;</span>
+            <span class="reaction love ${this.checkActiveReaction(reactions, 'love', you)}" data-reaction="love" data-content="&#128525;">&#128525;</span>
+            <span class="reaction laugh ${this.checkActiveReaction(reactions, 'laugh', you)}" data-reaction="laugh" data-content="&#128514;">&#128514;</span>
+            <span class="reaction wow ${this.checkActiveReaction(reactions, 'wow', you)}" data-reaction="wow" data-content="&#128558;">&#128558;</span>
+            <span class="reaction sad ${this.checkActiveReaction(reactions, 'sad', you)}" data-reaction="sad" data-content="&#128546;">&#128546;</span>
+            <span class="reaction angry ${this.checkActiveReaction(reactions, 'angry', you)}" data-reaction="angry" data-content="&#128544;">&#128544;</span>
           </div>
           <div class="actions">
             <span class="action reply" data-action="reply">
@@ -428,6 +465,43 @@ export default class Message extends HTMLDivElement {
         </div>
       </div>
     `;
+  }
+
+  checkActiveReaction = (reactions, str, you) => {
+    if (typeof reactions !== 'object' || !reactions) return '';
+    
+    // if message is yours, check if the reaction is from you:: return active
+    if (you && reactions.from === str) return 'active';
+
+    // if message is not yours, check if the reaction is to you:: return active
+    if (!you && reactions.to === str) return 'active';
+
+    return '';
+  }
+
+  getReactions = (reactions, you) => {
+    if (!reactions) return '';
+    return /* html */`
+      <div class="reactions">
+        ${this.getReactionIcon(reactions.from, you)}
+        ${this.getReactionIcon(reactions.to, you)}
+      </div>
+    `;
+  }
+
+  getActiveEmoji = (reaction, you) => {
+    if (reaction && you) return /* html */`<span class="reaction ${reaction}">${this.getReactionEmoji(reaction)}</span>`;
+    return /* html */`<span class="active"></span>`;
+  }
+
+  getReactionEmoji = reaction => {
+    if (reaction === 'like') return '&#128077;';
+    if (reaction === 'love') return '&#128525;';
+    if (reaction === 'laugh') return '&#128514;';
+    if (reaction === 'wow') return '&#128558;';
+    if (reaction === 'sad') return '&#128546;';
+    if (reaction === 'angry') return '&#128544;';
+    return '';
   }
 
   getDropDownYouActions = (you, dateTime) => {
@@ -1014,9 +1088,9 @@ export default class Message extends HTMLDivElement {
           cursor: pointer;
         }
 
-        .content > .message > .actions-dropdown > .actions-container > .reactions > .reaction:hover {
-          /* background: var(--tab-background);
-          color: var(--accent-color); */
+        .content > .message > .actions-dropdown > .actions-container > .reactions > .reaction.active {
+          background: var(--tab-background);
+          color: var(--accent-color);
         }
 
         .content > .message > .actions-dropdown > .actions-container > .actions {

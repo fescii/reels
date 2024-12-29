@@ -48,6 +48,34 @@ export default class Message extends HTMLDivElement {
     this.setupEditAction();
     this.showActionsDropdown();
     this.initalizeCopy(this.mql);
+    this.openDesktopReactions(this.mql);
+  }
+
+  openDesktopReactions = mql => {
+    if (!mql.matches) {
+      // select react action button
+      const actions = this.shadow.querySelector('.content > .message > .actions');
+      const react = this.shadow.querySelector('.content > .message > .actions > .action.react');
+      const reactions = this.shadow.querySelector('.content > .message > .desktop-reactions');
+      if(react && reactions && actions) {
+        react.addEventListener('click', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // hide the actions
+          actions.style.display = 'none';
+
+          // show the reactions
+          reactions.style.opacity = '0';
+          // add animation to the reactions
+          reactions.style.transition = 'all 0.3s ease-in-out';
+          reactions.style.display = 'flex';
+          setTimeout(() => {
+            reactions.style.opacity = '1';
+          }, 100);
+        });
+      }
+    }
   }
 
   initalizeCopy = mql => {
@@ -288,6 +316,7 @@ export default class Message extends HTMLDivElement {
         ${this.getReply()}
         ${this.getTextMessge()}
         ${this.getInlineActions(this.mql)}
+        ${this.getDesktopReactions(this.mql)}
         ${this.getActionsDropdown(this.mql)}
         <div class="time">
           <span class="date">${this.formatDateTime(this.getAttribute('datetime'))}</span>
@@ -428,7 +457,7 @@ export default class Message extends HTMLDivElement {
     }
   }
 
-  getReactions = mql => {
+  getDesktopReactions = mql => {
     if (!mql.matches) {
       const reactions = this.reactions;
       const you = this.textToBoolean(this.getAttribute('you'));
@@ -443,6 +472,8 @@ export default class Message extends HTMLDivElement {
         </div>
       `;
     }
+
+    return '';
   }
 
   getActionsDropdown = mql => {
@@ -795,7 +826,7 @@ export default class Message extends HTMLDivElement {
           top: -15px;
           left: 0;
           padding: 0;
-          display: flex;
+          display: none;
           flex-direction: row;
           align-items: center;
           gap: 0;
@@ -880,6 +911,49 @@ export default class Message extends HTMLDivElement {
           justify-content: center;
         }
 
+        .content > .message > .desktop-reactions {
+          z-index: 1;
+          position: absolute;
+          top: -15px;
+          left: 0;
+          display: none;
+          flex-direction: row;
+          align-items: center;
+          background: var(--background);
+          box-shadow: var(--box-shadow);
+          justify-content: start;
+          gap: 0;
+          border: var(--border);
+          padding: 0;
+          border-radius: 15px;
+        }
+
+        .content.reply > .message > .desktop-reactions {
+          top: 25px;
+        }
+
+        .content.you > .message > .desktop-reactions {
+          left: unset;
+          right: 0;
+        }
+
+        .content > .message > .desktop-reactions > .reaction {
+          display: flex;
+          flex-flow: row;
+          gap: 0;
+          font-size: 1.58rem;
+          padding: 5px 6px;
+          height: max-content;
+          border-radius: 15px;
+          cursor: pointer;
+        }
+
+        .content > .message > .desktop-reactions > .reaction.active,
+        .content > .message > .desktop-reactions > .reaction:hover {
+          background: var(--tab-background);
+          color: var(--accent-color);
+        }
+
         .content > .message > .text {
           background: var(--chat-background);
           box-sizing: border-box;
@@ -896,7 +970,6 @@ export default class Message extends HTMLDivElement {
         }
 
         .content.reacted > .message > .text {
-          /*border: 2px solid var(--accent-color);*/
           padding: 6px 1px 7px 12px;
         }
 

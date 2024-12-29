@@ -264,16 +264,17 @@ export default class Message extends HTMLDivElement {
   getMessage = () => {
     const you = this.textToBoolean(this.getAttribute('you')) ? 'you' : '';
     const reply = this.getAttribute('kind');
+    const reacted = this.reactions.from || this.reactions.to ? 'reacted' : '';
     if (you) {
       return /* html */`
-        <div class="content ${you} ${reply}">
+        <div class="content ${reacted} ${you} ${reply}">
           ${this.getMessageContent(you)}
           ${this.getAvatar()}
         </div>
       `;
     } else {
       return /* html */`
-        <div class="content ${you} ${reply}">
+        <div class="content ${you} ${reply} ${reacted}">
           ${this.getAvatar()}
           ${this.getMessageContent(you)}
         </div>
@@ -325,6 +326,7 @@ export default class Message extends HTMLDivElement {
     return /* html */`
       <div class="text">
         ${this.innerHTML}
+        ${this.getUserReactions(this.reactions)}
         ${this.getUnread(this.textToBoolean(this.getAttribute('you')), this.getAttribute('status'))}
       </div>
     `;
@@ -426,6 +428,23 @@ export default class Message extends HTMLDivElement {
     }
   }
 
+  getReactions = mql => {
+    if (!mql.matches) {
+      const reactions = this.reactions;
+      const you = this.textToBoolean(this.getAttribute('you'));
+      return /* html */`
+        <div class="desktop-reactions">
+          <span class="reaction like ${this.checkActiveReaction(reactions, 'like', you)}" data-reaction="like" data-content="&#128077;">&#128077;</span>
+          <span class="reaction love ${this.checkActiveReaction(reactions, 'love', you)}" data-reaction="love" data-content="&#128525;">&#128525;</span>
+          <span class="reaction laugh ${this.checkActiveReaction(reactions, 'laugh', you)}" data-reaction="laugh" data-content="&#128514;">&#128514;</span>
+          <span class="reaction wow ${this.checkActiveReaction(reactions, 'wow', you)}" data-reaction="wow" data-content="&#128558;">&#128558;</span>
+          <span class="reaction sad ${this.checkActiveReaction(reactions, 'sad', you)}" data-reaction="sad" data-content="&#128546;">&#128546;</span>
+          <span class="reaction angry ${this.checkActiveReaction(reactions, 'angry', you)}" data-reaction="angry" data-content="&#128544;">&#128544;</span>
+        </div>
+      `;
+    }
+  }
+
   getActionsDropdown = mql => {
     // if mql does not match, return nothing
     if (!mql.matches) return '';
@@ -479,19 +498,51 @@ export default class Message extends HTMLDivElement {
     return '';
   }
 
-  getReactions = (reactions, you) => {
+  getUserReactions = reactions => {
     if (!reactions) return '';
+    if(reactions.from === null && reactions.to === null) return '';
     return /* html */`
-      <div class="reactions">
-        ${this.getReactionIcon(reactions.from, you)}
-        ${this.getReactionIcon(reactions.to, you)}
-      </div>
+      <span class="user-reactions">
+        ${this.getActiveEmojis(reactions)}
+      </span>
     `;
   }
 
-  getActiveEmoji = (reaction, you) => {
-    if (reaction && you) return /* html */`<span class="reaction ${reaction}">${this.getReactionEmoji(reaction)}</span>`;
-    return /* html */`<span class="active"></span>`;
+  getActiveEmojis = reactions => {
+    if (!reactions) return '';
+    if (reactions.from !== null && reactions.to !== null) {
+      if(reactions.from === reactions.to) {
+        return /* html */`
+          <span class="user-reaction ${reactions.from}">
+            <span class="emoji">${this.getReactionEmoji(reactions.from)}</span>
+            <span class="count">2</span>
+          </span>
+        `;
+      } else {
+        return /* html */`
+          <span class="user-reaction ${reactions.from} ${reactions.to}">
+            <span class="emoji">${this.getReactionEmoji(reactions.from)}</span>
+            <span class="emoji">${this.getReactionEmoji(reactions.to)}</span>
+          </span>
+        `;
+      }
+    } else if(reactions.from !== null) {
+      return /* html */`
+        <span class="user-reaction ${reactions.from}">
+          <span class="emoji">${this.getReactionEmoji(reactions.from)}</span>
+          <span class="count">1</span>
+        </span>
+      `;
+    } else if(reactions.to !== null) {
+      return /* html */`
+        <span class="user-reaction ${reactions.to}">
+          <span class="emoji">${this.getReactionEmoji(reactions.to)}</span>
+          <span class="count">1</span>
+        </span>
+      `;
+    } else {
+      return '';
+    }
   }
 
   getReactionEmoji = reaction => {
@@ -654,7 +705,7 @@ export default class Message extends HTMLDivElement {
           width: max-content;
           max-width: 72%;
           width: 72%;
-          padding: 0;
+          padding: 5px 0;
           cursor: pointer;
           display: flex;
           flex-flow: row;
@@ -671,7 +722,7 @@ export default class Message extends HTMLDivElement {
         }
 
         .content.reply {
-          padding: 40px 0 0 0;
+          padding: 45px 0 0 0;
         }
 
         .content:hover > .message > .time,
@@ -744,7 +795,7 @@ export default class Message extends HTMLDivElement {
           top: -15px;
           left: 0;
           padding: 0;
-          display: none;
+          display: flex;
           flex-direction: row;
           align-items: center;
           gap: 0;
@@ -782,8 +833,7 @@ export default class Message extends HTMLDivElement {
           display: none;
           position: absolute;
           top: -35px;
-          left: 50%;
-          transform: translateX(-50%);
+          left: 0;
           padding: 5px 10px;
           background: var(--chat-hover);
           border-radius: 10px;
@@ -794,6 +844,11 @@ export default class Message extends HTMLDivElement {
           box-shadow: var(--shadow);
         }
 
+        .content.you > .message > .actions > .action > .info {
+          left: unset;
+          right: 0;
+        }
+
         .content > .message > .actions > .action:hover > .info {
           display: flex;
         }
@@ -801,7 +856,7 @@ export default class Message extends HTMLDivElement {
         .content > .message > .actions > .action > .info > .arrow {
           position: absolute;
           top: 100%;
-          left: 50%;
+          left: 20px;
           display: inline-block;
           transform: translateX(-50%);
           width: 0;
@@ -809,6 +864,11 @@ export default class Message extends HTMLDivElement {
           border-left: 5px solid transparent;
           border-right: 5px solid transparent;
           border-top: 5px solid var(--chat-hover);
+        }
+
+        .content.you > .message > .actions > .action > .info > .arrow {
+          left: unset;
+          right: 10px;
         }
 
         .content > .message > .actions > .action > svg {
@@ -825,7 +885,7 @@ export default class Message extends HTMLDivElement {
           box-sizing: border-box;
           gap: 5px;
           margin: 0;
-          padding: 5px 10px;
+          padding: 6px 10px;
           border-radius: 15px;
           width: max-content;
           max-width: 100%;
@@ -835,8 +895,17 @@ export default class Message extends HTMLDivElement {
           position: relative;
         }
 
+        .content.reacted > .message > .text {
+          /*border: 2px solid var(--accent-color);*/
+          padding: 6px 1px 7px 12px;
+        }
+
         .content.you > .message > .text {
-          padding: 5px 9px 5px 12px;
+          padding: 6px 9px 6px 12px;
+        }
+
+        .content.you.reacted > .message > .text {
+          padding: 7px 12px 8px 12px;
         }
 
         .content.reply > .message > .text {
@@ -902,7 +971,7 @@ export default class Message extends HTMLDivElement {
         .content > .message > .text > span.tick {
           float: right;
           display: inline-block;
-          margin: 2px 0 0 5px;
+          margin: 3px 0 0 5px;
         }
 
         .content > .message > .text > span.tick svg {
@@ -937,6 +1006,50 @@ export default class Message extends HTMLDivElement {
           stroke: var(--accent-color);
         }
 
+        /* user-reactions */
+        .content > .message > .text > .user-reactions {
+          border: none;
+          border: 2px solid var(--background);
+          display: flex;
+          flex-flow: row nowrap;
+          align-items: center;
+          gap: 2px;
+          padding: 3px 5px;
+          position: absolute;
+          left: 0;
+          min-width: max-content;
+          bottom: -23px;
+          background: var(--chat-background);
+          color: var(--gray-color);
+          z-index: 1;
+          border-radius: 15px;
+        }
+
+        .content.you > .message > .text > .user-reactions {
+          left: unset;
+          right: 0;
+        }
+
+        .content > .message > .text > .user-reactions > .user-reaction {
+          display: flex;
+          flex-flow: row nowrap;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+        }
+
+        .content > .message > .text > .user-reactions > .user-reaction > span.count {
+          font-size: 1rem;
+          font-weight: 500;
+          font-family: var(--font-read), sans-serif;
+          color: var(--gray-color);
+        }
+
+        .content > .message > .text > .user-reactions > .user-reaction > span.emoji {
+          font-size: 1rem;
+          display: inline-block;
+        }
+
         .content > .message > .time {
           padding: 0 3.5px;
           width: max-content;
@@ -954,6 +1067,10 @@ export default class Message extends HTMLDivElement {
         .content.you > .message > .time {
           /* border: 1px solid var(--accent-color); */
           padding: 0 7px 0 4px;
+        }
+
+        .content.reacted > .message > .time {
+          margin: 20px 0 0 0;
         }
 
         .content > .message > .time > .status.delivered,
@@ -1048,7 +1165,6 @@ export default class Message extends HTMLDivElement {
           height: max-content;
           border-radius: 15px;
           z-index: 1;
-          overflow: hidden;
         }
 
         .content.you > .message > .actions-dropdown {

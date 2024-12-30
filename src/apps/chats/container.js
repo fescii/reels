@@ -124,6 +124,7 @@ export default class MessagingContainer extends HTMLElement {
         <div class="messages">
           ${this.getMessages()}
         </div>
+        ${this.getEditor()}
       </main>
     `;
   }
@@ -328,6 +329,47 @@ export default class MessagingContainer extends HTMLElement {
   getEditor = () => {
     return /* html */`
       <div class="editor" id="editor">
+        <form class="form message-form">
+          <div class="actions-container">
+            <div class="actions">
+              <button class="action attachment" title="Attachment">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                  <path d="M9.14339 10.691L9.35031 10.4841C11.329 8.50532 14.5372 8.50532 16.5159 10.4841C18.4947 12.4628 18.4947 15.671 16.5159 17.6497L13.6497 20.5159C11.671 22.4947 8.46279 22.4947 6.48405 20.5159C4.50532 18.5372 4.50532 15.329 6.48405 13.3503L6.9484 12.886" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                  <path d="M17.0516 11.114L17.5159 10.6497C19.4947 8.67095 19.4947 5.46279 17.5159 3.48405C15.5372 1.50532 12.329 1.50532 10.3503 3.48405L7.48405 6.35031C5.50532 8.32904 5.50532 11.5372 7.48405 13.5159C9.46279 15.4947 12.671 15.4947 14.6497 13.5159L14.8566 13.309" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+              </button>
+              <button class="action image" title="Image">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                  <circle cx="7.5" cy="7.5" r="1.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z" stroke="currentColor" stroke-width="1.8" />
+                  <path d="M5 21C9.37246 15.775 14.2741 8.88406 21.4975 13.5424" stroke="currentColor" stroke-width="1.8" />
+                </svg>
+              </button>
+              <button class="action video" title="Video">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                  <path d="M11 8L13 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                  <path d="M2 11C2 7.70017 2 6.05025 3.02513 5.02513C4.05025 4 5.70017 4 9 4H10C13.2998 4 14.9497 4 15.9749 5.02513C17 6.05025 17 7.70017 17 11V13C17 16.2998 17 17.9497 15.9749 18.9749C14.9497 20 13.2998 20 10 20H9C5.70017 20 4.05025 20 3.02513 18.9749C2 17.9497 2 16.2998 2 13V11Z" stroke="currentColor" stroke-width="1.8" />
+                  <path d="M17 8.90585L17.1259 8.80196C19.2417 7.05623 20.2996 6.18336 21.1498 6.60482C22 7.02628 22 8.42355 22 11.2181V12.7819C22 15.5765 22 16.9737 21.1498 17.3952C20.2996 17.8166 19.2417 16.9438 17.1259 15.198L17 15.0941" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+              </button>
+            </div>
+            <div class="expand">
+              <button class="action expand" title="Expand">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+                  <path d="M9.00005 6C9.00005 6 15 10.4189 15 12C15 13.5812 9 18 9 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <textarea name="editor" id="editor" cols="30" rows="1" placeholder="Message" required></textarea>
+          <button type="submit" class="send" title="Send">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+              <path d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z" stroke="currentColor" stroke-width="1.8" />
+              <path id ="outer" d="M16 12L12 16L8 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              <path id ="outer" d="M12 8V16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </form>
       </div>
     `;
   }
@@ -619,6 +661,7 @@ export default class MessagingContainer extends HTMLElement {
           align-items: center;
           width: 24px;
           height: 24px;
+          color: var(--accent-color);
         }
 
         header.header > .contents > .actions > button > svg.large {
@@ -657,7 +700,7 @@ export default class MessagingContainer extends HTMLElement {
           align-items: start;
           justify-content: start;
           gap: 10px;
-          padding: 10px 0 80px;
+          padding: 10px 0 30px;
         }
 
         main.main > .messages > div.disclaimer {
@@ -717,6 +760,169 @@ export default class MessagingContainer extends HTMLElement {
           50% {
             opacity: 1;
           }
+        }
+
+        /* editor */
+        div.editor#editor {
+          /* border: 1px solid red; */
+          display: flex;
+          flex-flow: column;
+          align-items: start;
+          justify-content: end;
+          position: sticky;
+          bottom: 0;
+          z-index: 5;
+          gap: 0;
+          width: 100%;
+          margin: 0;
+          padding: 5px 0;
+          background: var(--background);
+        }
+
+        div.editor#editor > form.message-form {
+          display: flex;
+          flex-flow: row;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 0;
+          margin: 0;
+          width: 100%;
+        }
+
+        div.editor#editor > form.message-form > div.actions-container {
+          display: flex;
+          flex-flow: row;
+          align-items: center;
+          justify-content: start;
+          gap: 5px;
+        }
+
+        div.editor#editor > form.message-form > div.actions-container > div.actions {
+          display: flex;
+          flex-flow: row;
+          align-items: center;
+          justify-content: start;
+          width: 100px;
+          overflow: hidden;
+          gap: 5px;
+        }
+
+        div.editor#editor > form.message-form > div.actions-container > div.actions > button {
+          border: none;
+          display: flex;
+          background: var(--background);
+          justify-content: center;
+          align-items: center;
+          padding: 0;
+          cursor: pointer;
+          width: 30px;
+          height: 30px;
+          color: var(--gray-color);
+        }
+
+        div.actions-container > div.actions > button > svg {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 23px;
+          height: 23px;
+          color: var(--accent-color);
+        }
+
+        div.actions-container > div.expand  {
+          display: none;
+          justify-content: center;
+          align-items: center;
+        }
+
+        div.actions-container > div.expand > button {
+          border: none;
+          display: flex;
+          background: transparent;
+          justify-content: center;
+          align-items: center;
+          padding: 0;
+          width: 25px;
+          height: 25px;
+          cursor: pointer;
+          color: var(--gray-color);
+        }
+
+        div.actions-container > div.expand > button > svg {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 22px;
+          height: 22px;
+          color: var(--accent-color);
+        }
+
+        div.editor#editor > form.message-form > textarea {
+          border: var(--border);
+          font-family: var(--font-main), sans-serif;
+          background: var(--background);
+          font-size: 1rem;
+          padding: 5px 10px;
+          outline: none;
+          margin: 0;
+          width: calc(100% - 140px);
+          resize: none;
+          height: auto;
+          line-height: 1.5;
+          scroll-padding-top: 7px;
+          scroll-padding-bottom: 7px;
+          gap: 5px;
+          font-weight: 400;
+          color: var(--text-color);
+          scrollbar-width: 3px;
+          border-radius: 15px;
+        }
+
+        div.editor#editor > form.message-form > textarea::placeholder {
+          color: var(--gray-color);
+          font-weight: 400;
+          font-size: 1rem;
+          font-family: var(--font-main), sans-serif;
+        }
+
+        div.editor#editor > form.message-form > textarea::-webkit-scrollbar {
+          width: 3px;
+          -webkit-appearance: auto;
+        }
+
+        div.editor#editor > form.message-form > textarea:focus {
+          border: var(--input-border-focus);
+        }
+
+        div.editor#editor > form.message-form > button.send {
+          border: none;
+          display: flex;
+          background: var(--background);
+          justify-content: center;
+          align-items: center;
+          padding: 0;
+          cursor: pointer;
+          width: 40px;
+          height: 40px;
+          color: var(--gray-color);
+        }
+
+        div.editor#editor > form.message-form > button.send > svg {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 30px;
+          height: 30px;
+          fill: var(--accent-color);
+          color: var(--accent-color);
+          rotate: 180deg;
+        }
+
+        div.editor#editor > form.message-form > button.send > svg > path#outer  {
+          /*fill: var(--white-color);
+          color: var(--white-color);*/
+          stroke: var(--white-color);
         }
        
         @media screen and (max-width: 660px) {

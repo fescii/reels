@@ -266,7 +266,7 @@ export default class Message extends HTMLDivElement {
       const bottom = window.innerHeight - e.clientY;
 
       // if the bottom is less than 200px, show the dropdown at the top
-      if (bottom > 200) {
+      if (bottom > 350) {
         actionsDropdown.style.top = '25px';
         actionsDropdown.style.bottom = 'unset';
       } else {

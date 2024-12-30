@@ -53,7 +53,7 @@ export default class MessagingContainer extends HTMLElement {
       input.rows = 1;
 
       // Calculate the number of rows based on scrollHeight minus the offset
-      const newRows = Math.ceil((input.scrollHeight - offset) / lineHeight);
+      let newRows = Math.floor((input.scrollHeight - offset) / lineHeight);
       input.rows = Math.min(maxRows, Math.max(newRows, 1)); // Ensure at least 1 row
 
       // Toggle actions visibility based on input

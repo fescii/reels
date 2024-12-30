@@ -52,18 +52,15 @@ export default class Message extends HTMLDivElement {
   }
 
   openDesktopReactions = mql => {
+    const you = this.textToBoolean(this.getAttribute('you'));
     if (!mql.matches) {
-      // select react action button
-      const actions = this.shadow.querySelector('.content > .message > .actions');
+      // select react action button and reactions container
       const react = this.shadow.querySelector('.content > .message > .actions > .action.react');
       const reactions = this.shadow.querySelector('.content > .message > .desktop-reactions');
-      if(react && reactions && actions) {
+      if(react && reactions) {
         react.addEventListener('click', e => {
           e.preventDefault();
           e.stopPropagation();
-          
-          // hide the actions
-          actions.style.display = 'none';
 
           // show the reactions
           reactions.style.opacity = '0';
@@ -73,8 +70,139 @@ export default class Message extends HTMLDivElement {
           setTimeout(() => {
             reactions.style.opacity = '1';
           }, 100);
+
+          // add event listeners to the reactions
+          this.reactToMessage(reactions, you, 'desktop');
+
+          // add click outside event listener to close the reactions
+          document.addEventListener('click', e => {
+            if (e.target !== react && e.target !== reactions) {
+              reactions.style.opacity = '0';
+              setTimeout(() => {
+                reactions.style.display = 'none';
+              }, 300);
+            }
+          })
         });
       }
+    } else {
+      const reactionsContainer = this.shadow.querySelector('.actions-dropdown');
+      if(reactionsContainer) {
+        // react to message
+        this.reactToMessage(reactionsContainer, you, 'mobile');
+      }
+    }
+  }
+
+  reactToMessage = (reactionsContainer, you, kind) => {
+    // get the reactions elements
+    const reactionElements = reactionsContainer.querySelectorAll('.reaction');
+
+    // add event listeners to the reactions
+    reactionElements.forEach(reaction => {
+      reaction.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        const reactionData = reaction.dataset.reaction;
+
+        // if the reaction is already active, remove it
+        if(you && this.reactions.from === reactionData) {
+          this.reactions.from = null;
+          this.updateReactions(reactionsContainer, reactionData, { action: 'remove', kind: kind });
+        } else if(!you && this.reactions.to === reactionData) {
+          this.reactions.to = null;
+          this.updateReactions(reactionsContainer, reactionData, { action: 'remove', kind: kind });
+        } else {
+          // if the reaction is not active, add it
+          if(you) {
+            this.reactions.from = reactionData;
+            this.updateReactions(reactionsContainer, reactionData, { action: 'add', kind: kind });
+          } else {
+            this.reactions.to = reactionData;
+            this.updateReactions(reactionsContainer, reactionData, { action: 'add', kind: kind });
+          }
+        }
+
+        // if(kind === 'desktop') {
+        //   // close the container
+        //   reactionsContainer.style.transition = 'all 0.3s ease-in-out';
+        //   reactionsContainer.style.opacity = '0';
+        //   setTimeout(() => {
+        //     reactionsContainer.style.display = 'none';
+        //   }, 300);
+        // }
+      });
+    })
+  }
+
+  updateReactions = (container, reaction, data) => {
+    const updatedReaction = (nodes, reaction) => {
+      nodes.forEach(node => {
+        node.classList.remove('active');
+        if(node.dataset.reaction === reaction) {
+          node.classList.add('active');
+        }
+      });
+    }
+
+    const removeReaction = (nodes, reaction) => {
+      nodes.forEach(node => {
+        if(node.dataset.reaction === reaction) {
+          node.classList.remove('active');
+        }
+      });
+    }
+
+    // update the reactions: active or remove
+    const reactions = container.querySelectorAll('.reaction');
+    if(reactions) {
+      if(data.action === 'remove') {
+        removeReaction(reactions, reaction);
+      } else {
+        updatedReaction(reactions, reaction);
+      }
+    }
+
+    // close container
+    if (data.kind === 'desktop') {
+      // console.log('Closing container');
+      container.style.opacity = '0';
+      setTimeout(() => {
+        container.style.display = 'none';
+      }, 300);
+    } else {
+      // close context menu
+      // this.container.openedContextNode = null;
+      // container.style.display = 'none';
+      this.closeContextMenu();
+    }
+
+    // update the message reactions
+    this.updateMessageReactions();
+  }
+
+  updateMessageReactions = () => {
+    // update the message reactions
+    this.setAttribute('reactions', JSON.stringify(this.reactions));
+
+    // select the message reactions
+    const content = this.shadow.querySelector('.content');
+    const text = content.querySelector('.content > .message > .text');
+    const messageReactions = text.querySelector('.user-reactions');
+    if(messageReactions) {
+      // remove the current reactions
+      messageReactions.remove();
+    }
+
+    //update content class: reacted or not
+    if(this.reactions.from || this.reactions.to) {
+      content.classList.add('reacted');
+      // insert the new reactions
+      text.insertAdjacentHTML('beforeend', this.getUserReactions(this.reactions));
+    } else {
+      content.classList.remove('reacted');
     }
   }
 
@@ -156,7 +284,7 @@ export default class Message extends HTMLDivElement {
           actionsDropdown.style.display = 'none';
           this.container.openedContextNode = null;
         }
-      })
+      }, { once: true });
     });
   }
 
@@ -354,9 +482,13 @@ export default class Message extends HTMLDivElement {
   getTextMessge = () => {
     return /* html */`
       <div class="text">
-        ${this.innerHTML}
+        <div class="message-text">
+          ${this.innerHTML}
+          ${this.getUnread(this.textToBoolean(this.getAttribute('you')), this.getAttribute('status'))}
+        </div>
+        ${this.getAttachements()}
+        ${this.getImages()}
         ${this.getUserReactions(this.reactions)}
-        ${this.getUnread(this.textToBoolean(this.getAttribute('you')), this.getAttribute('status'))}
       </div>
     `;
   }
@@ -703,6 +835,77 @@ export default class Message extends HTMLDivElement {
     `;
   }
 
+  getImages = () => {
+    const images = this.imagesArray();
+ 
+     if (images.length < 1) return '';
+ 
+     const innerImages = images.map(image => {
+       return /* html */`
+         <div class="image">
+           <img src="${image}" alt="Image attachment">
+         </div>
+       `;
+     }).join('');
+ 
+     return /* html */`
+       <div class="images">
+         ${innerImages}
+       </div>
+     `;
+   }
+ 
+   imagesArray = () => {
+     const images = this.getAttribute('images');
+ 
+     if (!images || images === '' || images === 'null') {
+       return [];
+     } else {
+        try {
+         return images.split(',');
+        } catch (error) {
+          // console.error('Error parsing images', error);
+          return [];
+        }
+     }
+   }
+ 
+   getAttachements = () => {
+     const attachements = this.attachementsArray();
+ 
+     if (attachements.length < 1) return '';
+ 
+     const innerAttachements = attachements.map(attachement => {
+       return /* html */`
+         <a href="${attachement.link}" target="_blank" download
+           title="${attachement.name}" size="${attachement.size}" type="${attachement.type}">
+           ${attachement.name}
+         </a>
+       `;
+     }).join('');
+ 
+     return /* html */`
+       <div class="attachements">
+         ${innerAttachements}
+       </div>
+     `;
+   }
+ 
+   attachementsArray = () => {
+     const attachements = this.getAttribute('attachments');
+ 
+     if (!attachements || attachements === '' || attachements === 'null') {
+       return [];
+     } else {
+       try {
+         return JSON.parse(attachements);
+       } catch (error) {
+         // console.error('Error parsing attachments', error);
+         return [];
+       }
+     }
+   }
+
   getStyles = () => {
     return /* css */`
       <style>
@@ -757,7 +960,7 @@ export default class Message extends HTMLDivElement {
         }
 
         .content:hover > .message > .time,
-        .content:hover > .message > .actions {
+        .content > .message:hover > .actions {
           display: flex;
         } 
 
@@ -970,7 +1173,7 @@ export default class Message extends HTMLDivElement {
         }
 
         .content.reacted > .message > .text {
-          padding: 6px 1px 7px 12px;
+          padding: 6px 12px 7px 12px;
         }
 
         .content.you > .message > .text {
@@ -1087,7 +1290,7 @@ export default class Message extends HTMLDivElement {
           flex-flow: row nowrap;
           align-items: center;
           gap: 2px;
-          padding: 3px 5px;
+          padding: 3px 6px;
           position: absolute;
           left: 0;
           min-width: max-content;
@@ -1114,7 +1317,7 @@ export default class Message extends HTMLDivElement {
         .content > .message > .text > .user-reactions > .user-reaction > span.count {
           font-size: 1rem;
           font-weight: 500;
-          font-family: var(--font-read), sans-serif;
+          font-family: var(--font-main), sans-serif;
           color: var(--gray-color);
         }
 
@@ -1312,7 +1515,71 @@ export default class Message extends HTMLDivElement {
           color: var(--accent-color);*/
         }
 
-      
+        /* images & attachments */
+        .content > .message > .text > .images {
+          display: flex;
+          justify-content: start;
+          align-items: center;
+          width: 100%;
+          gap: 5px;
+          margin: 0;
+          overflow-x: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        .content > .message > .text > .images::-webkit-scrollbar {
+          display: none;
+          visibility: hidden;
+        }
+
+        .content > .message > .text > .images > .image {
+          width: max-content;
+          height: 40px;
+          min-width: 40px;
+          max-width: 40px;
+          min-height: 40px;
+          max-height: 40px;
+          border-radius: 10px;
+          overflow: hidden;
+        }
+
+        .content > .message > .text > .images > .image > img {
+          width: auto;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .content > .message > .text > .attachements {
+          display: flex;
+          flex-direction: row;
+          justify-content: start;
+          flex-wrap: wrap;
+          align-items: start;
+          width: 100%;
+          max-width: 100%;
+          gap: 5px;
+          margin-top: 5px;
+        }
+
+        .content > .message > .text > .attachements > a {
+          width: max-content;
+          display: flex;
+          justify-content: start;
+          align-items: center;
+          gap: 5px;
+          text-decoration: none;
+          color: var(--anchor-color);
+          font-family: var(--font-read), sans-serif;
+          font-size: 0.85rem;
+          background: var(--tab-background);
+          border-radius: 8px;
+          padding: 2.5px 7px;
+
+          /** add ellipsis */
+          white-space: nowrap;
+        }
+
         @media screen and (max-width: 660px) {
           :host {
             

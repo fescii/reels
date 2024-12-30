@@ -267,7 +267,12 @@ export default class ChatItem extends HTMLDivElement {
     if (!images || images === '' || images === 'null') {
       return [];
     } else {
-      return images.split(',');
+      try {
+        return images.split(',');
+      } catch (error) {
+        // console.error('Error parsing images', error);
+        return [];
+      }
     }
   }
 

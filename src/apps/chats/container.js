@@ -16,7 +16,7 @@ export default class MessagingContainer extends HTMLElement {
   }
 
   connectedCallback() {
-    this.scrollMessages();
+    // this.scrollMessages();
   }
 
   scrollMessages = () => {
@@ -234,12 +234,33 @@ export default class MessagingContainer extends HTMLElement {
       ${this.getDisclaimer()}
       <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/men/1.jpg" datetime="2024-12-24T12:00:00Z"
         you="false" verified="true" status="seen" active="true" kind="message"
-        reactions='{ "from": null, "to": "love" }'>
+        reactions='{ "from": null, "to": "love" }'
+        attachments='[
+          {
+            "name": "Meeting Notes.pdf",
+            "size": "1.2MB",
+            "type": "pdf",
+            "link": "https://example.com/meeting-notes.pdf"
+          },
+          {
+            "name": "Design Mockup.png",
+            "size": "2.4MB",
+            "type": "image",
+            "link": "https://example.com/design-mockup.png"
+          },
+          {
+            "name": "Project Proposal.docx",
+            "size": "3.6MB",
+            "type": "doc",
+            "link": "https://example.com/project-proposal.docx"
+          }
+          ]'>
         This is a message from John Doe, Please reply as soon as possible.
       </div>
       <div is="message-item" class="message" user-name="Jane Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"
         you="true" verified="false" status="seen" active="false" kind="message"
-        reactions='{ "from": "angry", "to": null }'>
+        reactions='{ "from": "angry", "to": null }'
+        images="https://images.unsplash.com/photo-1733077151673-c834c5613bbc?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://plus.unsplash.com/premium_photo-1733514691529-da25716e449b?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://images.unsplash.com/photo-1719937051176-9b98352a6cf4?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
         This is a message from Jane Doe, Please reply as soon as possible.
       </div>
       <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-24T12:00:00Z"

@@ -425,13 +425,11 @@ export default class Message extends HTMLDivElement {
       return /* html */`
         <div class="content ${reacted} ${you} ${reply}">
           ${this.getMessageContent(you)}
-          ${this.getAvatar()}
         </div>
       `;
     } else {
       return /* html */`
         <div class="content ${you} ${reply} ${reacted}">
-          ${this.getAvatar()}
           ${this.getMessageContent(you)}
         </div>
       `;
@@ -565,28 +563,6 @@ export default class Message extends HTMLDivElement {
         <path d="M8 12.5L10.5 15L16 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     `;
-  }
-
-  getAvatar = () => {
-    return /*html*/`
-      <div class="avatar">
-        ${this.getImage(this.getAttribute('user-picture'))}
-      </div>
-    `
-  }
-
-  getImage = image => {
-    if (!image || image === '' || image === 'null') {
-      return /* html */`
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-          <path d="M12 2.5a5.5 5.5 0 0 1 3.096 10.047 9.005 9.005 0 0 1 5.9 8.181.75.75 0 1 1-1.499.044 7.5 7.5 0 0 0-14.993 0 .75.75 0 0 1-1.5-.045 9.005 9.005 0 0 1 5.9-8.18A5.5 5.5 0 0 1 12 2.5ZM8 8a4 4 0 1 0 8 0 4 4 0 0 0-8 0Z"></path>
-        </svg>
-      `;
-    } else {
-      return /* html */`
-        <img src="${image}" alt="avatar">
-      `;
-    }
   }
 
   getDesktopReactions = mql => {
@@ -877,8 +853,8 @@ export default class Message extends HTMLDivElement {
  
      const innerAttachements = attachements.map(attachement => {
        return /* html */`
-         <a href="${attachement.link}" target="_blank" download
-           title="${attachement.name}" size="${attachement.size}" type="${attachement.type}">
+         <a href="${attachement.link}" target="_blank"
+           title="${attachement.name}" size="${attachement.size}" type="${attachement.type}" download>
            ${attachement.name}
          </a>
        `;
@@ -1160,9 +1136,12 @@ export default class Message extends HTMLDivElement {
         .content > .message > .text {
           background: var(--chat-background);
           box-sizing: border-box;
-          gap: 5px;
+          display: flex;
+          flex-direction: column;
+          align-items: start;
+          gap: 0;
           margin: 0;
-          padding: 6px 10px;
+          padding: 0;
           border-radius: 15px;
           width: max-content;
           max-width: 100%;
@@ -1172,16 +1151,22 @@ export default class Message extends HTMLDivElement {
           position: relative;
         }
 
-        .content.reacted > .message > .text {
-          padding: 6px 12px 7px 12px;
+        .content > .message > .text > .message-text {
+          box-sizing: border-box;
+          /* border: 1px solid red; */
+          padding: 6px 10px;
         }
 
-        .content.you > .message > .text {
-          padding: 6px 9px 6px 12px;
+        .content.reacted > .message > .text > .message-text {
+          padding: 6px 10px 7px;
         }
 
-        .content.you.reacted > .message > .text {
-          padding: 7px 12px 8px 12px;
+        .content.you > .message > .text > .message-text {
+          padding: 6px 10px 6px;
+        }
+
+        .content.you.reacted > .message > .text > .message-text {
+          padding: 7px 10px 8px;
         }
 
         .content.reply > .message > .text {
@@ -1244,15 +1229,17 @@ export default class Message extends HTMLDivElement {
           text-decoration: underline;
         }
 
-        .content > .message > .text > span.tick {
+        .content > .message > .text > .message-text > span.tick {
+          /*border: 1px solid red;*/
           float: right;
           display: inline-block;
           margin: 3px 0 0 5px;
+          margin-right: -5px;
         }
 
-        .content > .message > .text > span.tick svg {
-          width: 20px;
-          height: 20px;
+        .content > .message > .text > .message-text > span.tick svg {
+          width: 18px;
+          height: 18px;
           display: flex;
           flex-direction: row;
           align-items: center;
@@ -1260,25 +1247,27 @@ export default class Message extends HTMLDivElement {
           color: var(--gray-color);
         }
 
-        .content.you > .message > .text > span.tick svg {
+        .content > .message > .text > .message-text > span.tick svg {
           color: var(--chat-you-svg);
         }
 
-        .content > .message > .text > span.tick.read > svg {
+        .content > .message > .text > .message-text > span.tick.read > svg {
           color: var(--white-color);
           fill: var(--accent-color);
+          width: 20px;
+          height: 20px;
         }
 
-        .content > .message > .text > span.tick.delivered > svg {
+        .content > .message > .text > .message-text > span.tick.delivered > svg {
           color: var(--accent-color);
           fill: none;
         }
 
-        .content.you > .message > .text > span.tick.delivered > svg {
+        .content > .message > .text > .message-text > span.tick.delivered > svg {
           color: var(--white-color);
         }
 
-        .content > .message > .text > span.tick.read > svg #outer {
+        .content > .message > .text > .message-text > span.tick.read > svg #outer {
           stroke: var(--accent-color);
         }
 
@@ -1523,6 +1512,7 @@ export default class Message extends HTMLDivElement {
           width: 100%;
           gap: 5px;
           margin: 0;
+          padding: 0 10px 9px;
           overflow-x: auto;
           scrollbar-width: none;
           -ms-overflow-style: none;
@@ -1559,7 +1549,8 @@ export default class Message extends HTMLDivElement {
           width: 100%;
           max-width: 100%;
           gap: 5px;
-          margin-top: 5px;
+          padding: 0 10px 9px;
+          margin: 0;
         }
 
         .content > .message > .text > .attachements > a {

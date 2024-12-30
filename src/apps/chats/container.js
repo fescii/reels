@@ -16,7 +16,7 @@ export default class MessagingContainer extends HTMLElement {
   }
 
   connectedCallback() {
-    // this.scrollMessages();
+    this.scrollMessages();
   }
 
   scrollMessages = () => {
@@ -321,6 +321,13 @@ export default class MessagingContainer extends HTMLElement {
         <div class="dot"></div>
         <div class="dot"></div>
         <div class="dot"></div>
+      </div>
+    `;
+  }
+
+  getEditor = () => {
+    return /* html */`
+      <div class="editor" id="editor">
       </div>
     `;
   }

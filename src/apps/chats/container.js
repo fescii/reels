@@ -4,6 +4,7 @@ export default class MessagingContainer extends HTMLElement {
     this.shadow = this.attachShadow({ mode: 'open' });
     this.active_tab = null;
     this.openedContextNode = null;
+    this.expanded = false;
     this.render();
   }
 
@@ -17,11 +18,131 @@ export default class MessagingContainer extends HTMLElement {
 
   connectedCallback() {
     this.scrollMessages();
+    const editor = this.shadow.querySelector('.editor');
+    this.growTextarea(editor);
   }
 
   scrollMessages = () => {
     const messages = this.shadow.querySelector('main.main');
     messages.scrollTop = messages.scrollHeight;
+  }
+
+  growTextarea = editor => {
+    const form = editor.querySelector('form');
+    const input = form.querySelector('textarea#message');
+    const actionsContainer = form.querySelector('.actions-container');
+    const actions = actionsContainer.querySelector('div.actions');
+    const expand = actionsContainer.querySelector('div.expand');
+    // select expand icon(svg)
+    const icon = expand.querySelector('svg');
+    
+    const adjustRows = () => {
+      const maxRows = 5;
+      const style = window.getComputedStyle(input);
+      const lineHeight = parseInt(style.lineHeight, 10);
+
+      // rotate the expand button
+      icon.style.transform = 'rotate(0deg)';
+      
+      // Calculate the height offset (padding + border)
+      const paddingHeight = parseInt(style.paddingTop, 10) + parseInt(style.paddingBottom, 10);
+      const borderHeight = parseInt(style.borderTopWidth, 10) + parseInt(style.borderBottomWidth, 10);
+      const offset = paddingHeight + borderHeight;
+
+      // Reset the rows to 1 to calculate the new height
+      input.rows = 1;
+
+      // Calculate the number of rows based on scrollHeight minus the offset
+      const newRows = Math.ceil((input.scrollHeight - offset) / lineHeight);
+      input.rows = Math.min(maxRows, Math.max(newRows, 1)); // Ensure at least 1 row
+
+      // Toggle actions visibility based on input
+      if (input.value.trim().length > 0) {
+        // hide actions in animation width
+        actions.style.animation = 'hide-actions 0.3s forwards';
+        actions.style.width = '0';
+
+        // show expand button
+        expand.style.opacity = '0';
+        expand.style.animation = 'show-expand 0.3s forwards';
+        expand.style.display = 'flex';
+        expand.style.opacity = '1';
+
+        // adjust the width of the input
+        input.style.setProperty('width', 'calc(100% - 80px)')
+        // input.style.setProperty('min-width', 'calc(100% - 80px)')
+        // input.style.setProperty('max-width', 'calc(100% - 80px)')
+
+        // scroll to the bottom
+        this.scrollMessages();
+      } else {
+        // hide expand button
+        expand.style.animation = 'hide-expand 0.3s forwards';
+        expand.style.opacity = '0';
+        expand.style.display = 'none';
+
+        // show actions in animation width
+        actions.style.animation = 'show-actions 0.3s forwards';
+        actions.style.width = '100px';
+        actions.style.display = 'flex';
+        actions.style.opacity = '1';
+
+        // shrink the input
+        input.style.setProperty('width', 'calc(100% - 150px)')
+        // input.style.setProperty('min-width', 'calc(100% - 150px)')
+        // input.style.setProperty('max-width', 'calc(100% - 150px)')
+      }
+    };
+
+    input.addEventListener('input', adjustRows);
+    input.addEventListener('paste', adjustRows);
+
+    // click on expand button
+    expand.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      if (this.expanded) {
+        // hide actions in animation width with expand button
+        actions.style.animation = 'hide-actions 0.3s forwards';
+
+        // remove .one-line class from the input
+        input.classList.remove('one-line');
+
+        // adjust the width of the input
+        input.width = 'calc(100% - 80px)';
+
+        // trigger input event to adjust the rows
+        input.dispatchEvent(new Event('input'));
+
+        // show expand button
+        expand.style.opacity = '1';
+        expand.style.animation = 'show-expand 0.3s forwards';
+
+        // rotate the expand button
+        icon.style.transform = 'rotate(0deg)';
+        this.expanded = false;
+        return;
+      } else {
+        // show actions in animation width with expand button
+        actions.style.animation = 'show-actions 0.3s forwards';
+        actions.style.width = '100px';
+        actions.style.display = 'flex';
+        actions.style.opacity = '1';
+
+        // add .one-line class to the input
+        input.classList.add('one-line');
+        input.rows = 1;
+        input.style.setProperty('width', 'calc(100% - 170px)');
+        // rotate the expand button
+        icon.style.transform = 'rotate(180deg)';
+        this.expanded = true;
+        return;
+      }
+    })
+    
+    // Initial adjustment on page load
+    adjustRows();
   }
 
   textToBoolean = text => {
@@ -332,41 +453,71 @@ export default class MessagingContainer extends HTMLElement {
         <form class="form message-form">
           <div class="actions-container">
             <div class="actions">
-              <button class="action attachment" title="Attachment">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-                  <path d="M9.14339 10.691L9.35031 10.4841C11.329 8.50532 14.5372 8.50532 16.5159 10.4841C18.4947 12.4628 18.4947 15.671 16.5159 17.6497L13.6497 20.5159C11.671 22.4947 8.46279 22.4947 6.48405 20.5159C4.50532 18.5372 4.50532 15.329 6.48405 13.3503L6.9484 12.886" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                  <path d="M17.0516 11.114L17.5159 10.6497C19.4947 8.67095 19.4947 5.46279 17.5159 3.48405C15.5372 1.50532 12.329 1.50532 10.3503 3.48405L7.48405 6.35031C5.50532 8.32904 5.50532 11.5372 7.48405 13.5159C9.46279 15.4947 12.671 15.4947 14.6497 13.5159L14.8566 13.309" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              <button class="action attachment" title="Attachment" type="button">
+                <svg id="small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                  <defs>
+                    <linearGradient id="strokeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style="stop-color:#18a565" />
+                      <stop offset="100%" style="stop-color:#21d029" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M9.14339 10.691L9.35031 10.4841C11.329 8.50532 14.5372 8.50532 16.5159 10.4841C18.4947 12.4628 18.4947 15.671 16.5159 17.6497L13.6497 20.5159C11.671 22.4947 8.46279 22.4947 6.48405 20.5159C4.50532 18.5372 4.50532 15.329 6.48405 13.3503L6.9484 12.886" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+                  <path d="M17.0516 11.114L17.5159 10.6497C19.4947 8.67095 19.4947 5.46279 17.5159 3.48405C15.5372 1.50532 12.329 1.50532 10.3503 3.48405L7.48405 6.35031C5.50532 8.32904 5.50532 11.5372 7.48405 13.5159C9.46279 15.4947 12.671 15.4947 14.6497 13.5159L14.8566 13.309" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
                 </svg>
               </button>
-              <button class="action image" title="Image">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-                  <circle cx="7.5" cy="7.5" r="1.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z" stroke="currentColor" stroke-width="1.8" />
-                  <path d="M5 21C9.37246 15.775 14.2741 8.88406 21.4975 13.5424" stroke="currentColor" stroke-width="1.8" />
+              <button class="action image" title="Image" type="button">
+                <svg id="small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                  <defs>
+                    <linearGradient id="strokeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style="stop-color:#18a565" />
+                      <stop offset="100%" style="stop-color:#21d029" />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="7.5" cy="7.5" r="1.5" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                  <path d="M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z" stroke="url(#strokeGradient)" stroke-width="1.8" fill="none"/>
+                  <path d="M5 21C9.37246 15.775 14.2741 8.88406 21.4975 13.5424" stroke="url(#strokeGradient)" stroke-width="1.8" fill="none"/>
                 </svg>
               </button>
-              <button class="action video" title="Video">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-                  <path d="M11 8L13 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                  <path d="M2 11C2 7.70017 2 6.05025 3.02513 5.02513C4.05025 4 5.70017 4 9 4H10C13.2998 4 14.9497 4 15.9749 5.02513C17 6.05025 17 7.70017 17 11V13C17 16.2998 17 17.9497 15.9749 18.9749C14.9497 20 13.2998 20 10 20H9C5.70017 20 4.05025 20 3.02513 18.9749C2 17.9497 2 16.2998 2 13V11Z" stroke="currentColor" stroke-width="1.8" />
-                  <path d="M17 8.90585L17.1259 8.80196C19.2417 7.05623 20.2996 6.18336 21.1498 6.60482C22 7.02628 22 8.42355 22 11.2181V12.7819C22 15.5765 22 16.9737 21.1498 17.3952C20.2996 17.8166 19.2417 16.9438 17.1259 15.198L17 15.0941" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              <button class="action video" title="Video" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                  <defs>
+                    <linearGradient id="strokeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style="stop-color:#18a565" />
+                      <stop offset="100%" style="stop-color:#21d029" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M11 8L13 8" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+                  <path d="M2 11C2 7.70017 2 6.05025 3.02513 5.02513C4.05025 4 5.70017 4 9 4H10C13.2998 4 14.9497 4 15.9749 5.02513C17 6.05025 17 7.70017 17 11V13C17 16.2998 17 17.9497 15.9749 18.9749C14.9497 20 13.2998 20 10 20H9C5.70017 20 4.05025 20 3.02513 18.9749C2 17.9497 2 16.2998 2 13V11Z" stroke="url(#strokeGradient)" stroke-width="1.8" fill="none"/>
+                  <path d="M17 8.90585L17.1259 8.80196C19.2417 7.05623 20.2996 6.18336 21.1498 6.60482C22 7.02628 22 8.42355 22 11.2181V12.7819C22 15.5765 22 16.9737 21.1498 17.3952C20.2996 17.8166 19.2417 16.9438 17.1259 15.198L17 15.0941" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
                 </svg>
               </button>
             </div>
             <div class="expand">
-              <button class="action expand" title="Expand">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-                  <path d="M9.00005 6C9.00005 6 15 10.4189 15 12C15 13.5812 9 18 9 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              <button class="action expand" title="Expand" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                  <defs>
+                    <linearGradient id="strokeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style="stop-color:#18a565" />
+                      <stop offset="100%" style="stop-color:#21d029" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M9.00005 6C9.00005 6 15 10.4189 15 12C15 13.5812 9 18 9 18" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                 </svg>
               </button>
             </div>
           </div>
-          <textarea name="editor" id="editor" cols="30" rows="1" placeholder="Message" required></textarea>
+          <textarea name="message" id="message" cols="30" rows="1" placeholder="Message" required></textarea>
           <button type="submit" class="send" title="Send">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-              <path d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z" stroke="currentColor" stroke-width="1.8" />
-              <path id ="outer" d="M16 12L12 16L8 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              <path id ="outer" d="M12 8V16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+              <defs>
+                <linearGradient id="circleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#18a565" />
+                  <stop offset="100%" style="stop-color:#21d029" />
+                </linearGradient>
+              </defs>
+              <path d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z" fill="url(#circleGradient)" />
+              <path d="M16 12L12 16L8 12" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M12 8V16" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </button>
         </form>
@@ -782,20 +933,23 @@ export default class MessagingContainer extends HTMLElement {
         div.editor#editor > form.message-form {
           display: flex;
           flex-flow: row;
-          align-items: center;
+          align-items: flex-end;
           justify-content: space-between;
-          gap: 10px;
+          gap: 0;
           padding: 0;
           margin: 0;
           width: 100%;
         }
 
         div.editor#editor > form.message-form > div.actions-container {
+          /* border: 1px solid red; */
+          padding: 0 0 2px;
           display: flex;
           flex-flow: row;
           align-items: center;
-          justify-content: start;
-          gap: 5px;
+          justify-content: center;
+          gap: 0;
+          width: max-content;
         }
 
         div.editor#editor > form.message-form > div.actions-container > div.actions {
@@ -804,6 +958,7 @@ export default class MessagingContainer extends HTMLElement {
           align-items: center;
           justify-content: start;
           width: 100px;
+          margin: 0 3px 0 0;
           overflow: hidden;
           gap: 5px;
         }
@@ -830,10 +985,21 @@ export default class MessagingContainer extends HTMLElement {
           color: var(--accent-color);
         }
 
+        div.actions-container > div.actions > button > svg.small {
+          width: 20px;
+          height: 22px;
+        }
+
         div.actions-container > div.expand  {
           display: none;
           justify-content: center;
           align-items: center;
+          width: 25px;
+          max-width: 25px;
+          height: 25px;
+          min-width: 25px;
+          margin: 0;
+          max-height: 25px;
         }
 
         div.actions-container > div.expand > button {
@@ -843,8 +1009,6 @@ export default class MessagingContainer extends HTMLElement {
           justify-content: center;
           align-items: center;
           padding: 0;
-          width: 25px;
-          height: 25px;
           cursor: pointer;
           color: var(--gray-color);
         }
@@ -853,13 +1017,13 @@ export default class MessagingContainer extends HTMLElement {
           display: flex;
           justify-content: center;
           align-items: center;
-          width: 22px;
-          height: 22px;
+          width: 24px;
+          height: 24px;
           color: var(--accent-color);
         }
 
         div.editor#editor > form.message-form > textarea {
-          border: var(--border);
+          border: var(--input-border);
           font-family: var(--font-main), sans-serif;
           background: var(--background);
           font-size: 1rem;
@@ -867,16 +1031,26 @@ export default class MessagingContainer extends HTMLElement {
           outline: none;
           margin: 0;
           width: calc(100% - 140px);
+          /*min-width: calc(100% - 140px);
+          max-width: calc(100% - 140px);*/
           resize: none;
           height: auto;
           line-height: 1.5;
           scroll-padding-top: 7px;
           scroll-padding-bottom: 7px;
+          transition: linear 0.2s;
           gap: 5px;
           font-weight: 400;
           color: var(--text-color);
           scrollbar-width: 3px;
           border-radius: 15px;
+        }
+
+        div.editor#editor > form.message-form > textarea.one-line {
+          width: calc(100% - 170px);
+
+          /* hide overflow */
+          overflow: hidden;
         }
 
         div.editor#editor > form.message-form > textarea::placeholder {
@@ -910,10 +1084,11 @@ export default class MessagingContainer extends HTMLElement {
 
         div.editor#editor > form.message-form > button.send > svg {
           display: flex;
-          justify-content: center;
-          align-items: center;
-          width: 30px;
-          height: 30px;
+          justify-content: end;
+          align-items: flex-end;
+          margin-bottom: -4px;
+          width: 34px;
+          height: 34px;
           fill: var(--accent-color);
           color: var(--accent-color);
           rotate: 180deg;
@@ -923,6 +1098,62 @@ export default class MessagingContainer extends HTMLElement {
           /*fill: var(--white-color);
           color: var(--white-color);*/
           stroke: var(--white-color);
+        }
+
+        @keyframes show-actions {
+          from {
+            width: 0;
+            opacity: 0;
+            visibility: hidden;
+          }
+          to {
+            width: 100px;
+            opacity: 1;
+            visibility: visible;
+          }
+        }
+        
+        @keyframes hide-actions {
+          from {
+            width: 100px;
+            opacity: 1;
+            visibility: visible;
+          }
+          to {
+            width: 0;
+            opacity: 0;
+            visibility: hidden;
+          }
+        }
+        
+        @keyframes show-expand {
+          from {
+            width: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-10px);
+          }
+          to {
+            width: calc(100% - 90px);
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+          }
+        }
+        
+        @keyframes hide-expand {
+          from {
+            width: calc(100% - 90px);
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+          }
+          to {
+            width: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-10px);
+          }
         }
        
         @media screen and (max-width: 660px) {

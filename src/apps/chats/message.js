@@ -584,19 +584,19 @@ export default class Message extends HTMLDivElement {
     if (status === 'sent') {
       return /* html */`
         <span class="tick sent">
-          ${this.getStatusIcon()}
+          ${this.getStatusIcon('sent')}
         </span>
       `;
     } else if (status === 'delivered') {
       return /* html */`
         <span class="tick delivered">
-          ${this.getStatusIcon()}
+          ${this.getStatusIcon('delivered')}
         </span>
       `;
     } else if (status === 'seen') {
       return /* html */`
         <span class="tick read">
-          ${this.getStatusIcon()}
+          ${this.getStatusIcon('seen')}
         </span>
       `;
     } else {
@@ -604,12 +604,37 @@ export default class Message extends HTMLDivElement {
     }
   }
 
-  getStatusIcon = ()  => {
+  getStatusIcon = kind  => {
+    const icons = {
+      sent: this.getSentIcon(),
+      delivered: this.getDeliveredIcon(),
+      seen: this.getSeenIcon(),
+      sending: this.getSendingIcon(),
+    }
+    return icons[kind];
+  }
+
+  getDeliveredIcon = () => {
     return /* html */`
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-        <path id="outer" d="M22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12Z" stroke="currentColor" stroke-width="1.8" />
-        <path d="M8 12.5L10.5 15L16 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
+      <svg width="22" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#messagestatus-delivered__a)" fill="currentColor"><path d="M6 0c.67 0 1.316.11 1.918.313-.36.26-.695.552-1 .873a4.9 4.9 0 1 0 0 9.628c.305.321.64.614 1 .873A6 6 0 1 1 6 0Z"/><path d="m4.19 5.92.899 1.199c.09.556.244 1.09.456 1.595a.55.55 0 0 1-.735-.134l-1.5-2a.55.55 0 0 1 .88-.66Zm10.109-2.382a.55.55 0 0 1 .163.76l-2.75 4.25a.55.55 0 0 1-.902.032l-1.5-2a.55.55 0 0 1 .88-.66l1.027 1.369 2.321-3.588a.55.55 0 0 1 .76-.163Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6 6a6 6 0 1 1 12 0A6 6 0 0 1 6 6Zm6-4.9a4.9 4.9 0 1 0 0 9.8 4.9 4.9 0 0 0 0-9.8Z"/></g><defs><clipPath id="messagestatus-delivered__a"><path fill="#fff" d="M0 0h18v12H0z"/></clipPath></defs></svg>
+    `;
+  }
+
+  getSeenIcon = () => {
+    return /* html */`
+      <svg width="22" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#messagestatus-read__a)" fill="currentColor"><path d="M6 .25c.688 0 1.348.12 1.96.342A6.74 6.74 0 0 0 5.34 7.1l-.123.189L4.19 5.92a.55.55 0 1 0-.88.66l1.5 2a.55.55 0 0 0 .902-.031l.022-.034a6.77 6.77 0 0 0 2.225 2.893A5.75 5.75 0 1 1 6 .25Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M12 .25a5.75 5.75 0 1 0 0 11.5 5.75 5.75 0 0 0 0-11.5Zm2.299 3.288a.55.55 0 0 1 .163.76l-2.75 4.25a.55.55 0 0 1-.902.032l-1.5-2a.55.55 0 1 1 .88-.66l1.027 1.369 2.321-3.588a.55.55 0 0 1 .76-.163Z"/></g><defs><clipPath id="messagestatus-read__a"><path fill="#fff" d="M0 0h18v12H0z"/></clipPath></defs></svg>
+    `;
+  }
+
+  getSendingIcon = () => {
+    return /* html */`
+      <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#messagestatus-sending__a)" fill="currentColor"><path d="M6.188 1.104a4.858 4.858 0 0 0-.376 0 .55.55 0 1 1-.042-1.1c.153-.006.307-.005.461 0a.55.55 0 1 1-.043 1.1ZM8.055.922a.55.55 0 0 1 .743-.23c.136.072.27.149.4.231a.55.55 0 1 1-.587.93 4.86 4.86 0 0 0-.326-.188.55.55 0 0 1-.23-.743Zm-4.11.001a.55.55 0 0 1-.23.743c-.112.059-.22.121-.326.188a.55.55 0 1 1-.586-.931 5.45 5.45 0 0 1 .4-.23.55.55 0 0 1 .742.23Zm6.374 1.707a.55.55 0 0 1 .758.173c.082.13.159.263.23.4a.55.55 0 1 1-.973.512 4.858 4.858 0 0 0-.188-.327.55.55 0 0 1 .173-.758Zm-8.637 0a.55.55 0 0 1 .172.76c-.068.106-.13.215-.189.325a.55.55 0 0 1-.973-.513c.072-.136.149-.27.232-.4a.55.55 0 0 1 .758-.172ZM.576 5.24a.55.55 0 0 1 .528.572 4.858 4.858 0 0 0 0 .377.55.55 0 1 1-1.1.042 5.958 5.958 0 0 1 0-.462.55.55 0 0 1 .572-.528Zm10.849 0a.55.55 0 0 1 .57.53c.007.153.007.307 0 .461a.55.55 0 0 1-1.099-.043 4.873 4.873 0 0 0 0-.377.55.55 0 0 1 .53-.57ZM.923 8.055a.55.55 0 0 1 .743.23c.059.112.121.22.188.327a.55.55 0 1 1-.931.585 5.955 5.955 0 0 1-.23-.4.55.55 0 0 1 .23-.742Zm10.155 0a.55.55 0 0 1 .23.743 5.994 5.994 0 0 1-.231.4.55.55 0 0 1-.93-.587 5.08 5.08 0 0 0 .188-.326.55.55 0 0 1 .743-.23ZM2.63 10.318a.55.55 0 0 1 .76-.172c.106.068.215.13.325.189a.55.55 0 1 1-.513.973 5.952 5.952 0 0 1-.4-.232.55.55 0 0 1-.171-.758Zm6.74.001a.55.55 0 0 1-.172.758 5.45 5.45 0 0 1-.4.23.55.55 0 1 1-.512-.973c.111-.059.22-.121.326-.188a.55.55 0 0 1 .758.173Zm-4.129 1.105a.55.55 0 0 1 .571-.528c.126.005.252.005.377 0a.55.55 0 1 1 .042 1.1 5.975 5.975 0 0 1-.462 0 .55.55 0 0 1-.528-.572Z"/></g><defs><clipPath id="messagestatus-sending__a"><path fill="#fff" d="M0 0h12v12H0z"/></clipPath></defs></svg>
+    `;
+  }
+
+  getSentIcon = () => {
+    return /* html */`
+      <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#messagestatus-sent__a)" fill="currentColor"><path d="M8.462 4.299a.55.55 0 0 0-.924-.598L5.217 7.29 4.19 5.92a.55.55 0 0 0-.88.66l1.5 2a.55.55 0 0 0 .902-.031l2.75-4.25Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6 0a6 6 0 1 0 0 12A6 6 0 0 0 6 0ZM1.1 6a4.9 4.9 0 1 1 9.8 0 4.9 4.9 0 0 1-9.8 0Z"/></g><defs><clipPath id="messagestatus-sent__a"><path fill="#fff" d="M0 0h12v12H0z"/></clipPath></defs></svg>
     `;
   }
 
@@ -1278,32 +1303,24 @@ export default class Message extends HTMLDivElement {
         }
 
         .content > .message > .text > .message-text > span.tick {
-          /*border: 1px solid red;*/
+          /* border: 1px solid red; */
           float: right;
           display: inline-block;
-          margin: 3px 0 0 5px;
+          margin: 6px 0 0 5px;
           margin-right: -5px;
         }
 
         .content > .message > .text > .message-text > span.tick svg {
-          width: 18px;
-          height: 18px;
+          /* border: 1px solid blue; */
           display: flex;
-          flex-direction: row;
-          align-items: center;
+          align-items: flex-end;
           justify-content: center;
-          color: var(--gray-color);
-        }
-
-        .content > .message > .text > .message-text > span.tick svg {
-          color: var(--chat-you-svg);
+          color: var(--white-color);
         }
 
         .content > .message > .text > .message-text > span.tick.read > svg {
           color: var(--white-color);
           fill: var(--accent-color);
-          width: 20px;
-          height: 20px;
         }
 
         .content > .message > .text > .message-text > span.tick.delivered > svg {
@@ -1313,10 +1330,6 @@ export default class Message extends HTMLDivElement {
 
         .content > .message > .text > .message-text > span.tick.delivered > svg {
           color: var(--white-color);
-        }
-
-        .content > .message > .text > .message-text > span.tick.read > svg #outer {
-          stroke: var(--accent-color);
         }
 
         /* user-reactions */

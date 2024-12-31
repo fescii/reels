@@ -12,7 +12,7 @@ export default class ChatApp extends HTMLElement {
   }
 
   watchMql = () => {
-    this.mql.addEventListener("change", e => {
+    this.mql.addEventListener("change", _e => {
       // console.log("Media query changed", e);
       this.render();
       this.setUpEventListeners();
@@ -105,7 +105,7 @@ export default class ChatApp extends HTMLElement {
   getTemplate() {
     if (this.mql.matches) {
       return /* html */`
-        ${this.getMain()}
+        ${this.getChatsContainer()}
         ${this.getStyles()}
       `;
     } else {
@@ -124,7 +124,7 @@ export default class ChatApp extends HTMLElement {
     `;
   }
 
-  getChats = () => {
+  getChatsContainer = () => {
     return /* html */`
       <div class="chats">
         ${this.getForm()}
@@ -808,7 +808,6 @@ export default class ChatApp extends HTMLElement {
         }
 
         @media screen and (max-width: 768px) {
-          div.chats,
           div.main {
             width: 100%;
             min-width: 100%;
@@ -817,6 +816,25 @@ export default class ChatApp extends HTMLElement {
             max-height: unset;
             padding: 0;
             margin: 0;
+          }
+
+          div.chats {
+            width: 100%;
+            min-width: 100%;
+            height: 100dvh;
+            min-height: 100dvh;
+            max-height: 100dvh;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            -ms-overflow-style: -ms-autohiding-scrollbar;
+          }
+
+          div.chats::-webkit-scrollbar {
+            display: none !important;
+            visibility: hidden !important;
           }
         }
 
@@ -836,17 +854,6 @@ export default class ChatApp extends HTMLElement {
             flex-direction: column;
             align-items: start;
             justify-content: start;
-          }
-
-          div.chats,
-          div.main {
-            width: 100%;
-            min-width: 100%;
-            height: unset;
-            min-height: unset;
-            max-height: unset;
-            padding: 0;
-            margin: 0;
           }
 
           /* reset all cursor: pointer to cursor: default */

@@ -197,7 +197,7 @@ export default class MessagingContainer extends HTMLElement {
     const header = this.shadow.querySelector('.header');
     const content = this.shadow.querySelector('main.main');
     const messages = content.querySelector('.messages');
-    const docElement = document.documentElement;
+    // const docElement = document.documentElement;
     if (window.visualViewport) {
       // console.log('Visual Viewport Height: ', window.visualViewport.height);
       const viewportHeight = window.visualViewport.height;
@@ -619,7 +619,7 @@ export default class MessagingContainer extends HTMLElement {
     `;
   }
 
-  getReply = ({id: id, user: replyUser, you: toYou, text: replyText}) => {
+  getReply = ({id: _id, user: replyUser, you: toYou, text: replyText}) => {
     // if both are null or empty, return nothing
     if (!replyText || replyText.trim() === '' || replyText.trim().length === 0) return '';
 

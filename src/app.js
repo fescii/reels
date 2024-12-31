@@ -1,9 +1,13 @@
 // import Router from "./router.js";
 import app from "./apps/index.js";
+import APIManager from "./api.js";
 export default class App extends HTMLElement {
 	constructor() {
 		super();
 		this.registerComponents();
+		// this.api = new APIManager('https://api.zoanai.com');
+		this.api = new APIManager('http://zoanai.com', 9500);
+		// this.api = new APIManager('http://localhost:3000');
 	}
 	
 	// noinspection JSUnusedGlobalSymbols

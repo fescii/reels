@@ -641,9 +641,9 @@ export default class ShotVideo extends HTMLDivElement {
           -webkit-backdrop-filter: blur(5px);
         }
 
-        .actions > .action:hover > .icon,
         .actions > .action.active > .icon {
           background-color: var(--shot-active-background);
+          color: var(--alt-color);
         }
 
         .actions > .action > .icon > svg {
@@ -652,12 +652,10 @@ export default class ShotVideo extends HTMLDivElement {
           color: var(--shot-title-color);
         }
 
-        .actions > .action:hover > .icon > svg,
         .actions > .action.active > .icon > svg {
           color: var(--alt-color);
         }
 
-        .actions > .action:hover > .icon > svg path,
         .actions > .action.active > .icon > svg path {
           fill: var(--alt-color);
           color: var(--alt-color);
@@ -785,6 +783,13 @@ export default class ShotVideo extends HTMLDivElement {
             height: 100%;
             max-height: 100%;
             min-height: 100%;
+          }
+
+          /* reset all cursor: pointer to default !important */
+          a, button, input, label, select, textarea,
+          .actions > .action,
+          .footer > .summary > .read-more {
+            cursor: default !important;
           }
         }
 

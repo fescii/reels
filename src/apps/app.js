@@ -382,7 +382,7 @@ export default class AppMain extends HTMLElement {
 
   getShots = () => {
     return /* html */`
-      <shots-videos api="/shots/fyp" title="For You" type="fyp"></shots-videos>
+      <shots-videos api="/shots/fyp" name="For You" type="fyp"></shots-videos>
     `;
   }
 

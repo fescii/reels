@@ -170,6 +170,7 @@ export default class ShotsVideos extends HTMLElement {
     return /* css */`
       <style>
         :host {
+          border: 1px solid red;
           display: block;
           max-width: 450px;
           width: 450px;
@@ -178,9 +179,9 @@ export default class ShotsVideos extends HTMLElement {
           flex-direction: column;
           align-items: center;
           justify-content: start;
-          height: calc(100dvh - 40px);
-          max-height: calc(100dvh - 40px);
-          min-height: calc(100dvh - 40px);
+          height: 100dvh;
+          max-height: 100dvh;
+          min-height: 100dvh;
         }
 
         * {

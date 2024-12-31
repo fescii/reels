@@ -20,6 +20,12 @@ export default class MessagingContainer extends HTMLElement {
     this.scrollMessages();
     const editor = this.shadow.querySelector('.editor');
     this.growTextarea(editor);
+    this.dispatchVisualViewportResize();
+  }
+
+  disconnectedCallback() {
+    // remove event listeners
+    window.visualViewport?.removeEventListener('resize', this.adjustContentHeight);
   }
 
   scrollMessages = () => {
@@ -143,6 +149,64 @@ export default class MessagingContainer extends HTMLElement {
     
     // Initial adjustment on page load
     adjustRows();
+  }
+
+  adjustContentHeight = () => {
+    // const editor = this.shadow.querySelector('.editor');
+    const header = this.shadow.querySelector('.header');
+    const content = this.shadow.querySelector('main.main');
+    const messages = content.querySelector('.messages');
+    const docElement = document.documentElement;
+    if (window.visualViewport) {
+      // console.log('Visual Viewport Height: ', window.visualViewport.height);
+      const viewportHeight = window.visualViewport.height;
+      const headerHeight = header.offsetHeight;
+      const messagesHeight = messages.offsetHeight;
+
+      // window.alert(`Viewport Height: ${viewportHeight}, Header Height: ${headerHeight}, Messages Height: ${messagesHeight}, Editor Height: ${editorHeight}`);
+
+      // if the messages height is less than the viewport height - (header height + editor height)
+      if (messagesHeight < 500 ) {
+        // set content height to viewport height - (header height + editor height)
+        content.style.height = `${viewportHeight - headerHeight}px`;
+        content.style.setProperty('max-height', `${viewportHeight - headerHeight}px`);
+        content.style.setProperty('min-height', `${viewportHeight - headerHeight}px`);
+
+        // make it scrollable
+        content.style.overflowY = 'scroll';
+
+        // style body max-height
+        document.body.style.setProperty('max-height', `${viewportHeight}px`)
+        document.body.style.setProperty('height', `${viewportHeight}px`)
+        document.body.style.setProperty('min-height', `${viewportHeight}px`)
+
+        // scroll to the bottom
+        this.scrollMessages();
+
+        // hide scrollbar
+        content.style.scrollbarWidth = 'none';
+        content.style.msOverflowStyle = 'none';
+        content.style.overflow = '-moz-scrollbars-none';
+      } else {
+        content.style.setProperty('height', 'calc(100dvh - 60px)')
+        content.style.setProperty('max-height', 'calc(100dvh - 60px)')
+        content.style.setProperty('min-height', `calc(100dvh - 60px)`);
+
+        // make it scrollable
+        content.style.overflowY = 'scroll';
+
+        // style body max-height
+        document.body.style.setProperty('max-height', '100dvh')
+        document.body.style.setProperty('height', '100dvh')
+        document.body.style.setProperty('min-height', '100dvh')
+      }
+    } else {
+      console.error('Visual Viewport is not supported');
+    }
+  }
+
+  dispatchVisualViewportResize = () => {
+    window.visualViewport?.addEventListener('resize', this.adjustContentHeight);
   }
 
   textToBoolean = text => {
@@ -825,10 +889,11 @@ export default class MessagingContainer extends HTMLElement {
         }
 
         main.main {
+          /* border: 2px solid red; */
           display: flex;
           flex-flow: column;
           align-items: start;
-          justify-content: start;
+          justify-content: space-between;
           gap: 0;
           padding: 0;
           height: calc(100dvh - 70px);
@@ -1158,7 +1223,7 @@ export default class MessagingContainer extends HTMLElement {
        
         @media screen and (max-width: 660px) {
           :host {
-            /* border: 2px solid green;*/
+            /* border: 2px solid green; */
             height: unset;
             max-height: unset;
             min-height: unset;
@@ -1224,7 +1289,7 @@ export default class MessagingContainer extends HTMLElement {
           }
 
           main.main {
-            /* border: 2px solid blue;*/
+            /* border: 2px solid blue; */
             max-height: calc(100dvh - 60px);
             height: calc(100dvh - 60px);
             min-height: calc(100dvh - 60px);

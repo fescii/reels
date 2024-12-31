@@ -483,7 +483,7 @@ export default class ShotVideo extends HTMLDivElement {
           align-items: start;
           justify-content: flex-end;
           position: relative;
-          background: #000;
+          background: var(--shot-linear-gradient);
           overflow: hidden;
         }
 
@@ -764,7 +764,7 @@ export default class ShotVideo extends HTMLDivElement {
           width: 100%;
           height: 100%;
           z-index: 1;
-          background: #000;
+          background: var(--background);
           display: flex;
           align-items: center;
           justify-content: center;

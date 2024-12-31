@@ -97,7 +97,7 @@ export default class AppMain extends HTMLElement {
     if (mql.matches) {
       return /* html */`
         <section class="flow">
-          ${this.getChatApp()}
+          ${this.getShots()}
         </section>
         <section class="nav">
           ${this.getMobileNav()}
@@ -110,7 +110,7 @@ export default class AppMain extends HTMLElement {
           ${this.getMainNav()}
         </section>
         <section class="flow">
-          ${this.getChatApp()}
+          ${this.getShots()}
         </section>
       `;
     }
@@ -380,6 +380,12 @@ export default class AppMain extends HTMLElement {
     `;
   }
 
+  getShots = () => {
+    return /* html */`
+      <shots-videos api="/shots/fyp" title="For You" type="fyp"></shots-videos>
+    `;
+  }
+
   getFooter = () => {
     const year = new Date().getFullYear();
     return /*html*/`
@@ -491,7 +497,7 @@ export default class AppMain extends HTMLElement {
 
         section.nav > ul.nav {
           border-top: var(--border);
-          padding: 10px 0 0 0;
+          padding: 10px 0;
           margin: 0;
           display: flex;
           flex-flow: column;

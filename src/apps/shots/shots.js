@@ -154,6 +154,7 @@ export default class ShotsVideos extends HTMLElement {
 
   getShots = () => {
     return /* html */`
+      <div is="shot-video" link="../shots/shot4.m3u8" thumb="../thumbs/thum.webp"></div>
       <div is="shot-video" link="https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8" thumb="../thumbs/thum.webp"></div>
       <div is="shot-video" link="../shots/shot9.m3u8" thumb="../thumbs/thum.webp"></div>
       <div is="shot-video" link="../shots/shot4.m3u8" thumb="../thumbs/thum.webp"></div>
@@ -212,12 +213,13 @@ export default class ShotsVideos extends HTMLElement {
 
         @media screen and (max-width: 660px) {
           :host {
-            width: 100%;
+            width: 100dvw;
+            margin: 0 -10px;
             border: none;
             padding: 0;
-            height: 100dvh;
-            max-height: 100dvh;
-            min-height: 100dvh;
+            height: calc(100dvh - 55px);
+            max-height: calc(100dvh - 55px);
+            min-height: calc(100dvh - 55px);
           }
 
           div.shots {

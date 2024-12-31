@@ -205,8 +205,10 @@ Author URL: https://femar.co.ke
   --stage-no-linear: linear-gradient(0deg, #18a565 0%, #21d029 100%);
 }
 
-[data-theme="dark"] {
-  --background: #000000;
+/* prefers-color-scheme: dark */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #000000;
 
   --tab-background: #3a3c456d;
   --stat-background: #0f1015;
@@ -352,6 +354,7 @@ Author URL: https://femar.co.ke
   --stage-done-linear: linear-gradient(#a9a9a97a, #16171bcf);
   --stage-active-linear: linear-gradient(0deg, #cb6a0a 0%, #dc8c3e 100%);
   --stage-no-linear: linear-gradient(0deg, #148a55 0%, #1dbb25 100%);
+}
 }
 
 *,

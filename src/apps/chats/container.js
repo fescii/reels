@@ -543,7 +543,7 @@ export default class MessagingContainer extends HTMLElement {
   getEditor = () => {
     return /* html */`
       <div class="editor" id="editor">
-        ${this.getReply({ id: 43, user: 'Jane', you: false, text: 'This is a message from Jane Doe, Please reply as soon as possible.' })}
+        ${this.getImagesEditor()}
         <form class="form message-form">
           <div class="actions-container">
             <div class="actions">
@@ -649,6 +649,12 @@ export default class MessagingContainer extends HTMLElement {
           ${replyText}
         </div>
       </div>
+    `;
+  }
+
+  getImagesEditor = () => {
+    return /* html */`
+      <div is="chat-images" class="images" id="images" api="https://zoanai.com/api/v1/s/add"></div>
     `;
   }
 

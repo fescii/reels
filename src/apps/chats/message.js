@@ -353,13 +353,7 @@ export default class Message extends HTMLDivElement {
         this.container.setReply(data);
 
         // close container
-        if (kind === 'desktop') {
-          // console.log('Closing container');
-          // container.style.opacity = '0';
-          setTimeout(() => {
-            container.style.display = 'none';
-          }, 300);
-        } else {
+        if (kind === 'mobile') {
           this.closeContextMenu();
         }
         });

@@ -298,7 +298,7 @@ export default class ChatApp extends HTMLElement {
     return /* html */`
       <div is="chat-item" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Aidan"
         user-name="Alice Johnson" unread="0" active="true" you="false" opened="true"
-        message="I have attached the needed documents below!" is-even="true" datetime="2024-12-24T09:25:15Z"
+        message="I have attached the needed documents below!" is-even="true" datetime="2024-12-31T19:07:15Z"
         attachments='[
           {
             "name": "Meeting Notes.pdf",
@@ -367,7 +367,7 @@ export default class ChatApp extends HTMLElement {
       </div>
       <div is="chat-item" user-picture="https://randomuser.me/api/portraits/women/17.jpg"
       user-name="Meredith Palmer" unread="1" active="true" you="false"
-      message="Party at my place!" is-even="true" datetime="2024-02-01T20:15:15Z">
+      message="Party at my place!" is-even="true" datetime="2022-02-01T20:15:15Z">
       </div>
     `;
   }

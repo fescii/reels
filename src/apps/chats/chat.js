@@ -36,33 +36,52 @@ export default class ChatItem extends HTMLDivElement {
       return 'Just now';
     }
 
-    // if we are in the same day: HH:MM AM/PM
+    // if we are in the same day: Today at HH:MM AM/PM
     if (diff < 1000 * 60 * 60 * 24) {
-      return date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true });
+      // check if dates are the same
+      if (new Date().getDate() === date.getDate()) {
+        // if we are in the same hour: 36m ago
+        if (diff < 1000 * 60 * 60) {
+          return `${Math.floor(diff / 1000 / 60)}m Ago`;
+        }
+
+        // if we are in the same day: 6h ago
+        if (diff < 1000 * 60 * 60 * 24) {
+          return `${Math.floor(diff / 1000 / 60 / 60)}h Ago`;
+        }
+
+        return /* html */`
+          ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
+        `;
+      } else {
+        return /* html */`
+          ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
+        `;
+      }
     }
 
-    // if we are in the diff is less than 7 days: DAY HH:MM AM/PM
+    // if we are in the diff is less than 7 days: DAY AT HH:MM AM/PM
     if (diff < 1000 * 60 * 60 * 24 * 7) {
       return /* html */`
-        ${date.toLocaleString('default', { weekday: 'short' })} ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        ${date.toLocaleString('default', { weekday: 'short' })}
       `;
     }
 
-    // if we are in the same month AND year: 12th HH:MM AM/PM
+    // if we are in the same month AND year: 12th APR AT HH:MM AM/PM
     if (new Date().getMonth() === date.getMonth() && new Date().getFullYear() === date.getFullYear()) {
       return /* html */`
-        ${date.getDate()}${dayStr} ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })}
       `;
     }
 
-    // if we are in the same year: 12th Jan
+    // if we are in the same year: 12th Jan at 11:59 PM
     if (new Date().getFullYear() === date.getFullYear()) {
       return /* html */`
         ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })}
       `;
     }
 
-    // if we are in a different year: 12th Jan 2021
+    // if we are in a different year: 12th Jan 2021 at 11:59 PM
 		return /* html */`
       ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}
     `;
@@ -514,14 +533,14 @@ export default class ChatItem extends HTMLDivElement {
           justify-content: start;
           align-items: center;
           flex-flow: row nowrap;
-          gap: 5px;
+          gap: 3px;
         }
 
         .wrapper > .content > .head > .name > .text {
           width: max-content;
           max-width: calc(100% - 23px);
           text-align: start;
-          gap: 5px;
+          gap: 0;
 
           /** add ellipsis */
           white-space: nowrap;
@@ -561,7 +580,7 @@ export default class ChatItem extends HTMLDivElement {
           font-family: var(--font-read), sans-serif;
           font-weight: 500;
           font-size: 0.85rem;
-          text-transform: uppercase;
+          /* text-transform: uppercase;*/
           color: var(--gray-color);
         }
 
@@ -601,7 +620,7 @@ export default class ChatItem extends HTMLDivElement {
           display: flex;
           justify-content: center;
           align-items: center;
-          margin: 5px 0 0 0;
+          margin: 6px 0 0 0;
         }
 
         .wrapper > .content > .text > .tick > svg {
@@ -639,6 +658,7 @@ export default class ChatItem extends HTMLDivElement {
           font-family: var(--font-main), sans-serif;
           font-weight: 400;
           font-size: 1rem;
+          padding-left: 2px;
           color: var(--gray-color);
           white-space: nowrap;
           overflow: hidden;
@@ -728,6 +748,74 @@ export default class ChatItem extends HTMLDivElement {
           button, button:active, button:focus, button:hover,
           .wrapper {
             cursor: default !important;
+          }
+
+          .wrapper > .content > .head > .time {
+            min-width: 100px;
+            text-align: end;
+            max-width: 100px;
+            font-family: var(--font-read), sans-serif;
+            font-weight: 500;
+            font-size: 0.7rem;
+            color: var(--gray-color);
+          }
+
+          .wrapper > .content > .head > .name > svg {
+            min-width: 16px;
+            max-width: 16px;
+            min-height: 16px;
+            max-height: 16px;
+            width: 16px;
+            height: 16px;
+            margin-bottom: -1px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--white-color);
+            fill: var(--accent-color);
+          }
+
+          .wrapper > .image > .online-status {
+            border: var(--border);
+            display: flex;
+            background: var(--background);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 12px;
+            width: 12px;
+            min-width: 12px;
+            min-height: 12px;
+            max-width: 12px;
+            max-height: 12px;
+            border-radius: 50%;
+            padding: 3px;
+            position: absolute;
+            bottom: 0;
+            top: unset;
+            right: -1px;
+          }
+  
+          .wrapper > .image > .online-status > .active {
+            width: 6px;
+            height: 6px;
+            max-width: 6px;
+            max-height: 6px;
+            min-width: 6px;
+            min-height: 6px;
+            border-radius: 50%;
+            background: var(--accent-linear);
+          }
+  
+          .wrapper > .image > .online-status > .inactive {
+            width: 6px;
+            height: 6px;
+            max-width: 6px;
+            max-height: 6px;
+            min-width: 6px;
+            min-height: 6px;
+            border-radius: 50%;
+            background: var(--gray-color);
           }
         }
       </style>

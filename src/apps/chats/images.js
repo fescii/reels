@@ -7,7 +7,6 @@ export default class ChatImages extends HTMLDivElement {
     this.uploadCount = this.getImagesLength(this.getAttribute("images"));
     this.maxUploads = 10;
     this.render();
-    console.log('This api:', this.api);
   }
 
   render() {
@@ -80,39 +79,6 @@ export default class ChatImages extends HTMLDivElement {
     }
   }
 
-  updateDeletedImage = url => {
-    if(window.toBeChanged) {
-      try {
-        let images = window.toBeChanged.getAttribute('images');
-
-        // if images is empty or null, set it to an empty string
-        if (!images || images === 'null'){
-          window.toBeChanged.setAttribute('images', '');
-          return;
-        }
-
-        let imagesArray = images.split(',');
-
-        // Remove the url from the images array
-        const index = imagesArray.indexOf(url);
-        imagesArray.splice(index, 1);
-
-        imagesArray = imagesArray.filter(image => image.trim() !== '' && image !== 'null' && image.length > 5);
-
-        // if the resulting array is empty, or contains empty strings, set it to an empty string
-        if (imagesArray.length === 0 || imagesArray.every(image => image.trim().length < 5)) {
-          window.toBeChanged.setAttribute('images', '');
-          return;
-        }
-
-        // Set the new images array
-        window.toBeChanged.setAttribute('images', imagesArray.join(','));
-      } catch (error) {
-        console.error('Error updating deleted image:', error);
-      }
-    }
-  }
-
   updateAddedImage = url => {
     try {
       let images = window.toBeChanged.getAttribute('images');
@@ -130,8 +96,6 @@ export default class ChatImages extends HTMLDivElement {
         imagesArray.push(url);
       }
 
-      // Set the new images array
-      window.toBeChanged.setAttribute('images', imagesArray.join(','));
     } catch (error) {
       console.error('Error updating added image:', error);
     }
@@ -280,9 +244,6 @@ export default class ChatImages extends HTMLDivElement {
 
       // send delete url to server
       this.sendDeleteUrl(imageUrl);
-
-      // update the deleted image
-      this.updateDeletedImage(imageUrl);
     })
   }
 
@@ -335,27 +296,6 @@ export default class ChatImages extends HTMLDivElement {
     img.addEventListener('error', () => {
       img.parentElement.classList.add('error');
     });
-  }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error('Something went wrong');
-    } finally {
-      clearTimeout(timeoutId);
-    }
   }
 
   getTemplate = () => {

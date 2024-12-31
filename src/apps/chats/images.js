@@ -2,10 +2,12 @@ export default class ChatImages extends HTMLDivElement {
   constructor() {
     super();
     this.main = window.app.main;
-    this.api = this.getAttribute("api");
+    this.api = window.app.api;
+    this.url = this.getAttribute('url');
     this.uploadCount = this.getImagesLength(this.getAttribute("images"));
     this.maxUploads = 10;
     this.render();
+    console.log('This api:', this.api);
   }
 
   render() {
@@ -160,12 +162,10 @@ export default class ChatImages extends HTMLDivElement {
       const formData = new FormData();
       formData.append('file', webpBlob, 'image.webp');
 
-      const response = await this.fetchWithTimeout(this.api, {
-        method: 'POST',
-        body: formData
+      const data = await this.api.post(this.url, {
+        body: formData,
+        content: 'json'
       });
-
-      const data = await response.json();
 
       if (data.success) {
         this.addImageToGallery(data.url);
@@ -183,6 +183,14 @@ export default class ChatImages extends HTMLDivElement {
       }
     } catch (error) {
       console.error('Error uploading image:', error);
+      if (error.message === 'Request timed out') {
+        // Handle timeou
+      } else if (error.message.startsWith('HTTP error!')) {
+        // Handle HTTP error
+      } else {
+        // Handle other errors
+      }
+
       this.main.showToast(false, error.message);
 
       // remove loader and show add button

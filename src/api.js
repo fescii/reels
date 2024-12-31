@@ -1,9 +1,9 @@
 export default class APIManager {
-  constructor(baseURL = '', defaultTimeout = 9500) {
+  constructor(baseURL = '', defaultTimeout = 9500, cacheVersion = 'v1') {
     this.baseURL = baseURL;
     this.defaultTimeout = defaultTimeout;
-    this.cache = new Map();
     this.pendingRequests = new Map();
+    this.cacheName = `api-cache-${cacheVersion}`;
     
     this.contentTypes = {
       json: 'application/json',
@@ -14,6 +14,18 @@ export default class APIManager {
       multipart: 'multipart/form-data',
       binary: 'application/octet-stream'
     };
+
+    // Initialize cache
+    this.initCache();
+  }
+
+  async initCache() {
+    if ('caches' in window) {
+      // Open or create the cache
+      await caches.open(this.cacheName);
+    } else {
+      console.warn('Cache Storage API is not available in this browser');
+    }
   }
 
   #processHeaders(options = {}) {
@@ -36,35 +48,83 @@ export default class APIManager {
   #generateCacheKey(url, options = {}) {
     const normalizedOptions = { ...options };
     delete normalizedOptions.signal;
-    return `${options.method || 'GET'}-${url}-${JSON.stringify(normalizedOptions)}`;
+    return new Request(url, {
+      ...normalizedOptions,
+      method: options.method || 'GET'
+    });
   }
 
-  #handleCache(cacheKey, cacheOptions) {
-    if (!cacheOptions?.allow) return null;
+  async #storeCacheMetadata(request, data, cacheOptions) {
+    const metadata = {
+      data,
+      createdAt: new Date().toISOString(),
+      expiryDate: new Date(Date.now() + (cacheOptions.duration || 300000)).toISOString()
+    };
 
-    const cached = this.cache.get(cacheKey);
-    if (cached) {
-      const now = new Date();
-      if (now < cached.expiryDate) {
-        return cached.data;
+    // Store metadata in localStorage for quick access
+    localStorage.setItem(
+      `${this.cacheName}-metadata-${request.url}-${request.method}`,
+      JSON.stringify(metadata)
+    );
+
+    return metadata;
+  }
+
+  async #getCacheMetadata(request) {
+    const key = `${this.cacheName}-metadata-${request.url}-${request.method}`;
+    const metadata = localStorage.getItem(key);
+    return metadata ? JSON.parse(metadata) : null;
+  }
+
+  async #removeCacheMetadata(request) {
+    const key = `${this.cacheName}-metadata-${request.url}-${request.method}`;
+    localStorage.removeItem(key);
+  }
+
+  async #handleCache(request, cacheOptions) {
+    if (!cacheOptions?.allow || !('caches' in window)) return null;
+
+    const cache = await caches.open(this.cacheName);
+    const cachedResponse = await cache.match(request);
+    
+    if (cachedResponse) {
+      const metadata = await this.#getCacheMetadata(request);
+      if (metadata) {
+        const now = new Date();
+        const expiryDate = new Date(metadata.expiryDate);
+
+        if (now < expiryDate) {
+          return metadata.data;
+        }
+        // Cache expired, remove it
+        await this.#removeFromCache(request);
       }
-      // Cache expired, remove it
-      this.cache.delete(cacheKey);
     }
     return null;
   }
 
-  #setCacheData(cacheKey, data, cacheOptions) {
-    if (cacheOptions?.allow) {
-      const duration = cacheOptions.duration || 300000; // 5 minutes default
-      const expiryDate = new Date();
-      expiryDate.setTime(expiryDate.getTime() + duration);
-      
-      this.cache.set(cacheKey, {
-        data,
-        expiryDate,
-        createdAt: new Date()
-      });
+  async #setCacheData(request, data, cacheOptions) {
+    if (!cacheOptions?.allow || !('caches' in window)) return;
+
+    const cache = await caches.open(this.cacheName);
+    
+    // Store the response in the cache
+    const response = new Response(JSON.stringify(data), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': `max-age=${Math.floor((cacheOptions.duration || 300000) / 1000)}`
+      }
+    });
+    
+    await cache.put(request, response);
+    await this.#storeCacheMetadata(request, data, cacheOptions);
+  }
+
+  async #removeFromCache(request) {
+    if ('caches' in window) {
+      const cache = await caches.open(this.cacheName);
+      await cache.delete(request);
+      await this.#removeCacheMetadata(request);
     }
   }
 
@@ -88,14 +148,15 @@ export default class APIManager {
 
   async #request(url, options = {}, cacheOptions = {}) {
     const fullURL = this.baseURL + url;
-    const cacheKey = this.#generateCacheKey(fullURL, options);
+    const request = this.#generateCacheKey(fullURL, options);
 
     // Check cache first - will automatically handle expiry
-    const cachedData = this.#handleCache(cacheKey, cacheOptions);
+    const cachedData = await this.#handleCache(request, cacheOptions);
     if (cachedData) return cachedData;
 
     // Handle concurrent requests
-    const pendingRequest = this.pendingRequests.get(cacheKey);
+    const pendingKey = `${request.url}-${request.method}`;
+    const pendingRequest = this.pendingRequests.get(pendingKey);
     if (pendingRequest) return pendingRequest;
 
     const controller = new AbortController();
@@ -108,7 +169,7 @@ export default class APIManager {
 
     const fetchPromise = (async () => {
       try {
-        const response = await fetch(fullURL, {
+        const response = await fetch(request.url, {
           ...options,
           headers: processedHeaders,
           signal: controller.signal
@@ -119,7 +180,7 @@ export default class APIManager {
         }
 
         const data = await this.#processResponse(response);
-        this.#setCacheData(cacheKey, data, cacheOptions);
+        await this.#setCacheData(request, data, cacheOptions);
         return data;
       } catch (error) {
         if (error.name === 'AbortError') {
@@ -128,11 +189,11 @@ export default class APIManager {
         throw error;
       } finally {
         clearTimeout(timeoutId);
-        this.pendingRequests.delete(cacheKey);
+        this.pendingRequests.delete(pendingKey);
       }
     })();
 
-    this.pendingRequests.set(cacheKey, fetchPromise);
+    this.pendingRequests.set(pendingKey, fetchPromise);
     return fetchPromise;
   }
 
@@ -158,31 +219,50 @@ export default class APIManager {
   }
 
   // Cache management methods
-  clearCache(url = null, options = {}) {
-    if (url) {
-      const cacheKey = this.#generateCacheKey(this.baseURL + url, options);
-      this.cache.delete(cacheKey);
-    } else {
-      this.cache.clear();
+  async clearCache(url = null, options = {}) {
+    if ('caches' in window) {
+      if (url) {
+        const request = this.#generateCacheKey(this.baseURL + url, options);
+        await this.#removeFromCache(request);
+      } else {
+        await caches.delete(this.cacheName);
+        await this.initCache();
+        // Clear all metadata
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+          if (key.startsWith(`${this.cacheName}-metadata-`)) {
+            localStorage.removeItem(key);
+          }
+        });
+      }
     }
   }
 
-  getCacheSize() {
-    return this.cache.size;
+  async getCacheSize() {
+    if ('caches' in window) {
+      const cache = await caches.open(this.cacheName);
+      const keys = await cache.keys();
+      return keys.length;
+    }
+    return 0;
   }
 
-  getCacheStatus(url, options = {}) {
-    const cacheKey = this.#generateCacheKey(this.baseURL + url, options);
-    const cached = this.cache.get(cacheKey);
+  async getCacheStatus(url, options = {}) {
+    if (!('caches' in window)) return null;
+
+    const request = this.#generateCacheKey(this.baseURL + url, options);
+    const metadata = await this.#getCacheMetadata(request);
     
-    if (!cached) return null;
+    if (!metadata) return null;
     
     const now = new Date();
+    const expiryDate = new Date(metadata.expiryDate);
+    
     return {
-      isValid: now < cached.expiryDate,
-      createdAt: cached.createdAt,
-      expiryDate: cached.expiryDate,
-      timeRemaining: cached.expiryDate.getTime() - now.getTime()
+      isValid: now < expiryDate,
+      createdAt: new Date(metadata.createdAt),
+      expiryDate: expiryDate,
+      timeRemaining: expiryDate.getTime() - now.getTime()
     };
   }
 

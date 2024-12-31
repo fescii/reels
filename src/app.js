@@ -6,7 +6,7 @@ export default class App extends HTMLElement {
 		super();
 		this.registerComponents();
 		// this.api = new APIManager('https://api.zoanai.com');
-		this.api = new APIManager('http://zoanai.com', 9500);
+		this.api = new APIManager('https://zoanai.com/api/v1', 9500, 'v1');
 		// this.api = new APIManager('http://localhost:3000');
 	}
 	

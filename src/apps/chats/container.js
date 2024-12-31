@@ -654,7 +654,7 @@ export default class MessagingContainer extends HTMLElement {
 
   getImagesEditor = () => {
     return /* html */`
-      <div is="chat-images" class="images" id="images" api="https://zoanai.com/api/v1/s/add"></div>
+      <div is="chat-images" class="images" id="images" url="/s/add"></div>
     `;
   }
 

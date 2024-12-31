@@ -5,6 +5,7 @@ export default class MessagingContainer extends HTMLElement {
     this.active_tab = null;
     this.openedContextNode = null;
     this.expanded = false;
+    this.reply = null;
     this.render();
   }
 
@@ -26,6 +27,46 @@ export default class MessagingContainer extends HTMLElement {
   disconnectedCallback() {
     // remove event listeners
     window.visualViewport?.removeEventListener('resize', this.adjustContentHeight);
+  }
+
+  setReply = data => {
+    const editor = this.shadow.querySelector('.editor');
+    
+    if(editor) {
+      // select textarea
+      const textarea = editor.querySelector('textarea#message');
+      // select existing reply element
+      const reply = editor.querySelector('.reply');
+
+      // if reply element exists, remove it
+      if (reply) {
+        reply.remove();
+      }
+
+      // set the reply data
+      this.reply = data;
+      editor.insertAdjacentHTML('afterbegin', this.getReply(data));
+      this.activateReplyCancel(editor);
+
+      // focus on the textarea
+      textarea.focus();
+    }
+  }
+
+  activateReplyCancel = editor => {
+    const reply = editor.querySelector('.reply');
+
+    if (reply) {
+      const cancel = reply.querySelector('.cancel');
+
+      cancel.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        this.reply = null;
+        reply.remove();
+      });
+    }
   }
 
   scrollMessages = () => {
@@ -166,7 +207,7 @@ export default class MessagingContainer extends HTMLElement {
       // window.alert(`Viewport Height: ${viewportHeight}, Header Height: ${headerHeight}, Messages Height: ${messagesHeight}, Editor Height: ${editorHeight}`);
 
       // if the messages height is less than the viewport height - (header height + editor height)
-      if (messagesHeight < 500 ) {
+      if (messagesHeight) {
         // set content height to viewport height - (header height + editor height)
         content.style.height = `${viewportHeight - headerHeight}px`;
         content.style.setProperty('max-height', `${viewportHeight - headerHeight}px`);
@@ -187,18 +228,6 @@ export default class MessagingContainer extends HTMLElement {
         content.style.scrollbarWidth = 'none';
         content.style.msOverflowStyle = 'none';
         content.style.overflow = '-moz-scrollbars-none';
-      } else {
-        content.style.setProperty('height', 'calc(100dvh - 60px)')
-        content.style.setProperty('max-height', 'calc(100dvh - 60px)')
-        content.style.setProperty('min-height', `calc(100dvh - 60px)`);
-
-        // make it scrollable
-        content.style.overflowY = 'scroll';
-
-        // style body max-height
-        document.body.style.setProperty('max-height', '100dvh')
-        document.body.style.setProperty('height', '100dvh')
-        document.body.style.setProperty('min-height', '100dvh')
       }
     } else {
       console.error('Visual Viewport is not supported');
@@ -514,6 +543,7 @@ export default class MessagingContainer extends HTMLElement {
   getEditor = () => {
     return /* html */`
       <div class="editor" id="editor">
+        ${this.getReply({ id: 43, user: 'Jane', you: false, text: 'This is a message from Jane Doe, Please reply as soon as possible.' })}
         <form class="form message-form">
           <div class="actions-container">
             <div class="actions">
@@ -585,6 +615,39 @@ export default class MessagingContainer extends HTMLElement {
             </svg>
           </button>
         </form>
+      </div>
+    `;
+  }
+
+  getReply = ({id: id, user: replyUser, you: toYou, text: replyText}) => {
+    // if both are null or empty, return nothing
+    if (!replyText || replyText.trim() === '' || replyText.trim().length === 0) return '';
+
+    let text = '';
+    if (toYou) {
+      text = 'Replying to yourself';
+    } else {
+      text = `Replying to ${replyUser}`;
+    } 
+
+    return /* html */`
+      <div class="reply">
+        <span class="cancel" title="Cancel">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div class="head">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M21.7109 9.3871C21.8404 9.895 21.9249 10.4215 21.9598 10.9621C22.0134 11.7929 22.0134 12.6533 21.9598 13.4842C21.6856 17.7299 18.3536 21.1118 14.1706 21.3901C12.7435 21.485 11.2536 21.4848 9.8294 21.3901C9.33896 21.3574 8.8044 21.2403 8.34401 21.0505C7.83177 20.8394 7.5756 20.7338 7.44544 20.7498C7.31527 20.7659 7.1264 20.9052 6.74868 21.184C6.08268 21.6755 5.24367 22.0285 3.99943 21.9982C3.37026 21.9829 3.05568 21.9752 2.91484 21.7349C2.77401 21.4946 2.94941 21.1619 3.30021 20.4966C3.78674 19.5739 4.09501 18.5176 3.62791 17.6712C2.82343 16.4623 2.1401 15.0305 2.04024 13.4842C1.98659 12.6533 1.98659 11.7929 2.04024 10.9621C2.31441 6.71638 5.64639 3.33448 9.8294 3.05621C10.2156 3.03051 10.6067 3.01177 11 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M8.5 15H15.5M8.5 10H12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M14 4.5L22 4.5M14 4.5C14 3.79977 15.9943 2.49153 16.5 2M14 4.5C14 5.20023 15.9943 6.50847 16.5 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span class="text">${text}</span>
+        </div>
+        <div class="summary">
+          ${replyText}
+        </div>
       </div>
     `;
   }
@@ -915,6 +978,9 @@ export default class MessagingContainer extends HTMLElement {
           flex-flow: column;
           align-items: start;
           justify-content: start;
+          width: 100%;
+          max-width: 100%;
+          min-width: 100%;
           gap: 10px;
           padding: 10px 0 30px;
         }
@@ -995,11 +1061,86 @@ export default class MessagingContainer extends HTMLElement {
           background: var(--background);
         }
 
+        div.editor#editor > .reply {
+          z-index: 0;
+          padding: 0;
+          border-radius: 15px;
+          margin: 5px 0 0 0;
+          width: max-content;
+          display: flex;
+          max-width: 100%;
+          flex-direction: column;
+          gap: 4px;
+          left: 10px;
+          width: calc(100% - 10px);
+          margin-bottom: -20px;
+          position: relative;
+        }
+
+        div.editor#editor > .reply > .cancel {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          position: absolute;
+          cursor: pointer;
+          z-index: 1;
+          top: 2px;
+          right: 5px;
+        }
+
+        div.editor#editor > .reply > .cancel > svg {
+          width: 16px;
+          height: 16px;
+          color: var(--error-color);
+        }
+
+        div.editor#editor > .reply > .head {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          opacity: 0.8;
+          color: var(--gray-color);
+          font-family: var(--font-read), sans-serif;
+        }
+
+        div.editor#editor > .reply > .head > svg {
+          width: 16px;
+          height: 16px;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+        }
+
+        div.editor#editor > .reply > .head > .text {
+          font-size: 0.95rem;
+          font-weight: 400;
+          font-family: inherit;
+        }
+
+        .reply > .summary {
+          font-size: 0.9rem;
+          font-weight: 400;
+          width: max-content;
+          max-width: 100%;
+          background: var(--reply-background);
+          padding: 8px 10px 25px;
+          font-family: inherit;
+          color: var(--gray-color);
+          border-radius: 15px;
+          /* add ellipsis to the text */
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
         div.editor#editor > form.message-form {
           display: flex;
           flex-flow: row;
           align-items: flex-end;
           justify-content: space-between;
+          background: var(--background);
+          z-index: 1;
           gap: 0;
           padding: 0;
           margin: 0;
@@ -1220,43 +1361,8 @@ export default class MessagingContainer extends HTMLElement {
             transform: translateX(-10px);
           }
         }
-       
-        @media screen and (max-width: 660px) {
-          :host {
-            /* border: 2px solid green; */
-            height: unset;
-            max-height: unset;
-            min-height: unset;
-            width: 100%;
-            min-width: 100%;
-            max-width: 100%;
-          }
 
-          /* reset all cursor: pointer to cursor: default */
-          a, button, input, label, select, textarea,
-          ul.tabs > li.tab, ul.tabs > li.tab.active {
-            cursor: default !important;
-          }
-
-          header.header {
-            border-bottom: var(--border);
-            background: var(--background);
-            padding: 0;
-            padding: 10px 0 10px;
-            display: flex;
-            flex-flow: column;
-            align-items: start;
-            flex-wrap: nowrap;
-            height: 60px;
-            max-height: 60px;
-            gap: 5px;
-            margin: 0;
-            z-index: 6;
-            width: 100%;
-            position: sticky;
-            top: 0;
-          }
-  
+        @media screen and (max-width: 768px) {
           header.header > svg {
             position: absolute;
             left: -15px;
@@ -1286,6 +1392,44 @@ export default class MessagingContainer extends HTMLElement {
             margin: 0 0 0 20px;
             width: calc(100% - 20px);
             position: relative;
+          }
+        }
+       
+        @media screen and (max-width: 660px) {
+          :host {
+            /* border: 2px solid green; */
+            height: unset;
+            max-height: unset;
+            min-height: unset;
+            width: 100%;
+            min-width: 100%;
+            max-width: 100%;
+          }
+
+          /* reset all cursor: pointer to cursor: default */
+          a, button, input, label, select, textarea,
+          ul.tabs > li.tab, ul.tabs > li.tab.active,
+          div.editor#editor > .reply > .cancel {
+            cursor: default !important;
+          }
+
+          header.header {
+            border-bottom: var(--border);
+            background: var(--background);
+            padding: 0;
+            padding: 10px 0 10px;
+            display: flex;
+            flex-flow: column;
+            align-items: start;
+            flex-wrap: nowrap;
+            height: 60px;
+            max-height: 60px;
+            gap: 5px;
+            margin: 0;
+            z-index: 6;
+            width: 100%;
+            position: sticky;
+            top: 0;
           }
 
           main.main {

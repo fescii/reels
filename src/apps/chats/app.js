@@ -3,6 +3,7 @@ export default class ChatApp extends HTMLElement {
     super();
     this.shadow = this.attachShadow({ mode: 'open' });
     this.active_tab = null;
+    this.mql = window.matchMedia("(max-width: 768px)");
     this.render();
   }
 
@@ -10,7 +11,20 @@ export default class ChatApp extends HTMLElement {
     this.shadow.innerHTML = this.getTemplate();
   }
 
+  watchMql = () => {
+    this.mql.addEventListener("change", e => {
+      // console.log("Media query changed", e);
+      this.render();
+      this.setUpEventListeners();
+    });
+  }
+
   connectedCallback() {
+    this.watchMql();
+    this.setUpEventListeners();
+  }
+
+  setUpEventListeners = () => {
     const tabs = this.shadow.querySelector("ul.tabs");
 
     // if tabs exist, activate the tab controller
@@ -89,8 +103,7 @@ export default class ChatApp extends HTMLElement {
   }
 
   getTemplate() {
-    const mql = window.matchMedia("(max-width: 660px)");
-    if (mql.matches) {
+    if (this.mql.matches) {
       return /* html */`
         ${this.getMain()}
         ${this.getStyles()}
@@ -385,6 +398,7 @@ export default class ChatApp extends HTMLElement {
         div.main {
           width: calc(55% - 10px);
           max-width: calc(55% - 10px);
+          min-width: calc(55% - 10px);
           height: 100%;
           max-height: 100%;
           display: flex;
@@ -482,8 +496,9 @@ export default class ChatApp extends HTMLElement {
         }
 
         div.chats {
-          width: 45%;
-          max-width: 45%;
+          width: calc(45% - 10px);
+          max-width: calc(45% - 10px);
+          min-width: calc(45% - 10px);
           height: 100%;
           max-height: 100%;
           display: flex;
@@ -790,6 +805,19 @@ export default class ChatApp extends HTMLElement {
           gap: 0;
           padding: 0;
           width: 100%;
+        }
+
+        @media screen and (max-width: 768px) {
+          div.chats,
+          div.main {
+            width: 100%;
+            min-width: 100%;
+            height: unset;
+            min-height: unset;
+            max-height: unset;
+            padding: 0;
+            margin: 0;
+          }
         }
 
         @media screen and (max-width: 660px) {

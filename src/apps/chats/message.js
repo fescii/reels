@@ -49,6 +49,7 @@ export default class Message extends HTMLDivElement {
     this.showActionsDropdown();
     this.initalizeCopy(this.mql);
     this.openDesktopReactions(this.mql);
+    this.handleReply(this.mql);
   }
 
   openDesktopReactions = mql => {
@@ -223,7 +224,7 @@ export default class Message extends HTMLDivElement {
       e.preventDefault();
       e.stopPropagation();
       try {
-        const text = this.innerHTML;
+        const text = this.removeHTMLTags(this.innerHTML);
         navigator.clipboard.writeText(text);
         await this.main.showToast(true, 'Message copied to clipboard');
       } catch (error) {
@@ -316,6 +317,53 @@ export default class Message extends HTMLDivElement {
     } catch (error) {
       editAction.style.display = 'none';
     }
+  }
+
+  handleReply = mql => {
+    // get the reply action button
+    const you = this.textToBoolean(this.getAttribute('you'));
+    
+    if (!mql.matches) {
+      const actions = this.shadow.querySelector('.content > .message > .actions');
+
+      // call the reply function
+      this.replyToMessage(actions, you, 'desktop');
+    } else {
+      const actions = this.shadow.querySelector('.actions-dropdown');
+      // call the reply function
+      this.replyToMessage(actions, you, 'mobile');
+    }
+  }
+
+  replyToMessage = (container, you, kind) => {
+    const reply = container.querySelector('.action.reply');
+    if (reply) {
+      reply.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        const data = {
+          id: 43,
+          user: this.getAttribute('user-name').split(' ')[0],
+          you: you,
+          text: this.removeHTMLTags(this.innerHTML),
+        }
+
+        this.container.setReply(data);
+
+        // close container
+        if (kind === 'desktop') {
+          // console.log('Closing container');
+          // container.style.opacity = '0';
+          setTimeout(() => {
+            container.style.display = 'none';
+          }, 300);
+        } else {
+          this.closeContextMenu();
+        }
+        });
+      }
   }
 
   textToBoolean = text => {
@@ -489,6 +537,12 @@ export default class Message extends HTMLDivElement {
         ${this.getUserReactions(this.reactions)}
       </div>
     `;
+  }
+
+  removeHTMLTags = str => {
+    // remove html tags like: <, >, &gt;, &lt; and all attributes
+    return str.replace(/(<([^>]+)>)/gi, '')
+      .replace(/&lt;/g, '').replace(/&gt;/g, '')
   }
 
   getReply = () => {

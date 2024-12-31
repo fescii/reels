@@ -748,7 +748,7 @@ export default class AppMain extends HTMLElement {
 						border-top: var(--border);
 						box-shadow: var(--footer-shadow);
 						width: 100%;
-						display: none;
+						display: flex;
 						padding: 0;
 						flex-flow: row;
 						gap: 0;

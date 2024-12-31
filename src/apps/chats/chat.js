@@ -696,6 +696,9 @@ export default class ChatItem extends HTMLDivElement {
           max-height: 40px;
           border-radius: 10px;
           overflow: hidden;
+
+          /* disable pointer events */
+          pointer-events: none;
         }
 
         .wrapper > .content > .images > .image > img {
@@ -737,10 +740,27 @@ export default class ChatItem extends HTMLDivElement {
 
           /** add ellipsis */
           white-space: nowrap;
+          pointer-events: none;
         }
 
         @media all and (max-width: 660px) {
           :host {
+          }
+
+          .wrapper.opened {
+            padding: 10px 0;
+            border-radius: 0;
+            position: relative;
+          }
+
+          .wrapper:hover {
+            background: unset;
+            border-radius: 0;
+            padding: 10px 0;
+          }
+  
+          .wrapper.opened::before {
+            all: unset;
           }
 
           /* reset all cursor: pointer to cursor: default */

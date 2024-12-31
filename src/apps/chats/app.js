@@ -873,8 +873,8 @@ export default class ChatApp extends HTMLElement {
             align-items: center;
             flex-wrap: nowrap;
             gap: 0;
-            margin: 0 0 0 28px;
-            width: calc(100% - 28px);
+            margin: 0 0 0 25px;
+            width: calc(100% - 25px);
             position: relative;
           }
 
@@ -882,7 +882,7 @@ export default class ChatApp extends HTMLElement {
             position: absolute;
             display: flex;
             left: -12px;
-            top: calc(50% - 15px);
+            top: calc(50% - 20px);
             color: var(--text-color);
             cursor: pointer;
             width: 40px;
@@ -892,7 +892,15 @@ export default class ChatApp extends HTMLElement {
           ul.tabs > li.tab > .count {
             padding: 2px 7px;
           }
-  
+
+          div.chats > .container > div.chats-container {
+            display: flex;
+            flex-flow: column;
+            align-items: start;
+            gap: 0;
+            padding: 0 0 55px;
+            width: 100%;
+          }
         }
       </style>
     `;

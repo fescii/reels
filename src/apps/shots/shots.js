@@ -150,7 +150,7 @@ export default class ShotsVideos extends HTMLElement {
         <div class="shots">
           ${this.getShots()}
         </div>
-      </div>
+      </section>
       <section class="info-container"> 
         <h1>Shots</h1>
         <p>Scroll to view more shots</p>
@@ -166,7 +166,7 @@ export default class ShotsVideos extends HTMLElement {
           <path d="M15.28 5.22a.75.75 0 0 1 0 1.06L9.56 12l5.72 5.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215l-6.25-6.25a.75.75 0 0 1 0-1.06l6.25-6.25a.75.75 0 0 1 1.06 0Z"></path>
         </svg>
         <div class="contents">
-          <input type="text" name="q" id="query" placeholder="Search shots" />
+          <input type="text" name="q" id="query" placeholder="Search shots" autocomplete="off" />
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="11.7666" cy="11.7667" r="8.98856" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"  stroke-linejoin="round" />
             <path d="M18.0183 18.4853L21.5423 22.0001" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
@@ -195,7 +195,7 @@ export default class ShotsVideos extends HTMLElement {
     return /* css */`
       <style>
         :host {
-          /* border: 1px solid blue; */
+          border: 1px solid blue;
           display: flex;
           max-width: 100%;
           width: 100%;
@@ -205,10 +205,15 @@ export default class ShotsVideos extends HTMLElement {
           max-height: 100dvh;
           min-height: 100dvh;
           display: flex;
-          flex-direction: row;
+          flex-flow: row;
           align-items: start;
           justify-content: space-between;
           gap: 20px;
+        }
+
+        * {
+          box-sizing: border-box;
+          font-family: var(--font-main), sans-serif;
         }
 
         section.shots-container {
@@ -227,9 +232,20 @@ export default class ShotsVideos extends HTMLElement {
           position: relative;
         }
 
-        * {
-          box-sizing: border-box;
-          font-family: var(--font-main), sans-serif;
+        section.info-container {
+          border: 1px solid red;
+          display: block;
+          max-width: calc(100% - 470px);
+          width: calc(100% - 470px);
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: start;
+          justify-content: start;
+          height: 100%;
+          max-height: 100%;
+          min-height: 100%;
+          position: relative;
         }
 
         div.shots {
@@ -325,7 +341,7 @@ export default class ShotsVideos extends HTMLElement {
         form.search > .contents > input:-webkit-autofill,
         form.search > .contents > input:-webkit-autofill:hover, 
         form.search > .contents > input:-webkit-autofill:focus {
-          -webkit-box-shadow: 0 0 0px 1000px var(--background) inset;
+          -webkit-box-shadow: 0 0 0px 1000px transparent inset;
           -webkit-text-fill-color: var(--text-color) !important;
           transition: background-color 5000s ease-in-out 0s;
           color: var(--title-color) !important;
@@ -345,6 +361,7 @@ export default class ShotsVideos extends HTMLElement {
 
         form.search > .contents > input:focus {
           border: var(--input-border-focus);
+          background: transparent;
         }
 
         form.search > .contents > svg {

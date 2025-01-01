@@ -97,7 +97,7 @@ export default class AppMain extends HTMLElement {
     if (mql.matches) {
       return /* html */`
         <section class="flow">
-          ${this.getShots()}
+          ${this.getChatApp()}
         </section>
         <section class="nav">
           ${this.getMobileNav()}
@@ -110,7 +110,7 @@ export default class AppMain extends HTMLElement {
           ${this.getMainNav()}
         </section>
         <section class="flow">
-          ${this.getShots()}
+          ${this.getChatApp()}
         </section>
       `;
     }

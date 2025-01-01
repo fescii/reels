@@ -565,7 +565,7 @@ export default class ChatApp extends HTMLElement {
         }
 
         form.search > .contents > input {
-          border: var(--border-mobile);
+          border: var(--input-border);
           background-color: var(--background) !important;
           display: flex;
           flex-flow: row;

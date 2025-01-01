@@ -543,7 +543,6 @@ export default class MessagingContainer extends HTMLElement {
   getEditor = () => {
     return /* html */`
       <div class="editor" id="editor">
-        ${this.getImagesEditor()}
         <form class="form message-form">
           <div class="actions-container">
             <div class="actions">

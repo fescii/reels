@@ -238,7 +238,7 @@ export default class PinChat extends HTMLDivElement {
         .head > .online-status {
           border: var(--border);
           display: flex;
-          background: var(--gray-background);
+          background: var(--white-color);
           justify-content: center;
           align-items: center;
           height: 16px;

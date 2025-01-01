@@ -90,7 +90,7 @@ export default class PinChat extends HTMLDivElement {
     } else {
       return /* html */`
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-          <path d="M22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12Z" stroke="currentColor" stroke-width="1.8" />
+          <path id="outer-path2" d="M22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12Z" stroke="currentColor" stroke-width="1.8" />
           <path d="M8 12.5L10.5 15L16 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       `;
@@ -226,18 +226,23 @@ export default class PinChat extends HTMLDivElement {
           margin: 5px 0 0 0;
           min-width: 20px;
           height: 20px;
-          color: var(--anchor-color);
-          fill: var(--background);
+          color: var(--white-color);
+          fill: var(--accent-color);
+        }
+
+        .head > .messages > svg > path#outer-path2 {
+          stroke: var(--accent-color);
+          color: var(--accent-color);
         }
 
         .head > .online-status {
           border: var(--border);
           display: flex;
-          background: var(--background);
+          background: var(--gray-background);
           justify-content: center;
           align-items: center;
-          height: 14px;
-          width: 14px;
+          height: 16px;
+          width: 16px;
           border-radius: 50%;
         }
 
@@ -252,7 +257,7 @@ export default class PinChat extends HTMLDivElement {
           width: 10px;
           height: 10px;
           border-radius: 50%;
-          background: var(--gray-background);
+          background: var(--gray-color);
         }
 
         .content {

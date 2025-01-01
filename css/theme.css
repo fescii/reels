@@ -208,9 +208,9 @@ Author URL: https://femar.co.ke
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #000000;
-    --tab-background: #3a3c456d;
+    --tab-background: #07a45f33;  /* Updated to match light mode's accent tint */
     --stat-background: #0f1015;
-    --vh-height: 100dvh;  /* Added */
+    --vh-height: 100dvh;
 
     --card-box-shadow: 0 12px 28px 0 rgba(255, 255, 255, 0.1);
     --image-shadow: 0 -1px 10px 0 #ffffff09;

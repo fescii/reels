@@ -469,6 +469,7 @@ export default class ShotVideo extends HTMLDivElement {
     return /* css */`
       <style> 
         :host {
+          /* border: 2px solid green; */
           display: block;
           width: 100%;
           max-width: 100%;

@@ -105,7 +105,7 @@ export default class ChatApp extends HTMLElement {
   getTemplate() {
     if (this.mql.matches) {
       return /* html */`
-        ${this.getChatsContainer()}
+        ${this.getMain()}
         ${this.getStyles()}
       `;
     } else {

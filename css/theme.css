@@ -29,7 +29,7 @@ Author URL: https://femar.co.ke
 :root {
   --tab-background:  #08b86f21;
   --stat-background: #f1f1f1;
-
+  --attachement-background: var(var(--tab-background));
   --font-main: "Inter";
   --font-text: "Lexend";
   --font-mono: "Jetbrains Mono";
@@ -109,6 +109,7 @@ Author URL: https://femar.co.ke
   --chat-hover: #f3f3f3;
   --chat-you-delivered: #21d029;
   --typing-color: rgba(148 163 184 / 1);
+  --message-background: linear-gradient(rgb(255, 143, 178) 0%, rgb(167, 151, 255) 50%, rgb(0, 229, 255) 100%);
 
   --open-line: 2px solid #08b86f93;
   --open-line-mobile: 2px solid #08b86fc5;
@@ -208,9 +209,10 @@ Author URL: https://femar.co.ke
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #000000;
-    --tab-background: #07a45f33;  /* Updated to match light mode's accent tint */
+    --tab-background: #78ffc428;  /* Updated to match light mode's accent tint */
     --stat-background: #0f1015;
     --vh-height: 100dvh;
+    --attachement-background: #35363650;
 
     --card-box-shadow: 0 12px 28px 0 rgba(255, 255, 255, 0.1);
     --image-shadow: 0 -1px 10px 0 #ffffff09;
@@ -282,6 +284,7 @@ Author URL: https://femar.co.ke
     --chat-hover: #16181f;
     --chat-you-delivered: #1dbb25;
     --typing-color: rgba(123, 129, 142, 1);
+    --message-background: linear-gradient(rgb(64, 28, 42) 0%, rgb(38, 32, 71) 50%, rgb(0, 52, 61) 100%);
 
     --open-line: 2px solid #07a45fcc;
     --open-line-mobile: 2px solid #07a45fe6;

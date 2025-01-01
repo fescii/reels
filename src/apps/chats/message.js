@@ -1252,15 +1252,10 @@ export default class Message extends HTMLDivElement {
         }
 
         .content.you > .message > .text {
-          /*background: var(--you-background);*/
           color: var(--white-color);
           background-color: var(--accent-color);
-          background-image: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
-          background-image: linear-gradient(rgb(255, 143, 178) 0%, rgb(167, 151, 255) 50%, rgb(0, 229, 255) 100%);
+          background-image: var(--message-background);
           background-attachment: fixed;
-          /*background-color: #FBAB7E;*/
-          /*background-image: linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%);*/
-          /*background-image: linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%);*/
         }
 
         .content > .message > .text  strong,
@@ -1421,12 +1416,12 @@ export default class Message extends HTMLDivElement {
           margin: 5px 0 0 0;
           width: max-content;
           display: flex;
-          max-width: 100%;
+          max-width: calc(100% - 10px);
           flex-direction: column;
           gap: 4px;
           left: 0;
           position: absolute;
-          top: -15px;
+          top: -12px;
         }
 
         .content.you > .message > .reply {
@@ -1624,7 +1619,7 @@ export default class Message extends HTMLDivElement {
           color: var(--anchor-color);
           font-family: var(--font-read), sans-serif;
           font-size: 0.85rem;
-          background: var(--tab-background);
+          background: var(--attachement-background);
           border-radius: 8px;
           padding: 2.5px 7px;
 

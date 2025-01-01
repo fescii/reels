@@ -278,9 +278,9 @@ Author URL: https://femar.co.ke
     --shot-active-background: #eb831f5d;
 
     /* Added missing chat colors */
-    --chat-background: #11131a;
+    --chat-background: #1a1c23;
     --you-background: #0f261c;
-    --reply-background: #1a1c23;
+    --reply-background: #30333d65;
     --chat-hover: #16181f;
     --chat-you-delivered: #1dbb25;
     --typing-color: rgba(123, 129, 142, 1);

@@ -12,7 +12,7 @@ export default class ChatApp extends HTMLElement {
 
   connect() {
     // set cookie
-    document.cookie = "x-access-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImhleCI6IlUwSEFCNjVBQkQzIiwiZW1haWwiOiJ1c2VyMjJAZXhhbXBsZS5jb20iLCJhdmF0YXIiOiJkZWZhdWx0LnBuZyIsInZlcmlmaWVkIjp0cnVlLCJzdGF0dXMiOiJhY3RpdmUiLCJuYW1lIjoiSm9obiBEb2UiLCJwdWJsaWNLZXkiOiJzYW1wbGUga2V5In0sImlhdCI6MTczNjA4NjAzNiwiZXhwIjoxNzM2MDkzMjM2fQ.E2RX1zRcMttxGNtgGJ5NRIUUt9Ci70swSA5_31bwvZA; SameSite=None; Secure";
+    document.cookie = "x-access-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImhleCI6IlUwSEFCNjVBQkQzIiwiZW1haWwiOiJ1c2VyMjJAZXhhbXBsZS5jb20iLCJhdmF0YXIiOiJkZWZhdWx0LnBuZyIsInZlcmlmaWVkIjp0cnVlLCJzdGF0dXMiOiJhY3RpdmUiLCJuYW1lIjoiSm9obiBEb2UiLCJwdWJsaWNLZXkiOiJzYW1wbGUga2V5In0sImlhdCI6MTczNjEwNTI1NywiZXhwIjoxNzM2MTEyNDU3fQ.yrJpibPaqzylTpBdhfpYlljwgzQN3kD8_skj4PsxNq0; SameSite=None; Secure";
 
     // Initialize the client
     const wsClient = new WebSocketClient(

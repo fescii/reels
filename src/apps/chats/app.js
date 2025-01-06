@@ -1,4 +1,5 @@
 import WebSocketClient from "./uws.js";
+import crypoClient from "./encryption.js";
 export default class ChatApp extends HTMLElement {
   constructor() {
     super();
@@ -6,13 +7,20 @@ export default class ChatApp extends HTMLElement {
     this.active_tab = null;
     this.mql = window.matchMedia("(max-width: 768px)");
     // this.ws = new WebSocket('wss://localhost:3000/events');
-    this.connect()
+    // this.connect()
     this.render();
+    this.initCrypto();
+  }
+
+  initCrypto = async () => {
+    const keyPair = await crypoClient.generateKeyPair();
+
+    console.log('🔑 Generated key pair:', keyPair);
   }
 
   connect() {
     // set cookie
-    document.cookie = "x-access-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImhleCI6IlUwSEFCNjVBQkQzIiwiZW1haWwiOiJ1c2VyMjJAZXhhbXBsZS5jb20iLCJhdmF0YXIiOiJkZWZhdWx0LnBuZyIsInZlcmlmaWVkIjp0cnVlLCJzdGF0dXMiOiJhY3RpdmUiLCJuYW1lIjoiSm9obiBEb2UiLCJwdWJsaWNLZXkiOiJzYW1wbGUga2V5In0sImlhdCI6MTczNjEwNTI1NywiZXhwIjoxNzM2MTEyNDU3fQ.yrJpibPaqzylTpBdhfpYlljwgzQN3kD8_skj4PsxNq0; SameSite=None; Secure";
+    document.cookie = "x-access-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImhleCI6IlUwSEFCNjVBQkQzIiwiZW1haWwiOiJ1c2VyMjJAZXhhbXBsZS5jb20iLCJhdmF0YXIiOiJkZWZhdWx0LnBuZyIsInZlcmlmaWVkIjp0cnVlLCJzdGF0dXMiOiJhY3RpdmUiLCJuYW1lIjoiSm9obiBEb2UiLCJwdWJsaWNLZXkiOiJzYW1wbGUga2V5In0sImlhdCI6MTczNjE1NjA5OCwiZXhwIjoxNzM2MTYzMjk4fQ.VvA5SttscRH2qBRFaeV_cQWEIm8s9ECHHavmUlRbwto; SameSite=None; Secure";
 
     // Initialize the client
     const wsClient = new WebSocketClient(
@@ -49,7 +57,7 @@ export default class ChatApp extends HTMLElement {
     wsClient.connectToEvents();
 
     // Example: Connect to multiple chat rooms
-    const chatRooms = ['abc123', 'def456', 'ghi789'];
+    const chatRooms = ['C0HAB65ABC1'];
 
     chatRooms.forEach(roomHex => {
       wsClient.connectToChat(roomHex);
@@ -67,6 +75,11 @@ export default class ChatApp extends HTMLElement {
         console.error(`Failed to send message to ${roomHex}:`, error);
       }
     }
+
+    // send message
+    // setInterval(() => {
+    //   sendMessage('C0HAB65ABC1', 'Hello, world!');
+    // }, 5000);
   }
 
   render() {

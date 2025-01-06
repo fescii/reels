@@ -50,6 +50,34 @@ class CryptoClient {
     };
   }
 
+  // check if key pair exists in the database(indexedDB) before generating a new one
+  async checkKeyPair() {
+    const db = await this.getDb();
+
+    return new Promise(async (resolve, reject) => {
+      const transaction = db.transaction(["userKeys"], "read");
+      const store = transaction.objectStore("userKeys");
+      const request = store.get("keyPair");
+
+      request.onerror = function(event) {
+      reject("Failed to get key pair: " + event.target.errorCode);
+      }
+
+      request.onsuccess = async function(event) {
+      if (event.target.result) {
+        resolve(event.target.result);
+      } else {
+        try {
+        const newKeyPair = await this.storeKeyPair();
+        resolve(newKeyPair);
+        } catch (error) {
+        reject("Failed to store new key pair: " + error);
+        }
+      }
+      }.bind(this);
+    });
+  }
+
   // generate a key pair for signing messages and storing in the database(indexedDB)
   async storeKeyPair() {
     const keyPair = await this.generateKeyPair();

@@ -1,4 +1,6 @@
-class ChatStorageManager extends IndexDBHandler {
+import IndexDBHandler from './db.js';
+
+export default class ChatStorageManager extends IndexDBHandler {
   constructor() {
     super('chatDB', 1);
     this.PAGE_SIZE = 10;

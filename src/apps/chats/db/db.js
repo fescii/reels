@@ -1,4 +1,4 @@
-class IndexDBHandler {
+export default class IndexDBHandler {
   constructor(dbName, version = 1) {
     this.dbName = dbName;
     this.version = version;

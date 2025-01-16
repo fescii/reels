@@ -6,7 +6,7 @@ export default class KeyPairStorageManager extends IndexDBHandler {
     this.stores = [
       {
         name: 'keyPairs',
-        keyPath: 'userId',
+        keyPath: 'user',
         indices: [
           { 
             name: 'createdAt', 
@@ -27,8 +27,8 @@ export default class KeyPairStorageManager extends IndexDBHandler {
   }
 
   validateKeyPairData(keyPairData) {
-    if (!keyPairData?.userId) {
-      throw new Error('KeyPair must have a userId');
+    if (!keyPairData?.user) {
+      throw new Error('KeyPair must have a user');
     }
     if (!keyPairData?.publicKey) {
       throw new Error('KeyPair must have a publicKey');
@@ -43,7 +43,7 @@ export default class KeyPairStorageManager extends IndexDBHandler {
       this.validateKeyPairData(keyPairData);
 
       // Check if a key pair already exists for this user
-      const existingKeyPair = await this.getKeyPair(keyPairData.userId);
+      const existingKeyPair = await this.getKeyPair(keyPairData.user);
       if (existingKeyPair) {
         throw new Error('A key pair already exists for this user');
       }
@@ -61,9 +61,9 @@ export default class KeyPairStorageManager extends IndexDBHandler {
     }
   }
 
-  async getKeyPair(userId) {
+  async getKeyPair(user) {
     try {
-      return await this.get('keyPairs', userId);
+      return await this.get('keyPairs', user);
     } catch (error) {
       throw new Error(`Failed to get key pair: ${error.message}`);
     }
@@ -74,7 +74,7 @@ export default class KeyPairStorageManager extends IndexDBHandler {
       this.validateKeyPairData(keyPairData);
 
       // Verify the key pair exists before updating
-      const existingKeyPair = await this.getKeyPair(keyPairData.userId);
+      const existingKeyPair = await this.getKeyPair(keyPairData.user);
       if (!existingKeyPair) {
         throw new Error('No existing key pair found for this user');
       }
@@ -92,17 +92,17 @@ export default class KeyPairStorageManager extends IndexDBHandler {
     }
   }
 
-  async deleteKeyPair(userId) {
+  async deleteKeyPair(user) {
     try {
-      return await this.delete('keyPairs', userId);
+      return await this.delete('keyPairs', user);
     } catch (error) {
       throw new Error(`Failed to delete key pair: ${error.message}`);
     }
   }
 
-  async hasExistingKeyPair(userId) {
+  async hasExistingKeyPair(user) {
     try {
-      const keyPair = await this.getKeyPair(userId);
+      const keyPair = await this.getKeyPair(user);
       return !!keyPair;
     } catch (error) {
       throw new Error(`Failed to check existing key pair: ${error.message}`);

@@ -242,77 +242,57 @@ export default class UsersModal extends HTMLElement {
   getUsers = () => {
     return /* html */`
       <div is="user-item" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Aidan"
-        user-name="Alice Johnson" unread="0" active="true" you="false" opened="true"
-        message="I have attached the needed documents below!" is-even="true" datetime="2024-12-31T19:07:15Z"
-        attachments='[
-          {
-            "name": "Meeting Notes.pdf",
-            "size": "1.2MB",
-            "type": "pdf",
-            "link": "https://example.com/meeting-notes.pdf"
-          },
-          {
-            "name": "Design Mockup.png",
-            "size": "2.4MB",
-            "type": "image",
-            "link": "https://example.com/design-mockup.png"
-          },
-          {
-            "name": "Project Proposal.docx",
-            "size": "3.6MB",
-            "type": "doc",
-            "link": "https://example.com/project-proposal.docx"
-          }
-          ]'>
+        user-name="Alice Johnson" you="false"
+        bio="I have attached the needed documents below!" user-verified="true">
       </div>
       <div is="user-item" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Oliver"
-      user-name="Janet Doerinailsisgsgsgsg" unread="0" active="false" you="true" message="I'll be there soon, wait for me!"
-      is-even="false" datetime="2024-12-20T12:20:15Z" recieved="true" user-verified="true">
+        user-name="Janet Doerinailsisgsgsgsg" you="true" bio="I'll be there soon, wait for me!"
+        user-verified="true">
       </div>
       <div is="user-item" user-picture="https://randomuser.me/api/portraits/men/1.jpg"
-      user-name="Michael Scott" unread="78" active="true" you="false"
-      message="That's what she said!, See for yourself!" is-even="false" datetime="2024-11-15T16:30:15Z"
-      images="https://images.unsplash.com/photo-1733077151673-c834c5613bbc?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://plus.unsplash.com/premium_photo-1733514691529-da25716e449b?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://images.unsplash.com/photo-1719937051176-9b98352a6cf4?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
+        user-name="Michael Scott" you="false"
+        bio="That's what she said!, See for yourself!"
+        images="https://images.unsplash.com/photo-1733077151673-c834c5613bbc?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://plus.unsplash.com/premium_photo-1733514691529-da25716e449b?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://images.unsplash.com/photo-1719937051176-9b98352a6cf4?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
       </div>
       <div is="user-item" user-picture="https://api.dicebear.com/9.x/adventurer/svg?seed=Amaya"
-      user-name="Jim Halpert" unread="2" active="false" you="true" opened="true"
-      message="Pranking Dwight again!" is-even="true" datetime="2024-09-20T14:40:15Z" user-verified="true">
+        user-name="Jim Halpert" you="true"
+        bio="Pranking Dwight again!" user-verified="true">
       </div>
       <div is="user-item" user-picture="https://randomuser.me/api/portraits/women/9.jpg"
-      user-name="Pam Beesly" unread="0" active="true" you="false"
-      message="See you at the office." is-even="true" datetime="2024-10-01T08:35:15Z" user-verified="false">
+        user-name="Pam Beesly" you="false"
+        bio="See you at the office." user-verified="false">
       </div>
       <div is="user-item" user-picture="https://randomuser.me/api/portraits/men/10.jpg"
-      user-name="Jim Halpert" unread="2" active="false" you="true"
-      message="Pranking Dwight again!" is-even="false" datetime="2024-09-20T14:40:15Z">
+        user-name="Jim Halpert" you="true"
+        bio="Pranking Dwight again!" user-verified="false">
       </div>
       <div is="user-item" user-picture="https://randomuser.me/api/portraits/women/11.jpg"
-      user-name="Angela Martin" unread="3" active="true" you="false"
-      message="Cat party at my place." is-even="true" datetime="2024-08-05T11:45:15Z" user-verified="true">
+        user-name="Angela Martin" unread="3" you="false"
+        bio="Cat party at my place." user-verified="true">
       </div>
       <div is="user-item" user-picture="https://randomuser.me/api/portraits/men/12.jpg"
-      user-name="Dwight Schrute" unread="0" active="false" you="true"
-      message="Bears. Beets. Battlestar Galactica." is-even="false" datetime="2024-07-12T15:50:15Z">
+        user-name="Dwight Schrute" you="true"
+        bio="Bears. Beets. Battlestar Galactica." user-verified="true"> 
       </div>
       <div is="user-item" user-picture="https://randomuser.me/api/portraits/women/13.jpg"
-      user-name="Kelly Kapoor" unread="1" active="true" you="false"
-      message="Fashion show at lunch!" is-even="true" datetime="2024-06-30T10:55:15Z" user-verified="true">
+        user-name="Kelly Kapoor" you="false"
+        bio="Fashion show at lunch!" user-verified="false">
       </div>
       <div is="user-item" user-picture="https://randomuser.me/api/portraits/men/14.jpg"
-      user-name="Ryan Howard" unread="2" active="false" you="true"
-      message="Just got promoted!" is-even="false" datetime="2024-05-25T13:00:15Z">
+        user-name="Ryan Howard" you="false"
+        bio="Just got promoted!" user-verified="false">
       </div>
       <div is="user-item" user-picture="https://randomuser.me/api/portraits/women/15.jpg"
-      user-name="Phyllis Vance" unread="0" active="true" you="false"
-      message="Knitting club meeting." is-even="true" datetime="2024-04-18T09:05:15Z">
+      user-name="Phyllis Vance" you="false"
+      bio="Knitting club meeting." user-verified="true">
       </div>
       <div is="user-item" user-picture="https://randomuser.me/api/portraits/men/16.jpg"
-      user-name="Stanley Hudson" unread="3" active="false" you="true"
-      message="Did I stutter?" is-even="false" datetime="2024-03-10T17:10:15Z" user-verified="true">
+      user-name="Stanley Hudson" you="false"
+      bio="Did I stutter?"  user-verified="true">
       </div>
       <div is="user-item" user-picture="https://randomuser.me/api/portraits/women/17.jpg"
-      user-name="Meredith Palmer" unread="1" active="true" you="false"
-      message="Party at my place!" is-even="true" datetime="2022-02-01T20:15:15Z">
+        user-name="Meredith Palmer" unread="1" you="false"
+        bio="Party at my place!" user-verified="false">
       </div>
     `;
   }
@@ -411,7 +391,7 @@ export default class UsersModal extends HTMLElement {
         #content {
           z-index: 1;
           background-color: var(--background);
-          padding: 0 15px;
+          padding: 0 15px 15px;
           display: flex;
           flex-flow: column;
           gap: 0;

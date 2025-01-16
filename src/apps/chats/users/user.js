@@ -143,8 +143,7 @@ export default class UserItem extends HTMLDivElement {
             </span>
           </span>
           <span class="text">
-            ${this.getYou(this.textToBoolean(this.getAttribute('you')))}
-            <span class="message">${this.getAttribute('message')}</span>
+            <span class="bio">${this.getAttribute('bio')}</span>
           </span>
         </div>
       </div>
@@ -339,6 +338,7 @@ export default class UserItem extends HTMLDivElement {
         }
 
         .wrapper > .content > .head {
+          /* border: 1px solid red; */
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -348,10 +348,11 @@ export default class UserItem extends HTMLDivElement {
         }
 
         .wrapper > .content > .head > .name {
+          /* border: 1px solid red; */
           font-family: var(--font-main), sans-serif;
-          width: calc(100% - 105px);
-          max-width: calc(100% - 105px);
-          min-width: calc(100% - 105px);
+          width: 100%;
+          max-width: 100%;
+          min-width: 100%;
           font-weight: 500;
           font-size: 1.08rem;
           line-height: 1.4;
@@ -364,6 +365,7 @@ export default class UserItem extends HTMLDivElement {
         }
 
         .wrapper > .content > .head > .name > .text {
+          /* border: 1px solid red; */
           width: max-content;
           max-width: calc(100% - 23px);
           text-align: start;
@@ -469,19 +471,7 @@ export default class UserItem extends HTMLDivElement {
           stroke: var(--accent-color);
         }
 
-        .wrapper > .content > .text > .you {
-          font-family: var(--font-main), sans-serif;
-          font-weight: 500;
-          font-size: 1rem;
-          color: var(--gray-color);
-        }
-
-        .wrapper.unread > .content > .text > .you {
-          font-weight: 600;
-          color: var(--title-color);
-        }
-
-        .wrapper > .content > .text > .message {
+        .wrapper > .content > .text > .bio {
           font-family: var(--font-main), sans-serif;
           font-weight: 400;
           font-size: 1rem;
@@ -492,7 +482,7 @@ export default class UserItem extends HTMLDivElement {
           text-overflow: ellipsis;
         }
 
-        .wrapper.unread > .content > .text > .message {
+        .wrapper.unread > .content > .text > .bio {
           font-weight: 500;
           color: var(--text-color);
         }

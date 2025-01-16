@@ -1,5 +1,5 @@
 import WebSocketClient from "./uws.js";
-import crypoClient from "./encryption.js";
+import CryptoManager from "./keys/index.js";
 export default class ChatApp extends HTMLElement {
   constructor() {
     super();
@@ -13,7 +13,8 @@ export default class ChatApp extends HTMLElement {
   }
 
   initCrypto = async () => {
-    const keyPair = await crypoClient.generateKeyPair();
+    const crypto = new CryptoManager();
+    const keyPair = await crypto.setupUserKeys('new', '44986');
 
     console.log('🔑 Generated key pair:', keyPair);
   }

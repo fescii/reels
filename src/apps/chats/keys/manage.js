@@ -22,7 +22,7 @@ export class KeyManagement {
     const nonce = this.sodium.randombytes_buf(this.sodium.crypto_secretbox_NONCEBYTES);
 
     const privateKeyBytes = this.sodium.from_base64(privateKey);
-    const encryptedPrivateKey = this.sodium.crypto_secretbox(
+    const encryptedPrivateKey = this.sodium.crypto_secretbox_easy(  // Changed from crypto_secretbox to crypto_secretbox_easy
       privateKeyBytes,
       nonce,
       key
@@ -39,7 +39,7 @@ export class KeyManagement {
     const { encryptedPrivateKey, privateKeyNonce, passcodeSalt } = encryptedData;
     const { key } = await KeyDerivation.deriveKeyFromPasscode(passcode, passcodeSalt);
 
-    const privateKey = this.sodium.crypto_secretbox_open(
+    const privateKey = this.sodium.crypto_secretbox_open_easy(  // Changed from crypto_secretbox_open to crypto_secretbox_open_easy
       this.sodium.from_base64(encryptedPrivateKey),
       this.sodium.from_base64(privateKeyNonce),
       key

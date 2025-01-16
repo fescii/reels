@@ -5,7 +5,7 @@ import { KeyStorage } from './store.js';
 import { KeyManagement } from './manage.js';
 import { MessageEncryption } from './encryption.js';
 
-export class CryptoManager {
+export default class CryptoManager {
   constructor() {
     this.initialized = false;
     this.sodium = null;
@@ -13,6 +13,7 @@ export class CryptoManager {
     this.keyStorage = null;
     this.keyManagement = null;
     this.messageEncryption = null;
+    this.init = this.init.bind(this);
   }
 
   async init() {

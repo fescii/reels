@@ -1,4 +1,4 @@
-import WebSocketClient from "./uws.js";
+// import WebSocketClient from "./uws.js";
 import CryptoManager from "./keys/index.js";
 export default class ChatApp extends HTMLElement {
   constructor() {
@@ -114,11 +114,13 @@ export default class ChatApp extends HTMLElement {
   getTemplate() {
     if (this.mql.matches) {
       return /* html */`
+        ${this.getUsersModel()}
         ${this.getChatsContainer()}
         ${this.getStyles()}
       `;
     } else {
       return /* html */`
+        ${this.getUsersModel()}
         ${this.getBody()}
         ${this.getStyles()}
       `;
@@ -378,6 +380,12 @@ export default class ChatApp extends HTMLElement {
       user-name="Meredith Palmer" unread="1" active="true" you="false"
       message="Party at my place!" is-even="true" datetime="2022-02-01T20:15:15Z">
       </div>
+    `;
+  }
+
+  getUsersModel = () => {
+    return /* html */`
+      <users-modal api="/chat/users" name="Select a user to start a chat with"></users-modal>
     `;
   }
 

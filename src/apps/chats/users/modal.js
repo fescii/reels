@@ -677,25 +677,14 @@ export default class UsersModal extends HTMLElement {
           flex-flow: column;
           gap: 0;
           overflow-y: auto;
-          scrollbar-width: thin;
-          scrollbar-color: var(--accent-color) var(--background);
+          scrollbar-width: none;
+          -ms-overflow-style: none;
         }
 
         div.users::-webkit-scrollbar {
-          width: thin;
-        }
-
-        div.users::-webkit-scrollbar {
-          width: 1em;
-        }
-         
-        div.users::-webkit-scrollbar-track {
-          box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-        }
-         
-        div.users::-webkit-scrollbar-thumb {
-          background-color: darkgrey;
-          outline: 1px solid slategrey;
+          width: 0;
+          display: none;
+          visibility: hidden;
         }
 
         @media screen and ( max-width: 850px ){

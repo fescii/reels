@@ -141,7 +141,6 @@ export default class UserItem extends HTMLDivElement {
               <span class="text">${this.getAttribute('user-name')}</span>
               ${this.checkVerified(this.textToBoolean(this.getAttribute('user-verified')))}
             </span>
-            <span class="time">${this.formatDateTime(this.getAttribute('datetime'))}</span>
           </span>
           <span class="text">
             ${this.getYou(this.textToBoolean(this.getAttribute('you')))}

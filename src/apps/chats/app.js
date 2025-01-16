@@ -6,10 +6,7 @@ export default class ChatApp extends HTMLElement {
     this.shadow = this.attachShadow({ mode: 'open' });
     this.active_tab = null;
     this.mql = window.matchMedia("(max-width: 768px)");
-    // this.ws = new WebSocket('wss://localhost:3000/events');
-    // this.connect()
     this.render();
-    this.initCrypto();
   }
 
   initCrypto = async () => {
@@ -17,70 +14,6 @@ export default class ChatApp extends HTMLElement {
     const keyPair = await crypto.setupUserKeys('new', '44986');
 
     console.log('🔑 Generated key pair:', keyPair);
-  }
-
-  connect() {
-    // set cookie
-    document.cookie = "x-access-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImhleCI6IlUwSEFCNjVBQkQzIiwiZW1haWwiOiJ1c2VyMjJAZXhhbXBsZS5jb20iLCJhdmF0YXIiOiJkZWZhdWx0LnBuZyIsInZlcmlmaWVkIjp0cnVlLCJzdGF0dXMiOiJhY3RpdmUiLCJuYW1lIjoiSm9obiBEb2UiLCJwdWJsaWNLZXkiOiJzYW1wbGUga2V5In0sImlhdCI6MTczNjE1NjA5OCwiZXhwIjoxNzM2MTYzMjk4fQ.VvA5SttscRH2qBRFaeV_cQWEIm8s9ECHHavmUlRbwto; SameSite=None; Secure";
-
-    // Initialize the client
-    const wsClient = new WebSocketClient(
-      'wss://localhost:3001', 
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' // Your JWT token
-    );
-
-    // Event handling setup
-    wsClient.on('eventsConnected', () => {
-      console.log('✅ Connected to event stream');
-    });
-
-    wsClient.on('eventsDisconnected', () => {
-      console.log('❌ Disconnected from event stream');
-    });
-
-    wsClient.on('chatConnected', (conversationHex) => {
-      console.log(`✅ Connected to chat: ${conversationHex}`);
-    });
-
-    wsClient.on('chatDisconnected', (conversationHex) => {
-      console.log(`❌ Disconnected from chat: ${conversationHex}`);
-    });
-
-    wsClient.on('chatMessage', ({ conversationHex, data }) => {
-      console.log(`📩 Message in ${conversationHex}:`, data);
-    });
-
-    wsClient.on('error', (error) => {
-      console.error('🚨 WebSocket error:', error);
-    });
-
-    // Connect to the events stream
-    wsClient.connectToEvents();
-
-    // Example: Connect to multiple chat rooms
-    const chatRooms = ['C0HAB65ABC1'];
-
-    chatRooms.forEach(roomHex => {
-      wsClient.connectToChat(roomHex);
-    });
-
-    // Example: Send messages to a specific chat
-    function sendMessage(roomHex, content) {
-      try {
-        wsClient.sendChatMessage(roomHex, {
-          type: 'message',
-          content,
-          timestamp: new Date().toISOString()
-        });
-      } catch (error) {
-        console.error(`Failed to send message to ${roomHex}:`, error);
-      }
-    }
-
-    // send message
-    // setInterval(() => {
-    //   sendMessage('C0HAB65ABC1', 'Hello, world!');
-    // }, 5000);
   }
 
   render() {

@@ -157,20 +157,12 @@ export default class UsersModal extends HTMLElement {
       <section id="content" class="content">
         ${this.getForm()}
         ${this.getTab()}
-        ${this.getWelcome()}
+        <div class="users">
+          ${this.getUsers()}
+        </div>
       </section>
       ${this.getStyles()}
     `;
-  }
-
-  getWelcome() {
-    return /* html */`
-      <div class="welcome">
-				<ul class="highlights">
-          ${this.getLoader()}
-        </ul>
-			</div>
-    `
   }
 
   getForm = () => {
@@ -245,6 +237,84 @@ export default class UsersModal extends HTMLElement {
         </span>
       </div>
     `
+  }
+
+  getUsers = () => {
+    return /* html */`
+      <div is="user-item" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Aidan"
+        user-name="Alice Johnson" unread="0" active="true" you="false" opened="true"
+        message="I have attached the needed documents below!" is-even="true" datetime="2024-12-31T19:07:15Z"
+        attachments='[
+          {
+            "name": "Meeting Notes.pdf",
+            "size": "1.2MB",
+            "type": "pdf",
+            "link": "https://example.com/meeting-notes.pdf"
+          },
+          {
+            "name": "Design Mockup.png",
+            "size": "2.4MB",
+            "type": "image",
+            "link": "https://example.com/design-mockup.png"
+          },
+          {
+            "name": "Project Proposal.docx",
+            "size": "3.6MB",
+            "type": "doc",
+            "link": "https://example.com/project-proposal.docx"
+          }
+          ]'>
+      </div>
+      <div is="user-item" user-picture="https://api.dicebear.com/9.x/open-peeps/svg?seed=Oliver"
+      user-name="Janet Doerinailsisgsgsgsg" unread="0" active="false" you="true" message="I'll be there soon, wait for me!"
+      is-even="false" datetime="2024-12-20T12:20:15Z" recieved="true" user-verified="true">
+      </div>
+      <div is="user-item" user-picture="https://randomuser.me/api/portraits/men/1.jpg"
+      user-name="Michael Scott" unread="78" active="true" you="false"
+      message="That's what she said!, See for yourself!" is-even="false" datetime="2024-11-15T16:30:15Z"
+      images="https://images.unsplash.com/photo-1733077151673-c834c5613bbc?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://plus.unsplash.com/premium_photo-1733514691529-da25716e449b?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D, https://images.unsplash.com/photo-1719937051176-9b98352a6cf4?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
+      </div>
+      <div is="user-item" user-picture="https://api.dicebear.com/9.x/adventurer/svg?seed=Amaya"
+      user-name="Jim Halpert" unread="2" active="false" you="true" opened="true"
+      message="Pranking Dwight again!" is-even="true" datetime="2024-09-20T14:40:15Z" user-verified="true">
+      </div>
+      <div is="user-item" user-picture="https://randomuser.me/api/portraits/women/9.jpg"
+      user-name="Pam Beesly" unread="0" active="true" you="false"
+      message="See you at the office." is-even="true" datetime="2024-10-01T08:35:15Z" user-verified="false">
+      </div>
+      <div is="user-item" user-picture="https://randomuser.me/api/portraits/men/10.jpg"
+      user-name="Jim Halpert" unread="2" active="false" you="true"
+      message="Pranking Dwight again!" is-even="false" datetime="2024-09-20T14:40:15Z">
+      </div>
+      <div is="user-item" user-picture="https://randomuser.me/api/portraits/women/11.jpg"
+      user-name="Angela Martin" unread="3" active="true" you="false"
+      message="Cat party at my place." is-even="true" datetime="2024-08-05T11:45:15Z" user-verified="true">
+      </div>
+      <div is="user-item" user-picture="https://randomuser.me/api/portraits/men/12.jpg"
+      user-name="Dwight Schrute" unread="0" active="false" you="true"
+      message="Bears. Beets. Battlestar Galactica." is-even="false" datetime="2024-07-12T15:50:15Z">
+      </div>
+      <div is="user-item" user-picture="https://randomuser.me/api/portraits/women/13.jpg"
+      user-name="Kelly Kapoor" unread="1" active="true" you="false"
+      message="Fashion show at lunch!" is-even="true" datetime="2024-06-30T10:55:15Z" user-verified="true">
+      </div>
+      <div is="user-item" user-picture="https://randomuser.me/api/portraits/men/14.jpg"
+      user-name="Ryan Howard" unread="2" active="false" you="true"
+      message="Just got promoted!" is-even="false" datetime="2024-05-25T13:00:15Z">
+      </div>
+      <div is="user-item" user-picture="https://randomuser.me/api/portraits/women/15.jpg"
+      user-name="Phyllis Vance" unread="0" active="true" you="false"
+      message="Knitting club meeting." is-even="true" datetime="2024-04-18T09:05:15Z">
+      </div>
+      <div is="user-item" user-picture="https://randomuser.me/api/portraits/men/16.jpg"
+      user-name="Stanley Hudson" unread="3" active="false" you="true"
+      message="Did I stutter?" is-even="false" datetime="2024-03-10T17:10:15Z" user-verified="true">
+      </div>
+      <div is="user-item" user-picture="https://randomuser.me/api/portraits/women/17.jpg"
+      user-name="Meredith Palmer" unread="1" active="true" you="false"
+      message="Party at my place!" is-even="true" datetime="2022-02-01T20:15:15Z">
+      </div>
+    `;
   }
 
   getStyles() {
@@ -350,55 +420,8 @@ export default class UsersModal extends HTMLElement {
           max-height: calc(100dvh - 100px);
           height: max-content;
           min-height: calc(100dvh - 100px);
-          border-radius: 25px;
+          border-radius: 20px;
           position: relative;
-        }
-
-        .welcome {
-          width: 98%;
-          display: flex;
-          flex-flow: column;
-          align-items: center;
-          justify-content: center;
-          row-gap: 0;
-        }
-
-        .welcome > h2 {
-          width: 100%;
-          font-size: 1.35rem;
-          font-weight: 600;
-          margin: 0 0 10px;
-          padding: 10px 10px;
-          background-color: var(--gray-background);
-          text-align: center;
-          border-radius: 12px;
-          font-family: var(--font-read), sans-serif;
-          color: var(--text-color);
-          font-weight: 500;
-          position: relative;
-        }
-
-        .welcome > h2 > span.control {
-          padding: 0;
-          cursor: pointer;
-          display: flex;
-          flex-flow: column;
-          gap: 0px;
-          justify-content: center;
-          position: absolute;
-          top: 50%;
-          left: 10px;
-          transform: translateY(-50%);
-        }
-
-        .welcome > h2 > span.control svg {
-          width: 20px;
-          height: 20px;
-          color: var(--text-color);
-        }
-
-        .welcome > h2 > span.control svg:hover{
-          color: var(--error-color);
         }
 
         form.search {
@@ -538,7 +561,8 @@ export default class UsersModal extends HTMLElement {
           margin: 0;
           width: 100%;
           list-style: none;
-          overflow-x: auto;
+          overflow-x: scroll;
+          min-height: max-content;
           scrollbar-width: none;
           -ms-overflow-style: none;
           z-index: 1;
@@ -559,6 +583,8 @@ export default class UsersModal extends HTMLElement {
           gap: 5px;
           padding: 5px 0;
           border-radius: 12px;
+          height: max-content;
+          min-height: max-content;
           /*background: var(--gray-background);*/
           color: var(--text-color);
           font-family: var(--font-main), sans-serif;
@@ -643,90 +669,33 @@ export default class UsersModal extends HTMLElement {
           font-family: var(--font-main), sans-serif;
         }
         
-        ul.highlights {
+        div.users {
           width: 100%;
           padding: 0;
           margin: 0;
-          list-style-type: none;
           display: flex;
           flex-flow: column;
-          gap: 10px;
-        }
-        
-        ul.highlights > li.item {
-          padding: 0;
-          margin: 0;
-          width: 100%;
-          display: flex;
-          flex-flow: row;
-          align-items: center;
-          flex-wrap: nowrap;
-          gap: 10px;
-        }
-        
-        ul.highlights > li.item > .icon {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          height: 26px;
-          width: 26px;
-          min-height: 26px;
-          min-width: 26px;
-          max-height: 26px;
-          max-width: 26px;
-          padding: 3px;
-          border-radius: 50px;
-          -webkit-border-radius: 50px;
-          -moz-border-radius: 50px;
-          background-color: var(--gray-background);
-          color: var(--gray-color);
-          font-size: 0.9rem;
-          font-weight: 500;
-          text-transform: capitalize;
-        }
-        
-        ul.highlights > li.item > .icon > svg {
-          height: 15px;
-          width: 15px;
+          gap: 0;
+          overflow-y: auto;
+          scrollbar-width: thin;
+          scrollbar-color: var(--accent-color) var(--background);
         }
 
-        ul.highlights > li.item > .icon.increase {
-          background: var(--accent-linear);
-          color: var(--white-color);
+        div.users::-webkit-scrollbar {
+          width: thin;
         }
 
-        ul.highlights > li.item > .icon.decrease {
-          background: var(--error-linear);
-          color: var(--white-color);
+        div.users::-webkit-scrollbar {
+          width: 1em;
         }
-        
-        ul.highlights > li.item > .link {
-          color: var(--text-color);
-          font-family: var(--font-main), sans-serif;
-          font-size: 1rem;
-          font-weight: 400;
-          text-decoration: none;
+         
+        div.users::-webkit-scrollbar-track {
+          box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
         }
-        
-        ul.highlights > li.item > a.link:hover {
-          color: var(--text-color);
-        }
-        
-        ul.highlights > li.item > .link .numbers {
-          color: var(--highlight-color);
-          font-weight: 600;
-          font-family: var(--font-main), sans-serif;
-          font-size: 0.95rem;
-          display: inline-block;
-          margin: 0 0 -2px 0;
-        }
-        
-        ul.highlights > li.item.last {
-          background-color: var(--gray-background);
-          padding: 10px;
-          margin: 5px 0;
-          border-radius: 12px;
-          -webkit-border-radius: 12px;
+         
+        div.users::-webkit-scrollbar-thumb {
+          background-color: darkgrey;
+          outline: 1px solid slategrey;
         }
 
         @media screen and ( max-width: 850px ){

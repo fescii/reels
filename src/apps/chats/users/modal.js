@@ -158,7 +158,7 @@ export default class UsersModal extends HTMLElement {
         ${this.getForm()}
         ${this.getTab()}
         <div class="users">
-          ${this.getUsers()}
+          ${this.getEmpty()}
         </div>
       </section>
       ${this.getStyles()}
@@ -223,10 +223,27 @@ export default class UsersModal extends HTMLElement {
   getEmpty = () => {
     return /* html */`
       <div class="empty">
-        <p>User highlights were not loaded, and error while fetching data</p>
-        <p>Try refreshing the page or check your internet connection. If the problem persists, please contact support.</p>
+        <h3>No users found!</h3>
+        <p>Try searching for a user or check back later.</p>
+        ${this.getRetryButton()}
       </div>
     `
+  }
+
+  getError = () => {
+    return /* html */`
+      <div class="error empty">
+        <h3>Oops! Something went wrong!</h3>
+        <p>Try reloading the page or check your internet connection.</p>
+        ${this.getRetryButton()}
+      </div>
+    `;
+  }
+
+  getRetryButton = () => {
+    return /* html */`
+      <button class="load-more retry">Retry</button>
+    `;
   }
 
   getLoader() {
@@ -283,17 +300,23 @@ export default class UsersModal extends HTMLElement {
         bio="Just got promoted!" user-verified="false">
       </div>
       <div is="user-item" user-picture="https://randomuser.me/api/portraits/women/15.jpg"
-      user-name="Phyllis Vance" you="false"
-      bio="Knitting club meeting." user-verified="true">
+        user-name="Phyllis Vance" you="false"
+        bio="Knitting club meeting." user-verified="true">
       </div>
       <div is="user-item" user-picture="https://randomuser.me/api/portraits/men/16.jpg"
-      user-name="Stanley Hudson" you="false"
-      bio="Did I stutter?"  user-verified="true">
+        user-name="Stanley Hudson" you="false"
+        bio="Did I stutter?"  user-verified="true">
       </div>
       <div is="user-item" user-picture="https://randomuser.me/api/portraits/women/17.jpg"
         user-name="Meredith Palmer" unread="1" you="false"
         bio="Party at my place!" user-verified="false">
       </div>
+    `;
+  }
+
+  getButton = () => {
+    return /* html */`
+      <button class="load-more more">More</button>
     `;
   }
 
@@ -628,11 +651,28 @@ export default class UsersModal extends HTMLElement {
 
         div.empty {
           width: 100%;
-          padding: 0;
+          padding: 25px 0;
           margin: 0;
           display: flex;
           flex-flow: column;
+          align-items: center;
+          justify-content: center;
           gap: 8px;
+        }
+
+        div.empty > h3 {
+          /* border: 1px solid red; */
+          width: 100%;
+          padding: 0;
+          margin: 0;
+          color: var(--text-color);
+          font-family: var(--font-main), sans-serif;
+          font-size: 1.2rem;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          text-align: center;
+          justify-content: center;
         }
 
         div.empty > p {
@@ -640,13 +680,37 @@ export default class UsersModal extends HTMLElement {
           padding: 0;
           margin: 0;
           color: var(--text-color);
-          font-family: var(--font-text), sans-serif;
+          font-family: var(--font-read), sans-serif;
           font-size: 1rem;
           font-weight: 400;
+          display: flex;
+          align-items: center;
+          text-align: center;
+          justify-content: center;
         }
 
         div.empty > p.italics {
           font-family: var(--font-main), sans-serif;
+        }
+
+        button.load-more {
+          margin: 10px 0;
+          border: none;
+          cursor: pointer;
+          color: var(--white-color);
+          background: var(--accent-linear);
+          font-family: var(--font-main), sans-serif;
+          height: max-content;
+          width: max-content;
+          padding: 7px 20px;
+          font-size: 1rem;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+          border-radius: 12px;
+          transition: 0.3s;
         }
         
         div.users {

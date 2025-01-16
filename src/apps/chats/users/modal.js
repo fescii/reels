@@ -158,7 +158,8 @@ export default class UsersModal extends HTMLElement {
         ${this.getForm()}
         ${this.getTab()}
         <div class="users">
-          ${this.getEmpty()}
+          ${this.getUsers()}
+          ${this.getLoader()}
         </div>
       </section>
       ${this.getStyles()}
@@ -362,7 +363,8 @@ export default class UsersModal extends HTMLElement {
         div.loader-container {
           position: relative;
           width: 100%;
-          height: 150px;
+          height: 250px;
+          min-height: 100px;
           padding: 20px 0 0 0;
         }
 
@@ -719,6 +721,7 @@ export default class UsersModal extends HTMLElement {
           margin: 0;
           display: flex;
           flex-flow: column;
+          align-items: center;
           gap: 0;
           overflow-y: auto;
           scrollbar-width: none;

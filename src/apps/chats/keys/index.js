@@ -1,16 +1,18 @@
 const sodium = window.sodium;
 
 import { KeyDerivation } from './derive.js';
-import { KeyStorage } from './store.js';
+// import { KeyStorage } from './store.js';
 import { KeyManagement } from './manage.js';
 import { MessageEncryption } from './encryption.js';
+
+import KeyPairStorageManager from '../db/key.js';
 
 export default class CryptoManager {
   constructor() {
     this.initialized = false;
     this.sodium = null;
     this.keyDerivation = null;
-    this.keyStorage = null;
+    this.keyPairStorage = null;
     this.keyManagement = null;
     this.messageEncryption = null;
     this.init = this.init.bind(this);
@@ -24,64 +26,77 @@ export default class CryptoManager {
 
     // Initialize all components with sodium instance
     this.keyDerivation = new KeyDerivation(this.sodium);
-    this.keyStorage = new KeyStorage(this.sodium);
+    this.keyPairStorage = new KeyPairStorageManager();
     this.keyManagement = new KeyManagement(this.sodium, this.keyDerivation);
     this.messageEncryption = new MessageEncryption(this.sodium);
 
     // Initialize storage
-    await this.keyStorage.init();
+    await this.keyPairStorage.initialize();
 
     this.initialized = true;
   }
 
-  async setupUserKeys(name, passcode) {
+  async setupUserKeys(userId, passcode) {
     await this.#ensureInitialized();
+
+    // Check if user already has a key pair
+    const hasExisting = await this.keyPairStorage.hasExistingKeyPair(userId);
+    if (hasExisting) {
+      // throw new Error('User already has a key pair');
+
+      // Get the existing key pair
+      const keyPair = await this.keyPairStorage.getKeyPair(userId);
+      return keyPair;
+    }
 
     const keyPair = await this.keyManagement.generateKeyPair();
     const encryptedKeys = await this.keyManagement.encryptPrivateKey(keyPair.privateKey, passcode);
 
-    return {
-      name,
+    const keyPairData = {
+      userId,
       publicKey: keyPair.publicKey,
       encryptedPrivateKey: encryptedKeys.encryptedPrivateKey,
       privateKeyNonce: encryptedKeys.privateKeyNonce,
       passcodeSalt: encryptedKeys.passcodeSalt
     };
+
+    await this.keyPairStorage.saveKeyPair(keyPairData);
+    return keyPairData;
   }
 
-  async encryptMessage(message, recipientPublicKey, senderPublicKey, userHex) {
+  async encryptMessage(message, recipientPublicKey, userId) {
     await this.#ensureInitialized();
 
-    const privateKey = await this.keyStorage.getPrivateKey(userHex);
-    if (!privateKey) {
-      throw new Error('Private key not found in storage');
+    const keyPair = await this.keyPairStorage.getKeyPair(userId);
+    if (!keyPair) {
+      throw new Error('No key pair found for this user');
     }
 
     return this.messageEncryption.encryptMessageForBoth(message, {
       recipientPublicKey,
-      senderPublicKey,
-      senderPrivateKey: privateKey.encryptedKey
+      senderPublicKey: keyPair.publicKey,
+      senderPrivateKey: keyPair.encryptedPrivateKey
     });
   }
 
-  async decryptMessage(encryptedMessage, senderPublicKey, userHex) {
+  async decryptMessage(encryptedMessage, senderPublicKey, userId) {
     await this.#ensureInitialized();
 
-    const privateKey = await this.keyStorage.getPrivateKey(userHex);
-    if (!privateKey) {
-      throw new Error('Private key not found in storage');
+    const keyPair = await this.keyPairStorage.getKeyPair(userId);
+    if (!keyPair) {
+      throw new Error('No key pair found for this user');
     }
 
     return this.messageEncryption.decryptMessage(
       encryptedMessage,
       senderPublicKey,
-      privateKey.encryptedKey
+      keyPair.encryptedPrivateKey
     );
   }
 
-  async logout(userHex) {
+  async logout(userId) {
     await this.#ensureInitialized();
-    await this.keyStorage.removeKey(userHex);
+    await this.keyPairStorage.deleteKeyPair(userId);
   }
 
   async #ensureInitialized() {

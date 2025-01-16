@@ -36,16 +36,16 @@ export default class CryptoManager {
     this.initialized = true;
   }
 
-  async setupUserKeys(userId, passcode) {
+  async setupUserKeys(user, passcode) {
     await this.#ensureInitialized();
 
     // Check if user already has a key pair
-    const hasExisting = await this.keyPairStorage.hasExistingKeyPair(userId);
+    const hasExisting = await this.keyPairStorage.hasExistingKeyPair(user);
     if (hasExisting) {
       // throw new Error('User already has a key pair');
 
       // Get the existing key pair
-      const keyPair = await this.keyPairStorage.getKeyPair(userId);
+      const keyPair = await this.keyPairStorage.getKeyPair(user);
       return keyPair;
     }
 
@@ -53,7 +53,7 @@ export default class CryptoManager {
     const encryptedKeys = await this.keyManagement.encryptPrivateKey(keyPair.privateKey, passcode);
 
     const keyPairData = {
-      userId,
+      user,
       publicKey: keyPair.publicKey,
       encryptedPrivateKey: encryptedKeys.encryptedPrivateKey,
       privateKeyNonce: encryptedKeys.privateKeyNonce,
@@ -64,10 +64,10 @@ export default class CryptoManager {
     return keyPairData;
   }
 
-  async encryptMessage(message, recipientPublicKey, userId) {
+  async encryptMessage(message, recipientPublicKey, user) {
     await this.#ensureInitialized();
 
-    const keyPair = await this.keyPairStorage.getKeyPair(userId);
+    const keyPair = await this.keyPairStorage.getKeyPair(user);
     if (!keyPair) {
       throw new Error('No key pair found for this user');
     }
@@ -79,10 +79,10 @@ export default class CryptoManager {
     });
   }
 
-  async decryptMessage(encryptedMessage, senderPublicKey, userId) {
+  async decryptMessage(encryptedMessage, senderPublicKey, user) {
     await this.#ensureInitialized();
 
-    const keyPair = await this.keyPairStorage.getKeyPair(userId);
+    const keyPair = await this.keyPairStorage.getKeyPair(user);
     if (!keyPair) {
       throw new Error('No key pair found for this user');
     }
@@ -94,9 +94,9 @@ export default class CryptoManager {
     );
   }
 
-  async logout(userId) {
+  async logout(user) {
     await this.#ensureInitialized();
-    await this.keyPairStorage.deleteKeyPair(userId);
+    await this.keyPairStorage.deleteKeyPair(user);
   }
 
   async #ensureInitialized() {

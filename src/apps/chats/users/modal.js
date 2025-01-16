@@ -1,28 +1,70 @@
 export default class UsersModal extends HTMLElement {
   constructor() {
     super();
-    this.shadowObj = this.attachShadow({mode: 'open'});
-
+    this.shadow = this.attachShadow({mode: 'open'});
+    this.active_tab = null;
     this.render();
   }
 
   render() {
-    this.shadowObj.innerHTML = this.getTemplate();
+    this.shadow.innerHTML = this.getTemplate();
   }
 
   connectedCallback() {
     this.disableScroll();
 
+    // set up event listeners
+    this.setUpEventListeners();
+  }
+
+  setUpEventListeners = () => {
+    const tabs = this.shadow.querySelector("ul.tabs");
     // Select the close button & overlay
-    const overlay = this.shadowObj.querySelector('.overlay');
-    const btns = this.shadowObj.querySelectorAll('.cancel-btn');
-    const contentContainer = this.shadowObj.querySelector('ul.highlights');
+    const overlay = this.shadow.querySelector('.overlay');
+    const btns = this.shadow.querySelectorAll('.cancel-btn');
 
     // Close the modal
-    if (overlay && btns && contentContainer) {
-      // this.closePopup(overlay, btns);
-      // this.fetchTopics(contentContainer);
+    if (overlay && btns) {
+      this.closePopup(overlay, btns);
     }
+    // if tabs exist, activate the tab controller
+    if (tabs) this.activateTabController(tabs);
+  }
+
+  activateTabController = tabs => {
+    // get the active tab
+    this.getOrSetActiveTab(tabs);
+
+    // add click event listener to the tabs
+    tabs.querySelectorAll("li").forEach(tab => {
+      tab.addEventListener("click", e => {
+        e.preventDefault();
+        e.stopPropagation();
+        // remove the active class from the active tab
+        this.active_tab.classList.remove("active");
+
+        // set the new active tab
+        this.active_tab = tab;
+        this.active_tab.classList.add("active");
+
+        //TODO: hide the tab content
+      });
+    });
+  }
+
+  getOrSetActiveTab = tabs => {
+    // get the active tab
+    let activeTab = tabs.querySelector("li.active");
+
+    if (!activeTab) {
+      // if no active tab, set the first tab as active
+      activeTab = tabs.querySelector("li");
+      activeTab.classList.add("active");
+      this.active_tab = activeTab;
+    }
+
+    // else set the active tab
+    this.active_tab = activeTab;
   }
 
   formatNumber = numStr => {
@@ -134,7 +176,7 @@ export default class UsersModal extends HTMLElement {
   getForm = () => {
     return /*html*/`
       <form action="" method="get" class="search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" class="cancel-btn">
           <path d="M15.28 5.22a.75.75 0 0 1 0 1.06L9.56 12l5.72 5.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215l-6.25-6.25a.75.75 0 0 1 0-1.06l6.25-6.25a.75.75 0 0 1 1.06 0Z"></path>
         </svg>
         <div class="contents">
@@ -378,7 +420,6 @@ export default class UsersModal extends HTMLElement {
           display: none;
           left: -12px;
           top: calc(50% - 15px);
-          color: var(--text-color);
           cursor: pointer;
           width: 40px;
           height: 40px;
@@ -405,7 +446,7 @@ export default class UsersModal extends HTMLElement {
           display: flex;
           left: -12px;
           top: calc(50% - 20px);
-          color: var(--text-color);
+          color: var(--gray-color);
           cursor: pointer;
           width: 40px;
           height: 40px;
@@ -443,7 +484,7 @@ export default class UsersModal extends HTMLElement {
 
         form.search > .contents > input::placeholder {
           color: var(--gray-color);
-          font-family: var(--font-mono), sans-serif;
+          font-family: var(--font-text), sans-serif;
           font-size: 1rem;
           opacity: 0.8;
         }
@@ -470,12 +511,12 @@ export default class UsersModal extends HTMLElement {
           cursor: pointer;
           color: var(--white-color);
           background: var(--accent-linear);
-          font-family: var(--font-read), sans-serif;
+          font-family: var(--font-text), sans-serif;
           height: max-content;
           width: max-content;
           padding: 4px 10px;
-          font-size: 1rem;
-          font-weight: 500;
+          font-size: 0.9rem;
+          font-weight: 400;
           display: flex;
           align-items: center;
           justify-content: center;

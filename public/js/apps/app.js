@@ -97,7 +97,7 @@ export default class AppMain extends HTMLElement {
     if (mql.matches) {
       return /* html */`
         <section class="flow">
-          ${this.getChatApp()}
+          ${this.getLoader()}
         </section>
         <section class="nav">
           ${this.getMobileNav()}
@@ -110,7 +110,7 @@ export default class AppMain extends HTMLElement {
           ${this.getMainNav()}
         </section>
         <section class="flow">
-          ${this.getChatApp()}
+          ${this.getLoader()}
         </section>
       `;
     }
@@ -426,6 +426,14 @@ export default class AppMain extends HTMLElement {
     `;
   }
 
+  getLoader = () => {
+    return /* html */`
+      <div class="loader-container">
+        <div id="loader" class="loader"></div>
+      </div>
+    `;
+  }
+
   getStyles() {
     return /* css */`
 	    <style>
@@ -474,6 +482,34 @@ export default class AppMain extends HTMLElement {
           margin: 0;
           display: flex;
           gap: 20px;
+        }
+
+        .loader {
+          width: 17px;
+          aspect-ratio: 1;
+          border-radius: 50%;
+          background: #000;
+          display: grid;
+          animation: l22-0 2s infinite linear;
+        }
+        .loader:before,
+        .loader:after {
+          content: "";
+          grid-area: 1/1;
+          margin: 15%;
+          border-radius: 50%;
+          background: inherit;
+          transform: rotate(0deg) translate(150%);
+          animation: l22 1s infinite;
+        }
+        .loader:after {
+          animation-delay: -.5s
+        }
+        @keyframes l22-0 {
+          100% {transform: rotate(1turn)}
+        }
+        @keyframes l22 {
+          100% {transform: rotate(1turn) translate(150%)}
         }
 
         section.nav {

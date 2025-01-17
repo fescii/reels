@@ -10,7 +10,9 @@ import posts from "./post/index.js";
 import sections from "./sections/index.js";
 import stats from "./stats/index.js";
 import wrappers from "./wrappers/index.js";
-import { AppManager, NotificationManager, WebSocketManager } from "./core/index.js"
+import AppManager from "./core/manager.js"
+import NotificationManager from "./core/notify.js"
+import WebSocketManager from "./core/uWs.js"
 
 export default function uis() {
   apps()
@@ -27,7 +29,7 @@ export default function uis() {
   wrappers()
 
   // core
-  core();
+  // core();
 }
 
 

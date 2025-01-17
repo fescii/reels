@@ -5,7 +5,7 @@ import FormContainer from "./form.container.js";
 import HighlightsContainer from "./highlights.container.js";
 import InfoContainer from "./info.container.js";
 import PeopleContainer from "./people.container.js";
-import DiscoverPeople from "./discover-people.container.js";
+import DiscoverPeople from "./people.discover.js";
 import StatContainer from "./stat.container.js";
 import StoriesContainer from "./stories.container.js";
 import TopicsContainer from "./topics.container.js";

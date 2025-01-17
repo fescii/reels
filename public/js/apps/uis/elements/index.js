@@ -1,4 +1,4 @@
-import CustomSpan from "./span.element";
+import CustomSpan from "./span.element.js";
 
 export default function elements() {
   // Register custom elements

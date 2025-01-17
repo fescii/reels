@@ -44,11 +44,15 @@ export default class AppMain extends HTMLElement {
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
     // watch for media query changes
-    this.watchMeta(this.mql);
+    this.watchMeta();
   }
 
   // noinspection JSMethodCanBeStatic
   connectedCallback() {
+    this.setUpEvents()
+  }
+
+  setUpEvents = () => {
     // set display to flex
     this.style.setProperty('display', 'flex')
     const container = this.shadowObj.querySelector('section.flow');
@@ -56,9 +60,10 @@ export default class AppMain extends HTMLElement {
     if(container) this.setContent(container);
   }
 
-  watchMeta = mql => {
-    mql.addEventListener('change', e => {
+  watchMeta = () => {
+    this.mql.addEventListener('change', e => {
       this.render();
+      this.setUpEvents();
     })
   }
 
@@ -376,18 +381,6 @@ export default class AppMain extends HTMLElement {
           <span class="tooltip">
             <span class="arrow"></span>
             <span class="text">Settings</span>
-          </span>
-        </li>
-        <li class="logout">
-          <a href="/logout">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-              <path d="M14 3.09502C13.543 3.03241 13.0755 3 12.6 3C7.29807 3 3 7.02944 3 12C3 16.9706 7.29807 21 12.6 21C13.0755 21 13.543 20.9676 14 20.905" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-              <path d="M21 12L11 12M21 12C21 11.2998 19.0057 9.99153 18.5 9.5M21 12C21 12.7002 19.0057 14.0085 18.5 14.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </a>
-          <span class="tooltip">
-            <span class="arrow"></span>
-            <span class="text">Logout</span>
           </span>
         </li>
       </ul>
@@ -821,13 +814,15 @@ export default class AppMain extends HTMLElement {
           }
 
           section.nav > ul.nav {
-            gap: 10px;
             justify-content: center;
             align-items: center;
-            padding: 0;
-            margin: 0;
             width: 100%;
-            height: 100%;
+            height: max-content;
+          }
+
+          section.nav > ul.nav.logo {
+            height: 56px;
+            padding: 22px 0 0 0;
           }
 
           section.nav > ul.nav > li {
@@ -880,6 +875,17 @@ export default class AppMain extends HTMLElement {
             font-weight: 400;
             color: inherit;
           }
+  
+          section.nav > ul.nav > li.logo > span.tooltip > span.text {
+            font-family: var(--font-text), sans-serif;
+            font-size: 0.9rem;
+            color: inherit;
+            background: unset;
+            font-weight: 600;
+            background-clip: unset;
+            -webkit-backdrop-clip: unset;
+            text-transform: unset;
+          }
 
           section.flow {
             width: calc(100% - 60px);
@@ -888,6 +894,7 @@ export default class AppMain extends HTMLElement {
             flex-flow: column;
             gap: 0;
             padding: 0;
+            height: 100dvh;
           }
         }
 
@@ -1044,7 +1051,7 @@ export default class AppMain extends HTMLElement {
 						display: flex;
 						flex-flow: column;
 						gap: 0;
-						height: max-content;
+            min-height: 100dvh;
 						padding: 0 0;
 					}
 				}

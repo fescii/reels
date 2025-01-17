@@ -5,6 +5,7 @@ export default class AppHome extends HTMLElement {
     this.setTitle();
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
+    this.mql = window.matchMedia('(max-width: 700px)');
 
     this.render();
   }
@@ -25,14 +26,11 @@ export default class AppHome extends HTMLElement {
     // onpopstate event
     this.onPopEvent();
 
-    // Watch for media query changes
-    const mql = window.matchMedia('(max-width: 660px)');
-
     // fetch content
     const container = this.shadowObj.querySelector('.feeds');
     this.fetchContent(container);
 
-    this.watchMediaQuery(mql);
+    this.watchMediaQuery(this.mql);
   }
 
   checkNotificationPermission = async () => {
@@ -188,8 +186,7 @@ export default class AppHome extends HTMLElement {
   }
 
   getBody = () => {
-    const mql = window.matchMedia('(max-width: 660px)');
-    if (mql.matches) {
+    if (this.mql.matches) {
       return /* html */`
         <div class="feeds">
           ${this.getTab()}
@@ -449,8 +446,8 @@ export default class AppHome extends HTMLElement {
           }
         }
 
-				@media screen and (max-width:660px) {
-					:host {
+        @media screen and (max-width: 700px) {
+          :host {
             font-size: 16px;
 						padding: 0;
             margin: 0;
@@ -459,14 +456,6 @@ export default class AppHome extends HTMLElement {
             justify-content: space-between;
             gap: 0;
 					}
-
-					::-webkit-scrollbar {
-						-webkit-appearance: none;
-					}
-					a,
-          ul.tabs > li.tab {
-						cursor: default !important;
-          }
 
           .feeds {
             display: flex;
@@ -480,6 +469,17 @@ export default class AppHome extends HTMLElement {
             padding: 0;
             margin: 0;
             width: 100%;
+          }
+         }
+
+				@media screen and (max-width:660px) {
+					::-webkit-scrollbar {
+						-webkit-appearance: none;
+					}
+
+					a,
+          ul.tabs > li.tab {
+						cursor: default !important;
           }
 				}
 	    </style>

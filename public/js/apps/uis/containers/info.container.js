@@ -52,6 +52,7 @@ export default class InfoContainer extends HTMLElement {
 	}
 
   getInfo = () => {
+		const year = new Date().getFullYear()
     return /*html*/`
       <div class="company">
         <ul class="footer-list">
@@ -73,13 +74,13 @@ export default class InfoContainer extends HTMLElement {
             <span class="dot"></span>
           </li>
           <li class="item">
-            <a href="https://www.buymeacoffee.com/femar" class="item-link">Donate</a>
+            <a target="_blank" rel="noopener noreferrer" href="https://www.buymeacoffee.com/femar" class="item-link">Donate</a>
           </li>
           <li class="item">
             <a href="/soon" class="item-link">Contact</a>
           </li>
-          <li class="item">
-            <a href="/soon" class="item-link">&copy 2024 aduki, Inc</a>
+          <li class="item copy">
+            <a href="/soon" class="item-link">&copy ${year} aduki, Inc</a>
           </li>
         </ul>
       </div>
@@ -211,6 +212,10 @@ export default class InfoContainer extends HTMLElement {
           font-weight: 400;
           font-size: 0.9rem;
         }
+
+				.company > ul.footer-list > li.item.copy > a.item-link {
+					font-family: var(--font-text), sans-serif;
+				}
 
         .company > ul.footer-list > li.item > a.item-link:hover {
           /* color: var(--accent-color); */

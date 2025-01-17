@@ -1,7 +1,6 @@
 // Import necessary modules, middlewares, and controllers
 const {
-  getTopic, getTopicStories,
-  editTopic
+  getTopic, getTopicStories
 } = require('../controllers').topics;
 
 /**
@@ -29,7 +28,4 @@ module.exports = (app) => {
 
   // Route for handling topic stories page
   app.get('/t/:topic/stories', getTopicStories);
-
-  // Route for editing topic
-  app.get('/t/:hash/edit', editTopic);
 }

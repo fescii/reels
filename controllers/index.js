@@ -3,7 +3,6 @@ const authController = require("./auth");
 const searchController = require("./search");
 const storyController = require("./stories");
 const userController = require("./users");
-const statsController = require("./stats");
 const feedsController = require("./feeds");
 const publicController = require("./public");
 const errorsController = require("./errors");
@@ -16,7 +15,6 @@ module.exports = {
   search: searchController,
   stories: storyController,
   users: userController,
-  stats: statsController,
   feeds: feedsController,
   public: publicController,
   errors: errorsController,

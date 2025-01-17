@@ -18,13 +18,19 @@ let retryCount = 0;
 let retryStartTime;
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
   );
 });
 
 self.addEventListener("fetch", (event) => {
   const requestUrl = new URL(event.request.url);
+
+  // Skip requests with unsupported schemes
+  if (requestUrl.protocol !== 'http:' && requestUrl.protocol !== 'https:') {
+    return;
+  }
 
   const isStaticAsset = /\.(html|css|js|map|json|xml|ico|txt|webmanifest|woff2|ttf|eot|otf)$/i.test(requestUrl.pathname);
   const isImage = /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(requestUrl.pathname);
@@ -34,9 +40,14 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       caches.match(event.request).then((response) => {
         return response || fetch(event.request).then(async (networkResponse) => {
-          const cache = await caches.open(CACHE_NAME);
-          cache.put(event.request, networkResponse.clone());
-          return networkResponse;
+          try { 
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          } catch (error) {
+            console.error('Failed to cache static asset:', error);
+            return networkResponse;
+          }
         });
       })
     );

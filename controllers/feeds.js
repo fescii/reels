@@ -6,7 +6,7 @@
  * @description This route will render the search page for the app.
 */
 const home = async (req, res) => {
-  res.render('pages/home', {
+  res.render('pages/main', {
     data: {
       name: "Home",
     }
@@ -20,7 +20,7 @@ const home = async (req, res) => {
  * @description This route will render the offline page for the app.
 */
 const offline = async (req, res) => {
-  res.render('pages/offline', {
+  res.render('pages/main', {
     data: {
       name: "Offline",
     }

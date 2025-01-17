@@ -5,7 +5,9 @@ const urlsToCache = [
   '/static/css/theme.css',
   '/static/css/res.css',
   '/offline',
-  '/static/js/dist/bundle.0.2.8.js',
+  // '/static/js/dist/bundle.0.2.8.js',
+  '/static/img/favi.png',
+  '/static/js/index.js',
 ];
 
 const RETRY_INTERVAL = 5000; // 5 seconds
@@ -31,11 +33,10 @@ self.addEventListener("fetch", (event) => {
     // Handle static assets (cache them)
     event.respondWith(
       caches.match(event.request).then((response) => {
-        return response || fetch(event.request).then((networkResponse) => {
-          return caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
+        return response || fetch(event.request).then(async (networkResponse) => {
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(event.request, networkResponse.clone());
+          return networkResponse;
         });
       })
     );
@@ -46,16 +47,13 @@ self.addEventListener("fetch", (event) => {
     // For other requests (like API or when offline), check for network or offline fallback
     event.respondWith(
       fetch(event.request)
-        .catch(() => {
+        .catch(async () => {
           // Serve the offline page if network fails and request is not a navigational request
-          return caches.match('/offline')
-            .then((offlineResponse) => {
-              if (offlineResponse) {
-                return offlineResponse;
-              }
-              // Fallback to /home if offline page is not in cache
-              return caches.match('/home');
-            });
+          const offlineResponse = await caches.match('/offline');
+          if (offlineResponse) {
+            return offlineResponse;
+          }
+          return caches.match('/home');
         })
     );
   }

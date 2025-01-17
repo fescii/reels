@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+  <% var title = "Topic | " + data.name -%>
+  <% var image = "/static/img/fav.png" -%>
+  <% if (data.summary == null) { data.summary = "Topic summary has not been added yet." } -%>
+  <% var description = data.summary.length > 90 ? data.summary.substring(0, 90) + "..." : data.summary -%>
+  <%- include('../partials/meta', {
+    title: title, image: image, description: description
+  }); -%>
+
+  <body>
+    <!--App Logon page Start-->
+      <%- include('../partials/edits/topic', data); -%>
+    <!--App Logon page End-->
+  </body>
+
+</html>

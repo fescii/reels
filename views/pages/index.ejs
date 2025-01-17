@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<% var title = "Welcome | Discover and connect with people, topics and stories" -%>
+<% var image = "/static/img/fav.png" -%>
+<% var description = "Explore, engage, and evolve your perspectives with our community." -%>
+<%- include('../partials/head', {
+  title: title, image: image, description: description
+}); -%>
+
+<body>
+  <header-container join="/join" apk="/static/app-release-v1.apk"></header-container>
+  <main class="main">
+    <section class="landing">
+      <div class="content-one">
+        <div class="text">
+          <h2 class="title">
+            Inspire, Inform, and Interact.
+          </h2>
+          <p class="short">
+            Inspire and inform others through interactive discussions and meaningful connections.
+          </p>
+        </div>
+      </div>
+      <div class="container">
+        <div class="columns">
+          <div class="column">
+            <div class="box">
+              <img src="/static/img/home/share.jpg" alt="Share anything">
+              <h3>Share Anything</h3>
+              <p>
+                Create and share captivating stories, insightful articles, and engaging posts that resonate with a global audience.
+              </p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="box"> 
+              <img src="/static/img/home/use.jpg" alt="Reply">
+              <h3>Speak Freely</h3>
+              <p>
+                Dive into conversations and connect with others by replying to their posts, sharing your insights, and fostering meaningful interactions.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <div class="box">
+              <img src="/static/img/home/topic.jpg">
+              <h3>Foster Communities</h3>
+              <p>
+                Contribute to topic articles, adding your unique perspective to ongoing debates and discussions.
+              </p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="box"> 
+              <img src="/static/img/home/mail.jpg">
+              <h3>Liked It? Never Miss It.</h3>
+              <p>
+                Stay informed by subscribing to topics of interest and receiving updates on the latest discussions and content.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="content connect">
+      <div class="content">
+        <div class="svg">
+          <img src="/static/img/svgs/join.svg" alt="Join svg image">.
+        </div>
+        <div class="info-side">
+          <h2 class="title">Join the community</h2>
+          <p class="words">
+            On our platform, connect with like-minded individuals passionate about sharing ideas and engaging in
+            meaningful discussions. Join the largest network dedicated to fostering creativity, collaboration, and
+            insightful conversations.
+          </p>
+          <div class="actions">
+            <a href="/join/register" id="book-now" class="book action">Create account</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="content discuss">
+      <div class="content">
+        <div class="info-side">
+          <h2 class="title">Discuss with Passionate Minds</h2>
+          <p class="words">
+            Engage in vibrant discussions with a community of passionate individuals. Our platform connects you with diverse voices, fostering insightful conversations and meaningful connections.
+          </p>
+          <div class="actions">
+            <a href="/join" id="book-now" class="book action">Join to discuss</a>
+          </div>
+        </div>
+        <div class="svg">
+          <img src="/static/img/svgs/discuss.svg" alt="Discuss svg image">
+        </div>
+      </div>
+    </section>
+    <section class="share">
+      <div class="content">
+        <div class="info">
+          <h1 class="title">Download Our Progressive Web App (PWA) for Android</h1>
+          <p>We’ve transformed our Progressive Web App (PWA) into a native-like experience for Android users. Download the APK file to enjoy all the benefits of our PWA with the convenience of an app.</p>
+          <h2>What is a PWA?</h2>
+          <p>A Progressive Web App combines the best of web and mobile apps. It’s designed to work seamlessly on your device, offering offline access, fast performance, and the ability to be added to your home screen just like a native app.</p>
+          <h2>How to Install:</h2>
+          <ol>
+            <li><strong>Download the APK:</strong> Click the link below to download the APK file to your device.</li>
+            <li><strong>Open the File:</strong> Locate the downloaded APK file in your file manager.</li>
+            <li><strong>Install the App:</strong> Tap on the APK file and follow the prompts to install.</li>
+          </ol>
+          <h2>Why Choose Our PWA?</h2>
+          <ul>
+            <li><strong>Enhanced Performance:</strong> Enjoy a fast and responsive experience.</li>
+            <li><strong>Offline Access:</strong> Use the app even when you're not connected to the internet.</li>
+            <li><strong>Home Screen Access:</strong> Add the app to your home screen for quick and easy access.</li>
+          </ul>
+          <a href="/static/app-release-v1.apk" download>Download APK Now</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+
+</html>

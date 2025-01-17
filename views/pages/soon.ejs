@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<% var title = "Coming Soon | Contribute to our platform and make a difference" -%>
+<% var image = "/static/img/fav.png" -%>
+<% var description = "Explore, engage, and evolve your perspectives with our community." -%>
+<%- include('../partials/head', {
+  title: title, image: image, description: description
+}); -%>
+
+<body>
+  <header-container join="/join" apk="/static/app-release-v1.apk"></header-container>
+  <main class="main">
+    <div class="about-top">
+			<p class="head">Soon</p>
+      <h1 class="title">This page is not yet available<br />You can contribute</span>.
+        <br>
+      </h1>
+      <p class="text">
+        We invite passionate developers, designers, writers, and tech enthusiasts to join our growing community of contributors. Your expertise and creativity can help us enhance our platform, improve our documentation, and create a more robust user experience.
+      </p>
+    </div>
+		<section class="explore">
+      <div class="section people">
+				<div class="more">
+					<span class="looking">Want to contribute?</span>
+					<h2 class="title">Whether you’re a seasoned professional or just starting out, your contributions are valuable to us. Together, we can make a significant impact and drive the evolution of our platform.</h2>
+					<a href="mailto:isfescii@gmail.com" class="browse">Send us an email</a>
+				</div>
+			</div> 
+		</section>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+
+</html>

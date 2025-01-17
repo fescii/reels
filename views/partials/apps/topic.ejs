@@ -1,0 +1,16 @@
+<% var url = "/t/" + data.hash.toLowerCase() %>
+<% var author = data.topic_author %>
+<% var bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio; -%>
+<%# replace all " and ' with &quot; and &apos; to avoid breaking the html %>
+<% bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;') -%>
+<% var contact = author.contact ? JSON.stringify(author.contact) : null; -%>
+<app-topic style="display: none;" tab="<%= data.tab %>" subscribers="<%= data.subscribers %>" followers="<%= data.followers %>"
+  stories="<%= data.stories %>" hash="<%= data.hash %>" subscribed="<%= data.is_subscribed ? 'true' : 'false' %>" views="<%= data.views %>"
+  name="<%= data.name %>" url="<%= url %>" stories-url="/api/v1/t/<%= data.slug %>/stories" 
+  slug="<%= data.slug %>" followers-url="/api/v1<%= url %>/followers" topic-follow="<%= data.is_following ? 'true' : 'false' %>"
+  author-hash="<%= author.hash %>" author-you="<%= data.you ? 'true' : 'false' %>" author-stories="<%= author.stories %>" author-contact='<%= contact %>'
+  author-img="<%= author.picture %>" author-follow="<%= author.is_following ? 'true' : 'false' %>" author-replies="<%= author.replies %>"
+  author-name="<%= author.name %>" author-followers="<%= author.followers %>" author-following="<%= author.following %>"
+  author-verified="<%= author.verified ? 'true' : 'false' %>" author-bio="<%= bio %>">
+  <%= data.summary %>
+</app-topic>

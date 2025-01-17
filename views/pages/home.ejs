@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+  <% var title = "Home | Discover and connect with people, topics and stories" -%>
+  <% var image = "/static/img/fav.png" -%>
+  <% var description = "Explore, engage, and evolve your perspectives with our community." -%>
+  <%- include('../partials/meta', {
+    title: title, image: image, description: description
+  }); -%>
+  <body>
+    <%- include('../partials/apps/home', {data: data}); -%>
+  </body>
+</html>

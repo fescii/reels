@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%# Head/Meta  Start  %>
+  <%
+    function findFirstImageSrc(text) {
+      const imgRegex = /<img[^>]+src\s*=\s*['"]([^'"]+)['"][^>]*>/i;
+      const match = text.match(imgRegex);
+      return match ? match[1] : null;
+    }
+  %>
+
+  <% var image = "/static/img/fav.png" %>
+  <% const firstImageSrc = findFirstImageSrc(data.content); %>
+
+  <% if (data.kind === 'story') { %>
+    <% image = firstImageSrc || image %>
+  <% } else { %>
+    <% image = data.images && data.images.length > 0 ? data.images[0] : image %>
+  <% } %>
+
+  <% var title = data.title ? 'Story | ' + data.title : 'Post | by ' + data.author -%>
+
+  <%# Remove all tags %>
+  <% var content = data.content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim() %>
+  
+  <%# Check if content is null %>
+  <% if (content == null) { content = "This story has no content." } -%>
+  <%# Truncate content to 160 characters and add ... %>
+  <% var description = content.length > 100 ? content.substring(0, 100) + "..." : content -%>
+  <%- include('../partials/meta', {
+    title: title, image: image, description: description
+  }); -%>
+  <%# Head/Meta  End %>
+
+  <body>
+    <%# App Logon page Start %>
+      <%- include('../partials/apps/story', data); -%>
+    <%# App Logon page End %>
+  </body>
+
+</html>

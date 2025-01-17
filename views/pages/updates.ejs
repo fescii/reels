@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+  <% var title = "Settings - View your stats, preferences, and edit your profile" -%>
+  <% var image = "/static/img/fav.png" -%>
+  <% var description = "View your stats, preferences, and edit your profile." -%>
+  <%- include('../partials/meta', {
+    title: title, image: image, description: description
+  }); -%>
+  <body>
+    <%- include('../partials/apps/updates', {data: data}); -%>
+  </body>
+</html>

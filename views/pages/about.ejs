@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<% var title = "About | Contribute to our platform and make a difference" -%>
+<% var image = "/static/img/fav.png" -%>
+<% var description = "Explore, engage, and evolve your perspectives with our community." -%>
+<%- include('../partials/head', {
+  title: title, image: image, description: description
+}); -%>
+
+<body>
+  <header-container join="/join" apk="/static/app-release-v1.apk"></header-container>
+  <main class="main">
+    <div class="about-top">
+			<p class="head">About us</p>
+      <h1 class="title">Inspire, <span style="color:rgb(0, 122, 255);">Inform</span>, and Interact<br />Platform For Meaningful<span style="color:rgb(223, 121, 26);"> Connection</span>.
+        <br>
+      </h1>
+      <p class="text">
+        We are a forward-thinking company dedicated to creating innovative solutions that enhance digital communication.<br>
+        Our mission is to deliver exceptional experiences through our Progressive Web App (PWA), designed to seamlessly integrate with your daily life. <br>
+        Our commitment is to provide you with tools that not only meet but exceed your expectations, fostering a more connected and engaging digital world.
+      </p>
+    </div>
+		<section class="explore">
+			<div class="section">
+				<div class="info-side">
+					<h2 class="title">Our Mission</h2>
+					<p class="words">
+            We strive to leverage the latest technology to develop solutions that enhance productivity, encourage meaningful interactions, and build vibrant communities. <br>
+            Our goal is to simplify complex processes and make it easier for people to connect, share, and grow in their personal and professional lives.
+          </p>
+					<div class="actions">
+						<a href="/join" class="learn action">Get started today</a>
+					</div>
+				</div>
+				<div class="image-side">
+					<img src="/static/img/home/mission.avif" alt="Image">
+				</div>
+			</div>
+      <div class="section people">
+				<div class="more">
+					<span class="looking">Looking for more?</span>
+					<h2 class="title">Discover more people, browse best articles from them for endless inspiration.</h2>
+					<a href="/search" class="browse">Browse people</a>
+				</div>
+			</div> 
+		</section>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+
+</html>

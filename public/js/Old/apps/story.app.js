@@ -1,0 +1,932 @@
+export default class AppStory extends HTMLElement {
+  constructor() {
+    // We are not even going to touch this.
+    super();
+
+    this.setTitle(this.getAttribute('story-title'));
+
+    this.viewed = false;
+
+    // let's create our shadow root
+    this.shadowObj = this.attachShadow({ mode: "open" });
+
+    this.boundHandleWsMessage = this.handleWsMessage.bind(this);
+    this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
+
+    this.topics = this.getTopics();
+
+    this._content = this.innerHTML
+
+    this.render();
+  }
+
+  setTitle = title => {
+    // update title of the document
+    document.title = `Story | ${title}`;
+  }
+
+  getTopics = () => {
+    // get the topics
+    let topics = this.getAttribute('topics');
+
+    // 
+    return topics ? topics.split(',') : ['story'];
+  }
+
+  render() {
+    this.shadowObj.innerHTML = this.getTemplate();
+  }
+
+  connectedCallback() {
+    this.enableScroll();
+    // Change style to flex
+    this.style.display='flex';
+
+    // open urls
+    this.openUrl();
+
+    // get the content
+    const content = this.shadowObj.querySelector('article.article');
+
+    // adjust the indicator
+    this.adjustIndicator(content);
+
+    // connect to the WebSocket
+    this.checkAndAddHandler();
+
+    // request user to enable notifications
+    this.checkNotificationPermission();
+
+    // Get mql object
+    const mql = window.matchMedia('(max-width: 660px)');
+
+    this.watchMediaQuery(mql);
+
+    // view the story
+    this.activateView();
+  }
+
+  checkNotificationPermission = async () => {
+    if(window.notify && !window.notify.permission) {
+      await window.notify.requestPermission();
+    }
+  }
+
+  checkAndAddHandler() {
+    if (window.wss) {
+      window.wss.addMessageHandler(this.boundHandleWsMessage);
+      // console.log('WebSocket handler added successfully');
+    } else {
+      // console.log('WebSocket manager not available, retrying...');
+      setTimeout(this.checkAndAddHandler, 500); // Retry after 500ms
+    }
+  }
+
+  disconnectedCallback() {
+    this.enableScroll()
+    if (window.wss) {
+      window.wss.removeMessageHandler(this.boundHandleWsMessage);
+    }
+  }
+
+  handleWsMessage = message => {
+    // Handle the message in this component
+    // console.log('Message received in component:', message);
+    const data = message.data;
+
+    if (message.type !== 'action') return;
+
+    const user = data?.user;
+    const userHash = window.hash;
+
+    const hash = this.getAttribute('hash').toUpperCase();
+    const authorHash = this.getAttribute('author-hash').toUpperCase();
+
+    const author = this.shadowObj.querySelector('author-wrapper');
+    let wrapper = this.shadowObj.querySelector('action-wrapper');
+
+    const target = data.hashes.target;
+
+    // handle connect action
+    if (data.action === 'connect' && data.kind === 'user') {
+      this.handleConnectAction(data, author, userHash, authorHash);
+    }
+    else if(hash === target) {
+      if (data.action === 'reply') {
+        const replies = this.parseToNumber(this.getAttribute('replies')) + data.value;
+        this.updateReplies(wrapper, replies);
+      }
+      else if(data.action === 'view') {
+        const views = this.parseToNumber(this.getAttribute('views')) + data.value;
+        this.updateViews(wrapper, views);
+      }
+      else if (data.action === 'like') {
+        if(user !== null && user === userHash) {
+          return;
+        }
+        // get likes parsed to number
+        const likes = (this.parseToNumber(this.getAttribute('likes')) + data.value);
+        // update likes
+        this.updateLikes(wrapper, likes);
+      }
+    }
+  }
+
+  sendWsMessage(data) {
+    if (window.wss) {
+      window.wss.sendMessage(data);
+    } else {
+      console.warn('WebSocket connection not available. view information not sent.');
+    }
+  }
+
+  handleConnectAction = (data, author, userHash, authorHash) => {
+    const to = data.hashes.to;
+    if(to === authorHash) {
+      const followers = this.parseToNumber(this.getAttribute('author-followers')) + data.value;
+      this.setAttribute('author-followers', followers);
+      this.updateFollowers(author, followers);
+
+      if (data.hashes.from === userHash) {
+        const value = data.value === 1 ? 'true' : 'false';
+        // update user-follow/auth-follow attribute
+        this.setAttribute('author-follow', value);
+        if(author) {
+          author.setAttribute('user-follow', value);
+        }
+      }
+
+      if(author) {
+        author.setAttribute('reload', 'true');
+      }
+    }
+  }
+
+  updateLikes = (element, value) => {
+    // update likes in the element and this element
+    this.setAttribute('likes', value);
+    element.setAttribute('likes', value);
+    element.setAttribute('reload', 'true');
+  }
+
+  updateViews = (element, value) => {
+    // update views in the element and this element
+    this.setAttribute('views', value);
+    element.setAttribute('views', value);
+    element.setAttribute('reload', 'true');
+  }
+
+  updateReplies = (element, value) => {
+    // update replies in the element and this element
+    this.setAttribute('replies', value);
+    element.setAttribute('replies', value);
+    element.setAttribute('reload', 'true');
+  }
+
+  updateFollowers = (element, value) => {
+    if (!element) {
+      return;
+    }
+    element.setAttribute('followers', value);
+  }
+
+  updateAuthorFollowers = (element, value) => {
+    element.setAttribute('author-followers', value);
+    element.setAttribute('reload', 'true');
+  }
+
+  activateView = () => {
+    if (!this.viewed) {
+      setTimeout(() => {
+        this.sendViewData();
+        this.viewed = true;
+      }, 5000);
+    }
+  } 
+
+  sendViewData() {
+    const authorHash = this.getAttribute('author-hash').toUpperCase();
+    // check if the author is the user
+    if (authorHash === window.hash) return;
+
+    const hash = this.getAttribute('hash').toUpperCase();
+
+    const viewData = {
+      type: 'action',
+      frontend: true,
+      data: {
+        kind: 'story',
+        publish: true,
+        hashes: { target: hash },
+        action: 'view',
+        value: 1
+      }
+    };
+
+    // send the view data
+    this.sendWsMessage(viewData);
+  }
+
+  watchMediaQuery = mql => {
+    mql.addEventListener('change', () => {
+      // Re-render the component
+      this.render();
+    });
+  }
+
+  parseToNumber = str => {
+    // Try parsing the string to an integer
+    const num = parseInt(str);
+
+    // Check if parsing was successful
+    if (!isNaN(num)) {
+      return num;
+    } else {
+      return 0;
+    }
+  }
+
+  openUrl = () => {
+    // get all the links
+    const links = this.shadowObj.querySelectorAll('article.article a');
+    const body = document.querySelector('body');
+
+    // loop through the links
+    if (!links) return;
+    
+    links.forEach(link => {
+      // add event listener to the link
+      link.addEventListener('click', event => {
+        event.preventDefault();
+        // get the url
+        const url = link.getAttribute('href');
+
+        // link pop up
+        let linkPopUp = `<url-popup url="${url}"></url-popup>`
+
+        // open the popup
+        body.insertAdjacentHTML('beforeend', linkPopUp);
+      });
+    });
+  }
+
+  adjustIndicator = content => {
+    // get total height of the content(including padding and scroll height)
+    const totalHeight = content.scrollHeight;
+
+    // get the scroll position of the content
+    const scrollPosition = document.documentElement.scrollTop;
+
+    // calculate the percentage of the scroll position
+    const scrollPercentage = (scrollPosition / totalHeight) * 100;
+
+    // get the indicator
+    const indicator = this.shadowObj.querySelector('.indicator');
+
+    // if percentage is greater than 100, set the indicator to 100%
+    if (scrollPercentage >= 100) {
+      indicator.style.width = `100%`;
+      return;
+    }
+
+    // set the width of the indicator
+    indicator.style.width = `${scrollPercentage}%`;
+
+
+    // add scroll event listener to body but check if the content is still in view
+    document.addEventListener('scroll', () => {
+      // get total height of the content(minus padding)
+      const totalHeight = content.scrollHeight;
+
+      // get the scroll position of the content in the y-axis
+      const scrollPosition = document.documentElement.scrollTop;
+
+      // calculate the percentage of the scroll position
+      const scrollPercentage = (scrollPosition / totalHeight) * 100;
+
+      // if the scroll position is greater than the total height of the content, set the indicator to 100%
+      if (scrollPosition >= totalHeight) {
+        indicator.style.width = `100%`;
+        return;
+      }
+
+      // if percentage + 8  is greater than 100, set the indicator to 100%
+      if (scrollPercentage >= 100) {
+        indicator.style.width = `100%`;
+        return;
+      }
+
+      // set the width of the indicator
+      indicator.style.width = `${scrollPercentage}%`;
+    })
+  }
+
+  disableScroll() {
+    // Get the current page scroll position
+    let scrollTop = window.scrollY || document.documentElement.scrollTop;
+    let scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+    document.body.classList.add("stop-scrolling");
+
+    // if any scroll is attempted, set this to the previous value
+    window.onscroll = function () {
+      window.scrollTo(scrollLeft, scrollTop);
+    };
+  }
+
+  enableScroll() {
+    document.body.classList.remove("stop-scrolling");
+    window.onscroll = function () { };
+  }
+
+  getDate = isoDateStr => {
+    const dateIso = new Date(isoDateStr); // ISO strings with timezone are automatically handled
+    let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    // userTimezone.replace('%2F', '/')
+
+    // Convert posted time to the current timezone
+    const date = new Date(dateIso.toLocaleString('en-US', { timeZone: userTimezone }));
+
+    return `
+      ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+    `
+  }
+
+  formatDateWithRelativeTime = isoDateStr => {
+    // 1. Convert ISO date string with timezone to local Date object
+    let date;
+    try {
+      date = new Date(isoDateStr);
+    }
+    catch (error) {
+      date = new Date(Date.now())
+    }
+
+    // Get date
+    const localDate = date.toLocaleDateString('en-US', {
+      year: 'numeric', month: 'short', day: '2-digit'
+    });
+
+    // Get time
+    let localTime = date.toLocaleDateString('en-US', {
+      hour: 'numeric', minute: '2-digit', hour12: true
+    });
+
+    localTime = localTime.split(',')[1].trim();
+
+    return { dateStr: localDate, timeStr: localTime }
+  }
+
+  getTemplate = () => {
+    // Show HTML Here
+    return `
+      ${this.getBody()}
+      ${this.getStyles()}
+    `;
+  }
+
+  getBody = () => {
+    const mql = window.matchMedia('(max-width: 660px)');
+    if (mql.matches) {
+      return /* html */`
+        ${this.getTop()}
+        <span class="indicator"></span>
+        ${this.getAuthor()}
+        <div class="content" id="content-container">
+          ${this.getHeader()}
+          ${this.getContent()}
+          ${this.getMeta()}
+          ${this.getStats()}
+          ${this.getSection()}
+        </div>
+      `;
+    }
+    else {
+      return /* html */`
+        <div class="content" id="content-container">
+          ${this.getTop()}
+          <span class="indicator"></span>
+          ${this.getHeader()}
+          ${this.getContent()}
+          ${this.getMeta()}
+          ${this.getStats()}
+          ${this.getSection()}
+        </div>
+
+        <section class="side">
+          ${this.getAuthor()}
+          <topics-container url="/api/v1/q/trending/topics"></topics-container>
+          ${this.getInfo()}
+        </section>
+      `;
+    }
+  }
+
+  getHeader = () => {
+    let str = this.topics[0];
+    let formatted = str.toLowerCase().replace(/(^|\s)\S/g, match => match.toUpperCase());
+    return /*html*/`
+      <div class="head">
+        <span class="topic">${formatted}</span>
+        <h1 class="story-title">${this.getAttribute('story-title')}</h1>
+      </div>
+    `
+  }
+
+  getContent = () => {
+    const text = this.innerHTML;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/html');
+    const parsedHTML = doc.body.innerHTML;
+  
+    return /* html */`
+      <article class="article" id="article">
+        ${parsedHTML}
+      </article>
+    `;
+  }
+
+  getTop = () => {
+    return /* html */ `
+      <header-wrapper section="Story" type="story"
+        user-url="${this.getAttribute('user-url')}" auth-url="${this.getAttribute('auth-url')}"
+        url="${this.getAttribute('story-url')}" search-url="${this.getAttribute('search-url')}">
+      </header-wrapper>
+    `
+  }
+
+  getAuthor = () => {
+    const contact = this.getAttribute("author-contact");
+    let bio = this.getAttribute('author-bio') || 'This author has not provided a bio yet.';
+    // replace all " and ' with &quot; and &apos; to avoid breaking the html
+    bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    return /* html */`
+			<author-wrapper hash="${this.getAttribute('author-hash')}" picture="${this.getAttribute('author-img')}" name="${this.getAttribute('author-name')}"
+        followers="${this.getAttribute('author-followers')}" following="${this.getAttribute('author-following')}" user-follow="${this.getAttribute('author-follow')}"
+        stories="${this.getAttribute('author-stories')}" replies="${this.getAttribute('author-replies')}" contact='${contact}'
+        verified="${this.getAttribute('author-verified')}" url="${this.getAttribute('author-url')}" you="${this.getAttribute('author-you')}"
+        bio="${bio}">
+      </author-wrapper>
+		`
+  }
+
+  getSection = () => {
+    return /* html */`
+      <post-section url="${this.getAttribute('url')}" active="${this.getAttribute('tab')}" section-title="Story" 
+        author-hash="${this.getAttribute('author-hash')}" hash="${this.getAttribute('hash')}"
+        replies="${this.getAttribute('replies')}" likes="${this.getAttribute('likes')}" kind="story"
+        replies-url="${this.getAttribute('replies-url')}" likes-url="${this.getAttribute('likes-url')}">
+      </post-section>
+    `
+  }
+
+  getInfo = () => {
+    return /*html*/`
+      <info-container docs="/about/docs" new="/about/new"
+       feedback="/about/feedback" request="/about/request" code="/about/code" donate="/about/donate" contact="/about/contact" company="https://github.com/aduki-hub">
+      </info-container>
+    `
+  }
+
+  getMeta = () => {
+    let dateObject = this.formatDateWithRelativeTime(this.getAttribute('time'))
+    return /* html */`
+      <div class="meta">
+        <span class="sp">on</span>
+        <time class="published" datetime="${this.getAttribute('time')}">${dateObject.dateStr}</time>
+        <span class="sp">•</span>
+        <span class="sp">at</span>
+        <span class="time">${dateObject.timeStr}</span>
+      </div>
+    `
+  }
+
+  getStats = () => {
+    return /*html*/`
+      <action-wrapper full="true" kind="story" reload="false" likes="${this.getAttribute('likes')}" images="${this.getAttribute('images')}"
+        replies="${this.getAttribute('replies')}" liked="${this.getAttribute('liked')}" wrapper="true"
+        hash="${this.getAttribute('hash')}" views="${this.getAttribute('views')}"  url="${this.getAttribute('url')}" summary="${this.getAttribute('story-title')}"
+        preview-title="${this.getAttribute('story-title')}" time="${this.getAttribute('time')}"
+        author-hash="${this.getAttribute('author-hash')}">
+        ${this.getHTML()}
+      </action-wrapper>
+    `
+  }
+  
+  getHTML = () => {
+    const text = this.innerHTML;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/html');
+    return doc.body.innerHTML;
+  }
+
+  getStyles() {
+    return /* css */`
+	    <style>
+	      *,
+	      *:after,
+	      *:before {
+	        box-sizing: border-box !important;
+	        font-family: inherit;
+	        -webkit-box-sizing: border-box !important;
+	      }
+
+	      *:focus {
+	        outline: inherit !important;
+	      }
+
+	      *::-webkit-scrollbar {
+	        width: 3px;
+	      }
+
+	      *::-webkit-scrollbar-track {
+	        background: var(--scroll-bar-background);
+	      }
+
+	      *::-webkit-scrollbar-thumb {
+	        width: 3px;
+	        background: var(--scroll-bar-linear);
+	        border-radius: 50px;
+	      }
+
+	      h1,
+	      h2,
+	      h3,
+	      h4,
+	      h5,
+	      h6 {
+	        padding: 0;
+	        margin: 0;
+	        font-family: inherit;
+	      }
+
+	      p,
+	      ul,
+	      ol {
+	        padding: 0;
+	        margin: 0;
+	      }
+
+	      a {
+	        text-decoration: none;
+	      }
+
+	      :host {
+          font-size: 16px;
+          display: flex;
+          width: 100%;
+          gap: 30px;
+          min-height: 100vh;
+          justify-content: space-between;
+        }
+
+        div.content {
+          padding: 0;
+          width: 63%;
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+        }
+
+        /* Responses */
+        div.content section.responses {
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+        }
+
+        section.side {
+          padding: 25px 0;
+          margin: 0;
+          background-color: transparent;
+          width: 33%;
+          height: max-content;
+          display: flex;
+          flex-flow: column;
+          gap: 20px;
+          position: sticky;
+          top: 0;
+          height: 100vh;
+          max-height: 100vh;
+          overflow-y: scroll;
+          scrollbar-width: none;
+        }
+
+        section.side::-webkit-scrollbar {
+          visibility: hidden;
+          display: none;
+        }
+
+        span.indicator {
+          display: flex;
+          z-index: 4;
+          width: 0%;
+          height: 3px;
+          background: var(--alt-linear);
+          border-radius: 5px;
+          transition: width 0.3s;
+          position: sticky;
+          top: 60px;
+          left: 0;
+        }
+
+        div.head {
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+          margin: 15px 0 0;
+        }
+
+        div.head > .topic {
+          width: max-content;
+          color: var(--gray-color);
+          padding: 3px 10px 3px 10px;
+          background: var(--light-linear);
+          font-family: var(--font-read), sans-serif;
+          font-size: 0.8rem;
+          font-weight: 500;
+          border-radius: 10px;
+          -webkit-border-radius: 10px;
+          -moz-border-radius: 10px;
+        }
+
+        div.head > h1.story-title {
+          margin: 15px 0 10px;
+          padding: 0;
+          font-weight: 700;
+          font-size: 1.7rem;
+          line-height: 1.2;
+          font-family: var(--font-main), sans-serif;
+          color: var(--title-color);
+        }
+
+        .meta {
+          border-bottom: var(--border);
+          border-top: var(--border);
+          margin: 5px 0 0 0;
+          padding: 10px 0;
+          display: flex;
+          position: relative;
+          color: var(--text-color);
+          align-items: center;
+          font-family: var(--font-text), sans-serif;
+          gap: 5px;
+          font-size: 1rem;
+          font-weight: 600;
+        }
+
+        .meta > .sp {
+          font-size: 1rem;
+          color: var(--gray-color);
+          font-weight: 400;
+        }
+
+        article.article {
+          margin: 3px 0 0;
+          font-size: 1.05rem;
+          display: flex;
+          flex-flow: column;
+          color: var(--read-color);
+          font-family: var(--font-main), sans-serif;
+          gap: 0;
+          font-size: 1rem;
+          font-weight: 400;
+        }
+
+        article.article * {
+          font-size: inherit;
+          line-height: 1.3;
+          color: inherit;
+          font-family: inherit;
+        }
+
+        article.article h6,
+        article.article h5,
+        article.article h4,
+        article.article h3,
+        article.article h1 {
+          padding: 0;
+          color: var(--title-color);
+          font-weight: 500;
+          line-height: 1.5;
+          margin: 10px 0;
+          font-family: var(--font-main), sans-serif;
+        }
+
+        article.article h6 {
+          font-size: initial;
+        }
+
+        article.article h5 {
+          font-size: initial;
+        }
+
+        article.article h4 {
+          font-size: 1.25rem;
+        }
+
+        article.article h3 {
+          font-size: 1.3rem !important;;
+        }
+
+        article.article h2 {
+          font-size: 1.35rem !important;
+          color: var(--title-color);
+          font-weight: 600;
+          line-height: 1.2;
+          margin: 0;
+          padding: 2px 0 0 13px;
+          margin: 10px 0 10px;
+          position: relative;
+        }
+
+        article.article h2:before {
+          content: "";
+          position: absolute;
+          bottom: 10%;
+          left: 0;
+          width: 2px;
+          height: 80%;
+          background: var(--action-linear);
+          border-radius: 5px;
+        }
+
+        article.article .intro p {
+          margin: 0 0 5px 0;
+          line-height: 1.4;
+        }
+
+        article.article p {
+          margin: 5px 0;
+          line-height: 1.4;
+        }
+
+        article.article a {
+          text-decoration: none;
+          cursor: pointer;
+          color: var(--anchor-color) !important;
+        }
+
+        article.article a:hover {
+          text-decoration: underline;
+        }
+
+        article.article blockquote {
+          margin: 10px 0;
+          padding: 5px 15px;
+          font-style: italic;
+          border-left: 2px solid var(--gray-color);
+          background: var(--background);
+          color: var(--text-color);
+          font-weight: 400;
+        }
+
+        article.article blockquote:before {
+          content: open-quote;
+          color: var(--gray-color);
+          font-size: 1.5rem;
+          line-height: 1;
+          margin: 0 0 0 -5px;
+        }
+
+        article.article blockquote:after {
+          content: close-quote;
+          color: var(--gray-color);
+          font-size: 1.5rem;
+          line-height: 1;
+          margin: 0 0 0 -5px;
+        }
+
+        article.article blockquote p {
+          margin: 0;
+        }
+
+        article.article blockquote * {
+          margin: 0;
+        }
+
+        article.article hr {
+          border: none;
+          background-color: var(--gray-color);
+          height: 1px;
+          margin: 10px 0;
+        }
+
+        article.article ul,
+        article.article ol {
+          margin: 5px 0 15px 20px;
+          padding: 0 0 0 15px;
+          color: inherit;
+        }
+
+        article.article ul li,
+        article.article ol li {
+          padding: 5px 0;
+        }
+
+        article.article code {
+          background: var(--gray-background);
+          padding: 0 5px;
+          font-family: var(--font-mono);
+          font-size: 0.9rem;
+          border-radius: 5px;
+        }
+
+        article.article img {
+          max-width: 100%;
+          height: auto;
+          object-fit: contain;
+          border-radius: 5px;
+        }
+
+        article.article figure {
+          max-width: 100% !important;
+          height: auto;
+          width: max-content;
+          padding: 0;
+          max-width: 100%;
+          display: block;
+          margin-block-start: 5px;
+          margin-block-end: 5px;
+          margin-inline-start: 0 !important;
+          margin-inline-end: 0 !important;
+        }
+
+        @media screen and (max-width:900px) {
+          div.content {
+            width: 58%;
+          }
+
+          section.side {
+            width: 40%;
+          }
+        }
+
+				@media screen and (max-width:660px) {
+					:host {
+            font-size: 16px;
+						padding: 0;
+            margin: 0;
+            display: flex;
+            min-height: max-content;
+            height: max-content;
+            flex-flow: column;
+            gap: 0;
+					}
+
+          div.content .head {
+            margin: 10px 0 0 0;
+          }
+
+          div.content {
+            padding: 0;
+            width: 100%;
+            display: flex;
+            flex-flow: column;
+            gap: 0;
+          }
+
+					.action,
+					a {
+						cursor: default !important;
+          }
+
+          section.side {
+            padding: 0;
+            display: none;
+            width: 0%;
+          }
+          a {
+            cursor: default !important;
+          }
+
+          span.indicator {
+            display: flex;
+            width: 10%;
+            height: 3px;
+            border-radius: 5px;
+            transition: width 0.3s;
+            position: sticky;
+            top: 50px;
+            left: 0;
+          }
+
+          .meta {
+            display: flex;
+            position: relative;
+            color: var(--text-color);
+            align-items: center;
+            font-family: var(--font-text), sans-serif;
+            font-size: 0.9rem;
+            gap: 5px;
+            font-weight: 600;
+          }
+
+          a,
+          span.action {
+            cursor: default !important;
+          }
+				}
+	    </style>
+    `;
+  }
+}

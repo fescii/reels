@@ -1,5 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
   <%- include('../partials/meta', {meta: meta}); -%>
-  <%- include('../partials/body'); -%>
+  <body>
+    <main-app name="home" style="display: none;">
+    <%- include('../apps/home', {data: data}); -%>
+    </main-app>
+    <%- include('../partials/foot'); -%>
+  </body>  
 </html>

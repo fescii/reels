@@ -6,6 +6,7 @@
  * @description This route will render the search page for the app.
 */
 const search = async (req, res) => {
+  const query = req.query.q || null;
   const meta = {
     title: 'Search Zoanai',
     description: 'Search for content on Zoanai',
@@ -14,7 +15,10 @@ const search = async (req, res) => {
     url: '/search',
   }
   res.render('pages/main', {
-    meta: meta
+    meta: meta, data: {
+      name: 'search',
+      query: query
+    }
   })
 }
 

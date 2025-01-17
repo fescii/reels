@@ -1,0 +1,13 @@
+<script src="/static/js/sodium.js"></script>
+  <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.15/dist/modules/libsodium-wrappers.min.js"></script> -->
+<script>
+   // Self-contained async initialization and immediate usage
+  (async function initializeSodium() {
+    console.log('Initializing sodium...');
+  
+    // Wait for sodium to be ready and attach it to the global object
+    await sodium.ready;
+    window.sodium = sodium;
+    console.log("Sodium is ready!");
+  })();
+</script> 

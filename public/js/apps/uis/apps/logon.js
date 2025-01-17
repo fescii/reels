@@ -2,10 +2,8 @@
 
 export default class AppLogon extends HTMLElement {
   constructor() {
-
     // We are not even going to touch this.
     super();
-
     this.setTitle();
 
     // check if the user is authenticated

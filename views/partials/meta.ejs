@@ -28,9 +28,7 @@
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
 
   <script type="module">
-    import createApp from '/static/js/index.js'
-    const node = document.getElementById('root')
-  
-    const app = createApp(node)
+    import app from '/static/js/app.js'
+    customElements.define('main-app', app);
   </script>
 </head>

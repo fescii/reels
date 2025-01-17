@@ -2,7 +2,6 @@ export default class AppProfile extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-
     this.setTitle();
 
     // Check if you is true and convert to boolean

@@ -15,7 +15,9 @@ const join = async (req, res) => {
   }
 
   res.render('pages/main', {
-    meta: meta,
+    meta: meta, data: {
+      name: 'join'
+    }
   })
 }
 
@@ -26,6 +28,9 @@ const join = async (req, res) => {
  * @description This route will render the login page for the app.
 */
 const login = async (req, res) => {
+  // get next url
+  const nextUrl = req.query.next || '/home';
+
   const meta = {
     title: 'Login to Zoanai',
     description: 'Login to Zoanai to access your account',
@@ -35,7 +40,10 @@ const login = async (req, res) => {
   }
 
   res.render('pages/main', {
-    meta: meta,
+    meta: meta, data: {
+      name: 'login',
+      next: nextUrl
+    }
   })
 }
 
@@ -46,6 +54,8 @@ const login = async (req, res) => {
  * @description This route will render the register page for the app.
 */
 const register = async (req, res) => {
+  const nextUrl = req.query.next || '/home';
+
   const meta = {
     title: 'Register for Zoanai',
     description: 'Register for Zoanai to create and explore content',
@@ -55,7 +65,10 @@ const register = async (req, res) => {
   }
 
   res.render('pages/main', {
-    meta: meta,
+    meta: meta, data: {
+      name: 'register',
+      next: nextUrl
+    }
   })
 }
 
@@ -68,6 +81,8 @@ const register = async (req, res) => {
  * @returns Page: Renders recover page
 */
 const recover = async (req, res) => {
+  const nextUrl = req.query.next || '/home';
+
   const meta = {
     title: 'Recover your Zoanai account',
     description: 'Recover your Zoanai account by resetting your password',
@@ -77,7 +92,10 @@ const recover = async (req, res) => {
   }
 
   res.render('pages/main', {
-    meta: meta,
+    meta: meta, data: {
+      name: 'recover',
+      next: nextUrl
+    }
   })
 }
 

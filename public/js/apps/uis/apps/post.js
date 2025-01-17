@@ -2,7 +2,6 @@ export default class AppPost extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-
     this.setTitle();
 
     // let's create our shadow root

@@ -23,7 +23,7 @@ export default class HeaderContainer extends HTMLElement {
     const outerThis = this;
     const mql = window.matchMedia('(max-width: 660px)');
 
-    mql.addEventListener('change', e => {
+    mql.addEventListener('change', _e => {
       outerThis.render()
 
       outerThis.expandLists();

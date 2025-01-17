@@ -658,6 +658,10 @@ export default class AppMain extends HTMLElement {
           gap: 5px;
         }
 
+        section.nav > ul.nav.logo {
+          border: none;
+        }
+
         section.nav > ul.nav > li {
           /*border: thin solid black;*/
           padding: 0;
@@ -732,13 +736,14 @@ export default class AppMain extends HTMLElement {
         }
 
         section.nav > ul.nav > li.logo > span.tooltip > span.text {
-          font-family: var(--font-text), sans-serif;
+          font-family: var(--font-read), sans-serif;
           font-size: 1.35rem;
           color: transparent;
           background: var(--accent-linear);
-          font-weight: 500;
+          font-weight: 600;
           background-clip: text;
           -webkit-backdrop-clip: text;
+          text-transform: uppercase;
         }
 
         section.flow {

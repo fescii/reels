@@ -234,8 +234,8 @@ export default class ImagesWrapper extends HTMLElement {
 					position: relative;
 					cursor: pointer;
 					overflow: hidden;
-					height: 150px;
-					min-width: 105px;
+					height: 200px;
+					min-width: 200px;
 					border-radius: 12px;
 				}
 
@@ -250,8 +250,8 @@ export default class ImagesWrapper extends HTMLElement {
 				.image-container > img {
 					height: 100%;
 					width: auto;
-					min-width: 105px;
-					max-height: 150px;
+					min-width: 200px;
+					max-height: 200px;
 					object-fit: cover;
 					object-position: center;
 					border-radius: 12px;

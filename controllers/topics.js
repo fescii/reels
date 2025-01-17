@@ -1,11 +1,3 @@
-// Import find topic by hash and by slug
-const {
-  findTopicBySlugOrHash, findTopic
-} = require('../../queries').topicQueries;
-
-const { actionQueue } = require('../../bull');
-
-
 /**
  * @controller {get} /t/:slug(:hash) Topic
  * @name getTopic
@@ -16,14 +8,8 @@ const getTopic = async (req, res) => {
   //get the params from the request
   let param = req.params.topic;
 
-  // get user from the request object
-  const user = req.user;
-
-  // convert the topic to lowercase
-  param = param.toLowerCase();
-
   // query the database for the topic
-  const { topic, error } = await findTopicBySlugOrHash(param, user.hash);
+  const { topic, error } = [ null, null ];
 
   // if there is an error, render the error page
   if (error) { 
@@ -66,14 +52,8 @@ const getTopicStories = async (req, res) => {
   //get the params from the request
   let param = req.params.topic;
 
-  // get user from the request object
-  const user = req.user;
-
-  // convert the topic to lowercase
-  param = param.toLowerCase();
-
   // query the database for the topic
-  const { topic, error } = await findTopicBySlugOrHash(param, user.hash);
+  const { topic, error } = [ null, null ];
 
   // if there is an error, render the error page
   if (error) { 
@@ -105,42 +85,6 @@ const getTopicStories = async (req, res) => {
 }
 
 /**
- * @controller {get} /t/:hash Topic
- * @name editTopic
- * @description This route will render the topic edit page for the app.
- * @returns Page: Renders topic page
-*/
-const editTopic = async (req, res) => {
-  //get the params from the request
-  let param = req.params.hash;
-
-  // get user from the request object
-  const user = req.user;
-
-  //if user is null redirect to login
-  if (!user) {
-    return res.redirect('/join/login');
-  }
-
-  // query the database for the topic
-  const { topic, error } = await findTopic(param.toUpperCase());
-
-  // if there is an error, render the error page
-  if (error) { 
-    return res.status(500).render('500')
-  }
-
-  // if there is no topic, render the 404 page
-  if (!topic) {
-    return res.status(404).render('404')
-  }
-
-  res.render('pages/edit-topic', {
-    data: topic
-  })
-}
-
-/**
  * @controller {get} /t/:slug(:hash) Topic
  * @name fetchTopic
  * @description This route will render the topic page for the app.
@@ -150,14 +94,8 @@ const fetchTopic = async (req, res) => {
   //get the params from the request
   let param = req.params.topic;
 
-  // get user from the request object
-  const user = req.user;
-
-  // convert the topic to lowercase
-  param = param.toLowerCase();
-
   // query the database for the topic
-  const { topic, error } = await findTopicBySlugOrHash(param, user.hash);
+  const { topic, error } = [ null, null ];
 
   // if there is an error, render the error page
   if (error) { 
@@ -198,5 +136,5 @@ const fetchTopic = async (req, res) => {
 // Export all public content controllers
 module.exports = {
   getTopic, getTopicStories,
-  fetchTopic, editTopic
+  fetchTopic
 }

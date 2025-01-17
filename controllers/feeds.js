@@ -1,4 +1,3 @@
-
 /**
  * @controller {get} /search Search
  * @apiName Join
@@ -6,10 +5,15 @@
  * @description This route will render the search page for the app.
 */
 const home = async (req, res) => {
+  const meta = {
+    title: 'Zoanai',
+    description: 'Create and expore content with Zoanai',
+    keywords: 'articles, news, blog, content. create, explore',
+    image: '/static/img/favi.png',
+    url: '/',
+  }
   res.render('pages/main', {
-    data: {
-      name: "Home",
-    }
+    meta: meta,
   })
 }
 
@@ -20,10 +24,16 @@ const home = async (req, res) => {
  * @description This route will render the offline page for the app.
 */
 const offline = async (req, res) => {
+  const meta = {
+    title: 'Offline',
+    description: 'You are offline',
+    keywords: 'offline, no internet',
+    image: '/static/img/favi.png',
+    url: '/offline',
+  }
+
   res.render('pages/main', {
-    data: {
-      name: "Offline",
-    }
+    meta: meta,
   })
 }
 

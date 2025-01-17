@@ -1,9 +1,3 @@
-// Import find topic by hash and by slug
-const {
-  getUserByHash, getUserProfile
-} = require('../../queries').userQueries;
-
-
 /**
  * @controller {get} /t/:slug(:hash) Topic
  * @name getPerson
@@ -14,14 +8,9 @@ const getPerson = async (req, res) => {
   //get the params from the request
   let param = req.params.hash;
 
-  // get user from the request object
-  const currentUser = req.user;
-
-  // convert the user hash to lowercase
-  param = param.toUpperCase();
-
+  
   // query the database for the user
-  const { user, error } = await getUserByHash(param, currentUser.hash);
+  const { user, error } = [ null, null ];
 
   // if there is an error, render the error page
   if (error) { 

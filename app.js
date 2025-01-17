@@ -25,17 +25,9 @@ app.get('/service-worker.js', (req, res) => {
 let corsOptions = {
   origin: [`http://localhost:${process.env['PORT']}`, "https://192.168.68.21:${process.env['PORT']}"],
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
-
-// Require method for a syncing database
-const { syncDb } = require("./models");
-
-// SyncDb - take true or false for when altering the database or not
-syncDb({ alter: false }).then(() => {
-  console.log('Database Synchronized!')
-})
 
 app.use(cors(corsOptions));
 

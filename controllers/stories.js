@@ -86,7 +86,7 @@ const getStory = async (req, res) => {
       url: url,
     }
 
-    res.render('pages/story', {
+    res.render('pages/post', {
       data: story, meta: metaData
     })
   } catch (error) {
@@ -131,7 +131,7 @@ const getStoryLikes = async (req, res) => {
       url: url,
     }
 
-    res.render('pages/story', {
+    res.render('pages/post', {
       data: story, meta: metaData
     })
   } catch (error) {

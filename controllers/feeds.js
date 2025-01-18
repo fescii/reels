@@ -12,7 +12,7 @@ const home = async (req, res) => {
     image: '/static/img/favi.png',
     url: '/',
   }
-  res.render('pages/main', {
+  res.render('pages/home', {
     meta: meta, data: {
       name: 'home',
       tab: 'all',
@@ -34,7 +34,7 @@ const all = async (req, res) => {
     image: '/static/img/favi.png',
     url: '/',
   }
-  res.render('pages/main', {
+  res.render('pages/home', {
     meta: meta, data: {
       name: 'home',
       tab: 'all',
@@ -56,7 +56,7 @@ const stories = async (req, res) => {
     image: '/static/img/favi.png',
     url: '/',
   }
-  res.render('pages/main', {
+  res.render('pages/home', {
     meta: meta, data: {
       name: 'home',
       tab: 'stories',
@@ -78,7 +78,7 @@ const replies = async (req, res) => {
     image: '/static/img/favi.png',
     url: '/',
   }
-  res.render('pages/main', {
+  res.render('pages/home', {
     meta: meta, data: {
       name: 'home',
       tab: 'replies',
@@ -100,7 +100,7 @@ const users = async (req, res) => {
     image: '/static/img/favi.png',
     url: '/',
   }
-  res.render('pages/main', {
+  res.render('pages/home', {
     meta: meta, data: {
       name: 'home',
       tab: 'users',

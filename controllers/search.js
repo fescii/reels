@@ -14,7 +14,7 @@ const search = async (req, res) => {
     image: '/static/img/favi.png',
     url: '/search',
   }
-  res.render('pages/main', {
+  res.render('pages/search', {
     meta: meta, data: {
       name: 'search',
       query: query

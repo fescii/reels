@@ -54,7 +54,7 @@ const getPerson = async (req, res) => {
       url: `/u/${user.hash.toLowerCase()}`
     }
 
-    res.render('pages/user', {
+    res.render('pages/profile', {
       data: user, meta: metaData
     })
   } catch (error) {
@@ -98,7 +98,7 @@ const getUserReplies = async (req, res) => {
       url: `/u/${user.hash.toLowerCase()}`
     }
 
-    res.render('pages/user', {
+    res.render('pages/profile', {
       data: user, meta: metaData
     })
   } catch (error) {
@@ -141,7 +141,7 @@ const getUserFollowers = async (req, res) => {
       url: `/u/${user.hash.toLowerCase()}`
     }
 
-    res.render('pages/user', {
+    res.render('pages/profile', {
       data: user, meta: metaData
     })
   } catch (error) {
@@ -185,7 +185,7 @@ const getUserFollowing = async (req, res) => {
       url: `/u/${user.hash.toLowerCase()}`
     }
 
-    res.render('pages/user', {
+    res.render('pages/profile', {
       data: user, meta: metaData
     })
   } catch (error) {
@@ -208,7 +208,7 @@ const getAccount = async (req, res) => {
   }
 
   try {
-    const result = await api.get('/u/user', {
+    const result = await api.get('/u/profile', {
       "x-access-token": token
     });
 

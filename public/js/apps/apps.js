@@ -1,7 +1,6 @@
 import shots from "./shots/index.js";
 import chats from "./chats/index.js";
 import home from "./home/index.js";
-import uis from "./uis/index.js";
 
 import apps from "./apps/index.js";
 import containers from "./containers/index.js";
@@ -49,11 +48,10 @@ const core = () => {
   });
 }
 
-export default function apps(text) {
+export default function uis(text) {
   shots();
   chats();
   home();
-  uis();
   apps()
   containers()
   create()

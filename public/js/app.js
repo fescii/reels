@@ -1,4 +1,4 @@
-import apps from "./apps/apps.js"
+import uis from "./apps/apps.js"
 import APIManager from "./api.js";
 export default class AppMain extends HTMLElement {
   constructor() {
@@ -108,7 +108,7 @@ export default class AppMain extends HTMLElement {
 
   registerComponents = () => {
     // Register all components here
-    apps('Apps registered');
+    uis('Apps registered');
   }
 
   // set hash if user is logged

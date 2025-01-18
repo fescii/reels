@@ -1,6 +1,6 @@
 // Import necessary modules, middlewares, and controllers
 const {
-  join, login, register, recover
+  join, login, register, recover, logout
 } = require('../controllers').auth;
 
 
@@ -32,4 +32,7 @@ module.exports = (app) => {
 
   // Route for handling recover page
   app.get('/join/recover', recover);
+
+  // Logout route
+	app.get('/logout', logout);
 }

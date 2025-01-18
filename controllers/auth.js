@@ -99,8 +99,26 @@ const recover = async (req, res) => {
   })
 }
 
+/**
+ * @function logout
+ * @description Controller to log out a user
+ * @param {Object} req - Request object
+ * @param {Object} res - Response object
+ * @param {Function} next - Next middleware function
+ * @returns {Redirect} - Redirects to the login page
+*/
+const logout = async (req, res, next) => {
+  // Clear the cookie
+  res.clearCookie('x-access-token');
+  res.clearCookie('hash');
+
+  // Redirect to the login page
+  return res.redirect('/join');
+}
+
+
 
 // Export all public content controllers
 module.exports = {
-  join, login, register, recover
+  join, login, register, recover, logout
 }

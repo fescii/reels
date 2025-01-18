@@ -14,6 +14,8 @@ export default class AppMain extends HTMLElement {
     window.app = this;
     this.mql = window.matchMedia('(max-width: 660px)');
     this.render();
+    // Add popstate event listener
+    window.addEventListener('popstate', this.handlePopState);
   }
 
   getContent = () => {

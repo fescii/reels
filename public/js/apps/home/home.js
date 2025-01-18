@@ -9,6 +9,8 @@ export default class AppHome extends HTMLElement {
     this.mql = window.matchMedia('(max-width: 700px)');
     this.active_tab = null;
     this.render();
+    // Add popstate event listener
+    window.addEventListener('popstate', this.handlePopState);
   }
 
   setTitle = () => {
@@ -95,7 +97,40 @@ export default class AppHome extends HTMLElement {
 
     const content = contentMap[tabName] || this.getAll();
     contentContainer.innerHTML = content;
-    this.push(url, { kind: "sub", name: "home", html: content }, tabName);
+    this.push(url, { kind: "sub", app: "home", name: tabName, html: content }, tabName);
+  }
+
+  handlePopState = event => {
+    const state = event.state;
+    if (state && state.kind === 'sub' && state.app === 'home') {
+      this.updateHistory(state.name)
+    }
+  }
+
+  updateHistory = tabName => {
+    const contentContainer = this.shadowObj.querySelector('div.feeds > div.content-container');
+    const tabs = this.shadowObj.querySelectorAll('ul.tabs > li.tab');
+    const contentMap = {
+      'all': this.getAll(),
+      'stories': this.getStories(),
+      'replies': this.getReplies(),
+      'users': this.getUsers()
+    };
+
+    try {
+      this.active_tab.classList.remove('active');
+      const activeTab = tabs.querySelector(`li.${tabName}`);
+      activeTab.classList.add('active');
+      this.active_tab = activeTab;
+
+      const content = contentMap[tabName] || this.getAll();
+      contentContainer.innerHTML = content;
+    } catch (error) {
+      const activeTab = tabs.querySelector(li.all);
+      activeTab.classList.add('active');
+      this.active_tab = activeTab;
+      contentContainer.innerHTML = this.getAll()
+    }
   }
 
   // watch for mql changes

@@ -1,3 +1,24 @@
+const api = require('./api');
+
+const meta = data => {
+  // Head/Meta Start
+  const title = "User | " + data.name;
+  // Separate the name into first and last name
+  const name = data.name.split(" ");
+
+  // Check if the profile picture is null and overwrite it with the default picture
+  const picture = data.picture === null ? `https://ui-avatars.com/api/?background=d9e7ff&bold=true&size=100&color=fff&name=${name[0]}+${name[1]}` : data.picture;
+
+  // Check if bio is null and overwrite it with the default bio
+  const bio = data.bio === null ? "This user has not added a bio yet." : data.bio;
+
+  return {
+    title,
+    image: picture,
+    description: bio
+  }
+}
+
 /**
  * @controller {get} /t/:slug(:hash) Topic
  * @name getPerson
@@ -8,26 +29,37 @@ const getPerson = async (req, res) => {
   //get the params from the request
   let param = req.params.hash;
 
+  // get header x-access-token
+  const token = req.cookies['x-access-token'] || req.headers["x-access-token"]
   
-  // query the database for the user
-  const { user, error } = [ null, null ];
+  try {
+    const result = await api.get(`/u/page/${param}`, {
+      "x-access-token": token
+    });
 
-  // if there is an error, render the error page
-  if (error) { 
+    if(!result.success) {
+      return res.status(404).render('404');
+    }
+
+    const user = result.data.user;
+    user.tab = 'stories';
+
+    const { title, image, description } = meta(user);
+
+    const metaData = {
+      title,
+      description,
+      image,
+      keywords: user.tags ? user.tags.join(', ') : '',
+      url: `/u/${user.hash.toLowerCase()}`
+    }
+
+    res.render('pages/user', {
+      data: user, meta: metaData
+    })
+  } catch (error) {
     return res.status(500).render('500')
   }
-
-  // if there is no user, render the 404 page
-  if (!user) {
-    return res.status(404).render('404')
-  }
-
-  // add tab to the user object
-  user.tab = 'stories';
-
-  res.render('pages/user', {
-    data: user
-  })
 }
 
 
@@ -41,31 +73,37 @@ const getUserReplies = async (req, res) => {
   //get the params from the request
   let param = req.params.hash;
 
-  // get user from the request object
-  const currentUser = req.user;
+  // get header x-access-token
+  const token = req.cookies['x-access-token'] || req.headers["x-access-token"]
+  
+  try {
+    const result = await api.get(`/u/page/${param}`, {
+      "x-access-token": token
+    });
 
-  // convert the user hash to lowercase
-  param = param.toUpperCase();
+    if(!result.success) {
+      return res.status(404).render('404');
+    }
 
-  // query the database for the user
-  const { user, error } = await getUserByHash(param, currentUser.hash);
+    const user = result.data.user;
+    user.tab = 'replies';
 
-  // if there is an error, render the error page
-  if (error) {
+    const { title, image, description } = meta(user);
+
+    const metaData = {
+      title,
+      description,
+      image,
+      keywords: user.tags ? user.tags.join(', ') : '',
+      url: `/u/${user.hash.toLowerCase()}`
+    }
+
+    res.render('pages/user', {
+      data: user, meta: metaData
+    })
+  } catch (error) {
     return res.status(500).render('500')
   }
-
-  // if there is no user, render the 404 page
-  if (!user) {
-    return res.status(404).render('404')
-  }
-
-  // add tab to the user object
-  user.tab = 'replies';
-
-  res.render('pages/user', {
-    data: user
-  })
 }
 
 /**
@@ -78,31 +116,37 @@ const getUserFollowers = async (req, res) => {
   //get the params from the request
   let param = req.params.hash;
 
-  // get user from the request object
-  const currentUser = req.user;
+  // get header x-access-token
+  const token = req.cookies['x-access-token'] || req.headers["x-access-token"]
+  
+  try {
+    const result = await api.get(`/u/page/${param}`, {
+      "x-access-token": token
+    });
 
-  // convert the user hash to lowercase
-  param = param.toUpperCase();
+    if(!result.success) {
+      return res.status(404).render('404');
+    }
 
-  // query the database for the user
-  const { user, error } = await getUserByHash(param, currentUser.hash);
+    const user = result.data.user;
+    user.tab = 'followers';
 
-  // if there is an error, render the error page
-  if (error) { 
+    const { title, image, description } = meta(user);
+
+    const metaData = {
+      title,
+      description,
+      image,
+      keywords: user.tags ? user.tags.join(', ') : '',
+      url: `/u/${user.hash.toLowerCase()}`
+    }
+
+    res.render('pages/user', {
+      data: user, meta: metaData
+    })
+  } catch (error) {
     return res.status(500).render('500')
   }
-
-  // if there is no user, render the 404 page
-  if (!user) {
-    return res.status(404).render('404')
-  }
-
-  // add tab to the user object
-  user.tab = 'followers';
-
-  res.render('pages/user', {
-    data: user
-  })
 }
 
 
@@ -116,73 +160,37 @@ const getUserFollowing = async (req, res) => {
   //get the params from the request
   let param = req.params.hash;
 
-  // get user from the request object
-  const currentUser = req.user;
+  // get header x-access-token
+  const token = req.cookies['x-access-token'] || req.headers["x-access-token"]
+  
+  try {
+    const result = await api.get(`/u/page/${param}`, {
+      "x-access-token": token
+    });
 
-  // convert the user hash to lowercase
-  param = param.toUpperCase();
+    if(!result.success) {
+      return res.status(404).render('404');
+    }
 
-  // query the database for the user
-  const { user, error } = await getUserByHash(param, currentUser.hash);
+    const user = result.data.user;
+    user.tab = 'following';
 
-  // if there is an error, render the error page
-  if (error) {
+    const { title, image, description } = meta(user);
+
+    const metaData = {
+      title,
+      description,
+      image,
+      keywords: user.tags ? user.tags.join(', ') : '',
+      url: `/u/${user.hash.toLowerCase()}`
+    }
+
+    res.render('pages/user', {
+      data: user, meta: metaData
+    })
+  } catch (error) {
     return res.status(500).render('500')
   }
-
-  // if there is no user, render the 404 page
-  if (!user) {
-    return res.status(404).render('404')
-  }
-
-  // add tab to the user object
-  user.tab = 'following';
-
-  res.render('pages/user', {
-    data: user
-  })
-}
-
-/**
- * @controller {get} /t/:slug(:hash) Topic
- * @name getPerson
- * @description This route will the user page for the app.
- * @returns Page: Renders user page
-*/
-const fetchUser = async (req, res) => {
-  //get the params from the request
-  let param = req.params.hash;
-
-  // get user from the request object
-  const currentUser = req.user;
-
-  // convert the user hash to lowercase
-  param = param.toUpperCase();
-
-  // query the database for the user
-  const { user, error } = await getUserByHash(param, currentUser.hash);
-
-  // if there is an error, render the error page
-  if (error) { 
-    return res.status(500).json({
-      success: false,
-      message: 'An error occurred'
-    })
-  }
-
-  // if there is no user, render the 404 page
-  if (!user) {
-    return res.status(404).json({
-      success: false,
-      message: 'User not found'
-    });
-  }
-
-  res.status(200).json({
-    success: true,
-    message: 'User found',
-    user
-  });
 }
 
 /**
@@ -192,42 +200,62 @@ const fetchUser = async (req, res) => {
  * @returns Page: Renders settings page || error page
 */
 const getAccount = async (req, res) => {
-  if (!req.user?.hash) {
+  // Check if the user is logged in
+  const token = req.cookies['x-access-token'] || req.headers["x-access-token"];
+
+  if (!token) {
     return res.redirect('/join/login?next=/user');
   }
 
-  const hash = req.user.hash;
-  let current = req.params.current;
+  try {
+    const result = await api.get('/u/user', {
+      "x-access-token": token
+    });
 
-  const { user, error } = await getUserProfile(hash);
+    if (!result.success) {
+      return res.status(404).render('404');
+    }
 
-  if (error) {
-    console.log(error);
+    const user = result.data.user;
+
+    // if not user, render the 404 page
+    if (!user) {
+      return res.status(404).render('404');
+    }
+
+    // Check if the user has a bio and overwrite it with the default bio
+    user.contact = {
+      email: user.contact?.email || null,
+      x: user.contact?.x || null,
+      threads: user.contact?.threads || null,
+      phone: user.contact?.phone || null,
+      link: user.contact?.link || null,
+      linkedin: user.contact?.linkedin || null,
+    };
+
+    // set tab to the current tab or default to stats
+    const current = req.query.tab || 'stats';
+
+    // get meta data for the user
+    const { title, image, description } = meta(user);
+
+    const metaData = {
+      title,
+      description,
+      image,
+      keywords: user.tags ? user.tags.join(', ') : '',
+      url: `/u/${user.hash.toLowerCase()}`
+    }
+
+    res.render('pages/user', {
+      data: user, meta: metaData, current
+    })
+  } catch (error) {
     return res.status(500).render('500');
   }
-
-  if (!user) {
-    return res.status(404).render('404');
-  }
-
-  user.contact = {
-    email: user.contact?.email || null,
-    x: user.contact?.x || null,
-    threads: user.contact?.threads || null,
-    phone: user.contact?.phone || null,
-    link: user.contact?.link || null,
-    linkedin: user.contact?.linkedin || null,
-  };
-
-  user.tab = current || 'stats';
-
-  res.render('pages/updates', {
-    data: user
-  });
 }
 
 // Export all public content controllers
 module.exports = {
-  getPerson, getUserReplies, getUserFollowers, getUserFollowing, getAccount,
-  fetchUser
+  getPerson, getUserReplies, getUserFollowers, getUserFollowing, getAccount
 }

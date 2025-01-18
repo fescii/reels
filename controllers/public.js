@@ -5,7 +5,19 @@
  * @description This route will render the index page for the app.
 */
 const index = async (req, res) => {
-  res.render('pages/index')
+  const meta = {
+    title: 'Welcome to Zoanai',
+    description: 'Explore and create content on Zoanai',
+    keywords: 'blog, post, create, explore',
+    image: '/static/img/favi.png',
+    url: '/',
+  }
+
+  res.render('pages/index', {
+    meta: meta, data: {
+      name: 'index',
+    }
+  })
 }
 
 /**
@@ -15,7 +27,18 @@ const index = async (req, res) => {
  * @access Public
 */
 const about = async (req, res) => {
-  res.render('pages/about')
+  const meta = {
+    title: 'About | Zoanai',
+    description: 'Learn more about Zoanai',
+    keywords: 'about, zoanai, blog, post',
+    image: '/static/img/favi.png',
+    url: '/about',
+  }
+  res.render('pages/about', {
+    meta: meta, data: {
+      name: 'about'
+    }
+  })
 }
 
 /**
@@ -25,7 +48,19 @@ const about = async (req, res) => {
  * @access Public
 */
 const soon = async (req, res) => {
-  res.render('pages/soon')
+  const meta = {
+    title: 'Coming Soon | Zoanai',
+    description: 'Get ready for Zoanai',
+    keywords: 'coming soon, zoanai, blog, post',
+    image: '/static/img/favi.png',
+    url:  '/soon',
+  }
+  
+  res.render('pages/soon', {
+    meta: meta, data: {
+      name: 'soon'
+    }
+  })
 }
 
 // Export all public content controllers

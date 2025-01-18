@@ -1,3 +1,54 @@
+const api = require('./api');
+
+const first = text => {
+  const imgRegex = /<img[^>]+src\s*=\s*['"]([^'"]+)['"][^>]*>/i;
+  const match = text.match(imgRegex);
+  return match ? match[1] : null;
+}
+
+const meta = data => {
+  const firstImageSrc = first(text);
+
+  let image = '/static/img/favi.png';
+  if (data.kind === 'story') {
+    image = firstImageSrc || image;
+  } else {
+    image = data.images && data.images.length > 0 ? data.images[0] : image;
+  }
+
+  let title = data.title ? 'Story | ' + data.title : 'Post | by ' + data.author;
+
+  let content = data.content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  if (content == null) {
+    content = "This story has no content.";
+  }
+  let description = content.length > 100 ? content.substring(0, 100) + "..." : content;
+
+  return {
+    title,
+    image,
+    description
+  };
+}
+
+const replyMeta = data => {
+  let title = 'Reply | by ' + data.author;
+  let content = data.content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  if (content == null) {
+    content = "This reply has no content.";
+  }
+
+  const image = data.images && data.images.length > 0 ? data.images[0] : '/static/img/favi.png';
+
+  const description = content.length > 100 ? content.substring(0, 100) + "..." : content;
+
+  return {
+    title,
+    description,
+    image
+  };
+}
+
 /**
  * @controller {get} /p/:slug(:hash) Story
  * @name getStory
@@ -8,40 +59,39 @@ const getStory = async (req, res) => {
   //get the params from the request
   let param = req.params.story;
 
-  // query the database for the story
-  const { story, error } = [ null, null ];
+  // get header x-access-token
+  let token = req.cookies['x-access-token'] || req.headers["x-access-token"]
 
-  // console.log(story)
+  try {
+    const result = await api.get(`/p/page/${param}`, {
+      "x-access-token": token
+    })
 
-  // if there is an error, render the error page
-  if (error) { 
+    // if there is no story, render the 404 page
+    if (!result.success) {
+      return res.status(404).render('404')
+    }
+
+    const story = result.story;
+    story.tab = 'replies';
+
+    const { title, image, description } = meta(story);
+    const url = "/p/" + data.hash.toLowerCase();
+
+    const metaData = {
+      title: title,
+      description: description,
+      image: image,
+      keywords: story.tags ? story.tags.join(', ') : '',
+      url: url,
+    }
+
+    res.render('pages/story', {
+      data: story, meta: metaData
+    })
+  } catch (error) {
     return res.status(500).render('500')
   }
-
-  // if there is no story, render the 404 page
-  if (!story) {
-    return res.status(404).render('404')
-  }
-
-  // add the job to the queue
-  if (user.hash !== story.author) {
-    await actionQueue.add('actionJob', {
-      kind: 'view',
-      hashes: {
-        target: story.hash,
-      },
-      user: story.author,
-      action: 'story',
-      value: 1,
-    }, { attempts: 3, backoff: 1000, removeOnComplete: true });
-  }
-
-  // add tab to the story object
-  story.tab = 'replies';
-
-  res.render('pages/story', {
-    data: story
-  })
 }
 
 /**
@@ -54,38 +104,39 @@ const getStoryLikes = async (req, res) => {
   //get the params from the request
   let param = req.params.story;
 
-  // query the database for the story
-  const { story, error } = [ null, null ];
+  // get header x-access-token
+  let token = req.cookies['x-access-token'] || req.headers["x-access-token"]
 
-  // if there is an error, render the error page
-  if (error) { 
+  try {
+    const result = await api.get(`/p/page/${param}`, {
+      "x-access-token": token
+    })
+
+    // if there is no story, render the 404 page
+    if (!result.success) {
+      return res.status(404).render('404')
+    }
+
+    const story = result.story;
+    story.tab = 'likes';
+
+    const { title, image, description } = meta(story);
+    const url = "/p/" + data.hash.toLowerCase();
+
+    const metaData = {
+      title: title,
+      description: description,
+      image: image,
+      keywords: story.tags ? story.tags.join(', ') : '',
+      url: url,
+    }
+
+    res.render('pages/story', {
+      data: story, meta: metaData
+    })
+  } catch (error) {
     return res.status(500).render('500')
   }
-
-  // if there is no story, render the 404 page
-  if (!story) {
-    return res.status(404).render('404')
-  }
-
-  // add the job to the queue
-  if (user.hash !== story.author) {
-    await actionQueue.add('actionJob', {
-      kind: 'view',
-      hashes: {
-        target: story.hash,
-      },
-      user: story.author,
-      action: 'story',
-      value: 1,
-    }, { attempts: 3, backoff: 1000, removeOnComplete: true });
-  }
-
-  // add tab to the story object
-  story.tab = 'likes';
-
-  res.render('pages/story', {
-    data: story
-  })
 }
 
 /**
@@ -96,41 +147,41 @@ const getStoryLikes = async (req, res) => {
 */
 const getReply = async (req, res) => {
   //get the params from the request
-  let {hash} = req.params;
+  let { hash } = req.params;
 
+  // get header x-access-token
+  let token = req.cookies['x-access-token'] || req.headers["x-access-token"]
 
-  // query the database for the reply
-  const { reply, error } = [ null, null ];
+  try {
+    const result = await api.get(`/r/page/${hash}`, {
+      "x-access-token": token
+    });
 
-  // if there is an error, render the error page
-  if (error) { 
+    // if there is no reply, render the 404 page
+    if (!result.success) {
+      return res.status(404).render('404')
+    }
+
+    const reply = result.reply;
+    reply.tab = 'replies';
+
+    const { title, image, description } = replyMeta(reply);
+
+    const metaData = {
+      title: title,
+      description: description,
+      image: image,
+      keywords: reply.tags ? reply.tags.join(', ') : '',
+      url: "/r/" + reply.hash.toLowerCase(),
+    }
+
+    res.render('pages/reply', {
+      data: reply, meta: metaData
+    })
+
+  } catch (error) {
     return res.status(500).render('500')
   }
-
-  // if there is no reply, render the 404 page
-  if (!reply) {
-    return res.status(404).render('404')
-  }
-
-  // add the job to the queue
-  if (user.hash !== reply.author) {
-    await actionQueue.add('actionJob', {
-      kind: 'view',
-      hashes: {
-        target: reply.hash,
-      },
-      action: 'reply',
-      user: reply.author,
-      value: 1,
-    }, { attempts: 3, backoff: 1000, removeOnComplete: true });
-  }
-
-  // add tab to the reply object
-  reply.tab = 'replies';
-
-  res.render('pages/reply', {
-    data: reply
-  })
 }
 
 /**
@@ -141,40 +192,41 @@ const getReply = async (req, res) => {
 */
 const getReplyLikes = async (req, res) => {
   //get the params from the request
-  let {hash} = req.params;
+  const { hash } = req.params;
 
-  // query the database for the reply
-  const { reply, error } = [ null, null ];
- 
-  // if there is an error, render the error page
-  if (error) { 
+  // get header x-access-token
+  const token = req.cookies['x-access-token'] || req.headers["x-access-token"]
+
+  try {
+    const result = await api.get(`/r/page/${hash}`, {
+      "x-access-token": token
+    });
+
+    // if there is no reply, render the 404 page
+    if (!result.success) {
+      return res.status(404).render('404')
+    }
+
+    const reply = result.reply;
+    reply.tab = 'likes';
+
+    const { title, image, description } = replyMeta(reply);
+
+    const metaData = {
+      title: title,
+      description: description,
+      image: image,
+      keywords: reply.tags ? reply.tags.join(', ') : '',
+      url: "/r/" + reply.hash.toLowerCase(),
+    }
+
+    res.render('pages/reply', {
+      data: reply, meta: metaData
+    })
+
+  } catch (error) {
     return res.status(500).render('500')
   }
-
-  // if there is no reply, render the 404 page
-  if (!reply) {
-    return res.status(404).render('404')
-  }
-
-  // add the job to the queue
-  if (user.hash !== reply.author) {
-    await actionQueue.add('actionJob', {
-      kind: 'view',
-      hashes: {
-        target: reply.hash,
-      },
-      action: 'reply',
-      user: reply.author,
-      value: 1,
-    }, { attempts: 3, backoff: 1000, removeOnComplete: true });
-  }
-
-  // add tab to the reply object
-  reply.tab = 'likes';
-
-  res.render('pages/reply', {
-    data: reply
-  })
 }
 
 

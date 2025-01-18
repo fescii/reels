@@ -8,15 +8,12 @@ export default class StoryFeed extends HTMLElement {
     this._page = this.parseToNumber(this.getAttribute('page'));
     this._url = this.getAttribute('url');
     this._kind = this.getAttribute('kind');
-    this._query = this.setQuery(this.getAttribute('query'));
 
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
 
     this.render();
   }
-
-  setQuery = query => !(!query || query === "" || query !== "true");
 
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
@@ -31,6 +28,10 @@ export default class StoryFeed extends HTMLElement {
       this._empty = false;
       this.fetchStories(storiesContainer);
     }
+  }
+
+  disconnectedCallback() {
+    this.removeScrollEvent();
   }
 
   activateRefresh = () => {
@@ -130,7 +131,7 @@ export default class StoryFeed extends HTMLElement {
 
   fetchStories = storiesContainer => {
     const outerThis = this;
-    const url = this._query ? `${this._url}&page=${this._page}` : `${this._url}?page=${this._page}`;
+    const url = `${this._url}?page=${this._page}`;
 
     if(!this._block && !this._empty) {
       outerThis._empty = true;
@@ -152,21 +153,29 @@ export default class StoryFeed extends HTMLElement {
     // insert the content
     storiesContainer.insertAdjacentHTML('beforeend', content);
   }
-  
-  scrollEvent = storiesContainer => {
-    const outerThis = this;
-    window.addEventListener('scroll', function () {
-      let margin = document.body.clientHeight - window.innerHeight - 150;
-      if (window.scrollY > margin && !outerThis._empty && !outerThis._block) {
-        outerThis._page += 1;
-        outerThis.populateStories(outerThis.getLoader(), storiesContainer);
-        outerThis.fetchStories(storiesContainer);
-      }
-    });
 
-    // Launch scroll event
-    const scrollEvent = new Event('scroll');
-    window.dispatchEvent(scrollEvent);
+  scrollEvent = () => {
+    const outerThis = this;
+    if (!this._scrollEventAdded) {
+      this._scrollEventAdded = true;
+      window.addEventListener('scroll', function () {
+        let margin = document.body.clientHeight - window.innerHeight - 150;
+        if (window.scrollY > margin && !outerThis._empty && !outerThis._block) {
+          outerThis._page += 1;
+          outerThis.populateStories(outerThis.getLoader(), storiesContainer);
+          outerThis.fetchStories(storiesContainer);
+        }
+      });
+
+      // Launch scroll event
+      const scrollEvent = new Event('scroll');
+      window.dispatchEvent(scrollEvent);
+    }
+  }
+
+  removeScrollEvent = () => {
+    window.removeEventListener('scroll', this.onScroll);
+    this._scrollEventAdded = false;
   }
 
   mapFields = data => {
@@ -244,19 +253,17 @@ export default class StoryFeed extends HTMLElement {
     `;
   }
 
-  getLoader() {
+  getLoader = () => {
     return /* html */`
       <div class="loader-container">
-        <span id="btn-loader">
-          <span class="loader-alt"></span>
-        </span>
+        <div id="loader" class="loader"></div>
       </div>
-    `
+    `;
   }
 
   getBody = () => {
     // language=HTML
-    return `
+    return /* html */`
 			<div class="stories">
 				${this.getLoader()}
       </div>
@@ -443,55 +450,53 @@ export default class StoryFeed extends HTMLElement {
         }
 
         div.loader-container {
-          position: relative;
-          width: 100%;
-          height: 150px;
-          padding: 20px 0 0 0;
-        }
-
-        #btn-loader {
-          position: absolute;
-          top: 0;
-          left: 0;
-          bottom: 0;
-          right: 0;
-          z-index: 5;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: inherit;
+          width: 100%;
+          min-height: 200px;
+          min-width: 100%;
         }
 
-        #btn-loader > .loader-alt {
-          width: 35px;
-          aspect-ratio: 1;
-          --_g: no-repeat radial-gradient(farthest-side, #18A565 94%, #0000);
-          --_g1: no-repeat radial-gradient(farthest-side, #21D029 94%, #0000);
-          --_g2: no-repeat radial-gradient(farthest-side, #df791a 94%, #0000);
-          --_g3: no-repeat radial-gradient(farthest-side, #f09c4e 94%, #0000);
-          background:    var(--_g) 0 0,    var(--_g1) 100% 0,    var(--_g2) 100% 100%,    var(--_g3) 0 100%;
-          background-size: 30% 30%;
-          animation: l38 .9s infinite ease-in-out;
-          -webkit-animation: l38 .9s infinite ease-in-out;
-        }
-
-        #btn-loader > .loader {
+        div.loader-container > .loader {
           width: 20px;
           aspect-ratio: 1;
-          --_g: no-repeat radial-gradient(farthest-side, #ffffff 94%, #0000);
-          --_g1: no-repeat radial-gradient(farthest-side, #ffffff 94%, #0000);
-          --_g2: no-repeat radial-gradient(farthest-side, #df791a 94%, #0000);
-          --_g3: no-repeat radial-gradient(farthest-side, #f09c4e 94%, #0000);
-          background:    var(--_g) 0 0,    var(--_g1) 100% 0,    var(--_g2) 100% 100%,    var(--_g3) 0 100%;
-          background-size: 30% 30%;
-          animation: l38 .9s infinite ease-in-out;
-          -webkit-animation: l38 .9s infinite ease-in-out;
+          border-radius: 50%;
+          background: var(--accent-linear);
+          display: grid;
+          animation: l22-0 2s infinite linear;
         }
 
-        @keyframes l38 {
-          100% {
-            background-position: 100% 0, 100% 100%, 0 100%, 0 0
-          }
+        div.loader-container > .loader:before {
+          content: "";
+          grid-area: 1/1;
+          margin: 15%;
+          border-radius: 50%;
+          background: var(--second-linear);
+          transform: rotate(0deg) translate(150%);
+          animation: l22 1s infinite;
+        }
+
+        div.loader-container > .loader:after {
+          content: "";
+          grid-area: 1/1;
+          margin: 15%;
+          border-radius: 50%;
+          background: var(--accent-linear);
+          transform: rotate(0deg) translate(150%);
+          animation: l22 1s infinite;
+        }
+
+        div.loader-container > .loader:after {
+          animation-delay: -.5s
+        }
+
+        @keyframes l22-0 {
+          100% {transform: rotate(1turn)}
+        }
+
+        @keyframes l22 {
+          100% {transform: rotate(1turn) translate(150%)}
         }
 
         div.stories {

@@ -20,8 +20,7 @@ export default class HomeAll extends HTMLElement {
 
   disconnectedCallback() {
     this.enableScroll();
-    // clear window.home
-    this.home = null;
+    window.onscroll = null;
   }
 
   disableScroll() {

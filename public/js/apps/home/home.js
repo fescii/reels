@@ -21,9 +21,9 @@ export default class AppHome extends HTMLElement {
 
   connectedCallback() {
     // fetch content
-    const container = this.shadowObj.querySelector('.feeds');
+    const container = this.shadowObj.querySelector('div.feeds > div.content-container');
     const tabs = this.shadowObj.querySelector('ul.tabs');
-    if(tabs) this.activateTabController(tabs, container);
+    if(tabs && container) this.activateTabController(tabs, container);
 
     this.watchMediaQuery(this.mql);
   }
@@ -32,7 +32,7 @@ export default class AppHome extends HTMLElement {
     this.enableScroll();
   }
 
-  activateTabController = tabs => {
+  activateTabController = (tabs, contentContainer) => {
     // get the active tab
     this.getOrSetActiveTab(tabs);
 
@@ -48,24 +48,44 @@ export default class AppHome extends HTMLElement {
         this.active_tab = tab;
         this.active_tab.classList.add("active");
 
-        //TODO: hide the tab content
+        // update the content based on the tab
+        this.updateContent(contentContainer, tab.getAttribute('data-name'));
       });
     });
   }
 
   getOrSetActiveTab = tabs => {
-    // get the active tab
-    let activeTab = tabs.querySelector("li.active");
+    // get the tab from the attribute or default to 'all'
+    const tabName = this.getAttribute('tab') || 'all';
+    let activeTab = tabs.querySelector(`li.${tabName}`);
 
     if (!activeTab) {
-      // if no active tab, set the first tab as active
+      // if no tab matches the attribute, set the first tab as active
       activeTab = tabs.querySelector("li");
-      activeTab.classList.add("active");
-      this.active_tab = activeTab;
     }
 
-    // else set the active tab
+    activeTab.classList.add("active");
     this.active_tab = activeTab;
+  }
+
+  updateContent = (contentContainer, tabName) => {
+    switch (tabName) {
+      case 'all':
+        contentContainer.innerHTML = this.getAll();
+        break;
+      case 'stories':
+        contentContainer.innerHTML = this.getStories();
+        break;
+      case 'replies':
+        contentContainer.innerHTML = this.getReplies();
+        break;
+      case 'people':
+        contentContainer.innerHTML = this.getUsers();
+        break;
+      default:
+        contentContainer.innerHTML = this.getAll();
+        break;
+    }
   }
 
   // watch for mql changes
@@ -114,32 +134,6 @@ export default class AppHome extends HTMLElement {
     }
   }
 
-  onPopEvent = () => {
-    const outerThis = this;
-    // Update state on window.onpopstate
-    window.onpopstate = event => {
-      // This event will be triggered when the browser's back button is clicked
-
-      if (event.state) {
-        if (event.state.popup) {
-          return;
-        }
-        
-        if (event.state.page) {
-          outerThis.updatePage(event.state.content)
-        }
-      }
-    }
-  }
-
-  updatePage = content => {
-    // select body
-    const body = document.querySelector('body');
-
-    // populate content
-    body.innerHTML = content;
-  }
-
   disableScroll() {
     // Get the current page scroll position
     let scrollTop = window.scrollY || document.documentElement.scrollTop;
@@ -177,12 +171,32 @@ export default class AppHome extends HTMLElement {
     `
   }
 
+  getStories = () => {
+    return /* html */`
+      <home-stories-feed url="${this.getAttribute('stories')}" page="1"></home-stories-feed>
+    `
+  }
+
+  getReplies = () => {
+    return /* html */`
+      <home-replies-feed url="${this.getAttribute('replies')}" page="1"></home-replies-feed>
+    `
+  }
+
+  getUsers = () => {
+    return /* html */`
+      <home-users-feed url="${this.getAttribute('users')}" page="1"></home-users-feed>
+    `
+  }
+
   getBody = () => {
     if (this.mql.matches) {
       return /* html */`
         <div class="feeds">
           ${this.getTab()}
-          ${this.getAll()}
+          <div class="content-container">
+            ${this.getCurrent()}
+          </div>
         <div>
       `;
     }
@@ -190,13 +204,31 @@ export default class AppHome extends HTMLElement {
       return /* html */`
         <div class="feeds">
           ${this.getTab()}
-          ${this.getAll()}
+          <div class="content-container">
+            ${this.getCurrent()}
+          </div>
         </div>
         <div class="side">
           <topics-container url="/api/v1/q/trending/topics"></topics-container>
           ${this.getInfo()}
         </div>
       `;
+    }
+  }
+
+  getCurrent = () => {
+    const tabName = this.active_tab ? this.active_tab.getAttribute('data-name') : this.getAttribute('tab') || 'all';
+    switch (tabName) {
+      case 'all':
+        return this.getAll();
+      case 'stories':
+        return this.getStories();
+      case 'replies':
+        return this.getReplies();
+      case 'people':
+        return this.getUsers();
+      default:
+        return this.getAll();
     }
   }
 
@@ -312,6 +344,14 @@ export default class AppHome extends HTMLElement {
           flex-flow: column;
           gap: 0;
           width: calc(60% - 15px);
+        }
+
+        .content-container {
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+          padding: 0;
+          width: 100%;
         }
 
         div.side {

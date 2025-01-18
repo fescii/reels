@@ -33,6 +33,15 @@ export default class HomeFeed extends HTMLElement {
     }
   }
 
+  disconnectedCallback() {
+    this.removeScrollEvent();
+    const finish = this.shadowObj.querySelector('.finish');
+    if (finish) {
+      const btn = finish.querySelector('button.finish');
+      btn.removeEventListener('click', this.activateRefresh);
+    }
+  }
+
   activateRefresh = () => {
     const finish = this.shadowObj.querySelector('.finish');
     if (finish) {
@@ -146,23 +155,27 @@ export default class HomeFeed extends HTMLElement {
 
   scrollEvent = feedContainer => {
     const outerThis = this;
-    window.addEventListener('scroll', function () {
-      let margin = document.body.clientHeight - window.innerHeight - 150;
-      if (window.scrollY > margin && !outerThis._empty && !outerThis._block) {
-        outerThis._page += 1;
-        outerThis.populateFeeds(outerThis.getLoader(), feedContainer);
+    if (!this._scrollEventAdded) {
+      this._scrollEventAdded = true;
+      window.addEventListener('scroll', async function onScroll() {
+        let margin = document.body.clientHeight - window.innerHeight - 150;
+        if (window.scrollY > margin && !outerThis._empty && !outerThis._block) {
+          outerThis._page += 1;
+          outerThis.populateFeeds(outerThis.getLoader(), feedContainer);
 
-        outerThis.fetchFeeds(feedContainer);
-      }
-    });
+          outerThis.fetchFeeds(feedContainer);
+        }
+      });
 
-    // Launch scroll event
-    const scrollEvent = new Event('scroll');
-    window.dispatchEvent(scrollEvent);
+      // Launch scroll event
+      const scrollEvent = new Event('scroll');
+      window.dispatchEvent(scrollEvent);
+    }
   }
 
   removeScrollEvent = () => {
-    window.removeEventListener('scroll', function () { });
+    window.removeEventListener('scroll', this.onScroll);
+    this._scrollEventAdded = false;
   }
 
   mapFeeds = (stories, replies) => {

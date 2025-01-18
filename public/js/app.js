@@ -72,7 +72,7 @@ export default class AppMain extends HTMLElement {
   }
 
   watchMeta = () => {
-    this.mql.addEventListener('change', e => {
+    this.mql.addEventListener('change', () => {
       this.render();
       this.setUpEvents();
     })
@@ -116,7 +116,7 @@ export default class AppMain extends HTMLElement {
    */
   push(url, state = {}, title = '') {
     window.history.pushState(state, title, url);
-    this.handleUIUpdate({ url, state });
+    // this.handleUIUpdate({ url, state });
   }
 
   /**
@@ -127,7 +127,21 @@ export default class AppMain extends HTMLElement {
    */
   replace(url, state = {}, title = '') {
     window.history.replaceState(state, title, url);
-    this.handleUIUpdate({ url, state });
+    // this.handleUIUpdate({ url, state });
+  }
+
+  handlePopState = event => {
+    const state = event.state;
+    if (state && state.kind === 'app') {
+      this.updateHistory(state.html)
+    }
+  }
+
+  updateHistory = content => {
+    this.content = content;
+    const container = this.shadowObj.querySelector('section.flow');
+    container.innerHTML = this.getLoader();
+    this.setContent(container)
   }
 
   disconnectedCallback() {

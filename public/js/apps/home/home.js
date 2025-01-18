@@ -44,7 +44,7 @@ export default class AppHome extends HTMLElement {
     const pageUrl = window.location.href;
 
     // Replace History State
-    this.app.replace(url, { kind: 'app', name: "home", html: elementString }, pageUrl);
+    this.app.replace(pageUrl, { kind: 'app', name: "home", html: elementString }, pageUrl);
   }
 
   activateTabController = (tabs, contentContainer) => {
@@ -56,6 +56,9 @@ export default class AppHome extends HTMLElement {
       tab.addEventListener("click", e => {
         e.preventDefault();
         e.stopPropagation();
+
+        if(this.active_tab.dataset.name === tab.dataset.name) return;
+
         // remove the active class from the active tab
         this.active_tab.classList.remove("active");
 
@@ -71,17 +74,27 @@ export default class AppHome extends HTMLElement {
   }
 
   getOrSetActiveTab = tabs => {
+    const tabName = this.getAttribute('tab') || 'all';
     // get the tab from the attribute or default to 'all'
     let activeTab = tabs.querySelector('li.active');
 
     if (!activeTab) {
       // if no tab matches the attribute, set the first tab as active
-      const tabName = this.getAttribute('tab') || 'all';
       activeTab = tabs.querySelector(`li.${tabName}`);
     }
+
+    const contentMap = {
+      'all': this.getAll(),
+      'stories': this.getStories(),
+      'replies': this.getReplies(),
+      'users': this.getUsers()
+    };
+
+    const content = contentMap[tabName] || this.getAll();
     
     // replace current history:
-    this.history();
+    // this.history();
+    this.app.replace(activeTab.getAttribute('url'), { kind: "sub", app: "home", name: tabName, html: content }, tabName);
 
     activeTab.classList.add("active");
     this.active_tab = activeTab;
@@ -97,25 +110,20 @@ export default class AppHome extends HTMLElement {
 
     const content = contentMap[tabName] || this.getAll();
     contentContainer.innerHTML = content;
-    this.push(url, { kind: "sub", app: "home", name: tabName, html: content }, tabName);
+    this.app.push(url, { kind: "sub", app: "home", name: tabName, html: content }, tabName);
   }
 
   handlePopState = event => {
     const state = event.state;
     if (state && state.kind === 'sub' && state.app === 'home') {
-      this.updateHistory(state.name)
+      this.updateHistory(state.name, state.html)
     }
   }
 
-  updateHistory = tabName => {
+  updateHistory = (tabName, content) => {
     const contentContainer = this.shadowObj.querySelector('div.feeds > div.content-container');
-    const tabs = this.shadowObj.querySelectorAll('ul.tabs > li.tab');
-    const contentMap = {
-      'all': this.getAll(),
-      'stories': this.getStories(),
-      'replies': this.getReplies(),
-      'users': this.getUsers()
-    };
+    const tabs = this.shadowObj.querySelector('ul.tabs');
+
 
     try {
       this.active_tab.classList.remove('active');
@@ -123,10 +131,10 @@ export default class AppHome extends HTMLElement {
       activeTab.classList.add('active');
       this.active_tab = activeTab;
 
-      const content = contentMap[tabName] || this.getAll();
       contentContainer.innerHTML = content;
     } catch (error) {
-      const activeTab = tabs.querySelector(li.all);
+      console.log(error)
+      const activeTab = tabs.querySelector('li.all');
       activeTab.classList.add('active');
       this.active_tab = activeTab;
       contentContainer.innerHTML = this.getAll()

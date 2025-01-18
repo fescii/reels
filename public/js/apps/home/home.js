@@ -56,12 +56,12 @@ export default class AppHome extends HTMLElement {
 
   getOrSetActiveTab = tabs => {
     // get the tab from the attribute or default to 'all'
-    const tabName = this.getAttribute('tab') || 'all';
-    let activeTab = tabs.querySelector(`li.${tabName}`);
+    let activeTab = tabs.querySelector('li.active');
 
     if (!activeTab) {
       // if no tab matches the attribute, set the first tab as active
-      activeTab = tabs.querySelector("li");
+      const tabName = this.getAttribute('tab') || 'all';
+      activeTab = tabs.querySelector(`li.${tabName}`);
     }
 
     activeTab.classList.add("active");
@@ -79,7 +79,7 @@ export default class AppHome extends HTMLElement {
       case 'replies':
         contentContainer.innerHTML = this.getReplies();
         break;
-      case 'people':
+      case 'users':
         contentContainer.innerHTML = this.getUsers();
         break;
       default:
@@ -225,17 +225,17 @@ export default class AppHome extends HTMLElement {
         return this.getStories();
       case 'replies':
         return this.getReplies();
-      case 'people':
+      case 'users':
         return this.getUsers();
       default:
         return this.getAll();
     }
   }
 
-  getTab = () => {
+  getTab = tab => {
     return /* html */`
       <ul class="tabs">
-        <li class="tab active" data-name="all">
+        <li class="tab all ${tab === "all" ? "active" : ''}" data-name="all">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
             <path d="M12.5 3H11.5C7.02166 3 4.78249 3 3.39124 4.39124C2 5.78249 2 8.02166 2 12.5C2 16.9783 2 19.2175 3.39124 20.6088C4.78249 22 7.02166 22 11.5 22C15.9783 22 18.2175 22 19.6088 20.6088C21 19.2175 21 16.9783 21 12.5V11.5" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" />
             <path d="M22 5.5C22 7.433 20.433 9 18.5 9C16.567 9 15 7.433 15 5.5C15 3.567 16.567 2 18.5 2C20.433 2 22 3.567 22 5.5Z" stroke="currentColor" stroke-width="2.0" />
@@ -244,7 +244,7 @@ export default class AppHome extends HTMLElement {
           </svg>
           <span class="text">All</span>
         </li>
-        <li class="tab" data-name="stories">
+        <li class="tab stories ${tab === "stories" ? "active" : ''}" data-name="stories">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
             <path d="M10.5 8H18.5M10.5 12H13M18.5 12H16M10.5 16H13M18.5 16H16" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M7 7.5H6C4.11438 7.5 3.17157 7.5 2.58579 8.08579C2 8.67157 2 9.61438 2 11.5V18C2 19.3807 3.11929 20.5 4.5 20.5C5.88071 20.5 7 19.3807 7 18V7.5Z" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
@@ -252,14 +252,14 @@ export default class AppHome extends HTMLElement {
           </svg>
           <span class="text">Stories</span>
         </li>
-        <li class="tab" data-name="replies">
+        <li class="tab replies ${tab === "replies" ? "active" : ''}" data-name="replies">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
             <path d="M8 13.5H16M8 8.5H12" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M6.09881 19C4.7987 18.8721 3.82475 18.4816 3.17157 17.8284C2 16.6569 2 14.7712 2 11V10.5C2 6.72876 2 4.84315 3.17157 3.67157C4.34315 2.5 6.22876 2.5 10 2.5H14C17.7712 2.5 19.6569 2.5 20.8284 3.67157C22 4.84315 22 6.72876 22 10.5V11C22 14.7712 22 16.6569 20.8284 17.8284C19.6569 19 17.7712 19 14 19C13.4395 19.0125 12.9931 19.0551 12.5546 19.155C11.3562 19.4309 10.2465 20.0441 9.14987 20.5789C7.58729 21.3408 6.806 21.7218 6.31569 21.3651C5.37769 20.6665 6.29454 18.5019 6.5 17.5" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" />
           </svg>
           <span class="text">Replies</span>
         </li>
-        <li class="tab"data-name="people">
+        <li class="tab users ${tab === "users" ? "active" : ''}" data-name="users">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
             <path d="M18.6161 20H19.1063C20.2561 20 21.1707 19.4761 21.9919 18.7436C24.078 16.8826 19.1741 15 17.5 15M15.5 5.06877C15.7271 5.02373 15.9629 5 16.2048 5C18.0247 5 19.5 6.34315 19.5 8C19.5 9.65685 18.0247 11 16.2048 11C15.9629 11 15.7271 10.9763 15.5 10.9312" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" />
             <path d="M4.48131 16.1112C3.30234 16.743 0.211137 18.0331 2.09388 19.6474C3.01359 20.436 4.03791 21 5.32572 21H12.6743C13.9621 21 14.9864 20.436 15.9061 19.6474C17.7889 18.0331 14.6977 16.743 13.5187 16.1112C10.754 14.6296 7.24599 14.6296 4.48131 16.1112Z" stroke="currentColor" stroke-width="2.0" />

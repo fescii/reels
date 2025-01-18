@@ -100,23 +100,29 @@ export default class HomeFeed extends HTMLElement {
   }
 
   handleFetchSuccess = (data, feedContainer) => {
+    // First page with no content
     if (data.last && this._page === 1 && data.stories.length === 0 && data.replies.length === 0) {
       this._empty = true;
       this._block = true;
       this.populateFeeds(this.getEmptyMsg(), feedContainer);
-    } else if (data.stories.length < 6 && data.replies.length < 6) {
+    } 
+    // Last page with some content
+    else if (data.stories.length < 6 && data.replies.length < 6) {
       this._empty = true;
       this._block = true;
       const content = this.mapFeeds(data.stories, data.replies);
       this.populateFeeds(content, feedContainer);
       this.populateFeeds(this.getLastMessage(), feedContainer);
-    } else {
-      this._empty = false;
-      this._block = false;
+    } 
+    // Normal page with content, more might be available
+    else {
+      this._block = false;  // Unblock for next fetch
+      this._empty = false;  // More content might be available
       const content = this.mapFeeds(data.stories, data.replies);
       this.populateFeeds(content, feedContainer);
     }
-    // Add scroll event
+    
+    // Re-add scroll event after content is loaded
     this.scrollEvent(feedContainer);
   }
 
@@ -129,15 +135,14 @@ export default class HomeFeed extends HTMLElement {
   }
 
   fetchFeeds = feedContainer => {
-    const outerThis = this;
-    const url = `${this._url}?page=${this._page}`;
-
     if (!this._block && !this._empty) {
-      outerThis._empty = true;
-      outerThis._block = true;
-      // fetch the stories
+      // Set blocks before fetching
+      this._block = true;  // Block further fetches while this one is in progress
+      
+      const url = `${this._url}?page=${this._page}`;
+      
       setTimeout(async () => {
-        await outerThis.fetching(url, feedContainer)
+        await this.fetching(url, feedContainer);
       }, 2000);
     }
   }
@@ -157,25 +162,49 @@ export default class HomeFeed extends HTMLElement {
     const outerThis = this;
     if (!this._scrollEventAdded) {
       this._scrollEventAdded = true;
-      window.addEventListener('scroll', async function onScroll() {
-        let margin = document.body.clientHeight - window.innerHeight - 150;
-        if (window.scrollY > margin && !outerThis._empty && !outerThis._block) {
+      
+      const onScroll = () => {
+        // Get scroll position and page height
+        const scrollPosition = window.scrollY + window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        // Calculate threshold (e.g., 150px from bottom)
+        const threshold = 150;
+        
+        // Only fetch if:
+        // 1. We're near the bottom
+        // 2. Not already fetching (_empty is false)
+        // 3. Not blocked from fetching (_block is false)
+        // 4. Not at the last page
+        if (
+          documentHeight - scrollPosition <= threshold && 
+          !outerThis._empty && 
+          !outerThis._block
+        ) {
           outerThis._page += 1;
           outerThis.populateFeeds(outerThis.getLoader(), feedContainer);
-
           outerThis.fetchFeeds(feedContainer);
         }
-      });
+      };
 
-      // Launch scroll event
-      const scrollEvent = new Event('scroll');
-      window.dispatchEvent(scrollEvent);
+      // Store the function reference for cleanup
+      this.onScroll = onScroll;
+      window.addEventListener('scroll', onScroll);
+      
+      // Don't automatically trigger the scroll event on first load
+      if (!this._isFirstLoad) {
+        const scrollEvent = new Event('scroll');
+        window.dispatchEvent(scrollEvent);
+      }
+      this._isFirstLoad = false;
     }
   }
 
   removeScrollEvent = () => {
-    window.removeEventListener('scroll', this.onScroll);
-    this._scrollEventAdded = false;
+    if (this.onScroll) {
+      window.removeEventListener('scroll', this.onScroll);
+      this._scrollEventAdded = false;
+    }
   }
 
   mapFeeds = (stories, replies) => {

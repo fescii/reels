@@ -1,6 +1,5 @@
 export default class StoryFeed extends HTMLElement {
   constructor() {
-    // We are not even going to touch this.
     super();
     this.api = window.app.api;
     this._block = true;
@@ -8,10 +7,9 @@ export default class StoryFeed extends HTMLElement {
     this._page = this.parseToNumber(this.getAttribute('page'));
     this._url = this.getAttribute('url');
     this._kind = this.getAttribute('kind');
-
-    // let's create our shadow root
+    this._isFirstLoad = true;
+    
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.render();
   }
 
@@ -22,8 +20,8 @@ export default class StoryFeed extends HTMLElement {
   connectedCallback() {
     const storiesContainer = this.shadowObj.querySelector('.stories');
 
-    // check if the total
     if (storiesContainer) {
+      // Reset initial state for first fetch
       this._block = false;
       this._empty = false;
       this.fetchStories(storiesContainer);
@@ -101,6 +99,7 @@ export default class StoryFeed extends HTMLElement {
   }
 
   handleFetchError = (storiesContainer) => {
+    // Block on error
     this._empty = true;
     this._block = true;
     this.populateStories(this.getWrongMessage(), storiesContainer);
@@ -108,37 +107,43 @@ export default class StoryFeed extends HTMLElement {
   }
 
   handleEmptyStories = (storiesContainer) => {
+    // Block future fetches since we have no content
     this._empty = true;
     this._block = true;
     this.populateStories(this.getEmptyMsg(this._kind), storiesContainer);
   }
 
   handlePartialStories = (stories, storiesContainer) => {
+    // Block future fetches since we're at the end
     this._empty = true;
     this._block = true;
+    
     const content = this.mapFields(stories);
     this.populateStories(content, storiesContainer);
     this.populateStories(this.getLastMessage(this._kind), storiesContainer);
   }
 
   handleFullStories = (stories, storiesContainer) => {
-    this._empty = false;
+    // Unblock for next fetch since we have a full page
     this._block = false;
+    this._empty = false;
+    
     const content = this.mapFields(stories);
     this.populateStories(content, storiesContainer);
+    
+    // Re-add scroll event after content is loaded
     this.scrollEvent(storiesContainer);
   }
 
   fetchStories = storiesContainer => {
-    const outerThis = this;
-    const url = `${this._url}?page=${this._page}`;
-
-    if(!this._block && !this._empty) {
-      outerThis._empty = true;
-      outerThis._block = true;
+    if (!this._block && !this._empty) {
+      // Set blocks before fetching
+      this._block = true;  // Block further fetches while this one is in progress
+      
+      const url = `${this._url}?page=${this._page}`;
+      
       setTimeout(() => {
-        // fetch the stories
-        outerThis.fetching(url, storiesContainer)
+        this.fetching(url, storiesContainer);
       }, 1000);
     }
   }
@@ -154,28 +159,52 @@ export default class StoryFeed extends HTMLElement {
     storiesContainer.insertAdjacentHTML('beforeend', content);
   }
 
-  scrollEvent = () => {
+  scrollEvent = storiesContainer => {
     const outerThis = this;
     if (!this._scrollEventAdded) {
       this._scrollEventAdded = true;
-      window.addEventListener('scroll', function () {
-        let margin = document.body.clientHeight - window.innerHeight - 150;
-        if (window.scrollY > margin && !outerThis._empty && !outerThis._block) {
+      
+      const onScroll = () => {
+        // Get scroll position and page height
+        const scrollPosition = window.scrollY + window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        // Calculate threshold (e.g., 150px from bottom)
+        const threshold = 150;
+        
+        // Only fetch if:
+        // 1. We're near the bottom
+        // 2. Not already fetching (_empty is false)
+        // 3. Not blocked from fetching (_block is false)
+        if (
+          documentHeight - scrollPosition <= threshold && 
+          !outerThis._empty && 
+          !outerThis._block
+        ) {
           outerThis._page += 1;
           outerThis.populateStories(outerThis.getLoader(), storiesContainer);
           outerThis.fetchStories(storiesContainer);
         }
-      });
+      };
 
-      // Launch scroll event
-      const scrollEvent = new Event('scroll');
-      window.dispatchEvent(scrollEvent);
+      // Store the function reference for cleanup
+      this.onScroll = onScroll;
+      window.addEventListener('scroll', onScroll);
+      
+      // Don't automatically trigger the scroll event on first load
+      if (!this._isFirstLoad) {
+        const scrollEvent = new Event('scroll');
+        window.dispatchEvent(scrollEvent);
+      }
+      this._isFirstLoad = false;
     }
   }
 
   removeScrollEvent = () => {
-    window.removeEventListener('scroll', this.onScroll);
-    this._scrollEventAdded = false;
+    if (this.onScroll) {
+      window.removeEventListener('scroll', this.onScroll);
+      this._scrollEventAdded = false;
+    }
   }
 
   mapFields = data => {

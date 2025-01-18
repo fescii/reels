@@ -21,29 +21,94 @@ const home = async (req, res) => {
 }
 
 /**
- * @controller {get} /offline Offline
+ * @controller {get} /search Search
  * @apiName Join
- * @name Offline
- * @description This route will render the offline page for the app.
+ * @name Search
+ * @description This route will render the search page for the app.
 */
-const offline = async (req, res) => {
+const all = async (req, res) => {
   const meta = {
-    title: 'Offline',
-    description: 'You are offline',
-    keywords: 'offline, no internet',
+    title: 'Zoanai',
+    description: 'Create and expore content with Zoanai',
+    keywords: 'articles, news, blog, content. create, explore',
     image: '/static/img/favi.png',
-    url: '/offline',
+    url: '/',
   }
-
   res.render('pages/main', {
     meta: meta, data: {
-      name: 'offline',
+      name: 'home',
       tab: 'all',
+    }
+  })
+}
+
+/**
+ * @controller {get} /search Search
+ * @apiName Join
+ * @name Search
+ * @description This route will render the search page for the app.
+*/
+const stories = async (req, res) => {
+  const meta = {
+    title: 'Zoanai',
+    description: 'Create and expore content with Zoanai',
+    keywords: 'articles, news, blog, content. create, explore',
+    image: '/static/img/favi.png',
+    url: '/',
+  }
+  res.render('pages/main', {
+    meta: meta, data: {
+      name: 'home',
+      tab: 'stories',
+    }
+  })
+}
+
+/**
+ * @controller {get} /search Search
+ * @apiName Join
+ * @name Search
+ * @description This route will render the search page for the app.
+*/
+const replies = async (req, res) => {
+  const meta = {
+    title: 'Zoanai',
+    description: 'Create and expore content with Zoanai',
+    keywords: 'articles, news, blog, content. create, explore',
+    image: '/static/img/favi.png',
+    url: '/',
+  }
+  res.render('pages/main', {
+    meta: meta, data: {
+      name: 'home',
+      tab: 'replies',
+    }
+  })
+}
+
+/**
+ * @controller {get} /search Search
+ * @apiName Join
+ * @name Search
+ * @description This route will render the search page for the app.
+*/
+const users = async (req, res) => {
+  const meta = {
+    title: 'Zoanai',
+    description: 'Create and expore content with Zoanai',
+    keywords: 'articles, news, blog, content. create, explore',
+    image: '/static/img/favi.png',
+    url: '/',
+  }
+  res.render('pages/main', {
+    meta: meta, data: {
+      name: 'home',
+      tab: 'users',
     }
   })
 }
 
 // Export all public content controllers
 module.exports = {
-  home, offline
+  home, all, stories, replies, users
 }

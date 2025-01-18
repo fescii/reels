@@ -1,18 +1,16 @@
 export default class UserFeed extends HTMLElement {
   constructor() {
-    // We are not even going to touch this.
     super();
     this.api = window.app.api;
     this._block = false;
     this._empty = false;
     this._page = this.parseToNumber(this.getAttribute('page'));
     this._total = this.parseToNumber(this.getAttribute('total'));
-		this._kind = this.getAttribute('kind');
+    this._kind = this.getAttribute('kind');
     this._url = this.getAttribute('url');
-
-    // let's create our shadow root
+    this._isFirstLoad = true; // Add this line
+    
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.render();
   }
 
@@ -77,15 +75,14 @@ export default class UserFeed extends HTMLElement {
 
   fetching = async (url, peopleContainer) => {
     const outerThis = this;
-
     try {
       const result = await this.api.get(url, { content: 'json' });
-
+  
       if (!result.success) {
         outerThis.handleFetchError(peopleContainer);
         return;
       }
-
+  
       const people = result.users;
       if (outerThis._page === 1 && people.length === 0) {
         outerThis.handleEmptyResult(peopleContainer);
@@ -94,62 +91,65 @@ export default class UserFeed extends HTMLElement {
       } else {
         outerThis.handleFullResult(people, peopleContainer);
       }
-
+  
     } catch (error) {
       outerThis.handleFetchError(peopleContainer);
     }
   }
-
+  
   handleFetchError = (peopleContainer) => {
+    // Block on error
     this._empty = true;
     this._block = true;
-    this.populatePeople(this.getWrongMessage(this._kind), peopleContainer);
+    this.populatePeople(this.getWrongMessage(), peopleContainer);
     this.activateRefresh();
   }
-
+  
   handleEmptyResult = (peopleContainer) => {
+    // Block future fetches since we have no content
     this._empty = true;
     this._block = true;
     this.populatePeople(this.getEmptyMsg(this._kind), peopleContainer);
   }
-
+  
   handlePartialResult = (people, peopleContainer) => {
+    // Block future fetches since we're at the end
     this._empty = true;
     this._block = true;
     const content = this.mapFields(people);
     this.populatePeople(content, peopleContainer);
     this.populatePeople(this.getLastMessage(this._kind), peopleContainer);
   }
-
+  
   handleFullResult = (people, peopleContainer) => {
-    this._empty = false;
+    // Unblock for next fetch since we have a full page
     this._block = false;
+    this._empty = false;
     const content = this.mapFields(people);
     this.populatePeople(content, peopleContainer);
     this.scrollEvent(peopleContainer);
   }
-
+  
   fetchPeople = peopleContainer => {
-    const outerThis = this;
-    const url = `${this._url}?page=${this._page}`;
-
-    if(!this._block && !this._empty) {
-      outerThis._empty = true;
-      outerThis._block = true;
+    if (!this._block && !this._empty) {
+      // Block further fetches while this one is in progress
+      this._block = true;
+      
+      const url = `${this._url}?page=${this._page}`;
+      
       setTimeout(() => {
-        // fetch the likes
-        outerThis.fetching(url, peopleContainer)
+        this.fetching(url, peopleContainer);
       }, 1000);
     }
   }
-
+  
   populatePeople = (content, peopleContainer) => {
     // get the loader and remove it
     const loader = peopleContainer.querySelector('.loader-container');
-    if (loader){
+    if (loader) {
       loader.remove();
     }
-
+  
     // insert the content
     peopleContainer.insertAdjacentHTML('beforeend', content);
   }
@@ -158,24 +158,48 @@ export default class UserFeed extends HTMLElement {
     const outerThis = this;
     if (!this._scrollEventAdded) {
       this._scrollEventAdded = true;
-      window.addEventListener('scroll', function () {
-        let margin = document.body.clientHeight - window.innerHeight - 150;
-        if (window.scrollY > margin && !outerThis._empty && !outerThis._block) {
+      
+      const onScroll = () => {
+        // Get scroll position and page height
+        const scrollPosition = window.scrollY + window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        // Calculate threshold (e.g., 150px from bottom)
+        const threshold = 150;
+        
+        // Only fetch if:
+        // 1. We're near the bottom
+        // 2. Not already fetching (_empty is false)
+        // 3. Not blocked from fetching (_block is false)
+        if (
+          documentHeight - scrollPosition <= threshold && 
+          !outerThis._empty && 
+          !outerThis._block
+        ) {
           outerThis._page += 1;
           outerThis.populatePeople(outerThis.getLoader(), peopleContainer);
           outerThis.fetchPeople(peopleContainer);
         }
-      });
-
-      // Launch scroll event
-      const scrollEvent = new Event('scroll');
-      window.dispatchEvent(scrollEvent);
+      };
+  
+      // Store the function reference for cleanup
+      this.onScroll = onScroll;
+      window.addEventListener('scroll', onScroll);
+      
+      // Don't automatically trigger the scroll event on first load
+      if (!this._isFirstLoad) {
+        const scrollEvent = new Event('scroll');
+        window.dispatchEvent(scrollEvent);
+      }
+      this._isFirstLoad = false;
     }
   }
 
   removeScrollEvent = () => {
-    window.removeEventListener('scroll', this.onScroll);
-    this._scrollEventAdded = false;
+    if (this.onScroll) {
+      window.removeEventListener('scroll', this.onScroll);
+      this._scrollEventAdded = false;
+    }
   }
 
   mapFields = data => {

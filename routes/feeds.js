@@ -1,6 +1,6 @@
 // Import necessary modules, middlewares, and controllers
 const {
-  home, offline
+  home, stories, all, users, replies
 } = require('../controllers').feeds;
 
 /**
@@ -22,6 +22,15 @@ module.exports = app => {
   // Route for handling(rendering) home page
   app.get('/home', home);
 
-  // Route for handling offline page
-  app.get('/offline', offline);
+  // Route for handling(rendering) home page
+  app.get('/home/all', all);
+
+  // Route for handling(rendering) home page
+  app.get('/home/stories', home);
+
+  // Route for handling(rendering) home page
+  app.get('/home/replies', replies);
+
+  // Route for handling(rendering) home page
+  app.get('/home/users', users);
 }

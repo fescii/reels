@@ -1,0 +1,26 @@
+<% var url = "/r/" + data.hash.toLowerCase() -%>
+<% var author = data.reply_author; -%>
+<% var contact = author.contact ? JSON.stringify(author.contact) : null; -%>
+<% var images = data.images ? images.join(",") : null; %>
+<%
+  function removeQuotes(content) {
+    if (typeof content !== 'string') {
+      return content;
+    }
+    // Remove surrounding single or double quotes if they exist
+    return content.replace(/^['"](.*)['"]$/, '$1');
+  }
+%>
+
+<% var bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio; -%>
+<%# replace all " and ' with &quot; and &apos; to avoid breaking the html %>
+<% bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;') -%>
+
+<app-post story="reply" style="display: none;" tab="<%= data.tab %>" url="<%= url %>" hash="<%= data.hash %>" likes="<%= data.likes %>" images='<%= images %>'
+  replies="<%= data.replies %>" liked="<%= data.liked ? 'true' : 'false' %>" views="<%= data.views %>" time="<%= data.createdAt %>" replies-url="/api/v1<%= url %>/replies" likes-url="/api/v1<%= url %>/likes" 
+  author-url="/u/<%= author.hash %>" author-hash="<%= author.hash %>" author-you="<%= data.you ? 'true' : 'false' %>" author-contact='<%= contact %>'
+  author-stories="<%= author.stories %>" author-replies="<%= author.replies %>" parent="<%= data.story ? data.story : data.reply %>" preview="full"
+  author-img="<%= author.picture %>" author-verified="<%= author.verified ? 'true' : 'false' %>" author-name="<%= author.name %>" author-followers="<%= author.followers %>"
+  author-following="<%= author.following %>" author-follow="<%= author.is_following ? 'true' : 'false' %>" author-bio="<%= bio %>">
+  <%- removeQuotes(data.content) %>
+</app-post>

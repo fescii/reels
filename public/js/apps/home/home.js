@@ -35,18 +35,6 @@ export default class AppHome extends HTMLElement {
     this.enableScroll();
   }
 
-  // Replace and push states
-  history = () => {
-    // convert the custom element to a string
-    const elementString = this.outerHTML;
-
-    // get window location
-    const pageUrl = window.location.href;
-
-    // Replace History State
-    this.app.replace(pageUrl, { kind: 'app', name: "home", html: elementString }, pageUrl);
-  }
-
   activateTabController = (tabs, contentContainer) => {
     // get the active tab
     this.getOrSetActiveTab(tabs);
@@ -92,8 +80,6 @@ export default class AppHome extends HTMLElement {
 
     const content = contentMap[tabName] || this.getAll();
     
-    // replace current history:
-    // this.history();
     this.app.replace(activeTab.getAttribute('url'), { kind: "sub", app: "home", name: tabName, html: content }, tabName);
 
     activeTab.classList.add("active");

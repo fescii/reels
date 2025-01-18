@@ -14,7 +14,8 @@ const home = async (req, res) => {
   }
   res.render('pages/main', {
     meta: meta, data: {
-      name: 'home'
+      name: 'home',
+      tab: 'all',
     }
   })
 }
@@ -36,7 +37,8 @@ const offline = async (req, res) => {
 
   res.render('pages/main', {
     meta: meta, data: {
-      name: 'offline'
+      name: 'offline',
+      tab: 'all',
     }
   })
 }

@@ -1,7 +1,7 @@
 export default class ChatImages extends HTMLDivElement {
   constructor() {
     super();
-    this.main = window.app.main;
+    this.main = window.app;
     this.api = window.app.api;
     this.url = this.getAttribute('url');
     this.uploadCount = this.getImagesLength(this.getAttribute("images"));

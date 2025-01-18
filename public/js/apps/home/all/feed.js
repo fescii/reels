@@ -2,16 +2,15 @@ export default class HomeFeed extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-
+    this.api = window.app.api;
     this._isFirstLoad = true;
     this._block = false;
     this._empty = false;
     this._page = this.parseToNumber(this.getAttribute('page'));
     this._url = this.getAttribute('url');
-
+    this.all = this.getRootNode().host;
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.render();
   }
 
@@ -21,7 +20,7 @@ export default class HomeFeed extends HTMLElement {
 
   connectedCallback() {
     // set next
-    window.home = {
+    this.all.home = {
       last: true,
       next: 5,
       loaded: true
@@ -76,55 +75,48 @@ export default class HomeFeed extends HTMLElement {
     window.onscroll = function () { };
   }
 
-  fetching = (url, feedContainer) => {
+  fetching = async (url, feedContainer) => {
     // Remove the scroll event
     this.removeScrollEvent();
-    const outerThis = this;
-    this.fetchWithTimeout(url, { method: "GET" }).then((response) => {
-      response.json().then((result) => {
-        if (result.success) {
-          const data = result.data;
-          if (data.last && outerThis._page === 1 && data.stories.length === 0 && data.replies.length === 0) {
-            outerThis._empty = true;
-            outerThis._block = true;
-            outerThis.populateFeeds(outerThis.getEmptyMsg(), feedContainer);
-          }
-          else if (data.stories.length < 6 && data.replies.length < 6) {
-            outerThis._empty = true;
-            outerThis._block = true;
-            const content = outerThis.mapFeeds(data.stories, data.replies);
-            outerThis.populateFeeds(content, feedContainer);
-            outerThis.populateFeeds(outerThis.getLastMessage(), feedContainer);
-          }
-          else {
-            outerThis._empty = false;
-            outerThis._block = false;
+    try {
+      const result = await this.api.get(url, { content: 'json' });
+      if (result.success) {
+        this.handleFetchSuccess(result.data, feedContainer);
+      } else {
+        this.handleFetchFailure(feedContainer);
+      }
+    } catch (error) {
+      this.handleFetchFailure(feedContainer);
+    }
+  }
 
-            const content = outerThis.mapFeeds(data.stories, data.replies);
-            outerThis.populateFeeds(content, feedContainer);
-          }
+  handleFetchSuccess = (data, feedContainer) => {
+    if (data.last && this._page === 1 && data.stories.length === 0 && data.replies.length === 0) {
+      this._empty = true;
+      this._block = true;
+      this.populateFeeds(this.getEmptyMsg(), feedContainer);
+    } else if (data.stories.length < 6 && data.replies.length < 6) {
+      this._empty = true;
+      this._block = true;
+      const content = this.mapFeeds(data.stories, data.replies);
+      this.populateFeeds(content, feedContainer);
+      this.populateFeeds(this.getLastMessage(), feedContainer);
+    } else {
+      this._empty = false;
+      this._block = false;
+      const content = this.mapFeeds(data.stories, data.replies);
+      this.populateFeeds(content, feedContainer);
+    }
+    // Add scroll event
+    this.scrollEvent(feedContainer);
+  }
 
-          // Add scroll event
-          outerThis.scrollEvent(feedContainer);
-        }
-        else {
-          outerThis._empty = true;
-          outerThis._block = true;
-          outerThis.populateFeeds(outerThis.getWrongMessage(), feedContainer);
-          // activate the refresh button
-          outerThis.activateRefresh();
-        }
-      })
-        .catch((error) => {
-          // console.log(error)
-          outerThis._empty = true;
-          outerThis._block = true;
-          outerThis.populateFeeds(outerThis.getWrongMessage(), feedContainer);
-
-          // activate the refresh button
-          outerThis.activateRefresh();
-        });
-    });
+  handleFetchFailure = feedContainer => {
+    this._empty = true;
+    this._block = true;
+    this.populateFeeds(this.getWrongMessage(), feedContainer);
+    // activate the refresh button
+    this.activateRefresh();
   }
 
   fetchFeeds = feedContainer => {
@@ -135,8 +127,8 @@ export default class HomeFeed extends HTMLElement {
       outerThis._empty = true;
       outerThis._block = true;
       // fetch the stories
-      setTimeout(() => {
-        outerThis.fetching(url, feedContainer)
+      setTimeout(async () => {
+        await outerThis.fetching(url, feedContainer)
       }, 2000);
     }
   }
@@ -278,27 +270,6 @@ export default class HomeFeed extends HTMLElement {
       </quick-post>
     `
   }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
 
   parseToNumber = num_str => {
     // Try parsing the string to an integer

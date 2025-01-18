@@ -1,5 +1,4 @@
 // import apps
-import AppHome from "./home.js";
 import AppPost from "./post.js";
 import AppProfile from "./profile.js";
 import AppLogon from "./logon.js";
@@ -12,7 +11,6 @@ import AppOffline from "./offline.js";
 
 export default function apps() {
   // Register apps
-  customElements.define("app-home", AppHome);
   customElements.define("app-post", AppPost);
   customElements.define("app-profile", AppProfile);
   customElements.define("app-logon", AppLogon);

@@ -58,6 +58,15 @@ export default class AppMain extends HTMLElement {
     const container = this.shadowObj.querySelector('section.flow');
 
     if(container) this.setContent(container);
+
+    // request user to enable notifications
+    this.checkNotificationPermission();
+  }
+
+  checkNotificationPermission = async () => {
+    if(window.notify && !window.notify.permission) {
+      await window.notify.requestPermission();
+    }
   }
 
   watchMeta = () => {

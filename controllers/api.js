@@ -1,8 +1,22 @@
+const https = require('https');
+const path = require('path');
+const fs = require('fs');
 class APIManager {
   constructor(baseURL = '', defaultTimeout = 9500) {
     this.baseURL = baseURL;
     this.defaultTimeout = defaultTimeout;
     this.pendingRequests = new Map();
+    
+    // Create HTTPS agent with proper cert handling
+    this.httpsAgentOptions = {
+      rejectUnauthorized: true,
+      // Specify your certificate paths if needed
+      // ca: fs.readFileSync(path.resolve(__dirname, '../ssl/zoanai_com.key')),
+      // cert: fs.readFileSync(path.resolve(__dirname, 'ssl/zoanai_com.crt')),
+      // key: fs.readFileSync(path.resolve(__dirname, 'ssl/zoanai_com.key'))
+      key: path.join(__dirname, '../ssl', 'key.pem'),
+      cert: path.join(__dirname, '../ssl', 'cert.pem'),
+    };
   }
 
   #processHeaders(headers = {}) {
@@ -28,40 +42,52 @@ class APIManager {
     const pendingRequest = this.pendingRequests.get(pendingKey);
     if (pendingRequest) return pendingRequest;
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      options.timeout || this.defaultTimeout
-    );
+    const requestOptions = {
+      ...options,
+      ...this.httpsAgentOptions,
+      headers: this.#processHeaders(options.headers)
+    };
 
-    const processedHeaders = this.#processHeaders(options.headers);
-
-    const fetchPromise = (async () => {
-      try {
-        const response = await fetch(fullURL, {
-          ...options,
-          headers: processedHeaders,
-          signal: controller.signal
+    const requestPromise = new Promise((resolve, reject) => {
+      const req = https.request(fullURL, requestOptions, (res) => {
+        let data = '';
+        res.on('data', (chunk) => {
+          data += chunk;
         });
+        res.on('end', () => {
+          try {
+            const json = JSON.parse(data);
+            if (res.statusCode >= 200 && res.statusCode < 300) {
+              resolve(json);
+            } else {
+              reject(new Error(`HTTP error! status: ${res.statusCode}`));
+            }
+          } catch (error) {
+            reject(error);
+          }
+        });
+      });
 
-        return await this.#processResponse(response);
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          throw new Error('Request timed out');
-        }
-        throw error;
-      } finally {
-        clearTimeout(timeoutId);
-        this.pendingRequests.delete(pendingKey);
+      req.on('error', (error) => {
+        reject(error);
+      });
+
+      if (options.body) {
+        req.write(options.body);
       }
-    })();
 
-    this.pendingRequests.set(pendingKey, fetchPromise);
-    return fetchPromise;
+      req.end();
+    });
+
+    this.pendingRequests.set(pendingKey, requestPromise);
+    return requestPromise;
   }
 
   // HTTP method implementations
   async get(url, headers = {}) {
+    // check if options contains any null or undefined values and remove them
+    Object.keys(headers).forEach(key => headers[key] == null && delete headers[key]);
+
     return this.#request(url, { 
       method: 'GET',
       headers
@@ -100,4 +126,4 @@ class APIManager {
   }
 }
 
-module.exports =  new APIManager('http://localhost:3000/api/v1');
+module.exports =  new APIManager('https://localhost/api/v1');

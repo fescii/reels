@@ -90,6 +90,7 @@ const getStory = async (req, res) => {
       data: story, meta: metaData
     })
   } catch (error) {
+    console.log(error)
     return res.status(500).render('500')
   }
 }

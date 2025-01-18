@@ -18,7 +18,7 @@ export default class HomePeople extends HTMLElement {
 
   connectedCallback() {
     // get mql
-    const mql = window.matchMedia('(min-width: 660px)');
+    const mql = window.matchMedia('(min-width: 700px)');
 
     const contentContainer = this.shadowObj.querySelector('.people-list');
 
@@ -51,7 +51,7 @@ export default class HomePeople extends HTMLElement {
     const peopleLoader = this.shadowObj.querySelector('authors-loader');
 
     try {
-      const result = await this.api.get(this.url, { headers: headers, content: 'json' }, { allow: true, duration: 7200 });
+      const result = await this.api.get(this.url, { content: 'json' }, { allow: true, duration: 7200 });
       const data = result.data;
 
       if (result.success) {
@@ -79,6 +79,7 @@ export default class HomePeople extends HTMLElement {
         contentContainer.insertAdjacentHTML('beforeend', this.getEmpty());
       }
     } catch (error) {
+      console.log(error)
       peopleLoader.remove();
       contentContainer.insertAdjacentHTML('beforeend', this.getWrongMessage());
       this.activateRefresh();

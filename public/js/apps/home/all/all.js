@@ -94,7 +94,7 @@ export default class HomeAll extends HTMLElement {
   getBody = () => {
     return /* html */`
       <div class="feeds">
-        <home-stories stories="recent" url="${this.getAttribute('recent-api')}"></home-stories>
+        <home-recent url="${this.getAttribute('trending-api')}"></home-recent>
       <div>
     `;
   }

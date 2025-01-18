@@ -6,6 +6,7 @@ export default class HomeTopics extends HTMLElement {
 		this.url = this.getAttribute('url');
     this.api = window.app.api;
     this.all = this.getRootNode().host;
+    this.mql = window.matchMedia('(max-width: 660px)');
 		// let's create our shadow root
 		this.shadowObj = this.attachShadow({ mode: "open" });
 		this.render();
@@ -48,13 +49,9 @@ export default class HomeTopics extends HTMLElement {
   }
 
   fetching = (url, topicsContainer) => {
-    const mql = window.matchMedia('(max-width: 660px)');
     const outerThis = this;
 
-    this.api.get(url, {
-      headers: headers,
-      content: 'json'
-    }, { allow: true, duration: 7200 })
+    this.api.get(url, { content: 'json' }, { allow: true, duration: 7200 })
     .then(result => {
       if (!result.success) {
         this.handleFetchError(topicsContainer);
@@ -68,7 +65,7 @@ export default class HomeTopics extends HTMLElement {
         return;
       }
 
-      this.handleFetchSuccess(data, topicsContainer, mql);
+      this.handleFetchSuccess(data, topicsContainer, this.mql);
     })
     .catch(error => {
       console.log(error)
@@ -87,13 +84,11 @@ export default class HomeTopics extends HTMLElement {
     topicsContainer.innerHTML = content;
     this.setLastItem(topicsContainer);
 
-    if (mql.matches) {
-      this.all.home = {
-        last: false,
-        next: 3,
-        loaded: true
-      };
-    }
+    this.all.home = {
+      last: false,
+      next: 3,
+      loaded: true
+    };
   }
 
   fetchTopics = topicsContainer => {
@@ -151,27 +146,6 @@ export default class HomeTopics extends HTMLElement {
       return data
     }
   }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
 
   setLastItem = contentContainer => {
     // get last element child (topic)

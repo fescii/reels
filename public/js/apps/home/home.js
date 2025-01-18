@@ -23,7 +23,7 @@ export default class AppHome extends HTMLElement {
     // fetch content
     const container = this.shadowObj.querySelector('.feeds');
     const tabs = this.shadowObj.querySelector('ul.tabs');
-    if(tabs) this.activateTabController(tabs);
+    if(tabs) this.activateTabController(tabs, container);
 
     this.watchMediaQuery(this.mql);
   }
@@ -168,6 +168,7 @@ export default class AppHome extends HTMLElement {
   getAll = () => {
     return /* html */`
       <home-all stories="recent" 
+        trending-api="${this.getAttribute('trending-api')}"
         recent-api="${this.getAttribute('recent-api')}"
         topics-api="${this.getAttribute('topics-api')}"
         people-api="${this.getAttribute('people-api')}"
@@ -189,7 +190,7 @@ export default class AppHome extends HTMLElement {
       return /* html */`
         <div class="feeds">
           ${this.getTab()}
-          <feed-container url="${this.getAttribute('trending-url')}"></feed-container>
+          ${this.getAll()}
         </div>
         <div class="side">
           <topics-container url="/api/v1/q/trending/topics"></topics-container>

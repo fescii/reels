@@ -4,6 +4,7 @@ export default class HomeStories extends HTMLElement {
     super();
     this.api = window.app.api;
     this.url = this.getAttribute('url');
+    this.mql = window.matchMedia('(max-width: 7000px)');
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.all = this.getRootNode().host;
@@ -19,7 +20,9 @@ export default class HomeStories extends HTMLElement {
   }
 
   connectedCallback() {
-    this.fetchStories(contentContainer);
+    // re fetch the content
+    const feedContainer = this.shadowObj.querySelector('.stories');
+    this.fetchStories(feedContainer);
   }
 
   activateRefresh = () => {
@@ -30,8 +33,6 @@ export default class HomeStories extends HTMLElement {
         // unblock the fetching
         this._block = false;
         this._empty = false;
-        
-        // re fetch the content
         const feedContainer = this.shadowObj.querySelector('.stories');
 
         // set the loader
@@ -45,14 +46,10 @@ export default class HomeStories extends HTMLElement {
   }
 
   fetchStories = async contentContainer => {
-    const mql = window.matchMedia('(max-width: 660px)');
     const outerThis = this;
 
     try {
-      const data = await this.api.get(this.url, {
-        headers: headers,
-        content: 'json'
-      });
+      const data = await this.api.get(this.url, { content: 'json' });
 
       // if data.success is false, display error message
       if (!data.success) {
@@ -79,7 +76,7 @@ export default class HomeStories extends HTMLElement {
       // set the last item border-bottom to none
       outerThis.setLastItem(contentContainer);
 
-      if (mql.matches) {
+      if (this.mql.matches) {
         // set next
         this.all.home = {
           last: false,
@@ -95,6 +92,7 @@ export default class HomeStories extends HTMLElement {
         }
       }
     } catch (error) {
+      console.log(error)
       // display error message
       contentContainer.innerHTML = outerThis.getWrongMessage();
 
@@ -329,6 +327,10 @@ export default class HomeStories extends HTMLElement {
 
         @keyframes l22-0 {
           100% {transform: rotate(1turn)}
+        }
+
+        @keyframes l22 {
+          100% {transform: rotate(1turn) translate(150%)}
         }
 
         div.empty {

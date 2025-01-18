@@ -100,6 +100,34 @@ export default class AppMain extends HTMLElement {
     }, 5000);
   }
 
+  navigate = () => {
+    // navigate to the new page
+    this.shadowObj.innerHTML = html;
+    this.setUpEvents();
+  }
+
+  /**
+   * Navigate to a new URL and add it to history
+   * @param {string} url - The URL to navigate to
+   * @param {Object} state - State object to store with history entry
+   * @param {string} title - Title for the new history entry
+   */
+  push(url, state = {}, title = '') {
+    window.history.pushState(state, title, url);
+    this.handleUIUpdate({ url, state });
+  }
+
+  /**
+   * Replace current history entry with new URL
+   * @param {string} url - The URL to navigate to
+   * @param {Object} state - State object to store with history entry
+   * @param {string} title - Title for the new history entry
+   */
+  replace(url, state = {}, title = '') {
+    window.history.replaceState(state, title, url);
+    this.handleUIUpdate({ url, state });
+  }
+
   disconnectedCallback() {
     this.enableScroll();
     // clear window.home

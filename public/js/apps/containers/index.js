@@ -9,7 +9,6 @@ import DiscoverPeople from "./people.discover.js";
 import StatContainer from "./stat.container.js";
 import StoriesContainer from "./stories.container.js";
 import TopicsContainer from "./topics.container.js";
-import FeedContainer from "./feed.container.js";
 import UpdateContainer from "./update.container.js";
 import ContentContainer from "./content.container.js";
 
@@ -26,7 +25,6 @@ export default function containers() {
   customElements.define("stat-container", StatContainer);
   customElements.define("stories-container", StoriesContainer);
   customElements.define("topics-container", TopicsContainer);
-  customElements.define("feed-container", FeedContainer);
   customElements.define("update-container", UpdateContainer);
   customElements.define("content-container", ContentContainer);
 }

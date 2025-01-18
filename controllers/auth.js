@@ -39,7 +39,7 @@ const login = async (req, res) => {
     url: '/join/login',
   }
 
-  res.render('pages/main', {
+  res.render('pages/auth', {
     meta: meta, data: {
       name: 'login',
       next: nextUrl
@@ -64,7 +64,7 @@ const register = async (req, res) => {
     url: '/join/register',
   }
 
-  res.render('pages/main', {
+  res.render('pages/auth', {
     meta: meta, data: {
       name: 'register',
       next: nextUrl
@@ -91,7 +91,7 @@ const recover = async (req, res) => {
     url: '/join/recover',
   }
 
-  res.render('pages/main', {
+  res.render('pages/auth', {
     meta: meta, data: {
       name: 'recover',
       next: nextUrl

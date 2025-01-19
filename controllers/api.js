@@ -10,12 +10,9 @@ class APIManager {
     // Create HTTPS agent with proper cert handling
     this.httpsAgentOptions = {
       rejectUnauthorized: true,
-      // Specify your certificate paths if needed
-      // ca: fs.readFileSync(path.resolve(__dirname, '../ssl/zoanai_com.key')),
-      // cert: fs.readFileSync(path.resolve(__dirname, 'ssl/zoanai_com.crt')),
-      // key: fs.readFileSync(path.resolve(__dirname, 'ssl/zoanai_com.key'))
-      key: path.join(__dirname, '../ssl', 'key.pem'),
-      cert: path.join(__dirname, '../ssl', 'cert.pem'),
+      key: fs.readFileSync(path.resolve(__dirname, '../ssl/key.pem')),
+      cert: fs.readFileSync(path.resolve(__dirname, '../ssl/cert.pem')),
+      ca: fs.readFileSync(path.resolve(__dirname, '../ssl/rootCA.pem'))
     };
   }
 

@@ -7,7 +7,7 @@ const first = text => {
 }
 
 const meta = data => {
-  const firstImageSrc = first(text);
+  const firstImageSrc = first(data.content);
 
   let image = '/static/img/favi.png';
   if (data.kind === 'story') {
@@ -76,7 +76,7 @@ const getStory = async (req, res) => {
     story.tab = 'replies';
 
     const { title, image, description } = meta(story);
-    const url = "/p/" + data.hash.toLowerCase();
+    const url = "/p/" + story.hash.toLowerCase();
 
     const metaData = {
       title: title,
@@ -122,7 +122,7 @@ const getStoryLikes = async (req, res) => {
     story.tab = 'likes';
 
     const { title, image, description } = meta(story);
-    const url = "/p/" + data.hash.toLowerCase();
+    const url = "/p/" + story.hash.toLowerCase();
 
     const metaData = {
       title: title,

@@ -232,7 +232,7 @@ export default class AppHome extends HTMLElement {
     if (this.mql.matches) {
       return /* html */`
         <div class="feeds">
-          ${this.getTab()}
+          ${this.getTab(this.getAttribute('tab'))}
           <div class="content-container">
             ${this.getCurrent()}
           </div>
@@ -242,7 +242,7 @@ export default class AppHome extends HTMLElement {
     else {
       return /* html */`
         <div class="feeds">
-          ${this.getTab()}
+          ${this.getTab(this.getAttribute('tab'))}
           <div class="content-container">
             ${this.getCurrent()}
           </div>

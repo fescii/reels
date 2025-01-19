@@ -106,7 +106,7 @@ export default class ShareWrapper extends HTMLElement {
     // Use the Clipboard API to copy the url
     navigator.clipboard.writeText(text).then(() => {
       // Show a toast message
-      this.app.showToast(false, 'Link copied to clipboard');
+      this.app.showToast(true, 'Link copied to clipboard');
     }).catch(() => {
       // Show a toast message
       this.app.showToast(false, 'Failed to copy link to clipboard');

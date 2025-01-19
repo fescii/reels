@@ -1,5 +1,5 @@
 // Import sections
-import PostSection from "./post.section.js";
+import PostSection from "./post.js";
 import ProfileSection from "./profile.section.js";
 import TopicSection from "./topic.section.js";
 

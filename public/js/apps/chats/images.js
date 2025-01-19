@@ -1,8 +1,8 @@
 export default class ChatImages extends HTMLDivElement {
   constructor() {
     super();
-    this.main = window.app;
-    this.api = window.app.api;
+    this.app = window.app;
+    this.api = this.app.api;
     this.url = this.getAttribute('url');
     this.uploadCount = this.getImagesLength(this.getAttribute("images"));
     this.maxUploads = 10;
@@ -155,7 +155,7 @@ export default class ChatImages extends HTMLDivElement {
         // Handle other errors
       }
 
-      this.main.showToast(false, error.message);
+      this.app.showToast(false, error.message);
 
       // remove loader and show add button
       addDiv.innerHTML = this.getSvg();

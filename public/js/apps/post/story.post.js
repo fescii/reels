@@ -362,12 +362,6 @@ export default class StoryPost extends HTMLElement {
     return readTime;
   }
 
-  getReadTime = () => {
-    return /*html*/ `
-      <span class="time">${this.getAttribute('read-time')}</span>
-    `
-  }
-
   getContent = () => {
     // get url
     let url = this.getAttribute('url');

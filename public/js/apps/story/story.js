@@ -2,7 +2,7 @@ export default class AppStory extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-
+    this._data = this.getSummaryAndWords();
     this.setTitle(this.getAttribute('story-title'));
 
     this.viewed = false;
@@ -12,7 +12,7 @@ export default class AppStory extends HTMLElement {
 
     this.boundHandleWsMessage = this.handleWsMessage.bind(this);
     this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
-
+    this.mql = window.matchMedia('(max-width: 770px)');
     this.topics = this.getTopics();
 
     this._content = this.innerHTML
@@ -23,6 +23,27 @@ export default class AppStory extends HTMLElement {
   setTitle = title => {
     // update title of the document
     document.title = `Story | ${title}`;
+  }
+
+  getSummaryAndWords = () => {
+    const mql = window.matchMedia('(max-width: 660px)');
+    // get this content
+    let content = this.innerHTML.toString();
+
+    // remove all html tags and classes and extra spaces and tabs
+    content = content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+
+    let summary = content.substring(0, 500);
+
+    if (mql.matches) {
+      summary = content.substring(0, 250);
+    }
+
+    // return the summary: first 200 characters
+    return {
+      summary: `${summary}...`,
+      words: content.split(' ').length
+    };
   }
 
   getTopics = () => {
@@ -48,16 +69,10 @@ export default class AppStory extends HTMLElement {
     // get the content
     const content = this.shadowObj.querySelector('article.article');
 
-    // adjust the indicator
-    this.adjustIndicator(content);
-
     // connect to the WebSocket
     this.checkAndAddHandler();
 
-    // Get mql object
-    const mql = window.matchMedia('(max-width: 660px)');
-
-    this.watchMediaQuery(mql);
+    this.watchMediaQuery(this.mql);
 
     // view the story
     this.activateView();
@@ -261,57 +276,6 @@ export default class AppStory extends HTMLElement {
     });
   }
 
-  adjustIndicator = content => {
-    // get total height of the content(including padding and scroll height)
-    const totalHeight = content.scrollHeight;
-
-    // get the scroll position of the content
-    const scrollPosition = document.documentElement.scrollTop;
-
-    // calculate the percentage of the scroll position
-    const scrollPercentage = (scrollPosition / totalHeight) * 100;
-
-    // get the indicator
-    const indicator = this.shadowObj.querySelector('.indicator');
-
-    // if percentage is greater than 100, set the indicator to 100%
-    if (scrollPercentage >= 100) {
-      indicator.style.width = `100%`;
-      return;
-    }
-
-    // set the width of the indicator
-    indicator.style.width = `${scrollPercentage}%`;
-
-
-    // add scroll event listener to body but check if the content is still in view
-    document.addEventListener('scroll', () => {
-      // get total height of the content(minus padding)
-      const totalHeight = content.scrollHeight;
-
-      // get the scroll position of the content in the y-axis
-      const scrollPosition = document.documentElement.scrollTop;
-
-      // calculate the percentage of the scroll position
-      const scrollPercentage = (scrollPosition / totalHeight) * 100;
-
-      // if the scroll position is greater than the total height of the content, set the indicator to 100%
-      if (scrollPosition >= totalHeight) {
-        indicator.style.width = `100%`;
-        return;
-      }
-
-      // if percentage + 8  is greater than 100, set the indicator to 100%
-      if (scrollPercentage >= 100) {
-        indicator.style.width = `100%`;
-        return;
-      }
-
-      // set the width of the indicator
-      indicator.style.width = `${scrollPercentage}%`;
-    })
-  }
-
   disableScroll() {
     // Get the current page scroll position
     let scrollTop = window.scrollY || document.documentElement.scrollTop;
@@ -376,10 +340,8 @@ export default class AppStory extends HTMLElement {
   }
 
   getBody = () => {
-    const mql = window.matchMedia('(max-width: 660px)');
-    if (mql.matches) {
+    if (this.mql.matches) {
       return /* html */`
-        <span class="indicator"></span>
         ${this.getAuthor()}
         <div class="content" id="content-container">
           ${this.getHeader()}
@@ -393,7 +355,6 @@ export default class AppStory extends HTMLElement {
     else {
       return /* html */`
         <div class="content" id="content-container">
-          <span class="indicator"></span>
           ${this.getHeader()}
           ${this.getContent()}
           ${this.getMeta()}
@@ -414,8 +375,31 @@ export default class AppStory extends HTMLElement {
     return /*html*/`
       <div class="head">
         <h1 class="story-title">${this.getAttribute('story-title')}</h1>
+        ${this.getHover()}
       </div>
     `
+  }
+
+  getHover = () => {
+    return /*html*/`
+      <div class="top-meta">
+        <span class="by">by</span>
+        ${this.getAuthorHover()}
+        <span class="sp">•</span>
+        <span class="read">${this.calculateReadTime()}</span> <span class="text">min read</span>
+      </div>
+    `
+  }
+
+  calculateReadTime = () => {
+    // get the number of words
+    const words = this._data.words;
+
+    // calculate the read time
+    const readTime = Math.ceil(words / 150);
+
+    // return the read time
+    return readTime;
   }
 
   getContent = () => {
@@ -443,6 +427,22 @@ export default class AppStory extends HTMLElement {
         verified="${this.getAttribute('author-verified')}" url="${this.getAttribute('author-url')}" you="${this.getAttribute('author-you')}"
         bio="${bio}">
       </author-wrapper>
+		`
+  }
+
+  getAuthorHover = () => {
+    let url = this.getAttribute('author-url');
+    url = url.trim().toLowerCase();
+    let bio = this.getAttribute('author-bio') || 'This author has not provided a bio yet.';
+    // replace all " and ' with &quot; and &apos; to avoid breaking the html
+    bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    return /* html */`
+			<hover-author url="${url}" you="${this.getAttribute('author-you')}" hash="${this.getAttribute('author-hash')}"
+        picture="${this.getAttribute('author-img')}" name="${this.getAttribute('author-name')}" contact='${this.getAttribute("author-contact")}'
+        stories="${this.getAttribute('author-stories')}" replies="${this.getAttribute('author-replies')}"
+        followers="${this.getAttribute('author-followers')}" following="${this.getAttribute('author-following')}" user-follow="${this.getAttribute('author-follow')}"
+        verified="${this.getAttribute('author-verified')}" bio="${bio}">
+      </hover-author>
 		`
   }
 
@@ -558,7 +558,7 @@ export default class AppStory extends HTMLElement {
 
         div.content {
           padding: 0;
-          width: 63%;
+          width: calc(60% - 10px);
           display: flex;
           flex-flow: column;
           gap: 0;
@@ -575,7 +575,7 @@ export default class AppStory extends HTMLElement {
           padding: 25px 0;
           margin: 0;
           background-color: transparent;
-          width: 33%;
+          width: calc(40% - 10px);
           height: max-content;
           display: flex;
           flex-flow: column;
@@ -593,24 +593,11 @@ export default class AppStory extends HTMLElement {
           display: none;
         }
 
-        span.indicator {
-          display: flex;
-          z-index: 4;
-          width: 0%;
-          height: 3px;
-          background: var(--alt-linear);
-          border-radius: 5px;
-          transition: width 0.3s;
-          position: sticky;
-          top: 60px;
-          left: 0;
-        }
-
         div.head {
           display: flex;
           flex-flow: column;
           gap: 0;
-          margin: 15px 0 0;
+          margin: 0;
         }
 
         div.head > .topic {
@@ -627,13 +614,46 @@ export default class AppStory extends HTMLElement {
         }
 
         div.head > h1.story-title {
-          margin: 15px 0 10px;
+          margin: 15px 0 0 0;
           padding: 0;
           font-weight: 700;
           font-size: 1.7rem;
           line-height: 1.2;
           font-family: var(--font-main), sans-serif;
           color: var(--title-color);
+        }
+
+        .top-meta {
+          border-bottom: var(--border);
+          /* border-top: var(--border); */
+          margin: 0 0 12px;
+          padding: 0 0 5px;
+          display: flex;
+          position: relative;
+          color: var(--text-color);
+          align-items: center;
+          font-family: var(--font-mono), monospace;
+          gap: 5px;
+          font-size: 1rem;
+          font-weight: 600;
+        }
+
+        .top-meta > span.read {
+          font-size: 1rem;
+          font-weight: 400;
+          font-family: var(--font-text), sans-serif;
+        }
+
+        .top-meta > span.text {
+          font-size: 1rem;
+          font-weight: 400;
+          font-family: var(--font-main), sans-serif;
+        }
+
+        .top-meta > .sp {
+          font-size: 1.35rem;
+          color: var(--text-color);
+          font-weight: 400;
         }
 
         .meta {
@@ -646,13 +666,13 @@ export default class AppStory extends HTMLElement {
           color: var(--text-color);
           align-items: center;
           font-family: var(--font-text), sans-serif;
-          gap: 5px;
+          gap: 8px;
           font-size: 1rem;
           font-weight: 600;
         }
 
         .meta > .sp {
-          font-size: 1rem;
+          font-size: 1.25rem;
           color: var(--gray-color);
           font-weight: 400;
         }
@@ -838,6 +858,37 @@ export default class AppStory extends HTMLElement {
           }
         }
 
+        @media screen and (max-width: 770px) {
+					:host {
+            font-size: 16px;
+						padding: 15px 0 0 0;
+            margin: 0;
+            display: flex;
+            min-height: max-content;
+            height: max-content;
+            flex-flow: column;
+            gap: 0;
+					}
+
+          div.content .head {
+            margin: 0;
+          }
+
+          div.content {
+            padding: 0;
+            width: 100%;
+            display: flex;
+            flex-flow: column;
+            gap: 0;
+          }
+
+          section.side {
+            padding: 0;
+            display: none;
+            width: 0%;
+          }
+        }
+
 				@media screen and (max-width:660px) {
 					:host {
             font-size: 16px;
@@ -854,12 +905,16 @@ export default class AppStory extends HTMLElement {
             margin: 10px 0 0 0;
           }
 
+          div.head > h1.story-title {
+            margin: 0;
+          }
+
           div.content {
-            padding: 0;
             width: 100%;
             display: flex;
             flex-flow: column;
             gap: 0;
+            padding: 0 0 80px;
           }
 
 					.action,
@@ -874,17 +929,6 @@ export default class AppStory extends HTMLElement {
           }
           a {
             cursor: default !important;
-          }
-
-          span.indicator {
-            display: flex;
-            width: 10%;
-            height: 3px;
-            border-radius: 5px;
-            transition: width 0.3s;
-            position: sticky;
-            top: 50px;
-            left: 0;
           }
 
           .meta {

@@ -2,7 +2,7 @@ export default class Message extends HTMLDivElement {
   constructor() {
     super();
     this.shadow = this.attachShadow({ mode: 'open' });
-    this.main = window.app.main;
+    this.app = window.app;
     this.active_tab = null;
     this.editable = this.textToBoolean(this.getAttribute('you'));
     this.mql = window.matchMedia('(max-width: 660px)');
@@ -226,9 +226,9 @@ export default class Message extends HTMLDivElement {
       try {
         const text = this.removeHTMLTags(this.innerHTML);
         navigator.clipboard.writeText(text);
-        await this.main.showToast(true, 'Message copied to clipboard');
+        await this.app.showToast(true, 'Message copied to clipboard');
       } catch (error) {
-        await this.main.showToast(false, 'Failed to copy message');
+        await this.app.showToast(false, 'Failed to copy message');
       }
 
       // if mobile, close the dropdown

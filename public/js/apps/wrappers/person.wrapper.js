@@ -173,7 +173,7 @@ export default class PersonWrapper extends HTMLElement {
     hash = hash.trim().toLowerCase();
 
     // base api
-    const url = '/api/v1/u/' + hash;
+    const url = '/u/' + hash;
 
     // Get the follow action and subscribe action
     const followBtn = this.shadowObj.querySelector('button.action#follow-action');
@@ -460,8 +460,8 @@ export default class PersonWrapper extends HTMLElement {
 
    return /* html */`
       <app-profile tab="stories" you="${this.getAttribute('you')}" url="${url}" tab="stories"
-        stories-url="/api/v1${url}/stories" replies-url="/api/v1${url}/replies" stories="${this.getAttribute('stories')}" replies="${this.getAttribute('replies')}"
-        followers-url="/api/v1${url}/followers" following-url="/api/v1${url}/following"
+        stories-url="${url}/stories" replies-url="${url}/replies" stories="${this.getAttribute('stories')}" replies="${this.getAttribute('replies')}"
+        followers-url="${url}/followers" following-url="${url}/following"
         hash="${this.getAttribute('hash')}" picture="${this.getAttribute('picture')}" verified="${this.getAttribute('verified')}"
         name="${this.getAttribute('name')}" followers="${this.getAttribute('followers')}" contact='${this.getAttribute("contact")}'
         following="${this.getAttribute('following')}" user-follow="${this.getAttribute('user-follow')}" bio="${this.getAttribute('bio')}">

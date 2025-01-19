@@ -467,7 +467,7 @@ export default class EditPost extends HTMLDivElement {
     } else {
       return /* html */`
         <div is="images-editor" class="images-editor" hash="${this.getAttribute('hash')}" kind="${this.getAttribute('kind')}"
-          api="/api/v1/i/upload" multiple="true" accept="image/*" max="10" images='${this.getAttribute('images')}'>
+          api="/i/upload" multiple="true" accept="image/*" max="10" images='${this.getAttribute('images')}'>
         </div>
       `;
     }

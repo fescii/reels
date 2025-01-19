@@ -501,7 +501,7 @@ export default class QuickPost extends HTMLElement {
     if(this.noPreview) return '';
     if (story === 'reply') {
       const parent = this.getAttribute('parent');
-      let url = parent.startsWith('P') ? `/api/v1/p/${parent.toLowerCase()}/preview` : `/api/v1/r/${parent.toLowerCase()}/preview`;
+      let url = parent.startsWith('P') ? `/p/${parent.toLowerCase()}/preview` : `/r/${parent.toLowerCase()}/preview`;
       return /*html*/`
         <preview-post url="${url}" hash="${parent}" preview="quick"></preview-post>
       `

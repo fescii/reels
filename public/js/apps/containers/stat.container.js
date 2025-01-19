@@ -3,7 +3,7 @@ export default class StatContainer extends HTMLElement {
     // We are not even going to touch this.
     super();
 
-    this._url = this.getAttribute('api') || '/api/v1/u/stats';
+    this._url = this.getAttribute('api') || '/u/stats';
 
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });

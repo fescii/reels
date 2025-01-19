@@ -3,7 +3,7 @@ export default class ContentContainer extends HTMLElement {
     // We are not even going to touch this.
     super();
 
-    this._url = this.getAttribute('stories') || '/api/v1/user/content/stories';
+    this._url = this.getAttribute('stories') || '/user/content/stories';
 
     // Get default active tab
     this._active = this.getAttribute('tab') || "stories"

@@ -226,7 +226,7 @@ export default class AppProfile extends HTMLElement {
 
         <section class="side">
           ${this.getHighlights()}
-          <people-container url="/api/v1/users/recommended" type="profile"></people-container>
+          <people-container url="/users/recommended" type="profile"></people-container>
           ${this.getInfo()}
         </section>
       `;
@@ -276,7 +276,7 @@ export default class AppProfile extends HTMLElement {
     let formattedUrl = url.toLowerCase();
 
     return /* html */`
-      <highlights-container url="/api/v1${formattedUrl}/stats" name="${this.getAttribute('name')}"
+      <highlights-container url="${formattedUrl}/stats" name="${this.getAttribute('name')}"
         followers="${this.getAttribute('followers')}" following="${this.getAttribute('following')}" 
         stories="${this.getAttribute('stories')}" replies="${this.getAttribute('replies')}">
       </highlights-container>

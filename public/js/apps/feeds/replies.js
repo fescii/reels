@@ -1,9 +1,9 @@
-export default class StoryFeed extends HTMLElement {
+export default class ReplyFeed extends HTMLElement {
   constructor() {
     super();
     this.api = window.app.api;
-    this._block = true;
-    this._empty = true;
+    this._block = false;
+    this._empty = false;
     this._page = this.parseToNumber(this.getAttribute('page'));
     this._url = this.getAttribute('url');
     this._kind = this.getAttribute('kind');
@@ -13,18 +13,20 @@ export default class StoryFeed extends HTMLElement {
     this.render();
   }
 
+  convertToBoolean = value => {
+    return value === "true";
+  }
+
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
   }
 
   connectedCallback() {
-    const storiesContainer = this.shadowObj.querySelector('.stories');
+    const repliesContainer = this.shadowObj.querySelector('.replies');
 
-    if (storiesContainer) {
-      // Reset initial state for first fetch
-      this._block = false;
-      this._empty = false;
-      this.fetchStories(storiesContainer);
+    // check if the container exists
+    if (repliesContainer) {
+      this.fetchReplies(repliesContainer);
     }
   }
 
@@ -42,16 +44,16 @@ export default class StoryFeed extends HTMLElement {
         this._empty = false;
         
         // re fetch the content
-        const storiesContainer = this.shadowObj.querySelector('div.stories');
+        const repliesContainer = this.shadowObj.querySelector('div.replies');
 
         // remove the finish message
         finish.remove();
 
         // set the loader
-        storiesContainer.insertAdjacentHTML('beforeend', this.getLoader());
+        repliesContainer.insertAdjacentHTML('beforeend', this.getLoader());
 
         setTimeout(() => {
-          this.fetchStories(storiesContainer);
+          this.fetchReplies(repliesContainer);
         }, 1000);
       });
     }
@@ -74,68 +76,69 @@ export default class StoryFeed extends HTMLElement {
     window.onscroll = function () { };
   }
 
-  fetching = async (url, storiesContainer) => {
+  fetching = async(url, repliesContainer) => {
     const outerThis = this;
     try {
       const result = await this.api.get(url, { content: 'json' });
 
-      if (!result.success) {
-        outerThis.handleFetchError(storiesContainer);
+      if(!result.success) {
+        outerThis.handleFetchError(repliesContainer);
         return;
       }
 
-      const stories = result.stories;
-
-      if (outerThis._page === 1 && stories.length === 0) {
-        outerThis.handleEmptyStories(storiesContainer);
-      } else if (stories.length < 10) {
-        outerThis.handlePartialStories(stories, storiesContainer);
-      } else {
-        outerThis.handleFullStories(stories, storiesContainer);
+      const replies = result.replies;
+      if (outerThis._page === 1 && replies.length === 0) {
+        outerThis.handleEmptyReplies(repliesContainer);
+      }
+      else if (replies.length < 10) {
+        outerThis.handlePartialReplies(replies, repliesContainer);
+      }
+      else {
+        outerThis.handleFullReplies(replies, repliesContainer);
       }
     } catch (error) {
-      outerThis.handleFetchError(storiesContainer);
+      outerThis.handleFetchError(repliesContainer);
     }
   }
 
-  handleFetchError = (storiesContainer) => {
+  handleFetchError = (repliesContainer) => {
     // Block on error
     this._empty = true;
     this._block = true;
-    this.populateStories(this.getWrongMessage(), storiesContainer);
+    this.populateReplies(this.getWrongMessage(), repliesContainer);
     this.activateRefresh();
   }
 
-  handleEmptyStories = (storiesContainer) => {
+  handleEmptyReplies = (repliesContainer) => {
     // Block future fetches since we have no content
     this._empty = true;
     this._block = true;
-    this.populateStories(this.getEmptyMsg(this._kind), storiesContainer);
+    this.populateReplies(this.getEmptyMsg(this._kind), repliesContainer);
   }
 
-  handlePartialStories = (stories, storiesContainer) => {
+  handlePartialReplies = (replies, repliesContainer) => {
     // Block future fetches since we're at the end
     this._empty = true;
     this._block = true;
     
-    const content = this.mapFields(stories);
-    this.populateStories(content, storiesContainer);
-    this.populateStories(this.getLastMessage(this._kind), storiesContainer);
+    const content = this.mapFields(replies);
+    this.populateReplies(content, repliesContainer);
+    this.populateReplies(this.getLastMessage(this._kind), repliesContainer);
   }
 
-  handleFullStories = (stories, storiesContainer) => {
+  handleFullReplies = (replies, repliesContainer) => {
     // Unblock for next fetch since we have a full page
     this._block = false;
     this._empty = false;
     
-    const content = this.mapFields(stories);
-    this.populateStories(content, storiesContainer);
+    const content = this.mapFields(replies);
+    this.populateReplies(content, repliesContainer);
     
     // Re-add scroll event after content is loaded
-    this.scrollEvent(storiesContainer);
+    this.scrollEvent(repliesContainer);
   }
 
-  fetchStories = storiesContainer => {
+  fetchReplies = repliesContainer => {
     if (!this._block && !this._empty) {
       // Set blocks before fetching
       this._block = true;  // Block further fetches while this one is in progress
@@ -143,23 +146,23 @@ export default class StoryFeed extends HTMLElement {
       const url = `${this._url}?page=${this._page}`;
       
       setTimeout(() => {
-        this.fetching(url, storiesContainer);
+        this.fetching(url, repliesContainer);
       }, 1000);
     }
   }
 
-  populateStories = (content, storiesContainer) => {
+  populateReplies = (content, repliesContainer) => {
     // get the loader and remove it
-    const loader = storiesContainer.querySelector('.loader-container');
+    const loader = repliesContainer.querySelector('.loader-container');
     if (loader){
       loader.remove();
     }
 
     // insert the content
-    storiesContainer.insertAdjacentHTML('beforeend', content);
+    repliesContainer.insertAdjacentHTML('beforeend', content);
   }
 
-  scrollEvent = storiesContainer => {
+  scrollEvent = repliesContainer => {
     const outerThis = this;
     if (!this._scrollEventAdded) {
       this._scrollEventAdded = true;
@@ -182,8 +185,8 @@ export default class StoryFeed extends HTMLElement {
           !outerThis._block
         ) {
           outerThis._page += 1;
-          outerThis.populateStories(outerThis.getLoader(), storiesContainer);
-          outerThis.fetchStories(storiesContainer);
+          outerThis.populateReplies(outerThis.getLoader(), repliesContainer);
+          outerThis.fetchReplies(repliesContainer);
         }
       };
 
@@ -208,57 +211,22 @@ export default class StoryFeed extends HTMLElement {
   }
 
   mapFields = data => {
-    return data.map(story => {
-      const author = story.story_author;
+    return data.map(reply => {
+      const author = reply.reply_author;
       let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
       // replace all " and ' with &quot; and &apos; to avoid breaking the html
       bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-      const url = `/p/${story.hash.toLowerCase()}`;
-      const images = story.images ? story.images.join(',') : '';
-      if (story.kind === "post") {
-        return /*html*/`
-          <quick-post story="quick" url="${url}" hash="${story.hash}" likes="${story.likes}" 
-            replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
-            replies-url="/api/v1${url}/replies" likes-url="/api/v1${url}/likes" images='${images}'
-            author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
-            author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
-            author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
-            author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-            author-bio="${bio}">
-            ${story.content}
-          </quick-post>
-        `
-      }
-      else if(story.kind === "poll") {
-        return /*html*/`
-          <poll-post story="poll" url="${url}" hash="${story.hash}" likes="${story.likes}" 
-            replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
-            voted="${story.option ? 'true' : 'false'}" selected="${story.option}" end-time="${story.end}" replies-url="/api/v1${url}/replies" 
-            likes-url="/api/v1${url}/likes" options='${story.poll}' votes="${story.votes}" 
-            author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
-            author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
-            author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
-            author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-            author-bio="${bio}">
-            ${story.content}
-          </poll-post>
-        `
-      }
-      else if (story.kind === "story") {
-        return /*html*/`
-          <story-post story="story" hash="${story.hash}" url="${url}" 
-            topics="${story.topics.length === 0 ? 'story' : story.topics }" story-title="${story.title}" time="${story.createdAt}" replies-url="/api/v1${url}/replies" 
-            likes-url="/api/v1${url}/likes" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" likes="${story.likes}" 
-            views="${story.views}" images='${images}'
-            author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
-            author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-            author-img="${author.picture}" author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" 
-            author-followers="${author.followers}" author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" 
-            author-bio="${bio}">
-            ${story.content}
-          </story-post>
-        `
-      }
+      const images = reply.images ? reply.images.join(',') : null;
+      return /*html*/`
+        <quick-post story="reply" hash="${reply.hash}" url="/r/${reply.hash}" likes="${reply.likes}" replies="${reply.replies}" liked="${reply.liked}"
+          views="${reply.views}" time="${reply.createdAt}" replies-url="/r/${reply.hash}/replies" likes-url="/r/${reply.hash}/likes" images='${images}'
+          author-hash="${author.hash}" author-you="${reply.you}" author-url="/u/${author.hash}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
+          author-stories="${author.stories}" author-replies="${author.replies}" parent="${reply.story ? reply.story : reply.reply}" no-preview="false"
+          author-img="${author.picture}" author-verified="${author.verified}" author-name="${author.name}" author-followers="${author.followers}"
+          author-following="${author.following}" author-follow="${author.is_following}" author-bio="${bio}">
+          ${reply.content}
+        </quick-post>
+      `
     }).join('');
   }
 
@@ -292,8 +260,8 @@ export default class StoryFeed extends HTMLElement {
 
   getBody = () => {
     // language=HTML
-    return /* html */`
-			<div class="stories">
+    return `
+			<div class="replies">
 				${this.getLoader()}
       </div>
     `;
@@ -301,52 +269,61 @@ export default class StoryFeed extends HTMLElement {
 
   getEmptyMsg = text => {
     // get the next attribute
-   if (text === "feed") {
-    return /*html*/`
+   if (text === "post") {
+    return `
       <div class="finish">
-        <h2 class="finish__title">No stories</h2>
+        <h2 class="finish__title">No replies found!</h2>
         <p class="desc">
-          There are no stories/posts yet. You can come back later, once available they'll appear here.
+          The post has no replies yet. You can be the first one to reply or come back later, once available they'll appear here.
         </p>
       </div>
     `
-   } 
-   else if(text === "user") {
-    return /*html*/`
+   }
+   else if(text === "reply") {
+    return `
       <div class="finish">
-        <h2 class="finish__title">No stories or posts</h2>
+        <h2 class="finish__title">No replies found!</h2>
         <p class="desc">
-          The user has not posted any stories yet. You can come back later, once available they'll appear here.
+          The reply has no replies yet. You can be the first one to reply or come back later, once available they'll appear here.
         </p>
       </div>
     `
-   } 
+   }
+   else if(text === "story") {
+    return `
+      <div class="finish">
+        <h2 class="finish__title">No replies found!</h2>
+        <p class="desc">
+          The story has no replies yet. You can be the first one to reply or come back later, once available they'll appear here.
+        </p>
+      </div>
+    `
+   }
    else if(text === "search") {
-    return /*html*/`
+    return `
       <div class="finish">
-        <h2 class="finish__title">No stories found!</h2>
-        <p class="desc">
-          There are no stories/posts found. You can try searching with a different keyword.
+        <h2 class="title">No replies found!</h2>
+        <p class="finish__title">
+          There are no replies found for this search. You can try a different searching using a different keyword.
         </p>
       </div>
     `
    }
-   else if(text === "topic") {
-    return /*html*/`
+   else if(text === "user") {
+    return `
       <div class="finish">
-        <h2 class="finish__title">No stories found!</h2>
+        <h2 class="finish__title">No replies found!</h2>
         <p class="desc">
-          No stories/posts found for this topic. You can try coming back later.
+          The user has no replies yet. You can come back later, once available they'll appear here.
         </p>
       </div>
     `
-   }
-   else {
-    return /*html*/`
+   } else {
+    return `
       <div class="finish">
-        <h2 class="finish__title"> No stories found!</h2>
+        <h2 class="finish__title">No replies found!</h2>
         <p class="desc">
-          There are no stories/posts found. You can try coming back later.
+          There are no replies yet. You can come back later, once available they'll appear here.
         </p>
       </div>
     `
@@ -355,71 +332,80 @@ export default class StoryFeed extends HTMLElement {
 
   getLastMessage = text => {
     // get the next attribute
-    if (text === "feed") {
-      return /*html*/`
+    if (text === "post") {
+      return `
         <div class="finish">
-          <h2 class="finish__title">That's all for now!</h2>
+          <h2 class="finish__title">No more replies!</h2>
           <p class="desc">
-            You have reached the end of the stories. You can always come back later or refresh the page to check for new stories.
+            You have exhausted all of the post's replies. You can add a new reply or come back later to check for new replies.
+          </p>
+        </div>
+      `
+    } 
+    else if(text === "reply") {
+      return `
+        <div class="finish">
+          <h2 class="finish__title">No more replies!</h2>
+          <p class="desc">
+            You have exhausted all of the reply's replies. You can add a new reply or come back later to check for new replies.
           </p>
         </div>
       `
     }
-    else if(text === "user") {
-      return /*html*/`
+    else if(text === "story") {
+      return `
         <div class="finish">
-          <h2 class="finish__title">That's all the user's stories!</h2>
+          <h2 class="finish__title">No more replies!</h2>
           <p class="desc">
-            You have exhausted all of the user's stories. You can always come back later to check for new stories.
+            You have exhausted all of the story's replies. You can add a new reply or come back later to check for new replies.
           </p>
         </div>
       `
     }
     else if(text === "search") {
-      return /*html*/`
+      return `
         <div class="finish">
-          <h2 class="finish__title">That's all the results!</h2>
+          <h2 class="finish__title">No more replies!</h2>
           <p class="desc">
-            You have reached the end of the search results. You can try searching with a different keyword.
+            You have exhausted all of the search's results. You can try a different search using a different keyword.
           </p>
         </div>
       `
     }
-    else if(text === "topic") {
-      return /*html*/`
+    else if(text === "user") {
+      return `
         <div class="finish">
-          <h2 class="finish__title">That's all the topic stories!</h2>
+          <h2 class="finish__title">No more replies!</h2>
           <p class="desc">
-            You have reached the end of the topic stories. You can come back later to check for new stories.
+            You have exhausted all of the user's replies. You can always come back later to check for new replies.
           </p>
         </div>
       `
     }
     else {
-      return /*html*/`
+      return `
         <div class="finish">
-          <h2 class="finish__title">That's all!</h2>
+          <h2 class="finish__title">No more replies!</h2>
           <p class="desc">
-            You have reached the end of the stories. You can always come back later or refresh the page to check for new stories.
+            You have reached the end of the replies. You can always come back later to check for new replies.
           </p>
         </div>
       `
     }
    
   }
-  
+
   getWrongMessage = () => {
     return /* html */`
       <div class="finish">
         <h2 class="finish__title">Something went wrong!</h2>
         <p class="desc">
-          An error occurred while retrieving stories. Please check your connection and try again.
+          An error occurred while retrieving replies. Please check your connection and try again.
         </p>
         <button class="finish">Retry</button>
       </div>
     `;
   }
-
 
   getStyles() {
     return /* css */`
@@ -528,7 +514,7 @@ export default class StoryFeed extends HTMLElement {
           100% {transform: rotate(1turn) translate(150%)}
         }
 
-        div.stories {
+        div.replies {
           padding: 0;
           width: 100%;
           display: flex;

@@ -43,19 +43,19 @@ export default class ActivityItem extends HTMLElement {
 
   getPreviewUrl = (kind, hash) => {
     if (kind === 'story') {
-      return `/api/v1/p/${hash}/preview`;
+      return `/p/${hash}/preview`;
     }
 
     if (kind === 'reply') {
-      return `/api/v1/r/${hash}/preview`;
+      return `/r/${hash}/preview`;
     }
 
     if (kind === 'user') {
-      return `/api/v1/u/${hash}/preview`;
+      return `/u/${hash}/preview`;
     }
 
     if (kind === 'topic') {
-      return `/api/v1/t/${hash}/preview`;
+      return `/t/${hash}/preview`;
     }
   }
 

@@ -181,7 +181,7 @@ export default class AppTopic extends HTMLElement {
     hash = hash.trim().toLowerCase();
 
     // base api
-    const url = '/api/v1/t/' + hash;
+    const url = '/t/' + hash;
 
     // Get the follow action and subscribe action
     const followBtn = this.shadowObj.querySelector('.actions>.action#follow-action');
@@ -584,7 +584,7 @@ export default class AppTopic extends HTMLElement {
 
         <section class="side">
           ${this.getAuthor()}
-          <topics-container url="/api/v1/q/trending/topics"></topics-container>
+          <topics-container url="/q/trending/topics"></topics-container>
           ${this.getInfo()}
         </section>
       `;
@@ -773,7 +773,7 @@ export default class AppTopic extends HTMLElement {
 
   getHighlights = () => {
     return /* html */`
-      <topic-popup url="/api/v1/t/${this.getAttribute('hash').toLowerCase()}/stats" name="${this.getAttribute('name')}" views="${this.getAttribute('views')}"
+      <topic-popup url="/t/${this.getAttribute('hash').toLowerCase()}/stats" name="${this.getAttribute('name')}" views="${this.getAttribute('views')}"
         followers="${this.getAttribute('followers')}" subscribers="${this.getAttribute('subscribers')}" 
         stories="${this.getAttribute('stories')}">
       </topic-popup>

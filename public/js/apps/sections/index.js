@@ -1,7 +1,7 @@
 // Import sections
 import PostSection from "./post.js";
-import ProfileSection from "./profile.section.js";
-import TopicSection from "./topic.section.js";
+import ProfileSection from "./profile.js";
+import TopicSection from "./topic.js";
 
 
 export default function sections() {

@@ -154,11 +154,11 @@ export default class ActionWrapper extends HTMLElement {
     // get kind from the attribute
     const kind = this.getAttribute('kind');
     const hash = this.getAttribute('hash').toLowerCase();
-    let url = `/api/v1/s/${hash}/reply`;
+    let url = `/s/${hash}/reply`;
 
     // if kind is reply, change the url
     if (kind === 'reply') {
-      url = `/api/v1/r/${hash}/reply`;
+      url = `/r/${hash}/reply`;
     }
 
     return /* html */`
@@ -175,7 +175,7 @@ export default class ActionWrapper extends HTMLElement {
     let baseUrl = this.getAttribute('url');
 
     // base api
-    const url = `/api/v1${baseUrl}/like`
+    const url = `${baseUrl}/like`
 
     const options = {
       method: 'POST',

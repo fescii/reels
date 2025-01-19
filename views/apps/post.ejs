@@ -19,7 +19,7 @@
 <%# Check if the story is a quick (post) story %>
 <% if (data.kind === "post") { %>
 <app-post story="quick" style="display: none;" tab="<%= data.tab %>" url="<%= url %>" hash="<%= data.hash %>" images='<%= images %>' likes="<%= data.likes %>" 
-  replies="<%= data.replies %>" liked="<%= data.liked ? 'true' : 'false' %>" views="<%= data.views %>" time="<%= data.createdAt %>" replies-url="/api/v1<%= url %>/replies" likes-url="/api/v1<%= url %>/likes" 
+  replies="<%= data.replies %>" liked="<%= data.liked ? 'true' : 'false' %>" views="<%= data.views %>" time="<%= data.createdAt %>" replies-url="<%= url %>/replies" likes-url="<%= url %>/likes" 
   author-url="/u/<%= author.hash %>" author-hash="<%= author.hash %>" author-you="<%= data.you ? 'true' : 'false' %>" author-stories="<%= author.stories %>" author-replies="<%= author.replies %>"
   author-img="<%= author.picture %>" author-verified="<%= author.verified ? 'true' : 'false' %>" author-name="<%= author.name %>" author-followers="<%= author.followers %>" author-contact='<%= contact %>'
   author-following="<%= author.following %>" author-follow="<%= author.is_following ? 'true' : 'false' %>" author-bio="<%= bio %>">
@@ -28,7 +28,7 @@
 <% } else if (data.kind === "poll") { %>
 <app-post story="poll" style="display: none;" tab="<%= data.tab %>" url="<%= url %>" hash="<%= data.hash %>" likes="<%= data.likes %>" 
   replies="<%= data.replies %>" liked="<%= data.liked ? 'true' : 'false' %>" views="<%= data.views %>" time="<%= data.createdAt %>" voted="<%= data.option ? 'true' : 'false' %>" 
-  selected="<%= data.option %>" end-time="<%= data.end %>" replies-url="/api/v1<%= url %>/replies" likes-url="/api/v1<%= url %>/likes" options='<%= data.poll %>' votes="<%= data.votes %>" 
+  selected="<%= data.option %>" end-time="<%= data.end %>" replies-url="<%= url %>/replies" likes-url="<%= url %>/likes" options='<%= data.poll %>' votes="<%= data.votes %>" 
   author-url="/u/<%= author.hash %>" author-hash="<%= author.hash %>" author-you="<%= data.you ? 'true' : 'false' %>" author-stories="<%= author.stories %>" author-replies="<%= author.replies %>"
   author-img="<%= author.picture %>" author-verified="<%= author.verified ? 'true' : 'false' %>" author-name="<%= author.name %>" author-followers="<%= author.followers %>" author-contact='<%= contact %>'
   author-following="<%= author.following %>" author-follow="<%= author.is_following ? 'true' : 'false' %>" author-bio="<%= bio %>">
@@ -36,7 +36,7 @@
 </app-post>
 <% } else { %>
 <app-story story="story" hash="<%= data.hash %>" tab="<%= data.tab %>" style="display: none;" url="<%= url %>" topics="<%= data.topics %>" story-title="<%= data.title %>" 
-  time="<%= data.createdAt %>" replies-url="/api/v1<%= url %>/replies" likes-url="/api/v1<%= url %>/likes" replies="<%= data.replies %>" 
+  time="<%= data.createdAt %>" replies-url="<%= url %>/replies" likes-url="<%= url %>/likes" replies="<%= data.replies %>" 
   liked="<%= data.liked ? 'true' : 'false' %>" likes="<%= data.likes %>" views="<%= data.views %>" images='<%= images %>'
   author-url="/u/<%= author.hash %>" author-hash="<%= author.hash %>" author-you="<%= data.you ? 'true' : 'false' %>" author-stories="<%= author.stories %>" author-replies="<%= author.replies %>"
   author-img="<%= author.picture %>" author-verified="<%= author.verified ? 'true' : 'false' %>" author-name="<%= author.name %>" author-followers="<%= author.followers %>" author-contact='<%= contact %>'

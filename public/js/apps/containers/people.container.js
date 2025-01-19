@@ -3,7 +3,7 @@ export default class PeopleContainer extends HTMLElement {
 		// We are not even going to touch this.
 		super();
 
-		this._url = this.getAttribute('url') || '/api/v1/users/recommended';
+		this._url = this.getAttribute('url') || '/users/recommended';
 
 		// let's create our shadow root
 		this.shadowObj = this.attachShadow({ mode: "open" });

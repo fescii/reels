@@ -1,26 +1,19 @@
-export default class RepliesFeed extends HTMLElement {
+export default class StatFeed extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
 
-    this._block = false;
-    this._empty = false;
-    this._page = this.parseToNumber(this.getAttribute('page'));
-    this._url = this.getAttribute('url');
-    this._kind = this.getAttribute('kind');
-    this._query = this.setQuery(this.getAttribute('query'));
-    this._noPreview = this.convertToBoolean(this.getAttribute('no-preview'));
-
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
 
+    this._kind = this.getAttribute('kind');
+
+    this._block = false;
+    this._empty = false;
+    this._page = this.parseToNumber(this.getAttribute('page'));
+    this._url = this.getAttribute('api');
+
     this.render();
-  }
-
-  setQuery = query => !(!query || query === "" || query !== "true");
-
-  convertToBoolean = value => {
-    return value === "true";
   }
 
   render() {
@@ -28,133 +21,144 @@ export default class RepliesFeed extends HTMLElement {
   }
 
   connectedCallback() {
-    const repliesContainer = this.shadowObj.querySelector('.replies');
+    const contentContainer = this.shadowObj.querySelector('.activities');
 
-    // check if the container exists
-    if (repliesContainer) {
-      this.fetchReplies(repliesContainer);
-    }
+    this.fetchFeeds(contentContainer);
+
+    // watch event 
+    setTimeout(() => {
+      this.scrollEvent(contentContainer);
+    }, 3000);
   }
 
   activateRefresh = () => {
+    const outerThis = this;
     const finish = this.shadowObj.querySelector('.finish');
     if (finish) {
       const btn = finish.querySelector('button.finish');
       btn.addEventListener('click', () => {
         // unblock the fetching
-        this._block = false;
-        this._empty = false;
+        outerThis._block = false;
+        outerThis._empty = false;
         
         // re fetch the content
-        const repliesContainer = this.shadowObj.querySelector('div.replies');
+        const feedContainer = outerThis.shadowObj.querySelector('.activities');
 
-        // remove the finish message
-        finish.remove();
+        // select finish
+        const finishContainer =  feedContainer.querySelector('div.finish');
+
+        if (finishContainer) {
+          finishContainer.remove()
+        }
 
         // set the loader
-        repliesContainer.insertAdjacentHTML('beforeend', this.getLoader());
+        feedContainer.insertAdjacentHTML('beforeend', outerThis.getLoader())
 
         setTimeout(() => {
-          this.fetchReplies(repliesContainer);
+          outerThis.fetchFeeds(feedContainer)
         }, 1000);
       });
     }
   }
 
-  disableScroll() {
-    // Get the current page scroll position
-    let scrollTop = window.scrollY || document.documentElement.scrollTop;
-    let scrollLeft = window.scrollX || document.documentElement.scrollLeft;
-    document.body.classList.add("stop-scrolling");
-
-    // if any scroll is attempted, set this to the previous value
-    window.onscroll = function () {
-      window.scrollTo(scrollLeft, scrollTop);
-    };
-  }
-
-  enableScroll() {
-    document.body.classList.remove("stop-scrolling");
-    window.onscroll = function () { };
-  }
-
-  fetching = async(url, repliesContainer) => {
+  fetching = async (url, feedContainer) => {
     const outerThis = this;
+
     try {
       const response = await this.fetchWithTimeout(url);
-      const result = await response.json();
+      const data = await response.json();
 
-      if(!result.success) {
+      if (!data.success) {
         outerThis._empty = true;
         outerThis._block = true;
-        outerThis.populateReplies(outerThis.getWrongMessage(), repliesContainer);
+        outerThis.populateFeeds(outerThis.getWrongMessage(), feedContainer);
         outerThis.activateRefresh();
-        return;
       }
 
-      const data = result.data;
-      if (data.last && outerThis._page === 1 && data.replies.length === 0) {
-        outerThis._empty = true;
-        outerThis._block = true;
-        outerThis.populateReplies(outerThis.getEmptyMsg(outerThis._kind), repliesContainer);
-      }
-      else if (data.last && data.replies.length < 10) {
-        outerThis._empty = true;
-        outerThis._block = true;
-        const content = outerThis.mapFields(data.replies);
-        outerThis.populateReplies(content, repliesContainer);
-        outerThis.populateReplies(outerThis.getLastMessage(outerThis._kind), repliesContainer);
-      }
-      else {
-        outerThis._empty = false;
-        outerThis._block = false;
 
-        const content = outerThis.mapFields(data.replies);
-        outerThis.populateReplies(content, repliesContainer);
-        outerThis.scrollEvent(repliesContainer);
+      if (data.stories) {
+        if (data.stories.length === 0 && outerThis._page === 1) {
+          outerThis._empty = true;
+          outerThis._block = true;
+          outerThis.populateFeeds(outerThis.getEmptyMsg(), feedContainer);
+          
+        } else if (data.stories.length < 10) {
+          outerThis._empty = true;
+          outerThis._block = true;
+          const content = outerThis.mapStories(data.stories);
+          outerThis.populateFeeds(content, feedContainer);
+          outerThis.populateFeeds(outerThis.getLastMessage(), feedContainer)
+        }
+        else {
+          outerThis._empty = false;
+          outerThis._block = false;
+          const content = outerThis.mapStories(data.stories);
+          outerThis.populateFeeds(content, feedContainer);
+        }
+      }
+      else if (data.replies) {
+        if (data.replies.length === 0 && outerThis._page === 1) {
+          outerThis._empty = true;
+          outerThis._block = true;
+          outerThis.populateFeeds(outerThis.getEmptyMsg(), feedContainer);
+        } else if (data.replies.length < 10) {
+          outerThis._empty = true;
+          outerThis._block = true;
+          const content = outerThis.mapReplies(data.replies);
+          outerThis.populateFeeds(content, feedContainer);
+          outerThis.populateFeeds(outerThis.getLastMessage(), feedContainer)
+        }
+        else {
+          outerThis._empty = false;
+          outerThis._block = false;
+          const content = outerThis.mapReplies(data.replies);
+          outerThis.populateFeeds(content, feedContainer);
+        }
+      } else {
+        throw new Error("Stories or replies are not defined!");
       }
     } catch (error) {
       // console.log(error)
       outerThis._empty = true;
       outerThis._block = true;
-      outerThis.populateReplies(outerThis.getWrongMessage(), repliesContainer);
-      this.activateRefresh();
+      outerThis.populateFeeds(outerThis.getWrongMessage(), feedContainer);
+      outerThis.activateRefresh();
     }
   }
 
-  fetchReplies = repliesContainer => {
+  fetchFeeds = feedContainer => {
     const outerThis = this;
-    const url = this._query ? `${this._url}&page=${this._page}` : `${this._url}?page=${this._page}`;
+    const url = `${this._url}?page=${this._page}`;
 
-    if(!this._block && !this._empty) {
+    if (!this._block && !this._empty) {
       outerThis._empty = true;
       outerThis._block = true;
       setTimeout(() => {
-        // fetch the replies
-        outerThis.fetching(url, repliesContainer)
-      }, 1000);
+        // fetch the stories
+        outerThis.fetching(url, feedContainer)
+      }, 2000);
     }
   }
 
-  populateReplies = (content, repliesContainer) => {
+  populateFeeds = (content, feedContainer) => {
     // get the loader and remove it
-    const loader = repliesContainer.querySelector('.loader-container');
-    if (loader){
+    const loader = feedContainer.querySelector('.loader-container');
+    if (loader) {
       loader.remove();
     }
 
     // insert the content
-    repliesContainer.insertAdjacentHTML('beforeend', content);
+    feedContainer.insertAdjacentHTML('beforeend', content);
   }
-  
-  scrollEvent = repliesContainer => {
+
+  scrollEvent = feedContainer => {
     const outerThis = this;
     window.addEventListener('scroll', function () {
       let margin = document.body.clientHeight - window.innerHeight - 150;
       if (window.scrollY > margin && !outerThis._empty && !outerThis._block) {
         outerThis._page += 1;
-        outerThis.populateReplies(outerThis.getLoader(), repliesContainer);
-        outerThis.fetchReplies(repliesContainer);
+        outerThis.populateFeeds(outerThis.getLoader(), feedContainer);
+        outerThis.fetchFeeds(feedContainer);
       }
     });
 
@@ -163,22 +167,50 @@ export default class RepliesFeed extends HTMLElement {
     window.dispatchEvent(scrollEvent);
   }
 
-  mapFields = data => {
-    return data.map(reply => {
+  mapStories= stories => {
+    return stories.map(story => {
+      const author = story.story_author;
+      let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
+      // replace all " and ' with &quot; and &apos; to avoid breaking the html
+      bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+      const url = `/p/${story.hash.toLowerCase()}`;
+      const vote = story.kind === "poll" ? `
+        voted="${story.option ? 'true' : 'false'}" selected="${story.option}" end-time="${story.end}" 
+        options='${story.poll}' votes="${story.votes}" 
+      ` : '';
+      const images = story.images ? story.images.join(',') : null;
+      return /*html*/`
+        <stat-story kind="${story.kind}" url="${url}" hash="${story.hash}" likes="${story.likes}" images='${images}'
+          replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
+          replies-url="${url}/replies" likes-url="${url}/likes" story-title="${story.title}"
+          topics="${story.topics.length === 0 ? 'story' : story.topics}" ${vote} author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
+          author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
+          author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
+          author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
+          author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" 
+          author-bio="${bio}">
+          ${story.content}
+        </stat-story>
+      `
+    }).join('');
+  }
+
+  mapReplies = replies => {
+    return replies.map(reply => {
       const author = reply.reply_author;
       let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
       // replace all " and ' with &quot; and &apos; to avoid breaking the html
       bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
       const images = reply.images ? reply.images.join(',') : null;
       return /*html*/`
-        <quick-post story="reply" hash="${reply.hash}" url="/r/${reply.hash}" likes="${reply.likes}" replies="${reply.replies}" liked="${reply.liked}"
-          views="${reply.views}" time="${reply.createdAt}" replies-url="/api/v1/r/${reply.hash}/replies" likes-url="/api/v1/r/${reply.hash}/likes" images='${images}'
+        <stat-reply kind="reply" hash="${reply.hash}" url="/r/${reply.hash.toLowerCase()}" likes="${reply.likes}" replies="${reply.replies}" liked="${reply.liked}"
+          views="${reply.views}" time="${reply.createdAt}" replies-url="/r/${reply.hash}/replies" likes-url="/r/${reply.hash}/likes"
           author-hash="${author.hash}" author-you="${reply.you}" author-url="/u/${author.hash}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-          author-stories="${author.stories}" author-replies="${author.replies}" parent="${reply.story ? reply.story : reply.reply}" no-preview="${this._noPreview ? 'true' : 'false'}"
+          author-stories="${author.stories}" author-replies="${author.replies}" parent="${reply.story ? reply.story : reply.reply}" images='${images}'
           author-img="${author.picture}" author-verified="${author.verified}" author-name="${author.name}" author-followers="${author.followers}"
           author-following="${author.following}" author-follow="${author.is_following}" author-bio="${bio}">
           ${reply.content}
-        </quick-post>
+        </stat-reply>
       `
     }).join('');
   }
@@ -202,7 +234,7 @@ export default class RepliesFeed extends HTMLElement {
     } finally {
       clearTimeout(timeoutId);
     }
-  }
+  };
 
   parseToNumber = num_str => {
     // Try parsing the string to an integer
@@ -237,150 +269,47 @@ export default class RepliesFeed extends HTMLElement {
   getBody = () => {
     // language=HTML
     return `
-			<div class="replies">
+			<div class="activities">
 				${this.getLoader()}
       </div>
     `;
   }
 
-  getEmptyMsg = text => {
+  getEmptyMsg = () => {
     // get the next attribute
-   if (text === "post") {
-    return `
+    return /*html*/`
       <div class="finish">
-        <h2 class="finish__title">No replies found!</h2>
+        <h2 class="finish__title">You have not created any ${this._kind} yet!</h2>
         <p class="desc">
-          The post has no replies yet. You can be the first one to reply or come back later, once available they'll appear here.
+         You can always create a new ${this._kind}, check homepage for more details.
         </p>
       </div>
     `
-   }
-   else if(text === "reply") {
-    return `
-      <div class="finish">
-        <h2 class="finish__title">No replies found!</h2>
-        <p class="desc">
-          The reply has no replies yet. You can be the first one to reply or come back later, once available they'll appear here.
-        </p>
-      </div>
-    `
-   }
-   else if(text === "story") {
-    return `
-      <div class="finish">
-        <h2 class="finish__title">No replies found!</h2>
-        <p class="desc">
-          The story has no replies yet. You can be the first one to reply or come back later, once available they'll appear here.
-        </p>
-      </div>
-    `
-   }
-   else if(text === "search") {
-    return `
-      <div class="finish">
-        <h2 class="title">No replies found!</h2>
-        <p class="finish__title">
-          There are no replies found for this search. You can try a different searching using a different keyword.
-        </p>
-      </div>
-    `
-   }
-   else if(text === "user") {
-    return `
-      <div class="finish">
-        <h2 class="finish__title">No replies found!</h2>
-        <p class="desc">
-          The user has no replies yet. You can come back later, once available they'll appear here.
-        </p>
-      </div>
-    `
-   } else {
-    return `
-      <div class="finish">
-        <h2 class="finish__title">No replies found!</h2>
-        <p class="desc">
-          There are no replies yet. You can come back later, once available they'll appear here.
-        </p>
-      </div>
-    `
-   }
   }
 
-  getLastMessage = text => {
+  getLastMessage = () => {
     // get the next attribute
-    if (text === "post") {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
-          <p class="desc">
-            You have exhausted all of the post's replies. You can add a new reply or come back later to check for new replies.
-          </p>
-        </div>
-      `
-    } 
-    else if(text === "reply") {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
-          <p class="desc">
-            You have exhausted all of the reply's replies. You can add a new reply or come back later to check for new replies.
-          </p>
-        </div>
-      `
-    }
-    else if(text === "story") {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
-          <p class="desc">
-            You have exhausted all of the story's replies. You can add a new reply or come back later to check for new replies.
-          </p>
-        </div>
-      `
-    }
-    else if(text === "search") {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
-          <p class="desc">
-            You have exhausted all of the search's results. You can try a different search using a different keyword.
-          </p>
-        </div>
-      `
-    }
-    else if(text === "user") {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
-          <p class="desc">
-            You have exhausted all of the user's replies. You can always come back later to check for new replies.
-          </p>
-        </div>
-      `
-    }
-    else {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
-          <p class="desc">
-            You have reached the end of the replies. You can always come back later to check for new replies.
-          </p>
-        </div>
-      `
-    }
-   
+    return /*html*/`
+      <div class="finish">
+        <h2 class="finish__title">That's all for now!</h2>
+        <p class="desc">
+          That's it, you have reached the end of your ${this._kind}.
+        </p>
+      </div>
+    `
   }
 
   getWrongMessage = () => {
-    return /* html */`
+    // get the next attribute
+    return /*html*/`
       <div class="finish">
         <h2 class="finish__title">Something went wrong!</h2>
         <p class="desc">
-          An error occurred while retrieving replies. Please check your connection and try again.
+         An error occurred while fetching your stats feed. Please check your connection and try again.
         </p>
         <button class="finish">Retry</button>
       </div>
-    `;
+    `
   }
 
   getStyles() {
@@ -436,8 +365,11 @@ export default class RepliesFeed extends HTMLElement {
 
         :host {
           font-size: 16px;
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+          padding: 5px 0 10px;
           width: 100%;
-          padding: 0;
         }
 
         div.loader-container {
@@ -492,12 +424,12 @@ export default class RepliesFeed extends HTMLElement {
           }
         }
 
-        div.replies {
-          padding: 0;
-          width: 100%;
+        .activities {
           display: flex;
           flex-flow: column;
           gap: 0;
+          padding: 0;
+          width: 100%;
         }
 
         div.finish {
@@ -512,14 +444,27 @@ export default class RepliesFeed extends HTMLElement {
           gap: 5px;
         }
 
+        div.empty {
+          padding: 10px 0;
+          width: 100%;
+          min-width: 100%;
+          height: auto;
+          display: flex;
+          flex-flow: column;
+          justify-content: center;
+          align-items: center;
+          gap: 5px;
+        }
+
         div.finish > h2.finish__title {
           margin: 10px 0 0 0;
-          font-size: 1rem;
+          font-size: 1.15rem;
           font-weight: 500;
           font-family: var(--font-read), sans-serif;
           color: var(--text-color);
         }
 
+        div.empty p.desc,
         div.finish > p.desc {
           margin: 0;
           font-size: 0.85rem;

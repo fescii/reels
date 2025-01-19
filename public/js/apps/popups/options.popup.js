@@ -16,7 +16,7 @@ export default class PostOptions extends HTMLElement {
 
     this.drafted = this.convertToBool(this.getAttribute('drafted'));
 
-    this.removeApi  = this.getAttribute('kind') === 'reply' ? `/api/v1/r/${this.hash}/remove` : `/api/v1/s/${this.hash}/remove`;
+    this.removeApi  = this.getAttribute('kind') === 'reply' ? `/r/${this.hash}/remove` : `/s/${this.hash}/remove`;
 
     this.render();
   }
@@ -113,7 +113,7 @@ export default class PostOptions extends HTMLElement {
 
   getEdit = () => {
     const hash = this.getAttribute('hash').toLowerCase();
-    const api = this.getAttribute('kind') === 'reply' ? `/api/v1/r/${hash}/edit` : `/api/v1/s/${hash}/edit/content`;
+    const api = this.getAttribute('kind') === 'reply' ? `/r/${hash}/edit` : `/s/${hash}/edit/content`;
     // Show Post Page Here
     return /* html */`
       <div is="edit-post" api="${api}" method="PUT" kind="${this.getAttribute('kind')}" images="${this.getAttribute('images')}"
@@ -125,7 +125,7 @@ export default class PostOptions extends HTMLElement {
 
   getArticleEdit = () => {
     const hash = this.getAttribute('hash').toLowerCase();
-    const api = `/api/v1/s/${hash}/edit`;
+    const api = `/s/${hash}/edit`;
     // Show Post Page Here
     return /* html */`
       <div is="edit-article" api="${api}" method="PUT" kind="${this.kind}" story-title="${this.getAttribute('story-title')}" slug="${this.getAttribute('slug')}"
@@ -164,7 +164,7 @@ export default class PostOptions extends HTMLElement {
 
   publishPost = async (section, button) => {
     button.innerHTML = this.getButtonLoader();
-    const url = `/api/v1/s/${this.hash}/publish`;
+    const url = `/s/${this.hash}/publish`;
     const options = {
       method: 'PATCH',
       headers: {

@@ -76,21 +76,21 @@ export default class FormContainer extends HTMLElement {
   getTopic = () => {
     // Show Topic Page Here
     return /* html */`
-      <div is="create-topic" api="/api/v1/t/add" method="PUT"></div>
+      <div is="create-topic" api="/t/add" method="PUT"></div>
     `;
   }
 
   getPost = () => {
     // Show Post Page Here
     return /* html */`
-      <div is="create-post" api="/api/v1/s/add" method="PUT"></div>
+      <div is="create-post" api="/s/add" method="PUT"></div>
     `;
   }
 
   getArticle = () => {
     // Show Article Page Here
     return /* html */`
-      <div is="create-article" api="/api/v1/s/add" method="PUT"></div>
+      <div is="create-article" api="/s/add" method="PUT"></div>
     `;
   }
 

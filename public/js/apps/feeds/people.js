@@ -1,20 +1,17 @@
-export default class ReplyFeed extends HTMLElement {
+export default class PeopleFeed extends HTMLElement {
   constructor() {
     super();
     this.api = window.app.api;
     this._block = false;
     this._empty = false;
     this._page = this.parseToNumber(this.getAttribute('page'));
-    this._url = this.getAttribute('url');
+    this._total = this.parseToNumber(this.getAttribute('total'));
     this._kind = this.getAttribute('kind');
-    this._isFirstLoad = true;
+    this._url = this.getAttribute('url');
+    this._isFirstLoad = true; // Add this line
     
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.render();
-  }
-
-  convertToBoolean = value => {
-    return value === "true";
   }
 
   render() {
@@ -22,12 +19,12 @@ export default class ReplyFeed extends HTMLElement {
   }
 
   connectedCallback() {
-    const repliesContainer = this.shadowObj.querySelector('.replies');
+    const peopleContainer = this.shadowObj.querySelector('.people');
 
-    // check if the container exists
-    if (repliesContainer) {
-      this.fetchReplies(repliesContainer);
-    }
+		// check total
+		if (peopleContainer) {
+      this.fetchPeople(peopleContainer);     
+		}
   }
 
   disconnectedCallback() {
@@ -44,16 +41,16 @@ export default class ReplyFeed extends HTMLElement {
         this._empty = false;
         
         // re fetch the content
-        const repliesContainer = this.shadowObj.querySelector('div.replies');
+        const peopleContainer = this.shadowObj.querySelector('.people');
 
         // remove the finish message
         finish.remove();
 
         // set the loader
-        repliesContainer.insertAdjacentHTML('beforeend', this.getLoader());
+        peopleContainer.insertAdjacentHTML('beforeend', this.getLoader());
 
         setTimeout(() => {
-          this.fetchReplies(repliesContainer);
+          this.fetchPeople(peopleContainer);
         }, 1000);
       });
     }
@@ -76,93 +73,88 @@ export default class ReplyFeed extends HTMLElement {
     window.onscroll = function () { };
   }
 
-  fetching = async(url, repliesContainer) => {
+  fetching = async (url, peopleContainer) => {
     const outerThis = this;
     try {
       const result = await this.api.get(url, { content: 'json' });
-
-      if(!result.success) {
-        outerThis.handleFetchError(repliesContainer);
+  
+      if (!result.success) {
+        outerThis.handleFetchError(peopleContainer);
         return;
       }
-
-      const replies = result.replies;
-      if (outerThis._page === 1 && replies.length === 0) {
-        outerThis.handleEmptyReplies(repliesContainer);
+  
+      const people = result.users;
+      if (outerThis._page === 1 && people.length === 0) {
+        outerThis.handleEmptyResult(peopleContainer);
+      } else if (people.length < 10) {
+        outerThis.handlePartialResult(people, peopleContainer);
+      } else {
+        outerThis.handleFullResult(people, peopleContainer);
       }
-      else if (replies.length < 10) {
-        outerThis.handlePartialReplies(replies, repliesContainer);
-      }
-      else {
-        outerThis.handleFullReplies(replies, repliesContainer);
-      }
+  
     } catch (error) {
-      outerThis.handleFetchError(repliesContainer);
+      outerThis.handleFetchError(peopleContainer);
     }
   }
-
-  handleFetchError = (repliesContainer) => {
+  
+  handleFetchError = (peopleContainer) => {
     // Block on error
     this._empty = true;
     this._block = true;
-    this.populateReplies(this.getWrongMessage(), repliesContainer);
+    this.populatePeople(this.getWrongMessage(), peopleContainer);
     this.activateRefresh();
   }
-
-  handleEmptyReplies = (repliesContainer) => {
+  
+  handleEmptyResult = (peopleContainer) => {
     // Block future fetches since we have no content
     this._empty = true;
     this._block = true;
-    this.populateReplies(this.getEmptyMsg(this._kind), repliesContainer);
+    this.populatePeople(this.getEmptyMsg(this._kind), peopleContainer);
   }
-
-  handlePartialReplies = (replies, repliesContainer) => {
+  
+  handlePartialResult = (people, peopleContainer) => {
     // Block future fetches since we're at the end
     this._empty = true;
     this._block = true;
-    
-    const content = this.mapFields(replies);
-    this.populateReplies(content, repliesContainer);
-    this.populateReplies(this.getLastMessage(this._kind), repliesContainer);
+    const content = this.mapFields(people);
+    this.populatePeople(content, peopleContainer);
+    this.populatePeople(this.getLastMessage(this._kind), peopleContainer);
   }
-
-  handleFullReplies = (replies, repliesContainer) => {
+  
+  handleFullResult = (people, peopleContainer) => {
     // Unblock for next fetch since we have a full page
     this._block = false;
     this._empty = false;
-    
-    const content = this.mapFields(replies);
-    this.populateReplies(content, repliesContainer);
-    
-    // Re-add scroll event after content is loaded
-    this.scrollEvent(repliesContainer);
+    const content = this.mapFields(people);
+    this.populatePeople(content, peopleContainer);
+    this.scrollEvent(peopleContainer);
   }
-
-  fetchReplies = repliesContainer => {
+  
+  fetchPeople = peopleContainer => {
     if (!this._block && !this._empty) {
-      // Set blocks before fetching
-      this._block = true;  // Block further fetches while this one is in progress
+      // Block further fetches while this one is in progress
+      this._block = true;
       
       const url = `${this._url}?page=${this._page}`;
       
       setTimeout(() => {
-        this.fetching(url, repliesContainer);
+        this.fetching(url, peopleContainer);
       }, 1000);
     }
   }
-
-  populateReplies = (content, repliesContainer) => {
+  
+  populatePeople = (content, peopleContainer) => {
     // get the loader and remove it
-    const loader = repliesContainer.querySelector('.loader-container');
-    if (loader){
+    const loader = peopleContainer.querySelector('.loader-container');
+    if (loader) {
       loader.remove();
     }
-
+  
     // insert the content
-    repliesContainer.insertAdjacentHTML('beforeend', content);
+    peopleContainer.insertAdjacentHTML('beforeend', content);
   }
 
-  scrollEvent = repliesContainer => {
+  scrollEvent = peopleContainer => {
     const outerThis = this;
     if (!this._scrollEventAdded) {
       this._scrollEventAdded = true;
@@ -185,11 +177,11 @@ export default class ReplyFeed extends HTMLElement {
           !outerThis._block
         ) {
           outerThis._page += 1;
-          outerThis.populateReplies(outerThis.getLoader(), repliesContainer);
-          outerThis.fetchReplies(repliesContainer);
+          outerThis.populatePeople(outerThis.getLoader(), peopleContainer);
+          outerThis.fetchPeople(peopleContainer);
         }
       };
-
+  
       // Store the function reference for cleanup
       this.onScroll = onScroll;
       window.addEventListener('scroll', onScroll);
@@ -211,21 +203,15 @@ export default class ReplyFeed extends HTMLElement {
   }
 
   mapFields = data => {
-    return data.map(reply => {
-      const author = reply.reply_author;
-      let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
+    return data.map(user => {
+      let bio = user.bio === null ? 'This user has not added a bio yet.' : user.bio;
       // replace all " and ' with &quot; and &apos; to avoid breaking the html
       bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-      const images = reply.images ? reply.images.join(',') : null;
       return /*html*/`
-        <quick-post story="reply" hash="${reply.hash}" url="/r/${reply.hash}" likes="${reply.likes}" replies="${reply.replies}" liked="${reply.liked}"
-          views="${reply.views}" time="${reply.createdAt}" replies-url="/api/v1/r/${reply.hash}/replies" likes-url="/api/v1/r/${reply.hash}/likes" images='${images}'
-          author-hash="${author.hash}" author-you="${reply.you}" author-url="/u/${author.hash}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-          author-stories="${author.stories}" author-replies="${author.replies}" parent="${reply.story ? reply.story : reply.reply}" no-preview="false"
-          author-img="${author.picture}" author-verified="${author.verified}" author-name="${author.name}" author-followers="${author.followers}"
-          author-following="${author.following}" author-follow="${author.is_following}" author-bio="${bio}">
-          ${reply.content}
-        </quick-post>
+				<user-wrapper hash="${user.hash}" you="${user.you}" url="/u/${user.hash}" stories="${user.stories}" replies="${user.replies}"
+          picture="${user.picture}" verified="${user.verified}" name="${user.name}" followers="${user.followers}" contact='${user.contact ? JSON.stringify(user.contact) : null}'
+          following="${user.following}" user-follow="${user.is_following}" bio="${bio}">
+				</user-wrapper>
       `
     }).join('');
   }
@@ -261,138 +247,110 @@ export default class ReplyFeed extends HTMLElement {
   getBody = () => {
     // language=HTML
     return `
-			<div class="replies">
+			<div class="people">
 				${this.getLoader()}
       </div>
     `;
   }
 
   getEmptyMsg = text => {
-    // get the next attribute
-   if (text === "post") {
-    return `
-      <div class="finish">
-        <h2 class="finish__title">No replies found!</h2>
-        <p class="desc">
-          The post has no replies yet. You can be the first one to reply or come back later, once available they'll appear here.
-        </p>
-      </div>
-    `
-   }
-   else if(text === "reply") {
-    return `
-      <div class="finish">
-        <h2 class="finish__title">No replies found!</h2>
-        <p class="desc">
-          The reply has no replies yet. You can be the first one to reply or come back later, once available they'll appear here.
-        </p>
-      </div>
-    `
-   }
-   else if(text === "story") {
-    return `
-      <div class="finish">
-        <h2 class="finish__title">No replies found!</h2>
-        <p class="desc">
-          The story has no replies yet. You can be the first one to reply or come back later, once available they'll appear here.
-        </p>
-      </div>
-    `
-   }
-   else if(text === "search") {
-    return `
-      <div class="finish">
-        <h2 class="title">No replies found!</h2>
-        <p class="finish__title">
-          There are no replies found for this search. You can try a different searching using a different keyword.
-        </p>
-      </div>
-    `
-   }
-   else if(text === "user") {
-    return `
-      <div class="finish">
-        <h2 class="finish__title">No replies found!</h2>
-        <p class="desc">
-          The user has no replies yet. You can come back later, once available they'll appear here.
-        </p>
-      </div>
-    `
-   } else {
-    return `
-      <div class="finish">
-        <h2 class="finish__title">No replies found!</h2>
-        <p class="desc">
-          There are no replies yet. You can come back later, once available they'll appear here.
-        </p>
-      </div>
-    `
-   }
+    switch (text) {
+			case 'likes':
+				return /*html*/`
+					<div class="finish">
+						<h2 class="finish__title">No Likes found!</h2>
+						<p class="desc">
+							The post has no likes yet. You can be the first to like it or you can always come back later to check for new likes.
+						</p>
+					</div>
+				`;
+			case 'followers':
+				return /*html*/`
+					<div class="finish">
+						<h2 class="finish__title">The author has no followers yet!</h2>
+						<p class="desc">
+							The user has no followers yet. You can be the first to follow the author or you can always come back later to check for new followers.
+						</p>
+					</div>
+				`
+			case 'following':
+				return /*html*/`
+					<div class="finish">
+						<h2 class="finish__title">The user is not following anyone yet!</h2>
+						<p class="desc">
+							The user is not following anyone yet. You can always come back later to check.
+						</p>
+					</div>
+				`
+      case 'search':
+				return /*html*/`
+					<div class="finish">
+						<h2 class="finish__title">No user found!</h2>
+						<p class="desc">
+							The search keyword did not match any user, try searching using a different keyword.
+						</p>
+					</div>
+				`
+			default:
+				return /*html*/`
+					<div class="finish">
+						<h2 class="finish__title">No data found!</h2>
+						<p class="desc">
+							No data found. You can always come back later to check for new data.
+						</p>
+					</div>
+				`
+		}
   }
 
   getLastMessage = text => {
-    // get the next attribute
-    if (text === "post") {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
-          <p class="desc">
-            You have exhausted all of the post's replies. You can add a new reply or come back later to check for new replies.
-          </p>
-        </div>
-      `
-    } 
-    else if(text === "reply") {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
-          <p class="desc">
-            You have exhausted all of the reply's replies. You can add a new reply or come back later to check for new replies.
-          </p>
-        </div>
-      `
-    }
-    else if(text === "story") {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
-          <p class="desc">
-            You have exhausted all of the story's replies. You can add a new reply or come back later to check for new replies.
-          </p>
-        </div>
-      `
-    }
-    else if(text === "search") {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
-          <p class="desc">
-            You have exhausted all of the search's results. You can try a different search using a different keyword.
-          </p>
-        </div>
-      `
-    }
-    else if(text === "user") {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
-          <p class="desc">
-            You have exhausted all of the user's replies. You can always come back later to check for new replies.
-          </p>
-        </div>
-      `
-    }
-    else {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
-          <p class="desc">
-            You have reached the end of the replies. You can always come back later to check for new replies.
-          </p>
-        </div>
-      `
-    }
-   
+    switch (text) {
+			case 'likes':
+				return /*html*/`
+					<div class="finish">
+						<h2 class="finish__title">No more likes!</h2>
+						<p class="desc">
+							You have reached the end of people who liked this post. You can always come back later to check for new likes.
+						</p>
+					</div>
+				`
+			case 'followers':
+				return /*html*/`
+					<div class="finish">
+						<h2 class="finish__title">No more followers.</h2>
+						<p class="desc">
+							You have reached the people who are following this user. You can always come back later to check for new followers.
+						</p>
+					</div>
+				`
+			case 'following':
+				return /*html*/`
+					<div class="finish">
+						<h2 class="finish__title">No more people.</h2>
+						<p class="desc">
+							You have reached the end of the people who this user is following. You can always come back later to check for new people.
+						</p>
+					</div>
+				`
+      case 'search':
+				return /*html*/`
+					<div class="finish">
+						<h2 class="finish__title">The end of results</h2>
+						<p class="desc">
+							You have reached the end of the people who matched the query. You can try searching using different keyword.
+						</p>
+					</div>
+				`
+			default:
+				return /*html*/`
+					<div class="finish">
+						<h2 class="finish__title">No more data.</h2>
+						<p class="desc">
+							You have reached the end of the data. You can always come back later to check for new data.
+						</p>
+					</div>
+				`
+		}
   }
 
   getWrongMessage = () => {
@@ -400,12 +358,13 @@ export default class ReplyFeed extends HTMLElement {
       <div class="finish">
         <h2 class="finish__title">Something went wrong!</h2>
         <p class="desc">
-          An error occurred while retrieving replies. Please check your connection and try again.
+          An error occurred while retrieving people. Please check your connection and try again.
         </p>
         <button class="finish">Retry</button>
       </div>
     `;
   }
+
 
   getStyles() {
     return /* css */`
@@ -514,7 +473,7 @@ export default class ReplyFeed extends HTMLElement {
           100% {transform: rotate(1turn) translate(150%)}
         }
 
-        div.replies {
+        div.people {
           padding: 0;
           width: 100%;
           display: flex;

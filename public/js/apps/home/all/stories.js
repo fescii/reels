@@ -113,7 +113,7 @@ export default class HomeStories extends HTMLElement {
         return /*html*/`
           <quick-post story="quick" url="${url}" hash="${story.hash}" likes="${story.likes}" 
             replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
-            replies-url="/api/v1${url}/replies" likes-url="/api/v1${url}/likes" images="${images}"
+            replies-url="${url}/replies" likes-url="${url}/likes" images="${images}"
             author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
             author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
             author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
@@ -127,8 +127,8 @@ export default class HomeStories extends HTMLElement {
         return /*html*/`
           <poll-post story="poll" url="${url}" hash="${story.hash}" likes="${story.likes}" images="${images}"
             replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
-            voted="${story.option ? 'true' : 'false'}" selected="${story.option}" end-time="${story.end}" replies-url="/api/v1${url}/replies" 
-            likes-url="/api/v1${url}/likes" options='${story.poll}' votes="${story.votes}" 
+            voted="${story.option ? 'true' : 'false'}" selected="${story.option}" end-time="${story.end}" replies-url="${url}/replies" 
+            likes-url="${url}/likes" options='${story.poll}' votes="${story.votes}" 
             author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
             author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
             author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
@@ -141,8 +141,8 @@ export default class HomeStories extends HTMLElement {
       else if (story.kind === "story") {
         return /*html*/`
           <story-post story="story" hash="${story.hash}" url="${url}" images="${images}"
-            topics="${story.topics.length === 0 ? 'story' : story.topics }" story-title="${story.title}" time="${story.createdAt}" replies-url="/api/v1${url}/replies" 
-            likes-url="/api/v1${url}/likes" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" likes="${story.likes}" 
+            topics="${story.topics.length === 0 ? 'story' : story.topics }" story-title="${story.title}" time="${story.createdAt}" replies-url="${url}/replies" 
+            likes-url="${url}/likes" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" likes="${story.likes}" 
             views="${story.views}" 
             author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
             author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'

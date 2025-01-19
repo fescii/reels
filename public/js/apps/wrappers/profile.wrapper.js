@@ -181,7 +181,7 @@ export default class ProfileWrapper extends HTMLElement {
     hash = hash.trim().toLowerCase();
 
     // base api
-    const url = '/api/v1/u/' + hash;
+    const url = '/u/' + hash;
 
     // Get the follow action and subscribe action
     const followBtn = this.shadowObj.querySelector('.actions>.action#follow-action');
@@ -579,7 +579,7 @@ export default class ProfileWrapper extends HTMLElement {
     let formattedUrl = url.toLowerCase();
 
     return /* html */`
-      <stats-popup url="/api/v1${formattedUrl}/stats" name="${this.getAttribute('name')}"
+      <stats-popup url="${formattedUrl}/stats" name="${this.getAttribute('name')}"
         followers="${this.getAttribute('followers')}" following="${this.getAttribute('following')}" 
         stories="${this.getAttribute('stories')}" replies="${this.getAttribute('replies')}">
       </stats-popup>
@@ -594,7 +594,7 @@ export default class ProfileWrapper extends HTMLElement {
     let formattedUrl = url.toLowerCase();
 
     return /* html */`
-      <contact-popup url="/api/v1${formattedUrl}/contact" name="${this.getAttribute('name')}" contact='${this.getAttribute("contact")}'></contact-popup>
+      <contact-popup url="${formattedUrl}/contact" name="${this.getAttribute('name')}" contact='${this.getAttribute("contact")}'></contact-popup>
     `
   }
 
@@ -615,7 +615,7 @@ export default class ProfileWrapper extends HTMLElement {
     bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
     return /*html*/`
       <app-user hash="${this.getAttribute('hash')}" home-url="/home" current="name" verified="${this.getAttribute('verified')}"
-        stories-url="/api/v1${url}/stories" replies-url="/api/v1${url}/replies" stories="${this.getAttribute('stories')}" replies="${this.getAttribute('replies')}" 
+        stories-url="${url}/stories" replies-url="${url}/replies" stories="${this.getAttribute('stories')}" replies="${this.getAttribute('replies')}" 
         user-link="${contact?.link ? contact.link : ''}" user-email="${contact?.email ? contact.email : ''}" user-x="${contact?.x ? contact.x : ''}" 
         user-threads="${contact?.threads ? contact.threads : ''}" user-linkedin="${contact.linkedin ? contact.linkedin : ''}" email="${contact?.email ? contact.email : ''}" 
         user-username="${this.getAttribute('hash')}" user-contact='${str}'

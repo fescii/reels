@@ -392,7 +392,7 @@ export default class AppSearch extends HTMLElement {
         </section>
 
         <section class="side">
-          <topics-container url="/api/v1/q/trending/topics"></topics-container>
+          <topics-container url="/q/trending/topics"></topics-container>
           ${this.getInfo()}
         </section>
       `;

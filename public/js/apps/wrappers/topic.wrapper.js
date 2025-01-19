@@ -163,7 +163,7 @@ export default class TopicWrapper extends HTMLElement {
     hash = hash.trim().toLowerCase();
 
     // base api
-    const url = '/api/v1/t/' + hash;
+    const url = '/t/' + hash;
 
     // Get the follow action and subscribe action
     const followBtn = this.shadowObj.querySelector('.actions>.action#follow-action');
@@ -529,7 +529,7 @@ export default class TopicWrapper extends HTMLElement {
     // trim white spaces and convert to lowercase
     url = url.trim().toLowerCase();
 
-    let apiUrl = `/api/v1/t/${this.getAttribute('slug')}`;
+    let apiUrl = `/t/${this.getAttribute('slug')}`;
 
    return /* html */`
     <app-topic tab="article" hash="${this.getAttribute('hash')}" subscribers="${this.getAttribute('subscribers')}"
@@ -550,7 +550,7 @@ export default class TopicWrapper extends HTMLElement {
 
   getHighlights = () => {
     return /* html */`
-      <topic-popup url="/api/v1/t/${this.getAttribute('hash').toLowerCase()}/stats" name="${this.getAttribute('name')}" views="${this.getAttribute('views')}"
+      <topic-popup url="/t/${this.getAttribute('hash').toLowerCase()}/stats" name="${this.getAttribute('name')}" views="${this.getAttribute('views')}"
         followers="${this.getAttribute('followers')}" subscribers="${this.getAttribute('subscribers')}" 
         stories="${this.getAttribute('stories')}">
       </topic-popup>

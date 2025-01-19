@@ -1,4 +1,4 @@
-export default class StatFeed extends HTMLElement {
+export default class ContentFeed extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
@@ -73,8 +73,8 @@ export default class StatFeed extends HTMLElement {
         outerThis._block = true;
         outerThis.populateFeeds(outerThis.getWrongMessage(), feedContainer);
         outerThis.activateRefresh();
+        return;
       }
-
 
       if (data.stories) {
         if (data.stories.length === 0 && outerThis._page === 1) {
@@ -170,27 +170,27 @@ export default class StatFeed extends HTMLElement {
   mapStories= stories => {
     return stories.map(story => {
       const author = story.story_author;
-      let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
-      // replace all " and ' with &quot; and &apos; to avoid breaking the html
-      bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
       const url = `/p/${story.hash.toLowerCase()}`;
       const vote = story.kind === "poll" ? `
         voted="${story.option ? 'true' : 'false'}" selected="${story.option}" end-time="${story.end}" 
         options='${story.poll}' votes="${story.votes}" 
       ` : '';
+      let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
+      // replace all " and ' with &quot; and &apos; to avoid breaking the html
+      bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
       const images = story.images ? story.images.join(',') : null;
       return /*html*/`
-        <stat-story kind="${story.kind}" url="${url}" hash="${story.hash}" likes="${story.likes}" images='${images}'
-          replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
-          replies-url="/api/v1${url}/replies" likes-url="/api/v1${url}/likes" story-title="${story.title}"
+        <content-story published="${story.published}" kind="${story.kind}" url="${url}" hash="${story.hash}" likes="${story.likes}" 
+          replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" images='${images}'
+          replies-url="${url}/replies" likes-url="${url}/likes" story-title="${story.title}" slug="${story.slug}"
           topics="${story.topics.length === 0 ? 'story' : story.topics}" ${vote} author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-          author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
+          author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}" images='${story.images ? "" : JSON.stringify(story.images)}'
           author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
           author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
           author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" 
           author-bio="${bio}">
           ${story.content}
-        </stat-story>
+        </content-story>
       `
     }).join('');
   }
@@ -203,14 +203,14 @@ export default class StatFeed extends HTMLElement {
       bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
       const images = reply.images ? reply.images.join(',') : null;
       return /*html*/`
-        <stat-reply kind="reply" hash="${reply.hash}" url="/r/${reply.hash.toLowerCase()}" likes="${reply.likes}" replies="${reply.replies}" liked="${reply.liked}"
-          views="${reply.views}" time="${reply.createdAt}" replies-url="/api/v1/r/${reply.hash}/replies" likes-url="/api/v1/r/${reply.hash}/likes"
+        <content-reply kind="reply" hash="${reply.hash}" url="/r/${reply.hash.toLowerCase()}" likes="${reply.likes}" replies="${reply.replies}" liked="${reply.liked}"
+          views="${reply.views}" time="${reply.createdAt}" replies-url="/r/${reply.hash}/replies" likes-url="/r/${reply.hash}/likes"
           author-hash="${author.hash}" author-you="${reply.you}" author-url="/u/${author.hash}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
           author-stories="${author.stories}" author-replies="${author.replies}" parent="${reply.story ? reply.story : reply.reply}" images='${images}'
           author-img="${author.picture}" author-verified="${author.verified}" author-name="${author.name}" author-followers="${author.followers}"
           author-following="${author.following}" author-follow="${author.is_following}" author-bio="${bio}">
           ${reply.content}
-        </stat-reply>
+        </content-reply>
       `
     }).join('');
   }
@@ -305,7 +305,7 @@ export default class StatFeed extends HTMLElement {
       <div class="finish">
         <h2 class="finish__title">Something went wrong!</h2>
         <p class="desc">
-         An error occurred while fetching your stats feed. Please check your connection and try again.
+         An error occurred while fetching your content feed. Please check your connection and try again.
         </p>
         <button class="finish">Retry</button>
       </div>
@@ -502,6 +502,7 @@ export default class StatFeed extends HTMLElement {
             cursor: default !important;
           }
         }
+
       </style>
     `;
   }

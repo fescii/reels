@@ -174,7 +174,7 @@ export default class VotesAuthor extends HTMLElement {
     hash = hash.trim().toLowerCase();
 
     // base api
-    const url = `/api/v1/p/${hash}/vote/${option}`;
+    const url = `/p/${hash}/vote/${option}`;
 
     // define options 
     const options = {

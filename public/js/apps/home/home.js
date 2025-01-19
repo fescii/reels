@@ -212,19 +212,19 @@ export default class AppHome extends HTMLElement {
 
   getStories = () => {
     return /* html */`
-      <home-stories-feed url="${this.getAttribute('stories')}" page="1"></home-stories-feed>
+      <stories-feed url="${this.getAttribute('stories')}" page="1"></stories-feed>
     `
   }
 
   getReplies = () => {
     return /* html */`
-      <home-replies-feed url="${this.getAttribute('replies')}" page="1"></home-replies-feed>
+      <replies-feed url="${this.getAttribute('replies')}" page="1"></replies-feed>
     `
   }
 
   getUsers = () => {
     return /* html */`
-      <home-users-feed url="${this.getAttribute('users')}" page="1"></home-users-feed>
+      <people-feed url="${this.getAttribute('users')}" page="1"></people-feed>
     `
   }
 
@@ -248,7 +248,7 @@ export default class AppHome extends HTMLElement {
           </div>
         </div>
         <div class="side">
-          <topics-container url="/api/v1/q/trending/topics"></topics-container>
+          <topics-container url="/q/trending/topics"></topics-container>
           ${this.getInfo()}
         </div>
       `;

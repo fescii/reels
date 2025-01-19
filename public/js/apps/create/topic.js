@@ -302,7 +302,7 @@ export default class CreateTopic extends HTMLDivElement {
       };
 
       try {
-        const url = '/api/v1/t/add';
+        const url = '/t/add';
         const response = await outerThis.fetchWithTimeout(url, options);
         const result = await response.json();
 
@@ -343,7 +343,7 @@ export default class CreateTopic extends HTMLDivElement {
   }
 
   checkIfTopicExists = async (form, button, actions) => {
-    const url  = '/api/v1/t/check/topic';
+    const url  = '/t/check/topic';
     const options = {
       method: 'POST',
       headers: {

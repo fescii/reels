@@ -162,7 +162,7 @@ export default class HeaderWrapper extends HTMLElement {
       }
     }
 
-    const url = '/api/v1/u/author/info'
+    const url = '/u/author/info'
 
     this.getCacheData(url, 86400, options)
       .then(result => {
@@ -407,8 +407,8 @@ export default class HeaderWrapper extends HTMLElement {
 
   getHome = () => {
     return /* html */ `
-      <app-home url="/home" recent-url="/api/v1/h/recent" feeds-url="/api/v1/h/feeds"
-        trending-people="/api/v1/q/trending/people" trending-url="/api/v1/h/trending">
+      <app-home url="/home" recent-url="/h/recent" feeds-url="/h/feeds"
+        trending-people="/q/trending/people" trending-url="/h/trending">
       </app-home>
     `
   }
@@ -416,10 +416,10 @@ export default class HeaderWrapper extends HTMLElement {
   getLogon = next => {
     return /* html */ `
       <app-logon
-        name="join" next="${next}" api-login="/api/v1/a/login"
-        api-register="/api/v1/a/register" api-check-email="/api/v1/a/check-email"
-        api-forgot-password="/api/v1/a/forgot-password" api-verify-token="/api/v1/a/verify-token"
-        api-reset-password="/api/v1/a/reset-password" join-url="/join" login="/join/login"
+        name="join" next="${next}" api-login="/a/login"
+        api-register="/a/register" api-check-email="/a/check-email"
+        api-forgot-password="/a/forgot-password" api-verify-token="/a/verify-token"
+        api-reset-password="/a/reset-password" join-url="/join" login="/join/login"
         register="/join/register" forgot="/join/recover">
         ${this.getNext()}
       </app-logon>
@@ -428,10 +428,10 @@ export default class HeaderWrapper extends HTMLElement {
 
   getSearch = () => {
     return /* html */ `
-      <app-search url="/search" query="" page="1" tab="stories" stories-url="/api/v1/q/stories"
-        replies-url="/api/v1/q/replies" people-url="/api/v1/q/people" topics-url="/api/v1/q/topics"
-        trending-stories="/api/v1/q/trending/stories" trending-people="/api/v1/q/trending/people"
-        trending-topics="/api/v1/q/trending/topics" trending-replies="/api/v1/q/trending/replies">
+      <app-search url="/search" query="" page="1" tab="stories" stories-url="/q/stories"
+        replies-url="/q/replies" people-url="/q/people" topics-url="/q/topics"
+        trending-stories="/q/trending/stories" trending-people="/q/trending/people"
+        trending-topics="/q/trending/topics" trending-replies="/q/trending/replies">
       </app-search>
     `
   }
@@ -448,8 +448,8 @@ export default class HeaderWrapper extends HTMLElement {
 
     return /*html*/ `
       <app-user hash="${data.hash}" home-url="/home" current="${current}" 
-        verified="${data.verified}" email="${data.email}" stories-url="/api/v1${url}/stories" 
-        replies-url="/api/v1${url}/replies" stories="${data.stories}" replies="${data.replies}"
+        verified="${data.verified}" email="${data.email}" stories-url="${url}/stories" 
+        replies-url="${url}/replies" stories="${data.stories}" replies="${data.replies}"
         user-link="${data.contact?.link}" user-email="${data.contact?.email}" 
         user-x="${data.contact?.x}" user-threads="${data.contact?.threads}" user-linkedin="${data.contact?.linkedin}" 
         user-username="${data.hash}" user-you="true" user-url="${url}" user-img="${data.picture}"  user-verified="${data.verified}" 

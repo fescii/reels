@@ -2,12 +2,13 @@ export default class PostSection extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-
-    // Get default active tab
+    this.app = window.app;
     this.active_tab = null;
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.render();
+    // Add popstate event listener
+    window.addEventListener('popstate', this.handlePopState);
   }
 
   render() {
@@ -116,21 +117,21 @@ export default class PostSection extends HTMLElement {
 
     const contentMap = {
       'replies': this.getReplies(),
-      'likes': this.getUsers()
+      'likes': this.getLikes()
     };
 
     const content = contentMap[tabName] || this.getReplies();
     
     this.app.replace(activeTab.getAttribute('url'), { kind: "sub", app: "post", name: tabName, html: content }, tabName);
 
-    activeTab.classList.add("");active
+    activeTab.classList.add("active");
     this.active_tab = activeTab;
   }
 
   updateContent = (contentContainer, tabName, url) => {
     const contentMap = {
       'replies': this.getReplies(),
-      'likes': this.getUsers()
+      'likes': this.getLikes()
     };
 
     const content = contentMap[tabName] || this.getReplies();
@@ -140,7 +141,7 @@ export default class PostSection extends HTMLElement {
 
   handlePopState = event => {
     const state = event.state;
-    if (state && state.kind === 'sub' && state.app === 'home') {
+    if (state && state.kind === 'sub' && state.app === 'post') {
       this.updateHistory(state.name, state.html)
     }
   }
@@ -202,19 +203,19 @@ export default class PostSection extends HTMLElement {
       <ul class="tabs">
         <li class="tab replies ${tab === "replies" ? "active" : ''}" data-name="replies" url="${url}/replies">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-            <path d="M10.5 8H18.5M10.5 12H13M18.5 12H16M10.5 16H13M18.5 16H16" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M7 7.5H6C4.11438 7.5 3.17157 7.5 2.58579 8.08579C2 8.67157 2 9.61438 2 11.5V18C2 19.3807 3.11929 20.5 4.5 20.5C5.88071 20.5 7 19.3807 7 18V7.5Z" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M16 3.5H11C10.07 3.5 9.60504 3.5 9.22354 3.60222C8.18827 3.87962 7.37962 4.68827 7.10222 5.72354C7 6.10504 7 6.57003 7 7.5V18C7 19.3807 5.88071 20.5 4.5 20.5H16C18.8284 20.5 20.2426 20.5 21.1213 19.6213C22 18.7426 22 17.3284 22 14.5V9.5C22 6.67157 22 5.25736 21.1213 4.37868C20.2426 3.5 18.8284 3.5 16 3.5Z" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-          <span class="text">Stories</span>
-          <span class="count">${this.formatNumber(this.getAttribute("replies"))}</span>
-        </li>
-        <li class="tab likes ${tab === "likes" ? "active" : ''}" data-name="likes" url="${url}/likes">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
             <path d="M8 13.5H16M8 8.5H12" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M6.09881 19C4.7987 18.8721 3.82475 18.4816 3.17157 17.8284C2 16.6569 2 14.7712 2 11V10.5C2 6.72876 2 4.84315 3.17157 3.67157C4.34315 2.5 6.22876 2.5 10 2.5H14C17.7712 2.5 19.6569 2.5 20.8284 3.67157C22 4.84315 22 6.72876 22 10.5V11C22 14.7712 22 16.6569 20.8284 17.8284C19.6569 19 17.7712 19 14 19C13.4395 19.0125 12.9931 19.0551 12.5546 19.155C11.3562 19.4309 10.2465 20.0441 9.14987 20.5789C7.58729 21.3408 6.806 21.7218 6.31569 21.3651C5.37769 20.6665 6.29454 18.5019 6.5 17.5" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" />
           </svg>
           <span class="text">Replies</span>
+          <span class="count">${this.formatNumber(this.getAttribute("replies"))}</span>
+        </li>
+        <li class="tab likes ${tab === "likes" ? "active" : ''}" data-name="likes" url="${url}/likes">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M18.6161 20H19.1063C20.2561 20 21.1707 19.4761 21.9919 18.7436C24.078 16.8826 19.1741 15 17.5 15M15.5 5.06877C15.7271 5.02373 15.9629 5 16.2048 5C18.0247 5 19.5 6.34315 19.5 8C19.5 9.65685 18.0247 11 16.2048 11C15.9629 11 15.7271 10.9763 15.5 10.9312" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" />
+            <path d="M4.48131 16.1112C3.30234 16.743 0.211137 18.0331 2.09388 19.6474C3.01359 20.436 4.03791 21 5.32572 21H12.6743C13.9621 21 14.9864 20.436 15.9061 19.6474C17.7889 18.0331 14.6977 16.743 13.5187 16.1112C10.754 14.6296 7.24599 14.6296 4.48131 16.1112Z" stroke="currentColor" stroke-width="2.0" />
+            <path d="M13 7.5C13 9.70914 11.2091 11.5 9 11.5C6.79086 11.5 5 9.70914 5 7.5C5 5.29086 6.79086 3.5 9 3.5C11.2091 3.5 13 5.29086 13 7.5Z" stroke="currentColor" stroke-width="2.0" />
+          </svg>
+          <span class="text">Likes</span>
           <span class="count">${this.formatNumber(this.getAttribute("likes"))}</span>
         </li>
       </ul>
@@ -247,12 +248,6 @@ export default class PostSection extends HTMLElement {
         url="${this.getAttribute('likes-url')}" kind="likes">
       </people-feed>
     `
-  }
-
-  getLoader = () => {
-    return /* html */`
-			<post-loader speed="300"></post-loader>
-		`
   }
 
   getStyles() {

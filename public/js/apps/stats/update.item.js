@@ -72,25 +72,25 @@ export default class UpdateItem extends HTMLElement {
 
   getPreviewUrl = (kind, hash, author) => {
     if (kind === 'story') {
-      return `/api/v1/p/${hash}/preview`;
+      return `/p/${hash}/preview`;
     }
 
     if (kind === 'reply') {
-      return `/api/v1/r/${hash}/preview`;
+      return `/r/${hash}/preview`;
     }
 
     if (kind === 'user') {
-      return `/api/v1/u/${author}/preview`;
+      return `/u/${author}/preview`;
     }
 
     if (kind === 'topic') {
-      return `/api/v1/t/${hash}/preview`;
+      return `/t/${hash}/preview`;
     }
   }
 
   getAuthorUrl = author => {
     author = author.toLowerCase();
-    return `/api/v1/u/${author}/preview`;
+    return `/u/${author}/preview`;
   }
 
   parseToNumber = num_str => {

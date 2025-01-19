@@ -480,7 +480,7 @@ export default class PreviewPopup extends HTMLElement {
     if (story.kind === "post") {
       return /*html*/`
         <app-post story="quick" tab="replies" url="${url}" hash="${story.hash}" likes="${story.likes}" replies="${story.replies}" 
-          replies-url="/api/v1${url}/replies" likes-url="/api/v1${url}/likes" images='${images}'
+          replies-url="${url}/replies" likes-url="${url}/likes" images='${images}'
           views="${story.views}"  time="${story.createdAt}" liked="${story.liked ? 'true' : 'false'}" 
           author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
           author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
@@ -495,7 +495,7 @@ export default class PreviewPopup extends HTMLElement {
       return /*html*/`
         <app-post story="poll" tab="replies" url="${url}" hash="${story.hash}" likes="${story.likes}"
           replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}"
-          replies-url="/api/v1${url}/replies" likes-url="/api/v1${url}/likes" options='${story.poll}' voted="${story.option ? 'true' : 'false'}" 
+          replies-url="${url}/replies" likes-url="${url}/likes" options='${story.poll}' voted="${story.option ? 'true' : 'false'}" 
           selected="${story.option}" end-time="${story.end}" votes="${story.votes}" 
           author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
           author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
@@ -509,8 +509,8 @@ export default class PreviewPopup extends HTMLElement {
     else if (story.kind === "story") {
       return /*html*/`
         <app-story story="story" hash="${story.hash}" url="${url}" tab="replies" topics="${story.topics.length === 0 ? 'story' : story.topics}" 
-          story-title="${story.title}" time="${story.createdAt}" replies-url="/api/v1${url}/replies" images='${images}'
-          likes-url="/api/v1${url}/likes" likes="${story.likes}" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" 
+          story-title="${story.title}" time="${story.createdAt}" replies-url="${url}/replies" images='${images}'
+          likes-url="${url}/likes" likes="${story.likes}" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" 
           author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
           author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}' 
           author-img="${author.picture}" author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" 
@@ -526,8 +526,8 @@ export default class PreviewPopup extends HTMLElement {
     const author = reply.reply_author;
     return /*html*/`
       <app-post story="reply" tab="replies" hash="${reply.hash}" url="/r/${reply.hash.toLowerCase()}" likes="${reply.likes}" liked="${reply.liked}"
-        replies="${reply.replies}" views="${reply.views}" time="${reply.createdAt}" replies-url="/api/v1/r/${reply.hash}/replies" 
-        parent="${reply.story ? reply.story : reply.reply}" preview="full" likes-url="/api/v1/r/${reply.hash}/likes" 
+        replies="${reply.replies}" views="${reply.views}" time="${reply.createdAt}" replies-url="/r/${reply.hash}/replies" 
+        parent="${reply.story ? reply.story : reply.reply}" preview="full" likes-url="/r/${reply.hash}/likes" 
         author-url="/u/${author.hash}" author-hash="${author.hash}" author-you="${reply.you}" author-stories="${author.stories}" 
         author-replies="${author.replies}" author-img="${author.picture}" author-verified="${author.verified}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
         author-name="${author.name}" author-followers="${author.followers}" author-following="${author.following}" 
@@ -543,8 +543,8 @@ export default class PreviewPopup extends HTMLElement {
 			<app-profile tab="stories" hash="${user.hash}" you="${user.you}" url="${url}" stories="${user.stories}" replies="${user.replies}"
         picture="${user.picture}" verified="${user.verified}" name="${user.name}" followers="${user.followers}" contact='${user.contact ? JSON.stringify(user.contact) : null}'
         following="${user.following}" user-follow="${user.is_following}" bio="${user.bio === null ? 'The author has no bio yet!': user.bio }"
-        followers-url="/api/v1${url}/followers" following-url="/api/v1${url}/following"
-        stories-url="/api/v1${url}/stories" replies-url="/api/v1${url}/replies">
+        followers-url="${url}/followers" following-url="${url}/following"
+        stories-url="${url}/stories" replies-url="${url}/replies">
 			</app-profile>
     `
   }

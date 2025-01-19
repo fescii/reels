@@ -348,7 +348,7 @@ export default class CreateArticle extends HTMLDivElement {
       };
 
       try {
-        const url = '/api/v1/s/add';
+        const url = '/s/add';
         const response = await outerThis.fetchWithTimeout(url, options);
         const result = await response.json();
 
@@ -389,7 +389,7 @@ export default class CreateArticle extends HTMLDivElement {
   }
 
   checkIfStoryExists = async (form, button, actions) => {
-    const url  = '/api/v1/s/check';
+    const url  = '/s/check';
     const options = {
       method: 'POST',
       headers: {

@@ -556,7 +556,7 @@ export default class PreviewPost extends HTMLElement {
     if (story.kind === "post") {
       return /*html*/`
         <app-post story="quick" tab="replies" url="${url}" hash="${story.hash}" likes="${story.likes}" replies="${story.replies}" 
-          replies-url="/api/v1${url}/replies" likes-url="/api/v1${url}/likes" images='${images}'
+          replies-url="${url}/replies" likes-url="${url}/likes" images='${images}'
           views="${story.views}"  time="${story.createdAt}" liked="${story.liked ? 'true' : 'false'}" 
           author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
           author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
@@ -571,7 +571,7 @@ export default class PreviewPost extends HTMLElement {
       return /*html*/`
         <app-post story="poll" tab="replies" url="${url}" hash="${story.hash}" likes="${story.likes}"
           replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}"
-          replies-url="/api/v1${url}/replies" likes-url="/api/v1${url}/likes" options='${story.poll}' voted="${story.option ? 'true' : 'false'}" 
+          replies-url="${url}/replies" likes-url="${url}/likes" options='${story.poll}' voted="${story.option ? 'true' : 'false'}" 
           selected="${story.option}" end-time="${story.end}" votes="${story.votes}" 
           author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
           author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
@@ -585,8 +585,8 @@ export default class PreviewPost extends HTMLElement {
     else if (story.kind === "story") {
       return /*html*/`
         <app-story story="story" hash="${story.hash}" url="${url}" tab="replies" topics="${story.topics.length === 0 ? 'story' : story.topics}" 
-          story-title="${story.title}" time="${story.createdAt}" replies-url="/api/v1${url}/replies" images='${images}'
-          likes-url="/api/v1${url}/likes" likes="${story.likes}" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" 
+          story-title="${story.title}" time="${story.createdAt}" replies-url="${url}/replies" images='${images}'
+          likes-url="${url}/likes" likes="${story.likes}" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" 
           author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
           author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}' 
           author-img="${author.picture}" author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" 
@@ -603,8 +603,8 @@ export default class PreviewPost extends HTMLElement {
     const images = reply.images ? reply.images.join(',') : null;
     return /*html*/`
       <app-post story="reply" tab="replies" hash="${reply.hash}" url="/r/${reply.hash.toLowerCase()}" likes="${reply.likes}" liked="${reply.liked}"
-        replies="${reply.replies}" views="${reply.views}" time="${reply.createdAt}" replies-url="/api/v1/r/${reply.hash}/replies" 
-        parent="${reply.story ? reply.story : reply.reply}" preview="full" likes-url="/api/v1/r/${reply.hash}/likes" images='${images}'
+        replies="${reply.replies}" views="${reply.views}" time="${reply.createdAt}" replies-url="/r/${reply.hash}/replies" 
+        parent="${reply.story ? reply.story : reply.reply}" preview="full" likes-url="/r/${reply.hash}/likes" images='${images}'
         author-url="/u/${author.hash}" author-hash="${author.hash}" author-you="${reply.you}" author-stories="${author.stories}" 
         author-replies="${author.replies}" author-img="${author.picture}" author-verified="${author.verified}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
         author-name="${author.name}" author-followers="${author.followers}" author-following="${author.following}" 

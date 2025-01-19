@@ -217,7 +217,7 @@ export default class AppUser extends HTMLElement {
 
   removeSubscriptionFromServer = async () => {
     // Remove the subscription from the server
-    await fetch('/api/v1/push/unsubscribe', {
+    await fetch('/push/unsubscribe', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -767,7 +767,7 @@ export default class AppUser extends HTMLElement {
     }
 
     return /* html */`
-      <name-form  method="PATCH" url="/user/name" api="/api/v1/u/edit/name"
+      <name-form  method="PATCH" url="/user/name" api="/u/edit/name"
         first-name="${firstName}" last-name="${lastName}">
       </name-form>
     `;
@@ -775,7 +775,7 @@ export default class AppUser extends HTMLElement {
 
   getFormBio = () =>  {
     return /* html */`
-      <bio-form method="PATCH" url="/user/bio" api="/api/v1/u/edit/bio"
+      <bio-form method="PATCH" url="/user/bio" api="/u/edit/bio"
         bio="${this.getAttribute('user-bio')}">
       </bio-form>
     `;
@@ -783,7 +783,7 @@ export default class AppUser extends HTMLElement {
 
   getFormProfile = () =>  {
     return /* html */`
-      <profile-form method="PATCH" url="/user/profile" api="/api/v1/u/edit/profile"
+      <profile-form method="PATCH" url="/user/profile" api="/u/edit/profile"
         profile-image="${this.getAttribute('user-img')}">
       </profile-form>
     `;
@@ -798,7 +798,7 @@ export default class AppUser extends HTMLElement {
       link: this.getAttribute('user-link') || ''
     }
     return /* html */`
-      <social-form method="PATCH" url="/user/socials" api="/api/v1/u/edit/contact"
+      <social-form method="PATCH" url="/user/socials" api="/u/edit/contact"
         email="${socials.email}" x="${socials.x}"
         threads="${socials.threads}" linkedin="${socials.linkedin}" link="${socials.link}">
       </social-form>
@@ -807,7 +807,7 @@ export default class AppUser extends HTMLElement {
 
   getFormEmail = () =>  {
     return /* html */`
-      <email-form method="PATCH" url="/user/email" api="/api/v1/u/edit/email"
+      <email-form method="PATCH" url="/user/email" api="/u/edit/email"
         email="${this.getAttribute('email')}">
       </email-form>
     `;
@@ -815,29 +815,29 @@ export default class AppUser extends HTMLElement {
 
   getFormPassword = () =>  {
     return /* html */`
-      <password-form method="PATCH" url="/user/password" api="/api/v1/u/edit/password">
+      <password-form method="PATCH" url="/user/password" api="/u/edit/password">
       </password-form>
     `;
   }
 
   getActivity = () =>  {
     return /* html */`
-      <activity-container url="/user/activity" api-all="/api/v1/c/all" api-users="/api/v1/c/users"
-        api-stories="/api/v1/c/stories" api-replies="/api/v1/c/replies" api-topics="/api/v1/c/topics">
+      <activity-container url="/user/activity" api-all="/c/all" api-users="/c/users"
+        api-stories="/c/stories" api-replies="/c/replies" api-topics="/c/topics">
       </activity-container>
     `;
   }
 
   getStats = () =>  {
     return /* html */`
-      <stat-container url="/user/stats" api="/api/v1/u/stats" stories-stats="/api/v1/user/stats/stories" replies-stats="/api/v1/user/stats/replies"></stat-container>
+      <stat-container url="/user/stats" api="/u/stats" stories-stats="/user/stats/stories" replies-stats="/user/stats/replies"></stat-container>
     `;
   }
 
   getContent = () =>  {
     return /* html */`
       <content-container url="/user/content" tab="stories"
-        stories="/api/v1/user/content/stories" replies="/api/v1/user/content/replies">
+        stories="/user/content/stories" replies="/user/content/replies">
       </content-container>
     `;
   }
@@ -949,8 +949,8 @@ export default class AppUser extends HTMLElement {
 
   getUpdates = () => {
     return /* html */`
-      <update-container url="/user/updates" api-all="/api/v1/n/all" api-users="/api/v1/n/users" notification="true"
-        api-stories="/api/v1/n/stories" api-replies="/api/v1/n/replies" api-topics="/api/v1/n/topics">
+      <update-container url="/user/updates" api-all="/n/all" api-users="/n/users" notification="true"
+        api-stories="/n/stories" api-replies="/n/replies" api-topics="/n/topics">
       </update-container>
     `;
   }
@@ -1193,7 +1193,7 @@ export default class AppUser extends HTMLElement {
     <app-profile tab="stories" you="true" url="${url}" tab="stories"
       stories-url="${this.getAttribute('stories-url')}" replies-url="${this.getAttribute('replies-url')}"
       stories="${this.getAttribute('stories')}" replies="${this.getAttribute('replies')}"
-      followers-url="/api/v1${url}/followers" following-url="/api/v1${url}/following" contact='${this.getAttribute("user-contact")}'
+      followers-url="${url}/followers" following-url="${url}/following" contact='${this.getAttribute("user-contact")}'
       hash="${this.getAttribute('hash')}" picture="${this.getAttribute('user-img')}" verified="${this.getAttribute('user-verified')}"
       name="${this.getAttribute('user-name')}" followers="${this.getAttribute('user-followers')}"
       following="${this.getAttribute('user-following')}" user-follow="${this.getAttribute('user-follow')}" bio="${this.getAttribute('user-bio')}">

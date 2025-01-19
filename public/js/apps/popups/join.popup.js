@@ -140,10 +140,10 @@ export default class JoinPopup extends HTMLElement {
 
   getJoin = action => {
    return /* html */`
-    <app-logon name="${action}" next="${this.getAttribute('next')}" api-login="/api/v1/a/login" 
-      api-register="/api/v1/a/register" api-check-email="/api/v1/a/check-email" 
-      api-forgot-password="/api/v1/a/forgot-password" api-verify-token="/api/v1/a/verify-token" 
-      api-reset-password="/api/v1/a/reset-password" join-url="/join" login="/join/login" 
+    <app-logon name="${action}" next="${this.getAttribute('next')}" api-login="/a/login" 
+      api-register="/a/register" api-check-email="/a/check-email" 
+      api-forgot-password="/a/forgot-password" api-verify-token="/a/verify-token" 
+      api-reset-password="/a/reset-password" join-url="/join" login="/join/login" 
       register="/join/register" forgot="/join/recover">
     </app-logon>
    `

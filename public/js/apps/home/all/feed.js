@@ -253,7 +253,7 @@ export default class HomeFeed extends HTMLElement {
       return /*html*/`
         <quick-post story="quick" url="${url}" hash="${story.hash}" likes="${story.likes}" images='${images}'
           replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
-          replies-url="/api/v1${url}/replies" likes-url="/api/v1${url}/likes" 
+          replies-url="${url}/replies" likes-url="${url}/likes" 
           author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
           author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
           author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
@@ -268,7 +268,7 @@ export default class HomeFeed extends HTMLElement {
         <poll-post story="poll" url="${url}" hash="${story.hash}" likes="${story.likes}" 
           replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
           voted="${story.option ? 'true' : 'false'}" selected="${story.option}" end-time="${story.end}" 
-          options='${story.poll}' votes="${story.votes}" likes-url="/api/v1${url}/likes" replies-url="/api/v1${url}/replies" 
+          options='${story.poll}' votes="${story.votes}" likes-url="${url}/likes" replies-url="${url}/replies" 
           author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
           author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
           author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
@@ -281,8 +281,8 @@ export default class HomeFeed extends HTMLElement {
     else if (story.kind === "story") {
       return /*html*/`
         <story-post story="story" hash="${story.hash}" url="${url}" images='${images}'
-          topics="${story.topics.length === 0 ? 'story' : story.topics}" story-title="${story.title}" time="${story.createdAt}" replies-url="/api/v1${url}/replies" 
-          likes-url="/api/v1${url}/likes" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" likes="${story.likes}" 
+          topics="${story.topics.length === 0 ? 'story' : story.topics}" story-title="${story.title}" time="${story.createdAt}" replies-url="${url}/replies" 
+          likes-url="${url}/likes" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" likes="${story.likes}" 
           views="${story.views}" 
           author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
           author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
@@ -303,7 +303,7 @@ export default class HomeFeed extends HTMLElement {
     const images = reply.images ? reply.images.join(',') : null;
     return /*html*/`
       <quick-post story="reply" hash="${reply.hash}" url="/r/${reply.hash.toLowerCase()}" likes="${reply.likes}" replies="${reply.replies}" liked="${reply.liked}"
-        views="${reply.views}" time="${reply.createdAt}" replies-url="/api/v1/r/${reply.hash}/replies" likes-url="/api/v1/r/${reply.hash}/likes"
+        views="${reply.views}" time="${reply.createdAt}" replies-url="/r/${reply.hash}/replies" likes-url="/r/${reply.hash}/likes"
         author-hash="${author.hash}" author-you="${reply.you}" author-url="/u/${author.hash}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
         author-stories="${author.stories}" author-replies="${author.replies}" parent="${reply.story ? reply.story : reply.reply}" images='${images}'
         author-img="${author.picture}" author-verified="${author.verified}" author-name="${author.name}" author-followers="${author.followers}"

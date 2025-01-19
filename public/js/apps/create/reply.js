@@ -380,7 +380,7 @@ export default class CreateReply extends HTMLDivElement {
 
   getImagesEditor = () => {
     return /* html */`
-      <images-uploader api="/api/v1/i/upload" multiple="true" accept="image/*" max="10" images=''></images-uploader>
+      <images-uploader api="/i/upload" multiple="true" accept="image/*" max="10" images=''></images-uploader>
     `;
   }
 

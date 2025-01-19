@@ -364,7 +364,7 @@ export default class AppStory extends HTMLElement {
 
         <section class="side">
           ${this.getAuthor()}
-          <topics-container url="/api/v1/q/trending/topics"></topics-container>
+          <topics-container url="/q/trending/topics"></topics-container>
           ${this.getInfo()}
         </section>
       `;

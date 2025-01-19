@@ -147,7 +147,7 @@ export default class AppOffline extends HTMLElement {
       `
     } else if (step === 2) {
       return /* html */`
-        <topics-container url="/api/v1/q/trending/topics" offline="true"></topics-container>
+        <topics-container url="/q/trending/topics" offline="true"></topics-container>
       `
     } else return '';
   }
@@ -171,7 +171,7 @@ export default class AppOffline extends HTMLElement {
           <feed-container url="${this.getAttribute('trending-url')}" offline="true"></feed-container>
         </div>
         <div class="side">
-          <topics-container url="/api/v1/q/trending/topics" offline="true"></topics-container>
+          <topics-container url="/q/trending/topics" offline="true"></topics-container>
           ${this.getInfo()}
         </div>
       `;

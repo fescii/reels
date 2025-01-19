@@ -308,7 +308,7 @@ export default class AppPost extends HTMLElement {
         </div>
         <div class="side">
           ${this.getAuthor()}
-          <people-container url="/api/v1/users/recommended" type="profile"></people-container>
+          <people-container url="/users/recommended" type="profile"></people-container>
           ${this.getInfo()}
         </div>
       `;
@@ -444,7 +444,7 @@ export default class AppPost extends HTMLElement {
   getReply = story => {
     if (story === 'reply') {
       const parent = this.getAttribute('parent');
-      let url = parent.startsWith('P') ? `/api/v1/p/${parent.toLowerCase()}/preview` : `/api/v1/r/${parent.toLowerCase()}/preview`;
+      let url = parent.startsWith('P') ? `/p/${parent.toLowerCase()}/preview` : `/r/${parent.toLowerCase()}/preview`;
       return /*html*/`
         <preview-post url="${url}" hash="${parent}" preview="full"></preview-post>
       `

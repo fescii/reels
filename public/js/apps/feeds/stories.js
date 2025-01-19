@@ -1,22 +1,17 @@
 export default class StoryFeed extends HTMLElement {
   constructor() {
-    // We are not even going to touch this.
     super();
-
+    this.api = window.app.api;
     this._block = true;
     this._empty = true;
     this._page = this.parseToNumber(this.getAttribute('page'));
     this._url = this.getAttribute('url');
     this._kind = this.getAttribute('kind');
-    this._query = this.setQuery(this.getAttribute('query'));
-
-    // let's create our shadow root
+    this._isFirstLoad = true;
+    
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.render();
   }
-
-  setQuery = query => !(!query || query === "" || query !== "true");
 
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
@@ -25,12 +20,16 @@ export default class StoryFeed extends HTMLElement {
   connectedCallback() {
     const storiesContainer = this.shadowObj.querySelector('.stories');
 
-    // check if the total
     if (storiesContainer) {
+      // Reset initial state for first fetch
       this._block = false;
       this._empty = false;
       this.fetchStories(storiesContainer);
     }
+  }
+
+  disconnectedCallback() {
+    this.removeScrollEvent();
   }
 
   activateRefresh = () => {
@@ -78,58 +77,73 @@ export default class StoryFeed extends HTMLElement {
   fetching = async (url, storiesContainer) => {
     const outerThis = this;
     try {
-      const response = await this.fetchWithTimeout(url);
-      const result = await response.json();
+      const result = await this.api.get(url, { content: 'json' });
 
       if (!result.success) {
-        outerThis._empty = true;
-        outerThis._block = true;
-        outerThis.populateStories(outerThis.getWrongMessage(), storiesContainer);
-        outerThis.activateRefresh();
+        outerThis.handleFetchError(storiesContainer);
         return;
       }
 
-      const data = result.data;
-      if (data.last && outerThis._page === 1 && data.stories.length === 0) {
-        outerThis._empty = true;
-        outerThis._block = true;
-        outerThis.populateStories(outerThis.getEmptyMsg(outerThis._kind), storiesContainer);
-      }
-      else if (data.last && data.stories.length < 10) {
-        outerThis._empty = true;
-        outerThis._block = true;
-        const content = outerThis.mapFields(data.stories);
-        outerThis.populateStories(content, storiesContainer);
-        outerThis.populateStories(outerThis.getLastMessage(outerThis._kind), storiesContainer);
-      }
-      else {
-        outerThis._empty = false;
-        outerThis._block = false;
+      const stories = result.stories;
 
-        const content = outerThis.mapFields(data.stories);
-        outerThis.populateStories(content, storiesContainer);
-
-        // Add scroll event
-        outerThis.scrollEvent(storiesContainer);
+      if (outerThis._page === 1 && stories.length === 0) {
+        outerThis.handleEmptyStories(storiesContainer);
+      } else if (stories.length < 10) {
+        outerThis.handlePartialStories(stories, storiesContainer);
+      } else {
+        outerThis.handleFullStories(stories, storiesContainer);
       }
     } catch (error) {
-      outerThis._empty = true;
-      outerThis._block = true;
-      outerThis.populateStories(outerThis.getWrongMessage(), storiesContainer);
-      outerThis.activateRefresh();
+      outerThis.handleFetchError(storiesContainer);
     }
   }
 
-  fetchStories = storiesContainer => {
-    const outerThis = this;
-    const url = this._query ? `${this._url}&page=${this._page}` : `${this._url}?page=${this._page}`;
+  handleFetchError = (storiesContainer) => {
+    // Block on error
+    this._empty = true;
+    this._block = true;
+    this.populateStories(this.getWrongMessage(), storiesContainer);
+    this.activateRefresh();
+  }
 
-    if(!this._block && !this._empty) {
-      outerThis._empty = true;
-      outerThis._block = true;
+  handleEmptyStories = (storiesContainer) => {
+    // Block future fetches since we have no content
+    this._empty = true;
+    this._block = true;
+    this.populateStories(this.getEmptyMsg(this._kind), storiesContainer);
+  }
+
+  handlePartialStories = (stories, storiesContainer) => {
+    // Block future fetches since we're at the end
+    this._empty = true;
+    this._block = true;
+    
+    const content = this.mapFields(stories);
+    this.populateStories(content, storiesContainer);
+    this.populateStories(this.getLastMessage(this._kind), storiesContainer);
+  }
+
+  handleFullStories = (stories, storiesContainer) => {
+    // Unblock for next fetch since we have a full page
+    this._block = false;
+    this._empty = false;
+    
+    const content = this.mapFields(stories);
+    this.populateStories(content, storiesContainer);
+    
+    // Re-add scroll event after content is loaded
+    this.scrollEvent(storiesContainer);
+  }
+
+  fetchStories = storiesContainer => {
+    if (!this._block && !this._empty) {
+      // Set blocks before fetching
+      this._block = true;  // Block further fetches while this one is in progress
+      
+      const url = `${this._url}?page=${this._page}`;
+      
       setTimeout(() => {
-        // fetch the stories
-        outerThis.fetching(url, storiesContainer)
+        this.fetching(url, storiesContainer);
       }, 1000);
     }
   }
@@ -144,21 +158,53 @@ export default class StoryFeed extends HTMLElement {
     // insert the content
     storiesContainer.insertAdjacentHTML('beforeend', content);
   }
-  
+
   scrollEvent = storiesContainer => {
     const outerThis = this;
-    window.addEventListener('scroll', function () {
-      let margin = document.body.clientHeight - window.innerHeight - 150;
-      if (window.scrollY > margin && !outerThis._empty && !outerThis._block) {
-        outerThis._page += 1;
-        outerThis.populateStories(outerThis.getLoader(), storiesContainer);
-        outerThis.fetchStories(storiesContainer);
-      }
-    });
+    if (!this._scrollEventAdded) {
+      this._scrollEventAdded = true;
+      
+      const onScroll = () => {
+        // Get scroll position and page height
+        const scrollPosition = window.scrollY + window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        // Calculate threshold (e.g., 150px from bottom)
+        const threshold = 150;
+        
+        // Only fetch if:
+        // 1. We're near the bottom
+        // 2. Not already fetching (_empty is false)
+        // 3. Not blocked from fetching (_block is false)
+        if (
+          documentHeight - scrollPosition <= threshold && 
+          !outerThis._empty && 
+          !outerThis._block
+        ) {
+          outerThis._page += 1;
+          outerThis.populateStories(outerThis.getLoader(), storiesContainer);
+          outerThis.fetchStories(storiesContainer);
+        }
+      };
 
-    // Launch scroll event
-    const scrollEvent = new Event('scroll');
-    window.dispatchEvent(scrollEvent);
+      // Store the function reference for cleanup
+      this.onScroll = onScroll;
+      window.addEventListener('scroll', onScroll);
+      
+      // Don't automatically trigger the scroll event on first load
+      if (!this._isFirstLoad) {
+        const scrollEvent = new Event('scroll');
+        window.dispatchEvent(scrollEvent);
+      }
+      this._isFirstLoad = false;
+    }
+  }
+
+  removeScrollEvent = () => {
+    if (this.onScroll) {
+      window.removeEventListener('scroll', this.onScroll);
+      this._scrollEventAdded = false;
+    }
   }
 
   mapFields = data => {
@@ -173,7 +219,7 @@ export default class StoryFeed extends HTMLElement {
         return /*html*/`
           <quick-post story="quick" url="${url}" hash="${story.hash}" likes="${story.likes}" 
             replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
-            replies-url="/api/v1${url}/replies" likes-url="/api/v1${url}/likes" images='${images}'
+            replies-url="${url}/replies" likes-url="${url}/likes" images='${images}'
             author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
             author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
             author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
@@ -187,8 +233,8 @@ export default class StoryFeed extends HTMLElement {
         return /*html*/`
           <poll-post story="poll" url="${url}" hash="${story.hash}" likes="${story.likes}" 
             replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
-            voted="${story.option ? 'true' : 'false'}" selected="${story.option}" end-time="${story.end}" replies-url="/api/v1${url}/replies" 
-            likes-url="/api/v1${url}/likes" options='${story.poll}' votes="${story.votes}" 
+            voted="${story.option ? 'true' : 'false'}" selected="${story.option}" end-time="${story.end}" replies-url="${url}/replies" 
+            likes-url="${url}/likes" options='${story.poll}' votes="${story.votes}" 
             author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
             author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
             author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
@@ -201,8 +247,8 @@ export default class StoryFeed extends HTMLElement {
       else if (story.kind === "story") {
         return /*html*/`
           <story-post story="story" hash="${story.hash}" url="${url}" 
-            topics="${story.topics.length === 0 ? 'story' : story.topics }" story-title="${story.title}" time="${story.createdAt}" replies-url="/api/v1${url}/replies" 
-            likes-url="/api/v1${url}/likes" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" likes="${story.likes}" 
+            topics="${story.topics.length === 0 ? 'story' : story.topics }" story-title="${story.title}" time="${story.createdAt}" replies-url="${url}/replies" 
+            likes-url="${url}/likes" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" likes="${story.likes}" 
             views="${story.views}" images='${images}'
             author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
             author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
@@ -215,27 +261,6 @@ export default class StoryFeed extends HTMLElement {
       }
     }).join('');
   }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
 
   parseToNumber = num_str => {
     // Try parsing the string to an integer
@@ -257,19 +282,17 @@ export default class StoryFeed extends HTMLElement {
     `;
   }
 
-  getLoader() {
+  getLoader = () => {
     return /* html */`
       <div class="loader-container">
-        <span id="btn-loader">
-          <span class="loader-alt"></span>
-        </span>
+        <div id="loader" class="loader"></div>
       </div>
-    `
+    `;
   }
 
   getBody = () => {
     // language=HTML
-    return `
+    return /* html */`
 			<div class="stories">
 				${this.getLoader()}
       </div>
@@ -456,55 +479,53 @@ export default class StoryFeed extends HTMLElement {
         }
 
         div.loader-container {
-          position: relative;
-          width: 100%;
-          height: 150px;
-          padding: 20px 0 0 0;
-        }
-
-        #btn-loader {
-          position: absolute;
-          top: 0;
-          left: 0;
-          bottom: 0;
-          right: 0;
-          z-index: 5;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: inherit;
+          width: 100%;
+          min-height: 200px;
+          min-width: 100%;
         }
 
-        #btn-loader > .loader-alt {
-          width: 35px;
-          aspect-ratio: 1;
-          --_g: no-repeat radial-gradient(farthest-side, #18A565 94%, #0000);
-          --_g1: no-repeat radial-gradient(farthest-side, #21D029 94%, #0000);
-          --_g2: no-repeat radial-gradient(farthest-side, #df791a 94%, #0000);
-          --_g3: no-repeat radial-gradient(farthest-side, #f09c4e 94%, #0000);
-          background:    var(--_g) 0 0,    var(--_g1) 100% 0,    var(--_g2) 100% 100%,    var(--_g3) 0 100%;
-          background-size: 30% 30%;
-          animation: l38 .9s infinite ease-in-out;
-          -webkit-animation: l38 .9s infinite ease-in-out;
-        }
-
-        #btn-loader > .loader {
+        div.loader-container > .loader {
           width: 20px;
           aspect-ratio: 1;
-          --_g: no-repeat radial-gradient(farthest-side, #ffffff 94%, #0000);
-          --_g1: no-repeat radial-gradient(farthest-side, #ffffff 94%, #0000);
-          --_g2: no-repeat radial-gradient(farthest-side, #df791a 94%, #0000);
-          --_g3: no-repeat radial-gradient(farthest-side, #f09c4e 94%, #0000);
-          background:    var(--_g) 0 0,    var(--_g1) 100% 0,    var(--_g2) 100% 100%,    var(--_g3) 0 100%;
-          background-size: 30% 30%;
-          animation: l38 .9s infinite ease-in-out;
-          -webkit-animation: l38 .9s infinite ease-in-out;
+          border-radius: 50%;
+          background: var(--accent-linear);
+          display: grid;
+          animation: l22-0 2s infinite linear;
         }
 
-        @keyframes l38 {
-          100% {
-            background-position: 100% 0, 100% 100%, 0 100%, 0 0
-          }
+        div.loader-container > .loader:before {
+          content: "";
+          grid-area: 1/1;
+          margin: 15%;
+          border-radius: 50%;
+          background: var(--second-linear);
+          transform: rotate(0deg) translate(150%);
+          animation: l22 1s infinite;
+        }
+
+        div.loader-container > .loader:after {
+          content: "";
+          grid-area: 1/1;
+          margin: 15%;
+          border-radius: 50%;
+          background: var(--accent-linear);
+          transform: rotate(0deg) translate(150%);
+          animation: l22 1s infinite;
+        }
+
+        div.loader-container > .loader:after {
+          animation-delay: -.5s
+        }
+
+        @keyframes l22-0 {
+          100% {transform: rotate(1turn)}
+        }
+
+        @keyframes l22 {
+          100% {transform: rotate(1turn) translate(150%)}
         }
 
         div.stories {

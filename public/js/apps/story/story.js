@@ -54,9 +54,6 @@ export default class AppStory extends HTMLElement {
     // connect to the WebSocket
     this.checkAndAddHandler();
 
-    // request user to enable notifications
-    this.checkNotificationPermission();
-
     // Get mql object
     const mql = window.matchMedia('(max-width: 660px)');
 
@@ -64,12 +61,6 @@ export default class AppStory extends HTMLElement {
 
     // view the story
     this.activateView();
-  }
-
-  checkNotificationPermission = async () => {
-    if(window.notify && !window.notify.permission) {
-      await window.notify.requestPermission();
-    }
   }
 
   checkAndAddHandler() {
@@ -388,7 +379,6 @@ export default class AppStory extends HTMLElement {
     const mql = window.matchMedia('(max-width: 660px)');
     if (mql.matches) {
       return /* html */`
-        ${this.getTop()}
         <span class="indicator"></span>
         ${this.getAuthor()}
         <div class="content" id="content-container">
@@ -403,7 +393,6 @@ export default class AppStory extends HTMLElement {
     else {
       return /* html */`
         <div class="content" id="content-container">
-          ${this.getTop()}
           <span class="indicator"></span>
           ${this.getHeader()}
           ${this.getContent()}
@@ -422,11 +411,8 @@ export default class AppStory extends HTMLElement {
   }
 
   getHeader = () => {
-    let str = this.topics[0];
-    let formatted = str.toLowerCase().replace(/(^|\s)\S/g, match => match.toUpperCase());
     return /*html*/`
       <div class="head">
-        <span class="topic">${formatted}</span>
         <h1 class="story-title">${this.getAttribute('story-title')}</h1>
       </div>
     `
@@ -443,15 +429,6 @@ export default class AppStory extends HTMLElement {
         ${parsedHTML}
       </article>
     `;
-  }
-
-  getTop = () => {
-    return /* html */ `
-      <header-wrapper section="Story" type="story"
-        user-url="${this.getAttribute('user-url')}" auth-url="${this.getAttribute('auth-url')}"
-        url="${this.getAttribute('story-url')}" search-url="${this.getAttribute('search-url')}">
-      </header-wrapper>
-    `
   }
 
   getAuthor = () => {

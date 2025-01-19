@@ -1,6 +1,7 @@
 import shots from "./shots/index.js";
 import chats from "./chats/index.js";
 import home from "./home/index.js";
+import story from "./story/index.js";
 
 import apps from "./apps/index.js";
 import containers from "./containers/index.js";
@@ -52,6 +53,8 @@ export default function uis(text) {
   shots();
   chats();
   home();
+  story();
+
   apps()
   containers()
   create()

@@ -195,27 +195,6 @@ export default class HeaderWrapper extends HTMLElement {
     return;
   }
 
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
-
   getCacheData = async (url, maxAge, options = {}) => {
     const cacheName = "user-cache";
   

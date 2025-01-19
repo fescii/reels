@@ -203,9 +203,10 @@ export default class CreateArticle extends HTMLDivElement {
 
     // let's create our shadow root
     // this.shadowObj = this.attachShadow({ mode: "open" });
-
+    
     this._url = this.getAttribute('api');
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -332,25 +333,17 @@ export default class CreateArticle extends HTMLDivElement {
       // validate the editor data
       if (!this.validateStepTwo(form, data, actions)) return;
 
-      // send data to server
-      const options = {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          kind: 'story',
-          published: true,
-          slug: this.slug,
-          title: this._title,
-          content: this.content
-        })
-      };
+      const body = JSON.stringify({
+        kind: 'story',
+        published: true,
+        slug: this.slug,
+        title: this._title,
+        content: this.content
+      })
 
       try {
         const url = '/s/add';
-        const response = await outerThis.fetchWithTimeout(url, options);
-        const result = await response.json();
+        const result = this.api.put(url, { content: 'json', body })
 
         // check if request was successful
         if (result.success) {
@@ -390,19 +383,12 @@ export default class CreateArticle extends HTMLDivElement {
 
   checkIfStoryExists = async (form, button, actions) => {
     const url  = '/s/check';
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        slug: this.slug
-      })
-    }
+    const body = JSON.stringify({
+      slug: this.slug,
+    });
 
     try {
-      const response = await this.fetchWithTimeout(url, options);
-      const result = await response.json();
+      const result = this.api.post(url, { content: 'json', body });
 
       if (result.success) {
         // activate the next step
@@ -602,27 +588,6 @@ export default class CreateArticle extends HTMLDivElement {
 
     return cleanedText;
   }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
 
   getServerSuccessMsg = (success, text) => {
     if (!success) {

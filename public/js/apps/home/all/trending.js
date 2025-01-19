@@ -4,7 +4,8 @@ export default class HomeRecent extends HTMLElement {
     super();
 
     this.url = this.getAttribute('url');
-    this.api = window.app.api;
+    this.app = window.app;
+    this.api = this.app.api;
     this.all = this.getRootNode().host;
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
@@ -43,28 +44,6 @@ export default class HomeRecent extends HTMLElement {
 
         setTimeout(() => {
           this.fetchFeeds(feedContainer);
-        }, 1000);
-      });
-    }
-  }
-
-  activateOfflineRefresh = () => {
-    const finish = this.shadowObj.querySelector('.finish');
-    if (finish) {
-      const btn = finish.querySelector('button.finish');
-      btn.addEventListener('click', () => {
-        // unblock the fetching
-        this._block = false;
-        this._empty = false;
-        
-        // re fetch the content
-        const feedContainer = this.shadowObj.querySelector('.stories');
-
-        // set the loader
-        feedContainer.innerHTML = this.getLoader();
-
-        setTimeout(() => {
-          this.fetchOfflineFeeds(feedContainer);
         }, 1000);
       });
     }
@@ -135,47 +114,6 @@ export default class HomeRecent extends HTMLElement {
       outerThis._block = true;
       // fetch the stories
       outerThis.fetching(url, feedContainer);
-    }
-  }
-
-  fetchOfflineFeeds = async feedContainer => {
-    const outerThis = this;
-    const url = this.url;
-    try {
-      // fetch from cache
-      const result = await outerThis.getOfflineData(url);
-
-      // check if it was not success:
-      if (!result.success) {
-        outerThis.populateFeeds(outerThis.getWrongMessage(), feedContainer);
-        // activate the refresh button
-        outerThis.activateOfflineRefresh();
-        return;
-      }
-
-      // get the data
-      const data = result.data;
-
-      if (data.last && data.stories.length === 0 && data.replies.length === 0) {
-        outerThis.populateFeeds(outerThis.getEmptyMsg(), feedContainer);
-        return;
-      }
-
-      const content = outerThis.mapFeeds(data.stories, data.replies);
-
-      outerThis.populateFeeds(content, feedContainer);
-      outerThis.setLastItem(feedContainer);
-
-      // set next
-      window.home = {
-        last: false,
-        next: 1,
-        loaded: true
-      }
-    } catch (error) {
-      outerThis.populateFeeds(outerThis.getOfflineWrong(), feedContainer);
-      // activate the refresh button
-      outerThis.activateOfflineRefresh();
     }
   }
 
@@ -311,64 +249,6 @@ export default class HomeRecent extends HTMLElement {
       throw new Error('No data available');
     }
   }
-
-  getCacheData = async (url, maxAge, options = {}) => {
-    const cacheName = "user-cache";
-  
-    try {
-      const cache = await caches.open(cacheName);
-      const cachedResponse = await cache.match(url);
-  
-      if (cachedResponse) {
-        const cachedData = await cachedResponse.json();
-        const cacheTime = cachedData.timestamp;
-  
-        // Check if cache is still valid
-        if (Date.now() - cacheTime < maxAge) {
-          return cachedData.data;
-        }
-      }
-  
-      // If cache doesn't exist or is expired, fetch new data
-      const networkResponse = await this.fetchWithTimeout(url, options);
-      const data = await networkResponse.clone().json();
-  
-      // Store the new data in cache with a timestamp
-      const cacheData = {
-        data: data,
-        timestamp: Date.now()
-      };
-      
-      const cacheResponse = new Response(JSON.stringify(cacheData));
-      await cache.put(url, cacheResponse);
-  
-      return data;
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      throw error;
-    }
-  };
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
 
   parseToNumber = num_str => {
     // Try parsing the string to an integer

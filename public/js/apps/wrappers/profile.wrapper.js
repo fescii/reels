@@ -8,12 +8,11 @@ export default class ProfileWrapper extends HTMLElement {
 
     // Get if the user is the current user
     this._you = this.getAttribute('you') === 'true';
-
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-    this.app = window.app;
     this.parent = this.getRootNode().host;
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -188,15 +187,6 @@ export default class ProfileWrapper extends HTMLElement {
 
     // add event listener to the follow action
     if (followBtn) {
-      // construct options
-      const options = {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        }
-      }
-
       followBtn.addEventListener('click', e => {
         e.preventDefault();
         e.stopPropagation();
@@ -219,78 +209,33 @@ export default class ProfileWrapper extends HTMLElement {
           }
 
           // Follow the topic
-          this.followUser(`${url}/follow`, options, followBtn, action);
+          this.followUser(`${url}/follow`, followBtn, action);
         }
       });
     }
   }
 
-  followUser = (url, options, followBtn, followed) => {
+  followUser = async (url, followBtn, followed) => {
     const outerThis = this;
-    this.fetchWithTimeout(url, options)
-      .then(response => {
-        response.json()
-        .then(data => {
-          // If data has unverified, open the join popup
-          if (data.unverified) {
-            // Get body
-            const body = document.querySelector('body');
-
-            // Open the join popup
-            outerThis.openJoin(body);
-
-            // revert the follow button
-            outerThis.updateFollowBtn(followed, followBtn);
-          }
-
-          // if success is false, show toast message
-          if (!data.success) {
-            this.app.showToast(false, data.message);
-
-            // revert the follow button
-            outerThis.updateFollowBtn(followed, followBtn);
-          }
-          else {
-            // Show toast message
-            this.app.showToast(true, data.message);
-
-            // Check for followed boolean
-            outerThis.updateFollowBtn(data.followed, followBtn);
-
-            // Update the followers
-            // outerThis.updateFollowers(data.followed);
-          }
-        });
-      })
-      .catch(_error => {
-        // show toast message
-        this.app.showToast(false, 'An error occurred!');
-
-        // revert the follow button
-        outerThis.updateFollowBtn(followed, followBtn);
-      });
-  }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
     try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
+      const data = await this.api.patch(url, { content: 'json' });
 
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
+      if (data.unverified) {
+        const body = document.querySelector('body');
+        outerThis.openJoin(body);
+        outerThis.updateFollowBtn(followed, followBtn);
+      } else if (!data.success) {
+        this.app.showToast(false, data.message);
+        outerThis.updateFollowBtn(followed, followBtn);
+      } else {
+        this.app.showToast(true, data.message);
+        outerThis.updateFollowBtn(data.followed, followBtn);
       }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
+    } catch (_error) {
+      this.app.showToast(false, 'An error occurred!');
+      outerThis.updateFollowBtn(followed, followBtn);
     }
-  };
+  }
 
   updateFollowBtn = (following, btn) => {
     if (following) {

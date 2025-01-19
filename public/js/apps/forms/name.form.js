@@ -7,7 +7,8 @@ export default class FormName extends HTMLElement {
     this.shadowObj = this.attachShadow({ mode: "open" });
 
     this._url = this.getAttribute('api');
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -79,18 +80,8 @@ export default class FormName extends HTMLElement {
       const button = form.querySelector('.action.next');
       button.innerHTML = outerThis.getButtonLoader();
 
-      // send data to server
-      const options = {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      };
-
       try {
-        const response = await outerThis.fetchWithTimeout(outerThis._url, options);
-        const result = await response.json();
+        const result = this.api.patch(this._url, { content: 'json', body: JSON.stringify(data) });
 
         // check if request was successful
         if (result.success) {
@@ -124,27 +115,6 @@ export default class FormName extends HTMLElement {
       }, 5000);
     });
   }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
 
   getServerSuccessMsg = (success, text) => {
     if (!success) {

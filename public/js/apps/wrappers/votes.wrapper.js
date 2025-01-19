@@ -1,30 +1,16 @@
 export default class VotesAuthor extends HTMLElement {
   constructor() {
-    // We are not even going to touch this.
     super();
-
-    // check if the user is authenticated
     this._authenticated = window.hash ? true : false;
-
-     // Get array of objects for poll options and parse to Array
     this._options = this.combinePollAndVotes(this.getAttribute('options'), this.getAttribute('votes'));
-
-    // Get the end time for the poll
     this._endTime = new Date(this.getAttribute('end-time'));
-
-    // Check if user has voted and convert to boolean
-    this._voted = true ? this.getAttribute('voted') === 'true' : false;
-
+    this._voted = this.getAttribute('voted') === 'true';
     this._selected = this.getAttribute('selected') || 'none';
-
-    // Check if user is the owner of the profile
-    this._you = true ? this.getAttribute('you') === 'true' : false;
+    this._you = this.getAttribute('you') === 'true';
     this.app = window.app;
-    // let's create our shadow root
+    this.api = this.app.api;
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.parent = this.getRootNode().host;
-
     this.render();
   }
 
@@ -33,13 +19,8 @@ export default class VotesAuthor extends HTMLElement {
   }
 
   combinePollAndVotes = (poll, votes) => {
-    // convert the poll string to an array
     const pollArray = poll.split(',');
-
-    // convert the votes string to an array
     const votesArray = votes.split(',');
-
-    // combine the poll and votes arrays to an object named options
     return pollArray.map((option, index) => {
       return {
         name: index + 1,
@@ -50,80 +31,49 @@ export default class VotesAuthor extends HTMLElement {
   }
 
   separatePollAndVotes = options => {
-    // get the options
     const poll = options.map(option => option.text).join(',');
-
-    // get the votes
     const votes = options.map(option => option.votes).join(',');
-
     return { poll, votes };
   }
 
-  // observe the attributes
   static get observedAttributes() {
     return ['options', 'votes', 'end-time', 'voted', 'selected', 'you', 'reload', 'vote'];
   }
 
-  // listen for changes in the attributes
   attributeChangedCallback(name, oldValue, newValue) {
-    // Check if the attribute is reload
-    if (name === 'reload') {
-
-      if (newValue === 'true') {
-        // re-render the component
-        this.render();
-
-        this.setAttribute('reload', false)
-
-        // re attach the event listeners
-        this.updatePollTime();
-        // Check if user has voted
-        if (this._voted) {
-          // disable all inputs
-          this.disableInputs();
-        }
-        else {
-          // Listen for checked radio button
-          this.listenForChecked();
-        }
+    if (name === 'reload' && newValue === 'true') {
+      this.render();
+      this.setAttribute('reload', false);
+      this.updatePollTime();
+      if (this._voted) {
+        this.disableInputs();
+      } else {
+        this.listenForChecked();
       }
     }
 
     if (name === 'vote') {
       const value = this.parseToNumber(this.getAttribute('vote'));
-      if(value === 0) {
-        return;
-      }
+      if (value === 0) return;
 
-      this.setAttribute('vote', 0)
-      // add one to the option votes where the option name is equal to the new value
+      this.setAttribute('vote', 0);
       this._options = this._options.map(option => {
         if (option.name === value) {
           return { ...option, votes: option.votes + 1 };
-        }
-        else {
+        } else {
           return option;
         }
       });
-      
 
-      // update votes attribute
       this.setAttribute('votes', this._options.map(option => option.votes).join(','));
-
       this.render();
-
-      // re attach the event listeners
       this.updatePollTime();
-      // Check if user has voted
       if (this._voted) {
-        // disable all inputs
         this.disableInputs();
-      }
-      else {
-        // Listen for checked radio button
+      } else {
         this.listenForChecked();
       }
-    }  
+    }
   }
 
   render() {
@@ -131,31 +81,22 @@ export default class VotesAuthor extends HTMLElement {
   }
 
   connectedCallback() {
-    // Update poll expiry time per second
     this.updatePollTime();
-
-    // Check if user has voted
     if (this._voted) {
-      // disable all inputs
       this.disableInputs();
-    }
-    else {
-      // Listen for checked radio button
+    } else {
       this.listenForChecked();
     }
   }
 
   convertToBool = str => {
-    return str === 'true' ? true : false;
+    return str === 'true';
   }
 
   disableScroll() {
-    // Get the current page scroll position
     let scrollTop = window.scrollY || document.documentElement.scrollTop;
     let scrollLeft = window.scrollX || document.documentElement.scrollLeft;
     document.body.classList.add("stop-scrolling");
-
-    // if any scroll is attempted, set this to the previous value
     window.onscroll = function () {
       window.scrollTo(scrollLeft, scrollTop);
     };
@@ -166,121 +107,50 @@ export default class VotesAuthor extends HTMLElement {
     window.onscroll = function () { };
   }
 
-  // perform actions
-  performVote = (option, selected, votes) => {
-    // get url to 
-    let hash = this.getAttribute('hash');
-    // trim and convert to lowercase
-    hash = hash.trim().toLowerCase();
-
-    // base api
+  performVote = async (option, selected, votes) => {
+    let hash = this.getAttribute('hash').trim().toLowerCase();
     const url = `/p/${hash}/vote/${option}`;
-
-    // define options 
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application',
-        'Accept': 'application/json',
-      }
-    }
-
-    // Vote for the story
-    this.vote(url, options, selected, votes);
+    await this.vote(url, selected, votes);
   }
 
-  vote = (url, options, selectedOption, votes) => {
+  vote = async (url, selectedOption, votes) => {
     const outerThis = this;
-    this.fetchWithTimeout(url, options)
-      .then(response => {
-        response.json()
-        .then(data => {
-          // If data has unverified, open the join popup
-          if (data.unverified) {
-            // Get body
-            const body = document.querySelector('body');
-
-            // Open the join popup
-            outerThis.openJoin(body);
-            this.app.showToast(false, data.message);
-
-            // revert selected to null
-            outerThis.setAttribute('selected', null);
-
-            outerThis.setAttribute('voted', 'false');
-
-            selectedOption.setAttribute('votes', votes);
-
-            outerThis._voted = false;
-            
-            // update reload attribute to true
-            outerThis.setAttribute('reload', 'true');
-          }
-
-          // if success is false, show toast message
-          if (!data.success) {
-            this.app.showToast(false, data.message);
-
-            // revert selected to null
-            outerThis.setAttribute('selected', null);
-
-            outerThis.setAttribute('voted', 'false');
-            selectedOption.setAttribute('votes', votes);
-
-            outerThis._voted = false;
-            
-            // update reload attribute to true
-            outerThis.setAttribute('reload', 'true');
-          }
-          else {
-            // Show toast message
-            this.app.showToast(true, data.message);
-
-            outerThis._voted = true;
-
-            // update the voted attribute
-            const sepObj = outerThis.separatePollAndVotes(outerThis._options);
-            // set attributes
-            outerThis.setAttributes('options', sepObj.poll);
-            outerThis.setAttributes('votes', sepObj.votes);
-            outerThis.setAttributes('voted', 'true');
-            outerThis.setAttributes('selected', data.vote[0].option);
-          }
-        });
-      })
-      .catch(_error => {
-        this.app.showToast(false, 'An error occurred!');
-
+    try {
+      const data = await this.api.post(url, { content: 'json' });
+      if (data.unverified) {
+        const body = document.querySelector('body');
+        outerThis.openJoin(body);
+        this.app.showToast(false, data.message);
+        outerThis.setAttribute('selected', null);
         outerThis.setAttribute('voted', 'false');
         selectedOption.setAttribute('votes', votes);
         outerThis._voted = false;
-        // revert selected to null
-        outerThis.setAttribute('selected', null);
-        // update reload attribute to true
         outerThis.setAttribute('reload', 'true');
-      });
-  }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
+      } else if (!data.success) {
+        this.app.showToast(false, data.message);
+        outerThis.setAttribute('selected', null);
+        outerThis.setAttribute('voted', 'false');
+        selectedOption.setAttribute('votes', votes);
+        outerThis._voted = false;
+        outerThis.setAttribute('reload', 'true');
+      } else {
+        this.app.showToast(true, data.message);
+        outerThis._voted = true;
+        const sepObj = outerThis.separatePollAndVotes(outerThis._options);
+        outerThis.setAttributes('options', sepObj.poll);
+        outerThis.setAttributes('votes', sepObj.votes);
+        outerThis.setAttributes('voted', 'true');
+        outerThis.setAttributes('selected', data.vote[0].option);
       }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
+    } catch (_error) {
+      this.app.showToast(false, 'An error occurred!');
+      outerThis.setAttribute('voted', 'false');
+      selectedOption.setAttribute('votes', votes);
+      outerThis._voted = false;
+      outerThis.setAttribute('selected', null);
+      outerThis.setAttribute('reload', 'true');
     }
-  };
+  }
 
   openJoin = body => {
     // Insert getJoin beforeend

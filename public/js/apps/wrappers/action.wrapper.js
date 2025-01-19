@@ -10,7 +10,8 @@ export default class ActionWrapper extends HTMLElement {
     this.shadowObj = this.attachShadow({ mode: "open" });
 
     this.parent = this.getRootNode().host;
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -170,89 +171,56 @@ export default class ActionWrapper extends HTMLElement {
     `;
   }
 
-  performActions = (likeBtn, liked) => {
+  performActions = async (likeBtn, liked) => {
     // get url to 
     let baseUrl = this.getAttribute('url');
 
     // base api
-    const url = `${baseUrl}/like`
-
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      }
-    }
+    const url = `${baseUrl}/like`;
 
     // Follow the topic
-    this.like(url, options, likeBtn, liked);
+    await this.like(url, likeBtn, liked);
   }
 
-  like = (url, options, likeBtn, liked) => {
+  like = async (url, likeBtn, liked) => {
     const outerThis = this;
-    this.fetchWithTimeout(url, options)
-      .then(response => {
-        response.json()
-        .then(data => {
-          // If data has unverified, open the join popup
-          if (data.unverified) {
-            // Get body
-            const body = document.querySelector('body');
-
-            // Open the join popup
-            outerThis.openJoin(body);
-
-            // revert the like button
-            outerThis.updateLikeBtn(likeBtn, liked);
-          }
-
-          // if success is false, show toast message
-          if (!data.success) {
-            this.app.showToast(false, data.message);
-
-            // revert the like button
-            outerThis.updateLikeBtn(likeBtn, liked);
-          }
-          else {
-            // Show toast message
-            this.app.showToast(true, data.message);
-
-            // check the data.liked
-            if (data.liked !== liked) {
-              // revert the like button
-              outerThis.updateLikeBtn(likeBtn, data.liked ? false : true); 
-            }
-          }
-        });
-      })
-      .catch(_error => {
-        // show toast message
-        this.app.showToast(false, 'An error occurred!');
-
-        // revert the like button
-        outerThis.updateLikeBtn(likeBtn, liked);
-      });
-  }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
     try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
+      const data = await this.api.post(url, { content: 'json' });
 
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
+      // If data has unverified, open the join popup
+      if (data.unverified) {
+      // Get body
+      const body = document.querySelector('body');
+
+      // Open the join popup
+      outerThis.openJoin(body);
+
+      // revert the like button
+      outerThis.updateLikeBtn(likeBtn, liked);
       }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
+
+      // if success is false, show toast message
+      if (!data.success) {
+      this.app.showToast(false, data.message);
+
+      // revert the like button
+      outerThis.updateLikeBtn(likeBtn, liked);
+      } else {
+      // Show toast message
+      this.app.showToast(true, data.message);
+
+      // check the data.liked
+      if (data.liked !== liked) {
+        // revert the like button
+        outerThis.updateLikeBtn(likeBtn, data.liked ? false : true); 
+      }
+      }
+    } catch (_error) {
+      // show toast message
+      this.app.showToast(false, 'An error occurred!');
+
+      // revert the like button
+      outerThis.updateLikeBtn(likeBtn, liked);
     }
   }
 
@@ -335,7 +303,7 @@ export default class ActionWrapper extends HTMLElement {
       // Get the svg node
       const svg = likeButton.querySelector('svg');
 
-      likeButton.addEventListener('click', e => {
+      likeButton.addEventListener('click', async e => {
         // prevent the default action
         e.preventDefault()
 
@@ -387,7 +355,7 @@ export default class ActionWrapper extends HTMLElement {
           }, 200);
 
           // perform like
-          outerThis.performActions(likeButton, false);
+          await outerThis.performActions(likeButton, false);
         }
         else {
           // Set the new value of likes
@@ -409,7 +377,7 @@ export default class ActionWrapper extends HTMLElement {
           }, 200);
 
           // perform like
-          outerThis.performActions(likeButton, true)
+          await outerThis.performActions(likeButton, true)
         }
         // Scroll the likes
         this.scrollLikes(liked ? false : true);

@@ -1,7 +1,6 @@
 export default class PeopleFeed extends HTMLElement {
   constructor() {
     super();
-    this.api = window.app.api;
     this._block = false;
     this._empty = false;
     this._page = this.parseToNumber(this.getAttribute('page'));
@@ -9,7 +8,8 @@ export default class PeopleFeed extends HTMLElement {
     this._kind = this.getAttribute('kind');
     this._url = this.getAttribute('url');
     this._isFirstLoad = true; // Add this line
-    
+    this.app = window.app;
+    this.api = this.app.api;
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.render();
   }

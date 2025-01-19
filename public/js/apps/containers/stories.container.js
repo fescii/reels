@@ -7,7 +7,8 @@ export default class StoriesContainer extends HTMLElement {
 
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -22,14 +23,7 @@ export default class StoriesContainer extends HTMLElement {
   connectedCallback() {
     const contentContainer = this.shadowObj.querySelector('.stories');
 
-    // check if offline
-    const offline = this.convertToBoolean(this.getAttribute('offline'));
-
-    if (offline) {
-      this.fetchOfflineFeeds(contentContainer);
-    } else {
-      this.fetchStories(contentContainer);
-    }
+    this.fetchStories(contentContainer);
   }
 
   activateRefresh = () => {
@@ -76,154 +70,47 @@ export default class StoriesContainer extends HTMLElement {
     }
   }
 
-  fetchStories = contentContainer => {
+  fetchStories = async contentContainer => {
     const mql = window.matchMedia('(max-width: 660px)');
     const outerThis = this;
-		// fetch the user stats
-    const options = {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    };
 
-    this.fetchWithTimeout(this._url, options)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        // check for success response
-        if (data.success) {
-          if(data.stories.length === 0) {
-            // display empty message
-            const content = outerThis.getEmpty();
-            contentContainer.innerHTML = content;
-            return;
-          }
-          // update the content
-          const content = outerThis.mapFields(data.stories);
-          contentContainer.innerHTML = content;
-          // set the last item border-bottom to none
-          outerThis.setLastItem(contentContainer);
+    try {
+      const data = await this.api.get(this._url, { content: 'json', body });
 
-          if (mql.matches) {
-            // set next
-            window.home = {
-              last: false,
-              next: 2,
-              loaded: true
-            }
-          } else {
-            // set next
-            window.home = {
-              last: false,
-              next: 3,
-              loaded: true
-            }
-          }
-        }
-        else {
-          // display error message
+      if (data.success) {
+        if (data.stories.length === 0) {
           const content = outerThis.getEmpty();
           contentContainer.innerHTML = content;
+          return;
         }
-      })
-      .catch(error => {
-        // display error message
-        contentContainer.innerHTML = outerThis.getWrongMessage();
 
-        // activate the refresh button
-        outerThis.activateRefresh();
-      });
-	}
+        const content = outerThis.mapFields(data.stories);
+        contentContainer.innerHTML = content;
+        outerThis.setLastItem(contentContainer);
 
-  fetchOfflineFeeds = async feedContainer => {
-    const mql = window.matchMedia('(max-width: 660px)');
-    const outerThis = this;
-    const url = this._url;
-    try {
-      // fetch from cache
-      const data = await outerThis.getOfflineData(url);
-
-      // if empty
-      if (data.stories.length === 0) {
-        // display empty message
-        feedContainer.innerHTML = outerThis.getEmpty();
-        return;
-      }
-
-      // update the content
-      const content = outerThis.mapFields(data.stories);
-      feedContainer.innerHTML = content;
-      // set the last item border-bottom to none
-      outerThis.setLastItem(feedContainer);
-
-      if (mql.matches) {
-        // set next
-        window.home = {
-          last: false,
-          next: 2,
-          loaded: true
+        if (mql.matches) {
+          this.app.home = {
+            last: false,
+            next: 2,
+            loaded: true
+          }
+        } else {
+          this.app.home = {
+            last: false,
+            next: 3,
+            loaded: true
+          }
         }
       } else {
-        // set next
-        window.home = {
-          last: false,
-          next: 3,
-          loaded: true
-        }
+        const content = outerThis.getEmpty();
+        contentContainer.innerHTML = content;
       }
     } catch (error) {
-      // display error message
-      feedContainer.innerHTML = outerThis.getOfflineWrong();
-      outerThis.activateOfflineRefresh();
+      contentContainer.innerHTML = outerThis.getWrongMessage();
+      outerThis.activateRefresh();
     }
   }
 
-  getOfflineData = async url => {
-    const cacheName = "user-cache";
-
-    try {
-      const cache = await caches.open(cacheName);
-      const cachedResponse = await cache.match(url);
-
-      if (cachedResponse) {
-        const cachedData = await cachedResponse.json();
-  
-        // return the data
-        return cachedData.data;
-      } else {
-        // throw an error
-        throw new Error('No data available');
-      }
-
-    } catch (error) {
-      // console.error('Error fetching data:', error);
-      throw error;
-    }
-  }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  }
 
   mapFields = data => {
     return data.map(story => {

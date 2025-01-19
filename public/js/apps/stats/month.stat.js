@@ -7,7 +7,8 @@ export default class MonthStat extends HTMLElement {
 
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -47,20 +48,9 @@ export default class MonthStat extends HTMLElement {
   fetchStat = contentContainer => {
     const outerThis = this;
 		setTimeout(async () => {
-      // fetch the user stats
-      const options = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          // set the cache control to max-age to 1 day
-          "Cache-Control": "max-age=86400",
-          "Accept": "application/json"
-        }
-      }
-
       try {
         // fetch 
-        const result = await outerThis.getCacheData(outerThis._url, 86400, options)
+        const result = await this.api.get(this._url, { content: 'json'}, { allow: true, duration: 86400 });
   
         // if result is not successful
         if (!result.success) {
@@ -92,64 +82,6 @@ export default class MonthStat extends HTMLElement {
       }
 		}, 1000)
 	}
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
-
-  getCacheData = async (url, maxAge, options = {}) => {
-    const cacheName = "user-cache";
-  
-    try {
-      const cache = await caches.open(cacheName);
-      const cachedResponse = await cache.match(url);
-  
-      if (cachedResponse) {
-        const cachedData = await cachedResponse.json();
-        const cacheTime = cachedData.timestamp;
-  
-        // Check if cache is still valid
-        if (Date.now() - cacheTime < maxAge) {
-          return cachedData.data;
-        }
-      }
-  
-      // If cache doesn't exist or is expired, fetch new data
-      const networkResponse = await this.fetchWithTimeout(url, options);
-      const data = await networkResponse.clone().json();
-  
-      // Store the new data in cache with a timestamp
-      const cacheData = {
-        data: data,
-        timestamp: Date.now()
-      };
-      
-      const cacheResponse = new Response(JSON.stringify(cacheData));
-      await cache.put(url, cacheResponse);
-  
-      return data;
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      throw error;
-    }
-  };
 
   calculateTotal = (story, reply) => {
     const data = {

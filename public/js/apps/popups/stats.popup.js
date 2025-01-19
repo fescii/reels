@@ -8,7 +8,8 @@ export default class StatsPopup extends HTMLElement {
 
     // let's create our shadow root
     this.shadowObj = this.attachShadow({mode: 'open'});
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -34,66 +35,31 @@ export default class StatsPopup extends HTMLElement {
   fetchTopics = (contentContainer) => {
     const outerThis = this;
 		const topicsLoader = this.shadowObj.querySelector('.loader-container');
-		setTimeout(() => {
-      // fetch the user stats
-      const options = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      };
-  
-      this.fetchWithTimeout(this._url, options)
-        .then(response => {
-          return response.json();
-        })
-        .then(data => {
-          // check for success response
-          if (data.success) {
-            // update the content
-            const content = outerThis.getHighlights(data.data);
-            // remove the loader
-            topicsLoader.remove();
-            // insert the content
-            contentContainer.insertAdjacentHTML('beforeend', content);
-          }
-          else {
-            // display error message
-            const content = outerThis.getEmpty();
-            topicsLoader.remove();
-            contentContainer.insertAdjacentHTML('beforeend', content);
-          }
-        })
-        .catch(error => {
-          // display error message
-          const content = outerThis.getEmpty();
-          topicsLoader.remove();
-          contentContainer.insertAdjacentHTML('beforeend', content);
-        });
-		}, 2000)
-	}
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
+    setTimeout(async () => {
+      try {
+      const data = await this.api.get(this._url, { content: 'json' });
+      // check for success response
+      if (data.success) {
+        // update the content
+        const content = outerThis.getHighlights(data.data);
+        // remove the loader
+        topicsLoader.remove();
+        // insert the content
+        contentContainer.insertAdjacentHTML('beforeend', content);
+      } else {
+        // display error message
+        const content = outerThis.getEmpty();
+        topicsLoader.remove();
+        contentContainer.insertAdjacentHTML('beforeend', content);
       }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
+      } catch (error) {
+      // display error message
+      const content = outerThis.getEmpty();
+      topicsLoader.remove();
+      contentContainer.insertAdjacentHTML('beforeend', content);
+      }
+    }, 2000);
+	}
 
   formatNumber = n => {
     if (n >= 0 && n <= 999) {

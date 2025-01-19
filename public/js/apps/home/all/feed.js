@@ -2,13 +2,14 @@ export default class HomeFeed extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-    this.api = window.app.api;
     this._isFirstLoad = true;
     this._block = false;
     this._empty = false;
     this._page = this.parseToNumber(this.getAttribute('page'));
     this._url = this.getAttribute('url');
     this.all = this.getRootNode().host;
+    this.app = window.app;
+    this.api = this.app.api;
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.render();

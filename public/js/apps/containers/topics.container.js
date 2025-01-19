@@ -1,37 +1,30 @@
 export default class TopicsContainer extends HTMLElement {
-	constructor() {
-		// We are not even going to touch this.
-		super();
+  constructor() {
+    // We are not even going to touch this.
+    super();
 
-		this._url = this.getAttribute('url');
+    this._url = this.getAttribute('url');
 
-		// let's create our shadow root
-		this.shadowObj = this.attachShadow({ mode: "open" });
+    // let's create our shadow root
+    this.shadowObj = this.attachShadow({ mode: "open" });
+    this.app = window.app;
+    this.api = this.app.api;
+    this.render();
+  }
 
-		this.render();
-	}
-
-	render() {
-		this.shadowObj.innerHTML = this.getTemplate();
-	}
+  render() {
+    this.shadowObj.innerHTML = this.getTemplate();
+  }
 
   convertToBoolean = value => {
     return value === 'true';
   }
 
-	connectedCallback() {
-		const contentContainer = this.shadowObj.querySelector('div.content');
+  connectedCallback() {
+    const contentContainer = this.shadowObj.querySelector('div.content');
 
-    // get offline attribute
-    const offline = this.convertToBoolean(this.getAttribute('offline'));
-
-    // if offline is true
-    if (offline) {
-      this.fetchOfflineFeeds(contentContainer);
-    } else {
-			this.fetchTopics(contentContainer);
-		}
-	}
+    this.fetchTopics(contentContainer);
+  }
 
   activateRefresh = () => {
     const finish = this.shadowObj.querySelector('.finish');
@@ -41,7 +34,7 @@ export default class TopicsContainer extends HTMLElement {
         // unblock the fetching
         this._block = false;
         this._empty = false;
-        
+
         // re fetch the content
         const feedContainer = this.shadowObj.querySelector('div.content');
 
@@ -54,43 +47,13 @@ export default class TopicsContainer extends HTMLElement {
       });
     }
   }
-
-  activateOfflineRefresh = () => {
-    const finish = this.shadowObj.querySelector('.finish');
-    if (finish) {
-      const btn = finish.querySelector('button.finish');
-      btn.addEventListener('click', () => {
-        // unblock the fetching
-        this._block = false;
-        this._empty = false;
-        
-        // re fetch the content
-        const feedContainer = this.shadowObj.querySelector('.stories');
-
-        // set the loader
-        feedContainer.innerHTML = this.getLoader();
-
-        setTimeout(() => {
-          this.fetchOfflineFeeds(feedContainer);
-        }, 1000);
-      });
-    }
-  }
-
-	fetching = async (url, topicsContainer) => {
+  
+  fetching = async (url, topicsContainer) => {
     const mql = window.matchMedia('(max-width: 660px)');
     const outerThis = this;
-    const options = { 
-      method: 'GET',
-      // set the cache control to max-age to 2 hours
-      "Cache-Control": "max-age=7200",
-      "Accept": "application/json"
-    }
-
-
     try {
       // fetch 
-      const result = await outerThis.getCacheData(url, 7200, options)
+      const result = await this.api.get(url, { content: 'json' }, { allow: true, duration: 7200 });
 
       // if result is not successful
       if (!result.success) {
@@ -98,22 +61,22 @@ export default class TopicsContainer extends HTMLElement {
         this.activateRefresh();
         return;
       }
-      
+
       const data = result.data;
-  
-      if(data.topics.length === 0) {
+
+      if (data.topics.length === 0) {
         topicsContainer.innerHTML = outerThis.getEmptyMsg();
         return;
       }
-      
+
       const content = outerThis.mapFields(data.topics);
       topicsContainer.insertAdjacentHTML('beforebegin', outerThis.getTitle())
-      topicsContainer.innerHTML =  content
+      topicsContainer.innerHTML = content
       outerThis.setLastItem(topicsContainer);
 
       if (mql.matches) {
         // set next
-        window.home = {
+        this.app.home = {
           last: false,
           next: 3,
           loaded: true
@@ -127,117 +90,11 @@ export default class TopicsContainer extends HTMLElement {
     }
   }
 
-  fetchOfflineFeeds = async topicsContainer => {
-    const mql = window.matchMedia('(max-width: 660px)');
-    const outerThis = this;
-    const url = this._url;
-    try {
-      // fetch from cache
-      const result = await outerThis.getOfflineData(url);
-
-      // if result is not successful
-      if (!result.success) {
-        topicsContainer.innerHTML = outerThis.getWrongMessage();
-        this.activateOfflineRefresh();
-        return;
-      }
-
-      // get the data
-      const data = result.data;
-
-      // if topics is empty
-      if (data.topics.length === 0) {
-        topicsContainer.innerHTML = outerThis.getEmptyMsg();
-        this.activateOfflineRefresh();
-        return;
-      }
-
-      // map the fields
-      const content = outerThis.mapFields(data.topics);
-      topicsContainer.innerHTML = content;
-      outerThis.setLastItem(topicsContainer);
-      if(mql.matches) {
-        // set next
-        window.home = {
-          last: false,
-          next: 3,
-          loaded: true
-        }
-      }
-    } catch (error) {
-      // display error message
-      topicsContainer.innerHTML = outerThis.getOfflineWrong();
-
-      // activate the refresh button
-      outerThis.activateOfflineRefresh();
-    }
-  }
-
-  getOfflineData = async url => {
-    const cacheName = "user-cache";
-
-    try {
-      const cache = await caches.open(cacheName);
-      const cachedResponse = await cache.match(url);
-
-      if (cachedResponse) {
-        const cachedData = await cachedResponse.json();
-  
-        // return the data
-        return cachedData.data;
-      } else {
-        // throw an error
-        throw new Error('No data available');
-      }
-
-    } catch (error) {
-      // console.error('Error fetching data:', error);
-      throw error;
-    }
-  }
-
-  getCacheData = async (url, maxAge, options = {}) => {
-    const cacheName = "user-cache";
-  
-    try {
-      const cache = await caches.open(cacheName);
-      const cachedResponse = await cache.match(url);
-  
-      if (cachedResponse) {
-        const cachedData = await cachedResponse.json();
-        const cacheTime = cachedData.timestamp;
-  
-        // Check if cache is still valid
-        if (Date.now() - cacheTime < maxAge) {
-          return cachedData.data;
-        }
-      }
-  
-      // If cache doesn't exist or is expired, fetch new data
-      const networkResponse = await this.fetchWithTimeout(url, options);
-      const data = await networkResponse.clone().json();
-  
-      // Store the new data in cache with a timestamp
-      const cacheData = {
-        data: data,
-        timestamp: Date.now()
-      };
-      
-      const cacheResponse = new Response(JSON.stringify(cacheData));
-      await cache.put(url, cacheResponse);
-  
-      return data;
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      throw error;
-    }
-  };
-
   fetchTopics = topicsContainer => {
     const outerThis = this;
     const url = `${this._url}?limit=10`;
 
-    if(!this._block && !this._empty) {
+    if (!this._block && !this._empty) {
       outerThis.fetching(url, topicsContainer);
     }
   }
@@ -245,14 +102,14 @@ export default class TopicsContainer extends HTMLElement {
   populateTopics = (content, topicsContainer) => {
     // get the loader and remove it
     const loader = topicsContainer.querySelector('topic-loader');
-    if (loader){
+    if (loader) {
       loader.remove();
     }
 
     // insert the content
     topicsContainer.insertAdjacentHTML('beforeend', content);
   }
-  
+
   mapFields = data => {
     return data.map(topic => {
       const author = topic.topic_author;
@@ -289,27 +146,6 @@ export default class TopicsContainer extends HTMLElement {
     }
   }
 
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
-
   setLastItem = contentContainer => {
     // get last element child (topic)
     const lastItem = contentContainer.lastElementChild;
@@ -321,38 +157,38 @@ export default class TopicsContainer extends HTMLElement {
     }
   }
 
-	getTemplate = () => {
-		// Show HTML Here
-		return `
+  getTemplate = () => {
+    // Show HTML Here
+    return `
       ${this.getBody()}
       ${this.getStyles()}
     `;
-	}
+  }
 
-	getLoader = () => {
-		return `
+  getLoader = () => {
+    return /* html */`
 			<topic-loader speed="300"></topic-loader>
 		`
-	}
+  }
 
-	getBody = () => {
-		// get mql for media query: desktop
-		return /* html */`
+  getBody = () => {
+    // get mql for media query: desktop
+    return /* html */`
 		  <div class="content">
 				${this.getLoader()}
 			</div>
 		`;
-	}
+  }
 
-	getTitle = () => {
-		return /*html*/`
+  getTitle = () => {
+    return /*html*/`
 			<div class="title">
 				<h2>Most read topics</h2>
 			</div>
 		`
-	}
+  }
 
-	getEmptyMsg = () => {
+  getEmptyMsg = () => {
     // get the next attribute
     return /*html*/`
     <div class="empty">
@@ -390,8 +226,8 @@ export default class TopicsContainer extends HTMLElement {
     `;
   }
 
-	getStyles() {
-		return /* css */`
+  getStyles() {
+    return /* css */`
 	    <style>
 	      *,
 	      *:after,
@@ -572,5 +408,5 @@ export default class TopicsContainer extends HTMLElement {
 				}
 	    </style>
     `;
-	}
+  }
 }

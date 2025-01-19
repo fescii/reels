@@ -9,7 +9,8 @@ export default class TopicFeed extends HTMLElement {
     this._url = this.getAttribute('url');
     this._kind = this.getAttribute('kind');
     this._query = this.setQuery(this.getAttribute('query'));
-
+    this.app = window.app;
+    this.api = this.app.api;
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
 
@@ -76,8 +77,7 @@ export default class TopicFeed extends HTMLElement {
   fetching = async (url, topicsContainer) => {
     const outerThis = this;
     try {
-      const response = await this.fetchWithTimeout(url);
-      const result = await response.json();
+      const result = this.api.get(url, { content: 'json' })
 
       if (!result.success) {
         outerThis._empty = true;
@@ -191,27 +191,6 @@ export default class TopicFeed extends HTMLElement {
     }
     else {
       return data
-    }
-  }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
     }
   }
 

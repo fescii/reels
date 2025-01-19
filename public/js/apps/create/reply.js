@@ -11,7 +11,8 @@ export default class CreateReply extends HTMLDivElement {
     this._url = this.getAttribute('api');
 
     this.kind = this.getAttribute('kind');
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -171,18 +172,8 @@ export default class CreateReply extends HTMLDivElement {
       body.kind = this.kind;
       body.content = outerThis.processTextAreaInput(body.content)
 
-      // send data to server
-      const options = {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-      };
-
       try {
-        const response = await outerThis.fetchWithTimeout(this._url, options);
-        const result = await response.json();
+        const result = this.api.put(this._url, { content: 'json', body: JSON.stringify(body) });
 
         // check if request was successful
         if (result.success) {
@@ -194,7 +185,7 @@ export default class CreateReply extends HTMLDivElement {
           actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, result.message));
 
           // reset button
-          button.innerHTML = '<span class="text">Reply</span>';
+          button.innerHTML = /* html */`<span class="text">Reply</span>`;
           // enable pointer events
           button.style.pointerEvents = 'auto';
         }
@@ -270,27 +261,6 @@ export default class CreateReply extends HTMLDivElement {
     }
       
     return true;
-  }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
   }
 
   getServerSuccessMsg = (success, text) => {

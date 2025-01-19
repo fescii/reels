@@ -9,7 +9,8 @@ export default class PreviewPopup extends HTMLElement {
 
     // let's create our shadow root
     this.shadowObj = this.attachShadow({mode: 'open'});
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -35,158 +36,119 @@ export default class PreviewPopup extends HTMLElement {
   fetchPreview = (contentContainer) => {
     const outerThis = this;
 		const previewLoader = this.shadowObj.querySelector('.loader-container');
-		setTimeout(() => {
-      // fetch the user stats
-      const options = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+    setTimeout(async () => {
+      try {
+      const result = await this.api.get(this._url, { content: 'json' });
+
+      // check for success response
+      if (result.success) {
+        if (result.reply) {
+        const reply = result.reply;
+        outerThis._story = outerThis.mapReply(reply);
+        const replyContent = outerThis.populateReply(reply);
+        // remove the loader
+        previewLoader.remove();
+        // insert the content
+        contentContainer.insertAdjacentHTML('beforeend', replyContent);
+
+        // open the story
+        this.openStory();
+
+        // open the read more
+        this.openReadMore();
+        // open the url
+        this.openUrl();
+        // style lastBlock
+        this.styleLastBlock();
+        } else if (result.story) {
+        const story = result.story;
+        outerThis._story = outerThis.mapStory(story);
+        // remove the loader
+        previewLoader.remove();
+
+        // switch between the different kind of story
+        if (story.kind === 'post') {
+          const postContent = outerThis.populatePost(story);
+          contentContainer.insertAdjacentHTML('beforeend', postContent);
+        } else if (story.kind === 'poll') {
+          const pollContent = outerThis.populatePoll(story);
+          contentContainer.insertAdjacentHTML('beforeend', pollContent);
+        } else if (story.kind === 'story') {
+          const storyContent = outerThis.populateStory(story);
+          contentContainer.insertAdjacentHTML('beforeend', storyContent);
         }
-      };
-  
-      this.fetchWithTimeout(this._url, options)
-        .then(response => {
-          return response.json();
-        })
-        .then(result => {
-          // check for success response
-          if (result.success) {
-            if(result.reply) {
-              const reply = result.reply;
-              outerThis._story = outerThis.mapReply(reply);
-              const replyContent = outerThis.populateReply(reply);
-              // remove the loader
-              previewLoader.remove();
-              // insert the content
-              contentContainer.insertAdjacentHTML('beforeend', replyContent);
 
-              // open the story
-              this.openStory();
+        this.openStory();
 
-              // open the read more
-              this.openReadMore();
-              // open the url
-              this.openUrl();
-              // style lastBlock
-              this.styleLastBlock()
-            }
-            else if (result.story){
-              const story = result.story;
-              outerThis._story = outerThis.mapStory(story);
-              // remove the loader
-              previewLoader.remove();
+        // open the read more
+        this.openReadMore();
+        // open the url
+        this.openUrl();
+        // style lastBlock
+        this.styleLastBlock();
+        } else if (result.user) {
+        const user = result.user;
+        const bio = user.bio === null ? 'This user has not added a bio yet.' : user.bio;
+        const userContent = outerThis.removeHtml(bio, user.name);
+        outerThis._story = outerThis.mapUser(user);
+        const content = outerThis.getUserContent(userContent, `/u/${user.hash.toLowerCase()}`, user.hash, user.followers, user.following);
 
-              // switch between the different kind of story
-              if (story.kind === 'post') {
-                const postContent = outerThis.populatePost(story);
-                contentContainer.insertAdjacentHTML('beforeend', postContent);
-              } else if (story.kind === 'poll') {
-                const pollContent = outerThis.populatePoll(story);
-                contentContainer.insertAdjacentHTML('beforeend', pollContent);
-              } else if (story.kind === 'story') {
-                const storyContent = outerThis.populateStory(story);
-                contentContainer.insertAdjacentHTML('beforeend', storyContent);
-              }
+        // remove the loader
+        previewLoader.remove();
 
-              this.openStory();
+        // insert the content
+        contentContainer.insertAdjacentHTML('beforeend', content);
 
-              // open the read more
-              this.openReadMore();
-              // open the url
-              this.openUrl();
-              // style lastBlock
-              this.styleLastBlock()
-            }
-            else if (result.user){
-              const user = result.user;
-              const bio = user.bio === null ? 'This user has not added a bio yet.' : user.bio;
-              const userContent = outerThis.removeHtml(bio, user.name);
-              outerThis._story = outerThis.mapUser(user);
-              const content = outerThis.getUserContent(userContent, `/u/${user.hash.toLowerCase()}`, user.hash, user.followers, user.following);
+        // open the story
+        this.openStory();
 
-              // remove the loader
-              previewLoader.remove();
+        // open the read more
+        this.openReadMore();
+        // open the url
+        this.openUrl();
+        // style lastBlock
+        this.styleLastBlock();
+        } else if (result.topic) {
+        const topic = result.topic;
+        const topicContent = outerThis.removeHtml(topic.summary, topic.name);
+        outerThis._story = outerThis.mapTopic(topic);
+        const content = outerThis.getTopicContent(topicContent, `/t/${topic.hash.toLowerCase()}`, topic.author, topic.followers);
 
-              // insert the content
-              contentContainer.insertAdjacentHTML('beforeend', content);
+        // remove the loader
+        previewLoader.remove();
 
-              // open the story
-              this.openStory();
+        // insert the content
+        contentContainer.insertAdjacentHTML('beforeend', content);
 
-              // open the read more
-              this.openReadMore();
-              // open the url
-              this.openUrl();
-              // style lastBlock
-              this.styleLastBlock();
-            }
-            else if (result.topic){
-              const topic = result.topic;
-              const topicContent = outerThis.removeHtml(topic.summary, topic.name);
-              outerThis._story = outerThis.mapTopic(topic);
-              const content = outerThis.getTopicContent(topicContent, `/t/${topic.hash.toLowerCase()}`, topic.author, topic.followers);
+        // open the story
+        this.openStory();
 
-              // remove the loader
-              previewLoader.remove();
-
-              // insert the content
-              contentContainer.insertAdjacentHTML('beforeend', content);
-
-              // open the story
-              this.openStory();
-
-              // open the read more
-              this.openReadMore();
-              // open the url
-              this.openUrl();
-              // style lastBlock
-              this.styleLastBlock()
-            }
-
-            else {
-              // display error message
-              const content = outerThis.getEmpty();
-              previewLoader.remove();
-              contentContainer.insertAdjacentHTML('beforeend', content);
-            }
-          }
-          else {
-            // display error message
-            const content = outerThis.getEmpty();
-            previewLoader.remove();
-            contentContainer.insertAdjacentHTML('beforeend', content);
-          }
-        })
-        .catch(error => {
-          // display error message
-          const content = outerThis.getEmpty();
-          previewLoader.remove();
-          contentContainer.insertAdjacentHTML('beforeend', content);
-        });
-		}, 2000)
-	}
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
+        // open the read more
+        this.openReadMore();
+        // open the url
+        this.openUrl();
+        // style lastBlock
+        this.styleLastBlock();
+        } else {
+        // display error message
+        const content = outerThis.getEmpty();
+        previewLoader.remove();
+        contentContainer.insertAdjacentHTML('beforeend', content);
+        }
+      } else {
+        // display error message
+        const content = outerThis.getEmpty();
+        previewLoader.remove();
+        contentContainer.insertAdjacentHTML('beforeend', content);
       }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  }
+      } catch (error) {
+      // display error message
+      const content = outerThis.getEmpty();
+      previewLoader.remove();
+      contentContainer.insertAdjacentHTML('beforeend', content);
+      }
+    }, 2000);
+	}
 
   populateStory = story => {
     const author = story.story_author

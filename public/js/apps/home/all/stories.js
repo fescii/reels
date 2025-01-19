@@ -2,7 +2,8 @@ export default class HomeStories extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-    this.api = window.app.api;
+    this.app = window.app;
+    this.api = this.app.api;
     this.url = this.getAttribute('url');
     this.mql = window.matchMedia('(max-width: 7000px)');
     // let's create our shadow root

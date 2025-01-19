@@ -7,7 +7,8 @@ export default class PeopleContainer extends HTMLElement {
 
 		// let's create our shadow root
 		this.shadowObj = this.attachShadow({ mode: "open" });
-
+		this.app = window.app;
+    this.api = this.app.api;s
 		this.render();
 	}
 
@@ -24,66 +25,26 @@ export default class PeopleContainer extends HTMLElement {
 	fetchPeople = contentContainer => {
     const outerThis = this;
 		const peopleLoader = this.shadowObj.querySelector('people-loader');
-		setTimeout(() => {
-      // fetch the user stats
-      const options = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      };
-  
-      this.fetchWithTimeout(this._url, options)
-        .then(response => {
-          return response.json();
-        })
-        .then(data => {
-          // check for success response
-          if (data.success) {
-            // update the content
-            const content = outerThis.mapUsers(data.people);
-            // remove the loader
-            peopleLoader.remove();
-            // insert the content
-            contentContainer.insertAdjacentHTML('beforeend', content);
-          }
-          else {
-            // display error message
-            const content = outerThis.getEmpty();
-            peopleLoader.remove();
-            contentContainer.insertAdjacentHTML('beforeend', content);
-          }
-        })
-        .catch(error => {
-          // display error message
-          const content = outerThis.getEmpty();
-          peopleLoader.remove();
-          contentContainer.insertAdjacentHTML('beforeend', content);
-        });
-		}, 2000)
+		setTimeout(async () => {
+			try {
+			const data = this.api.post(this._url, { content: 'json' })
+
+			if (data.success) {
+				const content = this.mapUsers(data.people);
+				peopleLoader.remove();
+				contentContainer.insertAdjacentHTML('beforeend', content);
+			} else {
+				const content = this.getEmpty();
+				peopleLoader.remove();
+				contentContainer.insertAdjacentHTML('beforeend', content);
+			}
+			} catch (error) {
+			const content = this.getEmpty();
+			peopleLoader.remove();
+			contentContainer.insertAdjacentHTML('beforeend', content);
+			}
+		}, 2000);
 	}
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
 
 	mapUsers = data => {
     return data.map(user => {

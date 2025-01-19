@@ -1,17 +1,12 @@
 export default class TopicWrapper extends HTMLElement {
   constructor() {
-    // We are not even going to touch this.
     super();
-
-    // check if the user is authenticated
     this._authenticated = window.hash ? true : false;
-
-    // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-    this.app = window.app;
     this.boundHandleWsMessage = this.handleWsMessage.bind(this);
     this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -20,33 +15,19 @@ export default class TopicWrapper extends HTMLElement {
   }
 
   connectedCallback() {
-    // get url
-    let url = this.getAttribute('url');
-
-    url = url.trim().toLowerCase();
-
-    // connect to the WebSocket
+    let url = this.getAttribute('url').trim().toLowerCase();
     this.checkAndAddHandler();
- 
-    // Get the body
     const body = document.querySelector('body');
- 
     this.openTopicPage(url, body);
-
-    // perform actions
     this.performActions();
-
-    // open highlights
     this.openHighlights(body);
   }
 
   checkAndAddHandler() {
     if (window.wss) {
       window.wss.addMessageHandler(this.boundHandleWsMessage);
-      // console.log('WebSocket handler added successfully');
     } else {
-      // console.log('WebSocket manager not available, retrying...');
-      setTimeout(this.checkAndAddHandler, 500); // Retry after 500ms
+      setTimeout(this.checkAndAddHandler, 500);
     }
   }
 
@@ -57,28 +38,18 @@ export default class TopicWrapper extends HTMLElement {
   }
 
   handleWsMessage = message => {
-    // Handle the message in this component
-    // console.log('Message received in component:', message);
     const data = message.data;
-
     if (message.type !== 'action') return;
-
     const userHash = window.hash;
-
     const hash = this.getAttribute('hash').toUpperCase();
     const authorHash = this.getAttribute('author-hash').toUpperCase();
-
     const author = this.shadowObj.querySelector('author-wrapper');
-
     const target = data.hashes.target;
 
-    // handle connect action
     if (data.action === 'connect' && data.kind === 'user') {
       this.handleConnectAction(data, author, userHash, authorHash);
-    }
-    else if (data.kind === 'topic' && target === hash) {
+    } else if (data.kind === 'topic' && target === hash) {
       this.handleTopicAction(data, data.value, userHash);
-
     }
   }
 
@@ -86,193 +57,107 @@ export default class TopicWrapper extends HTMLElement {
     window.wss.sendMessage(data);
   }
 
-  handleConnectAction = (data, author,userHash, authorHash) => {
+  handleConnectAction = (data, author, userHash, authorHash) => {
     const to = data.hashes.to;
-    if(to === authorHash) {
+    if (to === authorHash) {
       const followers = this.parseToNumber(this.getAttribute('author-followers')) + data.value;
-      this.setAttribute('author-followers', followers)
+      this.setAttribute('author-followers', followers);
       this.updateFollowers(author, followers);
 
       if (data.hashes.from === userHash) {
         const value = data.value === 1 ? 'true' : 'false';
-        // update user-follow/auth-follow attribute
         this.setAttribute('author-follow', value);
-        if(author) {
+        if (author) {
           author.setAttribute('user-follow', value);
         }
       }
 
-      if(author) {
+      if (author) {
         author.setAttribute('reload', 'true');
       }
     }
   }
 
   handleTopicAction = (data, value, userHash) => {
-    if (data.user === userHash)  return;
-
-    // if action is follow
+    if (data.user === userHash) return;
     if (data.action === 'follow') {
       this.updateFollowers(value === 1);
-    }
-    else if (data.action === 'subscribe') {
+    } else if (data.action === 'subscribe') {
       const subscribers = this.parseToNumber(this.getAttribute('subscribers')) + value;
       this.setAttribute('subscribers', subscribers.toString());
-
-      // select subscribers element
       const subscribersStat = this.shadowObj.querySelector('.stats > span.subscribers');
       if (subscribersStat) {
-        // select no element
         const no = subscribersStat.querySelector('.number');
         const text = subscribersStat.querySelector('.label');
-
-        // Update the subscribers
         no.textContent = this.formatNumber(subscribers);
-
-        // Update the text
         text.textContent = subscribers === 1 ? 'subscriber' : 'subscribers';
       }
     }
   }
 
   openHighlights = body => {
-    // Get the stats action and subscribe action
     const statsBtn = this.shadowObj.querySelector('.actions>.action#stats-action');
-
-    // add event listener to the stats action
     if (statsBtn) {
       statsBtn.addEventListener('click', e => {
         e.preventDefault();
         e.stopPropagation();
-
-        // Open the highlights popup
         body.insertAdjacentHTML('beforeend', this.getHighlights());
       });
     }
   }
 
-  // perform actions
   performActions = () => {
     const outerThis = this;
-    // get body 
     const body = document.querySelector('body');
-
-    // get url to 
-    let hash = this.getAttribute('hash');
-    // trim and convert to lowercase
-    hash = hash.trim().toLowerCase();
-
-    // base api
+    let hash = this.getAttribute('hash').trim().toLowerCase();
     const url = '/t/' + hash;
-
-    // Get the follow action and subscribe action
     const followBtn = this.shadowObj.querySelector('.actions>.action#follow-action');
 
-    // add event listener to the follow action
     if (followBtn) {
-      // construct options
-      const options = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        }
-      }
-
-      followBtn.addEventListener('click', e => {
+      followBtn.addEventListener('click', async e => {
         e.preventDefault();
         e.stopPropagation();
-
         let action = false;
 
-        // Check if the user is authenticated
         if (!this._authenticated) {
-          // Open the join popup
           this.openJoin(body);
-        } 
-        else {
-          // Update the follow button
+        } else {
           if (followBtn.classList.contains('following')) {
             action = true;
             outerThis.updateFollowBtn(false, followBtn);
-          }
-          else {
+          } else {
             outerThis.updateFollowBtn(true, followBtn);
           }
 
-          // Follow the topic
-          this.followTopic(`${url}/follow`, options, followBtn, action);
+          await this.followTopic(`${url}/follow`, followBtn, action);
         }
       });
     }
   }
 
-  followTopic = (url, options, followBtn, followed) => {
+  followTopic = async (url, followBtn, followed) => {
     const outerThis = this;
-    this.fetchWithTimeout(url, options)
-      .then(response => {
-        response.json()
-        .then(data => {
-          // If data has unverified, open the join popup
-          if (data.unverified) {
-            // Get body
-            const body = document.querySelector('body');
-
-            // Open the join popup
-            outerThis.openJoin(body);
-
-            // revert the follow button
-            outerThis.updateFollowBtn(followed, followBtn);
-          }
-
-          // if success is false, show toast message
-          if (!data.success) {
-            this.app.showToast(false, data.message);
-
-            // revert the follow button
-            outerThis.updateFollowBtn(followed, followBtn);
-          }
-          else {
-            // Show toast message
-            this.app.showToast(true, data.message);
-
-            // Check for followed boolean
-            outerThis.updateFollowBtn(data.followed, followBtn);
-
-            // Update the followers
-            outerThis.updateFollowers(data.followed);
-          }
-        });
-      })
-      .catch(_error => {
-        // show toast message
-        this.app.showToast(false, 'An error occurred!');
-
-        // revert the follow button
-        outerThis.updateFollowBtn(followed, followBtn);
-      });
-  }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
     try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
+      const data = await this.api.post(url, { content: 'json' });
+      if (data.unverified) {
+        const body = document.querySelector('body');
+        outerThis.openJoin(body);
+        outerThis.updateFollowBtn(followed, followBtn);
       }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
+
+      if (!data.success) {
+        this.app.showToast(false, data.message);
+        outerThis.updateFollowBtn(followed, followBtn);
+      } else {
+        this.app.showToast(true, data.message);
+        outerThis.updateFollowBtn(data.followed, followBtn);
+        outerThis.updateFollowers(data.followed);
+      }
+    } catch (_error) {
+      this.app.showToast(false, 'An error occurred!');
+      outerThis.updateFollowBtn(followed, followBtn);
     }
-  };;
+  }
 
   updateFollowBtn = (following, btn) => {
     if (following) {

@@ -5,6 +5,8 @@ export default class HomeAll extends HTMLElement {
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.home = null;
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 

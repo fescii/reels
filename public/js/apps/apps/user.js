@@ -14,7 +14,8 @@ export default class AppUser extends HTMLElement {
 
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -216,18 +217,13 @@ export default class AppUser extends HTMLElement {
   }
 
   removeSubscriptionFromServer = async () => {
-    // Remove the subscription from the server
-    await fetch('/push/unsubscribe', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    })
-    .then(response => {
-      const result = response.json();
+    try {
+      const response = await this.api.post('/push/unsubscribe', { content: 'json' });
+      const result = await response.json();
       console.log('Subscription removed from server:', result);
-    })
-    .catch(error => {console.error('Error removing subscription from server:', error)});
+    } catch (error) {
+      console.error('Error removing subscription from server:', error);
+    }
   }
 
   checkAndAddHandler() {

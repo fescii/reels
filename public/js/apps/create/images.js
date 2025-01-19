@@ -4,6 +4,8 @@ export default class ImagesEditor extends HTMLDivElement {
     this.api = this.getAttribute("api");
     this.uploadCount = this.getImagesLength(this.getAttribute("images"));
     this.maxUploads = 10;
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 

@@ -5,12 +5,12 @@ export default class UpdateFeed extends HTMLElement {
 
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this._block = false;
     this._empty = false;
     this._page = this.parseToNumber(this.getAttribute('page'));
     this._url = this.getAttribute('url');
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -63,8 +63,7 @@ export default class UpdateFeed extends HTMLElement {
     const outerThis = this;
 
     try {
-      const response = await this.fetchWithTimeout(url);
-      const data = await response.json();
+      const data = this.api.get(url, { content: 'json' })
 
       if(!data.success ||!data.updates) {
         outerThis._empty = true;
@@ -151,28 +150,7 @@ export default class UpdateFeed extends HTMLElement {
       `
     }).join('');
   }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
   
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  }
-
   parseToNumber = num_str => {
     // Try parsing the string to an integer
     const num = parseInt(num_str);

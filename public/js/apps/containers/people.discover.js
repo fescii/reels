@@ -9,10 +9,10 @@ export default class DiscoverPeople extends HTMLElement {
 		this._url = `${this._url}?limit=20`;
 
 		this._isHome = this.getAttribute('home') === 'true';
-
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
+		this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -44,132 +44,54 @@ export default class DiscoverPeople extends HTMLElement {
         // set the loader
         feedContainer.innerHTML = this.getLoader();
 
-        setTimeout(() => {
-          this.fetchPeople(feedContainer);
+        setTimeout(async() => {
+          await this.fetchPeople(feedContainer);
         }, 1000);
       });
     }
   }
 
-  fetchPeople = (contentContainer, mql) => {
-    const outerThis = this;
+	fetchPeople = async (contentContainer, mql) => {
 		const peopleLoader = this.shadowObj.querySelector('authors-loader');
-		const options = {
-			method: 'GET',
-			// set the cache control to max-age to 2 hours
-			"Cache-Control": "max-age=7200",
-			"Accept": "application/json"
-		}
-		this.getCacheData(this._url, 7200, options)
-			.then(result => {
-				const data = result.data;
-				// check for success response
-				if (result.success) {
-					if (data.people.length === 0) {
-						// display empty message
-						const content = outerThis.getEmpty();
-						// remove loader
-						peopleLoader.remove();
-						contentContainer.insertAdjacentHTML('beforeend', content);
-						return;
-					}
-					// update the content
-					const content = outerThis.mapUsers(data.people);
-					// remove loader
-					peopleLoader.remove();
-					// add title
-					contentContainer.insertAdjacentHTML('beforebegin', outerThis.getTitle());
-					contentContainer.insertAdjacentHTML('beforeend', content);
-					// activate controls
-					if (mql) {
-						outerThis.activateControls(contentContainer);
-					}
-
-					// set next
-					window.home = {
-						last: false,
-						next: 4,
-						loaded: true
-					}
-				}
-				else {
-					// display error message
-					const content = outerThis.getEmpty();
-					// remove loader
-					peopleLoader.remove();
-					contentContainer.insertAdjacentHTML('beforeend', content);;
-				}
-			})
-			.catch(error => {
-				// console.error(error);
-				// display error message
-				const content = outerThis.getWrongMessage();
-				// remove loader
-				peopleLoader.remove();
-				contentContainer.insertAdjacentHTML('beforeend', content);
-
-				// activate refresh
-				outerThis.activateRefresh();
-			});
-	}
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
-
-	getCacheData = async (url, maxAge, options = {}) => {
-		const cacheName = "user-cache";
 
 		try {
-			const cache = await caches.open(cacheName);
-			const cachedResponse = await cache.match(url);
+			const result = await this.api.get(this._url, { content: 'json', body }, { allow: true, duration: 7200 });
+			const data = result.data;
 
-			if (cachedResponse) {
-				const cachedData = await cachedResponse.json();
-				const cacheTime = cachedData.timestamp;
-
-				// Check if cache is still valid
-				if (Date.now() - cacheTime < maxAge) {
-					return cachedData.data;
+			if (result.success) {
+				if (data.people.length === 0) {
+					const content = this.getEmpty();
+					peopleLoader.remove();
+					contentContainer.insertAdjacentHTML('beforeend', content);
+					return;
 				}
+
+				const content = this.mapUsers(data.people);
+				peopleLoader.remove();
+				contentContainer.insertAdjacentHTML('beforebegin', this.getTitle());
+				contentContainer.insertAdjacentHTML('beforeend', content);
+
+				if (mql) {
+					this.activateControls(contentContainer);
+				}
+
+				window.home = {
+					last: false,
+					next: 4,
+					loaded: true
+				};
+			} else {
+				const content = this.getEmpty();
+				peopleLoader.remove();
+				contentContainer.insertAdjacentHTML('beforeend', content);
 			}
-
-			// If cache doesn't exist or is expired, fetch new data
-			const networkResponse = await this.fetchWithTimeout(url, options);
-			const data = await networkResponse.clone().json();
-
-			// Store the new data in cache with a timestamp
-			const cacheData = {
-				data: data,
-				timestamp: Date.now()
-			};
-			
-			const cacheResponse = new Response(JSON.stringify(cacheData));
-			await cache.put(url, cacheResponse);
-
-			return data;
 		} catch (error) {
-			console.error('Error fetching data:', error);
-			throw error;
+			const content = this.getWrongMessage();
+			peopleLoader.remove();
+			contentContainer.insertAdjacentHTML('beforeend', content);
+			this.activateRefresh();
 		}
-	};
+	}
 
 	mapUsers = data => {
     return data.map(user => {

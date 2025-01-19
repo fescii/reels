@@ -2,9 +2,9 @@ export default class HomeTopics extends HTMLElement {
 	constructor() {
 		// We are not even going to touch this.
 		super();
-
 		this.url = this.getAttribute('url');
-    this.api = window.app.api;
+    this.app = window.app;
+    this.api = this.app.api;
     this.all = this.getRootNode().host;
     this.mql = window.matchMedia('(max-width: 660px)');
 		// let's create our shadow root

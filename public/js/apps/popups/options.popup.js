@@ -17,7 +17,8 @@ export default class PostOptions extends HTMLElement {
     this.drafted = this.convertToBool(this.getAttribute('drafted'));
 
     this.removeApi  = this.getAttribute('kind') === 'reply' ? `/r/${this.hash}/remove` : `/s/${this.hash}/remove`;
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -165,16 +166,9 @@ export default class PostOptions extends HTMLElement {
   publishPost = async (section, button) => {
     button.innerHTML = this.getButtonLoader();
     const url = `/s/${this.hash}/publish`;
-    const options = {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    }
 
     try {
-      const response = await this.fetchWithTimeout(url, options);
-      const data = await response.json();
+      const data = this.api.patch(url, { content: 'json' })
       if (data.success) {
         // select fields container
         const fields = this.shadowObj.querySelector('div.fields')
@@ -257,16 +251,9 @@ export default class PostOptions extends HTMLElement {
 
   deletePost = async (section, button) => {
     button.innerHTML = this.getButtonLoader();
-    const options = {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    }
 
     try {
-      const response = await this.fetchWithTimeout(this.removeApi, options);
-      const data = await response.json();
+      const data = this.api.delete(this.removeApi, { content: 'json', body })
       if (data.success) {
         // replace the fields with the finish message
         section.innerHTML = this.getFinish('delete');
@@ -311,27 +298,6 @@ export default class PostOptions extends HTMLElement {
           serverStatus.remove();
         }
       }, 5000);
-    }
-  }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
-      }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
     }
   }
 

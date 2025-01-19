@@ -1,24 +1,16 @@
 export default class PersonWrapper extends HTMLElement {
   constructor() {
-    // We are not even going to touch this.
     super();
-
-    // check if the user is authenticated
     this._authenticated = window.hash ? true : false;
-
-    // Check if user is the owner of the profile
-    this._you = true ? this.getAttribute('you') === 'true' : false;
-
-    // let's create our shadow root
+    this._you = this.getAttribute('you') === 'true';
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.app = window.app;
     this.boundHandleWsMessage = this.handleWsMessage.bind(this);
     this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
-
+    this.api = this.app.api;
     this.render();
   }
 
-  // observe the attributes
   static get observedAttributes() {
     return ['followers', 'user-follow', 'reload'];
   }
@@ -27,48 +19,29 @@ export default class PersonWrapper extends HTMLElement {
     this.shadowObj.innerHTML = this.getTemplate();
   }
 
-  // listen for changes in the attributes
   attributeChangedCallback(name, oldValue, newValue) {
-    // get the follow button
     const followBtn = this.shadowObj.querySelector('button.action#follow-action');
-    // check if old value is not equal to new value
-    if (name === 'reload') {
-      if(newValue === 'true') {
-        this.setAttribute('reload', 'false');
-
-        // Update the follow button
-        if(followBtn) {
-          this.updateFollowBtn(this.textToBoolean(this.getAttribute('user-follow')), followBtn);
-        }
+    if (name === 'reload' && newValue === 'true') {
+      this.setAttribute('reload', 'false');
+      if (followBtn) {
+        this.updateFollowBtn(this.textToBoolean(this.getAttribute('user-follow')), followBtn);
       }
-    }  
+    }
   }
 
   connectedCallback() {
-    // get url
-    let url = this.getAttribute('url');
-
-    url = url.trim().toLowerCase();
-
-    // Check and add handler
+    let url = this.getAttribute('url').trim().toLowerCase();
     this.checkAndAddHandler();
-
-    // Get the body
     const body = document.querySelector('body');
-
     this.handleUserClick(url, body);
-
-    // Perform actions
     this.performActions();
   }
 
   checkAndAddHandler() {
     if (window.wss) {
       window.wss.addMessageHandler(this.boundHandleWsMessage);
-      // console.log('WebSocket handler added successfully');
     } else {
-      // console.log('WebSocket manager not available, retrying...');
-      setTimeout(this.checkAndAddHandler, 500); // Retry after 500ms
+      setTimeout(this.checkAndAddHandler, 500);
     }
   }
 
@@ -79,10 +52,7 @@ export default class PersonWrapper extends HTMLElement {
   }
 
   handleWsMessage = message => {
-    // Handle the message in this component
-    // console.log('Message received in component:', message);
     const data = message.data;
-
     if (message.type !== 'action') return;
 
     const userHash = window.hash;
@@ -95,14 +65,12 @@ export default class PersonWrapper extends HTMLElement {
 
   handleConnectAction = (data, userHash, authorHash) => {
     const to = data.hashes.to;
-    if(to === authorHash) {
+    if (to === authorHash) {
       const followers = this.parseToNumber(this.getAttribute('followers')) + data.value;
-      this.setAttribute('followers', followers)
+      this.setAttribute('followers', followers);
 
       if (data.hashes.from === userHash) {
         const value = data.value === 1 ? 'true' : 'false';
-  
-        // update user-follow/auth-follow attribute
         this.setAttribute('user-follow', value);
       }
 
@@ -114,175 +82,80 @@ export default class PersonWrapper extends HTMLElement {
     window.wss.sendMessage(data);
   }
 
-  textToBoolean = text => {
-    return text === 'true' ? true : false;
-  }
+  textToBoolean = text => text === 'true';
 
-  // Open user profile
   handleUserClick = (url, body) => {
-    const outerThis = this;
-    // get a.meta.link
     const content = this.shadowObj.querySelector('a#username');
-
-    if(body && content) { 
+    if (body && content) {
       content.addEventListener('click', event => {
         event.preventDefault();
-
-        // Get full post
-        const profile =  this.getProfile();
-        
-        // replace and push states
-        outerThis.replaceAndPushStates(url, body, profile);
-
+        const profile = this.getProfile();
+        this.replaceAndPushStates(url, body, profile);
         body.innerHTML = profile;
-      })
+      });
     }
   }
 
-  // Replace and push states
   replaceAndPushStates = (url, body, profile) => {
-    // Replace the content with the current url and body content
-    // get the first custom element in the body
     const firstElement = body.firstElementChild;
-
-    // convert the custom element to a string
-     const elementString = firstElement.outerHTML;
-    // get window location
+    const elementString = firstElement.outerHTML;
     const pageUrl = window.location.href;
-    window.history.replaceState(
-      { page: 'page', content: elementString },
-      url, pageUrl
-    );
-
-    // Updating History State
-    window.history.pushState(
-      { page: 'page', content: profile},
-      url, url
-    );
+    window.history.replaceState({ page: 'page', content: elementString }, url, pageUrl);
+    window.history.pushState({ page: 'page', content: profile }, url, url);
   }
 
-  // perform actions
   performActions = () => {
-    const outerThis = this;
-    // get body 
     const body = document.querySelector('body');
-
-    // get url to 
-    let hash = this.getAttribute('hash');
-    // trim and convert to lowercase
-    hash = hash.trim().toLowerCase();
-
-    // base api
+    let hash = this.getAttribute('hash').trim().toLowerCase();
     const url = '/u/' + hash;
-
-    // Get the follow action and subscribe action
     const followBtn = this.shadowObj.querySelector('button.action#follow-action');
 
-    // add event listener to the follow action
     if (followBtn) {
-      // construct options
-      const options = {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        }
-      }
-
-      followBtn.addEventListener('click', e => {
+      followBtn.addEventListener('click', async e => {
         e.preventDefault();
         e.stopPropagation();
 
         let action = false;
 
-        // Check if the user is authenticated
         if (!this._authenticated) {
-          // Open the join popup
           this.openJoin(body);
-        } 
-        else {
-          // Update the follow button
+        } else {
           if (followBtn.classList.contains('following')) {
             action = true;
-            outerThis.updateFollowBtn(false, followBtn);
-          }
-          else {
-            outerThis.updateFollowBtn(true, followBtn);
+            this.updateFollowBtn(false, followBtn);
+          } else {
+            this.updateFollowBtn(true, followBtn);
           }
 
-          // Follow the topic
-          this.followUser(`${url}/follow`, options, followBtn, action);
+          await this.followUser(`${url}/follow`, followBtn, action);
         }
       });
     }
   }
 
-  followUser = (url, options, followBtn, followed) => {
-    const outerThis = this;
-    this.fetchWithTimeout(url, options)
-      .then(response => {
-        response.json()
-        .then(data => {
-          // If data has unverified, open the join popup
-          if (data.unverified) {
-            // Get body
-            const body = document.querySelector('body');
-
-            // Open the join popup
-            outerThis.openJoin(body);
-
-            // revert the follow button
-            outerThis.updateFollowBtn(followed, followBtn);
-          }
-
-          // if success is false, show toast message
-          if (!data.success) {
-            this.app.showToast(false, data.message);
-
-            // revert the follow button
-            outerThis.updateFollowBtn(followed, followBtn);
-          }
-          else {
-            // Show toast message
-            this.app.showToast(true, data.message);
-
-            // Check for followed boolean
-            outerThis.updateFollowBtn(data.followed, followBtn);
-
-            // Update the followers
-            outerThis.updateFollowers(data.followed);
-          }
-        });
-      })
-      .catch(_error => {
-        // show toast message
-        this.app.showToast(false, 'An error occurred!');
-
-        // revert the follow button
-        outerThis.updateFollowBtn(followed, followBtn);
-      });
-  }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
+  followUser = async (url, followBtn, followed) => {
     try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
+      const data = await this.api.patch(url, { content: 'json' });
 
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
+      if (data.unverified) {
+        const body = document.querySelector('body');
+        this.openJoin(body);
+        this.updateFollowBtn(followed, followBtn);
       }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
+
+      if (!data.success) {
+        this.app.showToast(false, data.message);
+        this.updateFollowBtn(followed, followBtn);
+      } else {
+        this.app.showToast(true, data.message);
+        this.updateFollowBtn(data.followed, followBtn);
+        this.updateFollowers(data.followed);
+      }
+    } catch (_error) {
+      this.app.showToast(false, 'An error occurred!');
+      this.updateFollowBtn(followed, followBtn);
     }
-  };
+  }
 
   updateFollowBtn = (following, btn) => {
     if (following) {

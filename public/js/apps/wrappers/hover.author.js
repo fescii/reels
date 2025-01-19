@@ -1,22 +1,17 @@
 export default class HoverAuthor extends HTMLElement {
   constructor() {
-    // We are not even going to touch this.
     super();
 
-    // check if the user is authenticated
     this._authenticated = window.hash ? true : false;
+    this._you = this.getAttribute('you') === 'true';
 
-    // Check if user is the owner of the profile
-    this._you = true ? this.getAttribute('you') === 'true' : false;
-
-    // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.parent = this.getRootNode().host;
     this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
-  // observe the attributes
   static get observedAttributes() {
     return ['followers', 'user-follow', 'reload'];
   }
@@ -25,29 +20,19 @@ export default class HoverAuthor extends HTMLElement {
     this.shadowObj.innerHTML = this.getTemplate();
   }
 
-  // listen for changes in the attributes
   attributeChangedCallback(name, oldValue, newValue) {
-    // get the followers element
     const followers = this.shadowObj.querySelector('.stats > span.followers > .number');
-    // get the follow button
     const followBtn = this.shadowObj.querySelector('.actions > .action#follow-action');
-    // check if old value is not equal to new value
-    if (name === 'reload') {
-      if(newValue === 'true') {
-        this.setAttribute('reload', 'false');
-
-        // Update the followers
-        if(followers) {
-          const totalFollowers = this.parseToNumber(this.getAttribute('followers'));
-          followers.textContent = totalFollowers >= 0 ? this.formatNumber(totalFollowers) : '0';
-        }
-
-        // Update the follow button
-        if(followBtn) {
-          this.updateFollowBtn(this.textToBoolean(this.getAttribute('user-follow')), followBtn);
-        }
+    if (name === 'reload' && newValue === 'true') {
+      this.setAttribute('reload', 'false');
+      if (followers) {
+        const totalFollowers = this.parseToNumber(this.getAttribute('followers'));
+        followers.textContent = totalFollowers >= 0 ? this.formatNumber(totalFollowers) : '0';
       }
-    }  
+      if (followBtn) {
+        this.updateFollowBtn(this.textToBoolean(this.getAttribute('user-follow')), followBtn);
+      }
+    }
   }
 
   setAttributes = (name, value) => {
@@ -55,30 +40,19 @@ export default class HoverAuthor extends HTMLElement {
   }
 
   connectedCallback() {
-    // Get the media query list
     const mql = window.matchMedia('(max-width: 660px)');
-
-    // get url
-    let url = this.getAttribute('url');
-
-    url = url.trim().toLowerCase();
- 
-    // Get the body
+    let url = this.getAttribute('url').trim().toLowerCase();
     const body = document.querySelector('body');
-
     const contentContainer = this.shadowObj.querySelector('div.content-container');
 
     if (contentContainer) {
       this.mouseEvents(url, mql.matches, contentContainer);
     }
 
-    // handle user click
     this.handleUserClick(mql.matches, url, body, contentContainer);
   }
 
-  textToBoolean = text => {
-    return text === 'true' ? true : false;
-  }
+  textToBoolean = text => text === 'true';
 
   disconnectedCallback() {
     this.enableScroll();
@@ -86,232 +60,131 @@ export default class HoverAuthor extends HTMLElement {
   }
 
   openHighlights = (body, contentContainer) => {
-    // Get the stats action and subscribe action
     const statsBtn = this.shadowObj.querySelector('.actions>.action#highlights-action');
-
-    // add event listener to the stats action
     if (statsBtn) {
       statsBtn.addEventListener('click', e => {
         e.preventDefault();
         e.stopPropagation();
-
         contentContainer.style.display = 'none';
-
-        // Open the highlights popup
         body.insertAdjacentHTML('beforeend', this.getHighlights());
       });
     }
   }
 
-  // Open user profile
   handleUserClick = (mql, url, body, contentContainer) => {
-    const outerThis = this;
-    // get a.meta.link
     const content = this.shadowObj.querySelector('a.meta.link');
-
-    if(body && content) { 
+    if (body && content) {
       content.addEventListener('click', event => {
         event.preventDefault();
-
         this.enableScroll();
-
-        // Get full post
-        const profile =  outerThis.getProfile();
-
+        const profile = this.getProfile();
         if (mql) {
-          // change the display of the content container
           contentContainer.style.display = 'flex';
-
-          // Fetch content
-          outerThis.fetchContent(url, mql, contentContainer);
-        }
-        else {
-          // replace and push states
+          this.fetchContent(url, mql, contentContainer);
+        } else {
           this.replaceAndPushStates(url, body, profile);
-
           body.innerHTML = profile;
         }
-      })
+      });
     }
   }
 
-  // Replace and push states
   replaceAndPushStates = (url, body, profile) => {
     this.enableScroll();
-    // Replace the content with the current url and body content
-    // get the first custom element in the body
     const firstElement = body.firstElementChild;
-
-    // convert the custom element to a string
     const elementString = firstElement.outerHTML;
-
     body.classList.remove('stop-scrolling');
-
-    // get window location
     const pageUrl = window.location.href;
-    window.history.replaceState(
-      { page: 'page', content: elementString },
-      url, pageUrl
-    );
-
-    // Updating History State
-    window.history.pushState(
-      { page: 'page', content: profile},
-      url, url
-    );
+    window.history.replaceState({ page: 'page', content: elementString }, url, pageUrl);
+    window.history.pushState({ page: 'page', content: profile }, url, url);
   }
 
   mouseEvents = (url, mql, contentContainer) => {
-    const outerThis = this;
-    // get meta link
     const metaLink = this.shadowObj.querySelector('div.author');
-
     if (metaLink) {
-      // check if its not a mobile device
       if (!mql) {
-        // add mouse enter event listener and mouse leave event listener
         metaLink.addEventListener('mouseenter', () => {
-          
-          // change the display of the content container
           contentContainer.style.display = 'flex';
-
-          // Fetch content
-          outerThis.fetchContent(url, mql, contentContainer);
+          this.fetchContent(url, mql, contentContainer);
         });
-
-        // add mouse leave event listener
         metaLink.addEventListener('mouseleave', () => {
-          // change the display of the content container
           contentContainer.style.display = 'none';
-
-          // remove the content from the content container
-          contentContainer.innerHTML = outerThis.getLoader();
+          contentContainer.innerHTML = this.getLoader();
         });
-      }
-      else {
-        // add click event listener
+      } else {
         metaLink.addEventListener('click', e => {
-          e.preventDefault()
-          e.stopPropagation()
+          e.preventDefault();
+          e.stopPropagation();
           e.stopImmediatePropagation();
-
-          outerThis.disableScroll();
-
-          // change the display of the content container
+          this.disableScroll();
           contentContainer.style.display = 'flex';
-
-          // Fetch content
-          outerThis.fetchContent(url, mql, contentContainer);
+          this.fetchContent(url, mql, contentContainer);
         });
       }
     }
   }
 
-  fetchContent = (url, mql, contentContainer) => {
-    const outerThis = this;
-    // Get the body
+  fetchContent = async (url, mql, contentContainer) => {
     const body = document.querySelector('body');
     const content = this.getContent();
     setTimeout(() => {
-      // change the content of the content container
       contentContainer.innerHTML = content;
-
-      // Activate view
-      outerThis.activateView(url, body);
-
-      // perform actions
-      outerThis.performActions();
-
-      // Activate username link
-      outerThis.activateUsernameLink(url, body);
-
-      // open Highlights
-      outerThis.openHighlights(body, contentContainer);
-
+      this.activateView(url, body);
+      this.performActions();
+      this.activateUsernameLink(url, body);
+      this.openHighlights(body, contentContainer);
       if (mql) {
-        const overlayBtn = outerThis.shadowObj.querySelector('span.pointer');
-        // if overlayBtn
+        const overlayBtn = this.shadowObj.querySelector('span.pointer');
         if (overlayBtn) {
-          // add mouse leave event listener
           overlayBtn.addEventListener('click', e => {
             e.preventDefault();
-            e.stopImmediatePropagation()
-            e.stopPropagation()
-  
-            // change the display of the content container
+            e.stopImmediatePropagation();
+            e.stopPropagation();
             contentContainer.style.display = 'none';
-
-            outerThis.enableScroll();
-  
-            // remove the content from the content container
-            contentContainer.innerHTML = outerThis.getLoader();
+            this.enableScroll();
+            contentContainer.innerHTML = this.getLoader();
           });
-        };
+        }
       }
     }, 2000);
   }
 
-  // Open user profile
   activateView = (url, body) => {
-    const outerThis = this;
-    // get a.action.view
     const content = this.shadowObj.querySelector('.actions > a.action.view');
-
-    if(body && content) {
+    if (body && content) {
       content.addEventListener('click', event => {
         event.preventDefault();
-
-        // Get full post
-        const profile =  outerThis.getProfile();
-  
-        // replace and push states
+        const profile = this.getProfile();
         this.replaceAndPushStates(url, body, profile);
-
         body.innerHTML = profile;
-
         setTimeout(() => {
-          outerThis.enableScroll();
+          this.enableScroll();
         }, 2000);
-      })
+      });
     }
   }
 
-  // Open user profile
   activateUsernameLink = (url, body) => {
-    const outerThis = this;
-    // get div.name > a.username
     const content = this.shadowObj.querySelector('.top > .name > a.username');
-
-    if(body && content) {
+    if (body && content) {
       content.addEventListener('click', event => {
         event.preventDefault();
-
-        outerThis.enableScroll();
-
+        this.enableScroll();
         body.classList.remove('stop-scrolling');
-
-        // Get full post
-        const profile =  outerThis.getProfile();
-  
-        // replace and push states
+        const profile = this.getProfile();
         this.replaceAndPushStates(url, body, profile);
-
         body.innerHTML = profile;
-
         setTimeout(() => {
-          outerThis.enableScroll();
+          this.enableScroll();
         }, 2000);
-      })
+      });
     }
   }
 
   disableScroll() {
-    // Get the current page scroll position
     let scrollTop = window.scrollY || document.documentElement.scrollTop;
     let scrollLeft = window.scrollX || document.documentElement.scrollLeft;
     document.body.classList.add("stop-scrolling");
-
-    // if any scroll is attempted, set this to the previous value
     window.onscroll = function () {
       window.scrollTo(scrollLeft, scrollTop);
     };
@@ -323,131 +196,53 @@ export default class HoverAuthor extends HTMLElement {
     window.onscroll = function () { };
   }
 
-  // perform actions
   performActions = () => {
     const contentContainer = this.shadowObj.querySelector('div.content-container');
-    const outerThis = this;
-    // get body 
     const body = document.querySelector('body');
-
-    // get url to 
-    let hash = this.getAttribute('hash');
-    // trim and convert to lowercase
-    hash = hash.trim().toLowerCase();
-
-    // base api
+    let hash = this.getAttribute('hash').trim().toLowerCase();
     const url = '/u/' + hash;
-
-    // Get the follow action and subscribe action
     const followBtn = this.shadowObj.querySelector('.actions>.action#follow-action');
-
-    // add event listener to the follow action
     if (followBtn) {
-      // construct options
-      const options = {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        }
-      }
-
       followBtn.addEventListener('click', e => {
         e.preventDefault();
         e.stopPropagation();
-
         let action = false;
-
-        // Check if the user is authenticated
         if (!this._authenticated) {
-          // Open the join popup
           this.openJoin(body, contentContainer);
-        } 
-        else {
-          // Update the follow button
+        } else {
           if (followBtn.classList.contains('following')) {
             action = true;
-            outerThis.updateFollowBtn(false, followBtn);
+            this.updateFollowBtn(false, followBtn);
+          } else {
+            this.updateFollowBtn(true, followBtn);
           }
-          else {
-            outerThis.updateFollowBtn(true, followBtn);
-          }
-
-          // Follow the topic
-          this.followUser(`${url}/follow`, options, followBtn, action);
+          this.followUser(`${url}/follow`, followBtn, action);
         }
       });
     }
   }
 
-  followUser = (url, options, followBtn, followed) => {
+  followUser = async (url, followBtn, followed) => {
     const contentContainer = this.shadowObj.querySelector('div.content-container');
-    const outerThis = this;
-    this.fetchWithTimeout(url, options)
-      .then(response => {
-        response.json()
-        .then(data => {
-          // If data has unverified, open the join popup
-          if (data.unverified) {
-            // Get body
-            const body = document.querySelector('body');
-
-            // Open the join popup
-            outerThis.openJoin(body, contentContainer);
-
-            // revert the follow button
-            outerThis.updateFollowBtn(followed, followBtn);
-          }
-
-          // if success is false, show toast message
-          if (!data.success) {
-            this.app.showToast(false, data.message);
-
-            // revert the follow button
-            outerThis.updateFollowBtn(followed, followBtn);
-          }
-          else {
-            // Show toast message
-            this.app.showToast(true, data.message);
-
-            // Check for followed boolean
-            outerThis.updateFollowBtn(data.followed, followBtn);
-
-            // Update the followers
-            // outerThis.updateFollowers(data.followed);
-          }
-        });
-      })
-      .catch(_error => {
-        // show toast message
-        this.app.showToast(false, 'An error occurred!');
-
-        // revert the follow button
-        outerThis.updateFollowBtn(followed, followBtn);
-      });
-  }
-
-  fetchWithTimeout = async (url, options = {}, timeout = 9500) => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
     try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out');
+      const data = await this.api.patch(url, { content: 'json' });
+      if (data.unverified) {
+        const body = document.querySelector('body');
+        this.openJoin(body, contentContainer);
+        this.updateFollowBtn(followed, followBtn);
+      } else if (!data.success) {
+        this.app.showToast(false, data.message);
+        this.updateFollowBtn(followed, followBtn);
+      } else {
+        this.app.showToast(true, data.message);
+        this.updateFollowBtn(data.followed, followBtn);
       }
-      throw new Error(`Network error: ${error.message}`);
-    } finally {
-      clearTimeout(timeoutId);
+    } catch (_error) {
+      this.app.showToast(false, 'An error occurred!');
+      this.updateFollowBtn(followed, followBtn);
     }
-  };;
-
+  }
+  
   updateFollowBtn = (following, btn) => {
     if (following) {
       // Change the text to following

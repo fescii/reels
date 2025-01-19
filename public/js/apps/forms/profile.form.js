@@ -7,7 +7,8 @@ export default class FormProfile extends HTMLElement {
     this.shadowObj = this.attachShadow({ mode: "open" });
 
     this._url = this.getAttribute('api');
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 

@@ -5,7 +5,8 @@ export default class HomePeople extends HTMLElement {
     this.url = this.getAttribute('url');
     // add limit query in the url
     this.url = `${this.url}?limit=20`;
-    this.api = window.app.api;
+    this.app = window.app;
+    this.api = this.app.api;
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.all = this.getRootNode().host;

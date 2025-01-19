@@ -1,14 +1,14 @@
 export default class StoryFeed extends HTMLElement {
   constructor() {
     super();
-    this.api = window.app.api;
     this._block = true;
     this._empty = true;
     this._page = this.parseToNumber(this.getAttribute('page'));
     this._url = this.getAttribute('url');
     this._kind = this.getAttribute('kind');
     this._isFirstLoad = true;
-    
+    this.app = window.app;
+    this.api = this.app.api;
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.render();
   }

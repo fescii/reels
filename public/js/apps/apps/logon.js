@@ -8,7 +8,8 @@ export default class AppLogon extends HTMLElement {
 
     // check if the user is authenticated
     this._authenticated = window.hash ? true : false;
-
+    this.app = window.app;
+    this.api = this.app.api;
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: 'open' });
 
@@ -613,15 +614,8 @@ export default class AppLogon extends HTMLElement {
     const outerThis = this;
     const loginUrl = outerThis.getAttribute('api-login');
     try {
-      const response = await fetch(loginUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
+      const body = JSON.stringify(data);
+      const result = await this.api.post(loginUrl, { content: 'json', body });
 
       return  {
         result: result,
@@ -908,15 +902,9 @@ export default class AppLogon extends HTMLElement {
     const outerThis = this;
     const registerUrl = outerThis.getAttribute('api-register');
     try {
-      const response = await fetch(registerUrl, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      const body = JSON.stringify(data);
 
-      const result = await response.json();
+      const result = await this.api.put(registerUrl, { content: 'json', body });
 
       return  {
         result: result,
@@ -935,15 +923,8 @@ export default class AppLogon extends HTMLElement {
     const outerThis = this;
     const checkEmailUrl = outerThis.getAttribute('api-check-email');
     try {
-      const response = await fetch(checkEmailUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
+      const body = JSON.stringify(data);
+      const result = await this.api.post(checkEmailUrl, { content: 'json', body });
 
       return {
         result: result,
@@ -1263,15 +1244,8 @@ export default class AppLogon extends HTMLElement {
     const outerThis = this;
     const url = outerThis.getAttribute('api-forgot-password');
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
+      const body = JSON.stringify(data);
+      const result = await this.api.post(url, { content: 'json', body });
 
       return {
         result: result,
@@ -1290,15 +1264,8 @@ export default class AppLogon extends HTMLElement {
     const outerThis = this;
     const url = outerThis.getAttribute('api-verify-token');
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
+      const body = JSON.stringify(data);
+      const result = await this.api.post(url, { content: 'json', body });
 
       return {
         result: result,
@@ -1317,15 +1284,8 @@ export default class AppLogon extends HTMLElement {
     const outerThis = this;
     const url = outerThis.getAttribute('api-reset-password');
     try {
-      const response = await fetch(url, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
+      const body = JSON.stringify(data);
+      const result = await this.api.patch(url, { content: 'json', body });
 
       return {
         result: result,

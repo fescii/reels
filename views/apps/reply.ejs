@@ -1,7 +1,7 @@
 <% var url = "/r/" + data.hash.toLowerCase() -%>
 <% var author = data.reply_author; -%>
 <% var contact = author.contact ? JSON.stringify(author.contact) : null; -%>
-<% var images = data.images ? images.join(",") : null; %>
+<% var images = data.images ? data.images.join(",") : null; %>
 <%
   function removeQuotes(content) {
     if (typeof content !== 'string') {

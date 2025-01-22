@@ -36,11 +36,6 @@ export default class HomeFeed extends HTMLElement {
 
   disconnectedCallback() {
     this.removeScrollEvent();
-    const finish = this.shadowObj.querySelector('.finish');
-    if (finish) {
-      const btn = finish.querySelector('button.finish');
-      btn.removeEventListener('click', this.activateRefresh);
-    }
   }
 
   activateRefresh = () => {

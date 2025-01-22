@@ -52,6 +52,13 @@ export default class AppMain extends HTMLElement {
   // noinspection JSMethodCanBeStatic
   connectedCallback() {
     this.setUpEvents()
+    this.getRenderedContent()
+  }
+
+  getRenderedContent = () => {
+    // get the rendered content as a string
+    const flow = this.shadowObj.querySelector('section.flow');
+    return flow.innerHTML;
   }
 
   setUpEvents = () => {

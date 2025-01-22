@@ -553,7 +553,7 @@ export default class AppStory extends HTMLElement {
         }
 
         div.content {
-          padding: 0;
+          padding: 10px 0 0 0;
           width: calc(55% - 10px);
           display: flex;
           flex-flow: column;

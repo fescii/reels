@@ -26,7 +26,7 @@ export default class PeopleContainer extends HTMLElement {
 		const peopleLoader = this.shadowObj.querySelector('people-loader');
 		setTimeout(async () => {
 			try {
-			const data = this.api.post(this._url, { content: 'json' })
+			const data = this.api.get(this._url, { content: 'json' })
 
 			if (data.success) {
 				const content = this.mapUsers(data.people);
@@ -68,7 +68,7 @@ export default class PeopleContainer extends HTMLElement {
 	}
 
 	getLoader = () => {
-		return `
+		return /* html */`
 			<people-loader speed="300"></people-loader>
 		`
 	}

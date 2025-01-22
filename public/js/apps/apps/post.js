@@ -511,12 +511,13 @@ export default class AppPost extends HTMLElement {
           display: flex;
           flex-flow: column;
           gap: 0;
+          padding: 20px 0 0 0;
           width: calc(55% - 10px);
         }
 
         div.side {
           padding: 25px 0;
-          width: calc(545% - 10px);
+          width: calc(45% - 10px);
           display: flex;
           flex-flow: column;
           gap: 20px;

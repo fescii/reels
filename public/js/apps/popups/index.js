@@ -12,14 +12,14 @@ import ImagePopup from "./images.js"
 
 export default function popups() {
   // Register popups
-customElements.define("join-popup", JoinPopup);
-customElements.define("url-popup", UrlPopup);
-customElements.define("stats-popup", StatsPopup);
-customElements.define("contact-popup", ContactPopup);
-customElements.define("topic-popup", TopicPopup);
-customElements.define("views-popup", ViewsPopup);
-customElements.define("preview-popup", PreviewPopup);
-customElements.define("notify-popup", NotifyPopup);
-customElements.define("post-options", PostOptions);
-customElements.define("image-popup", ImagePopup);
+  customElements.define("join-popup", JoinPopup);
+  customElements.define("url-popup", UrlPopup);
+  customElements.define("stats-popup", StatsPopup);
+  customElements.define("contact-popup", ContactPopup);
+  customElements.define("topic-popup", TopicPopup);
+  customElements.define("views-popup", ViewsPopup);
+  customElements.define("preview-popup", PreviewPopup);
+  customElements.define("notify-popup", NotifyPopup);
+  customElements.define("post-options", PostOptions);
+  customElements.define("image-popup", ImagePopup);
 }

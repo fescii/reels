@@ -51,7 +51,7 @@ export default class TrendingStories extends HTMLElement {
   fetchStories = async contentContainer => {
     const outerThis = this;
     try {
-      const data = await this.api.get(this._url, { content: 'json', body });
+      const data = await this.api.get(this._url, { content: 'json' });
 
       if (data.success) {
         if (data.stories.length === 0) {
@@ -68,6 +68,7 @@ export default class TrendingStories extends HTMLElement {
         contentContainer.innerHTML = content;
       }
     } catch (error) {
+      console.error(error);
       contentContainer.innerHTML = outerThis.getWrongMessage();
       outerThis.activateRefresh();
     }
@@ -127,10 +128,19 @@ export default class TrendingStories extends HTMLElement {
   getBody = () => {
     // language=HTML
     return /*html*/`
+      ${this.getTitle()}
 			<div class="stories new">
 				${this.getLoader()}
       </div>
     `;
+  }
+
+  getTitle = () => {
+    return /*html*/`
+			<div class="title">
+				<h2>Most read stories</h2>
+			</div>
+		`
   }
 
   getEmpty = () => {
@@ -269,6 +279,10 @@ export default class TrendingStories extends HTMLElement {
 
         @keyframes l22-0 {
           100% {transform: rotate(1turn)}
+        }
+
+        @keyframes l22 {
+          100% {transform: rotate(1turn) translate(150%)}
         }
 
         div.empty {

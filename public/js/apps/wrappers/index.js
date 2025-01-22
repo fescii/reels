@@ -9,6 +9,7 @@ import HoverAuthor from "./hover.author.js"
 import VotesWrapper from "./votes.wrapper.js"
 import ActionWrapper from "./action.wrapper.js"
 import ImagesWrapper from "./images.wrapper.js"
+import ImagesSmall from "./images.small.js"
 import ImagesUploader from "./images.uploader.js"
 
 export default function wrappers() {
@@ -24,5 +25,6 @@ export default function wrappers() {
   customElements.define("votes-wrapper", VotesWrapper);
   customElements.define("action-wrapper", ActionWrapper);
   customElements.define("images-wrapper", ImagesWrapper);
+  customElements.define("images-small", ImagesSmall);
   customElements.define("images-uploader", ImagesUploader);
 }

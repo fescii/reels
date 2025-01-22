@@ -125,18 +125,13 @@ export default class TrendingStory extends HTMLElement {
   }
 
   getSummaryAndWords = () => {
-    const mql = window.matchMedia('(max-width: 660px)');
     // get this content
     let content = this.innerHTML.toString();
 
     // remove all html tags and classes and extra spaces and tabs
     content = content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 
-    let summary = content.substring(0, 500);
-
-    if (mql.matches) {
-      summary = content.substring(0, 250);
-    }
+    const summary = content.substring(0, 80);
 
     // return the summary: first 200 characters
     return {
@@ -184,26 +179,6 @@ export default class TrendingStory extends HTMLElement {
         body.innerHTML = post;
       })
     }
-  }
-
-  replaceAndPushStates = (url, body, post) => {
-    // get the first custom element in the body
-    const firstElement = body.firstElementChild;
-
-    // convert the custom element to a string
-    const elementString = firstElement.outerHTML;
-    // get window location
-    const pageUrl = window.location.href;
-    window.history.replaceState(
-      { page: 'page', content: elementString },
-      url, pageUrl
-    );
-
-    // Updating History State
-    window.history.pushState(
-      { page: 'page', content: post},
-      url, url
-    );
   }
 
   openHighlights = body => {
@@ -387,7 +362,7 @@ export default class TrendingStory extends HTMLElement {
 
     // return
     return /* html */`
-      <images-wrapper images="${images}"></images-wrapper>
+      <images-small images="${images}"></images-small>
     `
   }
 
@@ -438,8 +413,6 @@ export default class TrendingStory extends HTMLElement {
     return /*html*/`
       <div class="summary extra" id="summary">
         <p>${summary}</p>
-        <div class="read-more">
-        </div>
       </div>
     `
   }

@@ -402,7 +402,7 @@ export default class TopicWrapper extends HTMLElement {
     // trim white spaces and convert to lowercase
     url = url.trim().toLowerCase();
 
-    let apiUrl = `/t/${this.getAttribute('slug')}`;
+    let apiUrl = `${this.getAttribute('url').toLowerCase()}`;
 
    return /* html */`
     <app-topic tab="article" hash="${this.getAttribute('hash')}" subscribers="${this.getAttribute('subscribers')}"

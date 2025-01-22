@@ -3,12 +3,12 @@ export default class ProfileSection extends HTMLElement {
     // We are not even going to touch this.
     super();
 
-    // Get default active tab
-    this._active = this.getAttribute('active');
-
-    // let's create our shadow root
+    this.active_tab = null;
     this.shadowObj = this.attachShadow({ mode: "open" });
-
+    this.app = window.app;
+    this.api = this.app.api;
+    // Add popstate event listener
+    window.addEventListener('popstate', this.handlePopState);
     this.render();
   }
 
@@ -21,12 +21,11 @@ export default class ProfileSection extends HTMLElement {
     const contentContainer = this.shadowObj.querySelector('div.feeds');
     
     // Get the tabContainer
-    const tabContainer = this.shadowObj.querySelector('ul#tab');
+    const tabContainer = this.shadowObj.querySelector('ul.tabs');
 
     // if content container and tab container exists
     if (contentContainer && tabContainer) {
-      this.updateActiveTab(this._active);
-      this.activateTab(contentContainer, tabContainer);
+      this.activateTabController(tabContainer, contentContainer)
     }
   }
 
@@ -47,170 +46,83 @@ export default class ProfileSection extends HTMLElement {
     window.onscroll = function () { };
   }
 
-  updateActiveTab = active => {
-    // Select tab with active class
-    const tab = this.shadowObj.querySelector(`ul#tab > li.${active}`);
+  activateTabController = (tabs, contentContainer) => {
+    // get the active tab
+    this.getOrSetActiveTab(tabs);
 
-    // select line
-    const line = this.shadowObj.querySelector('ul#tab span.line');
+    // add click event listener to the tabs
+    tabs.querySelectorAll("li").forEach(tab => {
+      tab.addEventListener("click", e => {
+        e.preventDefault();
+        e.stopPropagation();
 
-    if (tab && line) {
-      tab.classList.add('active');
+        if(this.active_tab.dataset.name === tab.dataset.name) return;
 
-      // Calculate half tab width - 10px
-      const tabWidth = (tab.offsetWidth/2) - 20;
+        // remove the active class from the active tab
+        this.active_tab.classList.remove("active");
 
-      // update line
-      line.style.left = `${tab.offsetLeft + tabWidth}px`;
-    }
-    else {
-      // Select the stories tab
-      const storiesTab = this.shadowObj.querySelector("ul#tab > li.stories");
-      storiesTab.classList.add('active');
-    }
+        // set the new active tab
+        this.active_tab = tab;
+        this.active_tab.classList.add("active");
+        const url = tab.getAttribute('url');
+
+        // update the content based on the tab
+        this.updateContent(contentContainer, tab.getAttribute('data-name'), url);
+      });
+    });
   }
 
-  activateTab = (contentContainer, tabContainer) => {
-    const outerThis = this;
+  getOrSetActiveTab = tabs => {
+    const tabName = this.getAttribute('active') || 'all';
+    // get the tab from the attribute or default to 'all'
+    let activeTab = tabs.querySelector('li.active');
 
-    if (tabContainer && contentContainer) {
-      const line = tabContainer.querySelector('span.line');
-      const tabItems = tabContainer.querySelectorAll('li.tab-item');
-      let activeTab = tabContainer.querySelector('li.tab-item.active');
+    if (!activeTab) {
+      // if no tab matches the attribute, set the first tab as active
+      activeTab = tabs.querySelector(`li.${tabName}`);
+    }
 
-      tabItems.forEach(tab => {
-        tab.addEventListener('click', e => {
-          e.preventDefault()
-          e.stopPropagation()
+    activeTab.classList.add("active");
+    this.active_tab = activeTab;
+  }
 
-          // Calculate half tab width - 10px
-          const tabWidth = (tab.offsetWidth/2) - 20;
+  updateContent = (contentContainer, tabName, url) => {
+    const contentMap = {
+      'stories': this.getStories(),
+      'replies': this.getReplies(),
+      'followers': this.getFollowers(),
+      'following': this.getFollowing()
+    };
 
-          line.style.left = `${tab.offsetLeft + tabWidth}px`;
+    const content = contentMap[tabName] || this.getReplies();
+    contentContainer.innerHTML = content;
+    this.app.push(url, { kind: "sub", app: "profile", name: tabName, html: content }, tabName);
+  }
 
-          if (tab.dataset.element === activeTab.dataset.element) {
-            return;
-          }
-          else {
-            activeTab.classList.remove('active');
-            tab.classList.add('active');
-            activeTab = tab;
-
-            // get current feed
-            const currentFeed = outerThis.getCurrentFeed(tab.dataset.element);
-
-            // Updating History State
-            window.history.pushState(
-              { tab: tab.dataset.element, content: currentFeed},
-              tab.dataset.element, `${tab.getAttribute('url')}`
-            );
-
-            // update active attribute
-            outerThis.setAttribute('active', tab.dataset.element);
-
-            const tabName = tab.dataset.element; 
-
-            if (tabName === "stories") {
-              contentContainer.innerHTML = outerThis.getStories();
-            } else if (tabName === "replies") {
-              contentContainer.innerHTML = outerThis.getReplies();
-            } else if (tabName === "followers") {
-              contentContainer.innerHTML = outerThis.getFollowers();
-            } else if (tabName === "following") {
-              contentContainer.innerHTML = outerThis.getFollowing();
-            }
-          }
-        })
-      })
-
-      // Update state on window.onpopstate
-      window.onpopstate = event => {
-        // This event will be triggered when the browser's back button is clicked
-
-        if (event.state) {
-          if (event.state.popup) {
-            return;
-          }
-          if (event.state.page) {
-            outerThis.updatePage(event.state.content)
-          }
-          else if (event.state.tab) {
-            // Select the state tab
-            const tab = outerThis.shadowObj.querySelector(`ul#tab > li.${event.state.tab}`);
-
-            if (tab) {
-              activeTab.classList.remove('active');
-
-              tab.classList.add('active');
-              activeTab = tab;
-
-              // Calculate half tab width - 10px
-              const tabWidth = (tab.offsetWidth/2) - 20;
-
-              // update line 
-              line.style.left = `${tab.offsetLeft + tabWidth}px`;
-
-              outerThis.updateState(event.state, contentContainer);
-
-              //Update active attribute
-              outerThis.setAttribute('active', event.state.tab);
-            }
-          }
-        }
-        else {
-          // Select li with class name as current and content Container
-          const currentTab = tabContainer.querySelector(`li.tab-item.${this._active}`);
-          if (currentTab) {
-            activeTab.classList.remove('active');
-            activeTab = currentTab;
-            currentTab.classList.add('active');
-            
-            // Calculate half tab width - 10px
-            const tabWidth = (currentTab.offsetWidth/2) - 20;
-
-            // Update line
-            line.style.left = `${currentTab.offsetLeft + tabWidth}px`;
-
-            outerThis.updateDefault(contentContainer);
-
-            // Update active attribute
-            outerThis.setAttribute('active', this._active);
-          }
-        }
-      };
+  handlePopState = event => {
+    const state = event.state;
+    if (state && state.kind === 'sub' && state.app === 'profile') {
+      this.updateHistory(state.name, state.html)
     }
   }
 
-  updatePage = content => {
-    // select body
-    const body = document.querySelector('body');
+  updateHistory = (tabName, content) => {
+    const contentContainer = this.shadowObj.querySelector('div.feeds');
+    const tabs = this.shadowObj.querySelector('ul.tabs');
 
-    // populate content
-    body.innerHTML = content;
-  }
+    try {
+      this.active_tab.classList.remove('active');
+      const activeTab = tabs.querySelector(`li.${tabName}`);
+      activeTab.classList.add('active');
+      this.active_tab = activeTab;
 
-  updateState = (state, contentContainer)=> {
-    // populate content
-    contentContainer.innerHTML = state.content;
-  }
-
-  updateDefault = contentContainer => {
-    contentContainer.innerHTML = this.getContainer(this._active);
-  }
-
-  // get current feed
-  getCurrentFeed = tab => {
-    switch (tab) {
-      case "stories":
-        return this.getStories();
-      case "replies":
-        return this.getReplies();
-      case "followers":
-        return this.getFollowers();
-      case "following":
-        return this.getFollowing();
-      default:
-        return this.getStories();
+      contentContainer.innerHTML = content;
+    } catch (error) {
+      console.log(error)
+      const activeTab = tabs.querySelector('li.stories');
+      activeTab.classList.add('active');
+      this.active_tab = activeTab;
+      contentContainer.innerHTML = this.getStories()
     }
   }
 
@@ -225,7 +137,7 @@ export default class ProfileSection extends HTMLElement {
   getBody = () => {
     return /* html */`
       <div class="content-container">
-        ${this.getTab()}
+        ${this.getTab(this.getAttribute('active'))}
         ${this.getContent()}
       </div>
     `
@@ -234,36 +146,52 @@ export default class ProfileSection extends HTMLElement {
   getContent = () => {
     return /* html */`
       <div class="feeds">
-        ${this.getContainer(this._active)}
+        ${this.getContainer(this.getAttribute('active'))}
       </div>
 		`
   }
 
-  getTab = () => {
+  getTab = tab => {
     // Get url 
     let url = this.getAttribute('url');
 
     // convert url to lowercase
     url = url.toLowerCase();
     return /* html */`
-      <div class="tab-control">
-        <ul id="tab" class="tab">
-          <li url="${url}/stories" data-element="stories" class="tab-item stories">
-            <span class="text">Stories</span>
-          </li>
-          <li url="${url}/replies" data-element="replies" class="tab-item replies">
-            <span class="text">Replies</span>
-          </li>
-          <li url="${url}/followers" data-element="followers" class="tab-item followers">
-            <span class="text">Followers</span>
-          </li>
-          <li url="${url}/following" data-element="following" class="tab-item following">
-            <span class="text">Following</span>
-          </li>
-          <span class="line"></span>
-        </ul>
-      </div>
-    `
+      <ul class="tabs">
+        <li class="tab stories ${tab === "stories" ? "active" : ''}" data-name="stories" url="${url}/stories">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M10.5 8H18.5M10.5 12H13M18.5 12H16M10.5 16H13M18.5 16H16" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M7 7.5H6C4.11438 7.5 3.17157 7.5 2.58579 8.08579C2 8.67157 2 9.61438 2 11.5V18C2 19.3807 3.11929 20.5 4.5 20.5C5.88071 20.5 7 19.3807 7 18V7.5Z" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M16 3.5H11C10.07 3.5 9.60504 3.5 9.22354 3.60222C8.18827 3.87962 7.37962 4.68827 7.10222 5.72354C7 6.10504 7 6.57003 7 7.5V18C7 19.3807 5.88071 20.5 4.5 20.5H16C18.8284 20.5 20.2426 20.5 21.1213 19.6213C22 18.7426 22 17.3284 22 14.5V9.5C22 6.67157 22 5.25736 21.1213 4.37868C20.2426 3.5 18.8284 3.5 16 3.5Z" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span class="text">Stories</span>
+        </li>
+        <li class="tab replies ${tab === "replies" ? "active" : ''}" data-name="replies" url="${url}/replies">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M8 13.5H16M8 8.5H12" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M6.09881 19C4.7987 18.8721 3.82475 18.4816 3.17157 17.8284C2 16.6569 2 14.7712 2 11V10.5C2 6.72876 2 4.84315 3.17157 3.67157C4.34315 2.5 6.22876 2.5 10 2.5H14C17.7712 2.5 19.6569 2.5 20.8284 3.67157C22 4.84315 22 6.72876 22 10.5V11C22 14.7712 22 16.6569 20.8284 17.8284C19.6569 19 17.7712 19 14 19C13.4395 19.0125 12.9931 19.0551 12.5546 19.155C11.3562 19.4309 10.2465 20.0441 9.14987 20.5789C7.58729 21.3408 6.806 21.7218 6.31569 21.3651C5.37769 20.6665 6.29454 18.5019 6.5 17.5" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" />
+          </svg>
+          <span class="text">Replies</span>
+        </li>
+        <li class="tab followers ${tab === "followers" ? "active" : ''}" data-name="followers" url="${url}/followers">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M18.6161 20H19.1063C20.2561 20 21.1707 19.4761 21.9919 18.7436C24.078 16.8826 19.1741 15 17.5 15M15.5 5.06877C15.7271 5.02373 15.9629 5 16.2048 5C18.0247 5 19.5 6.34315 19.5 8C19.5 9.65685 18.0247 11 16.2048 11C15.9629 11 15.7271 10.9763 15.5 10.9312" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" />
+            <path d="M4.48131 16.1112C3.30234 16.743 0.211137 18.0331 2.09388 19.6474C3.01359 20.436 4.03791 21 5.32572 21H12.6743C13.9621 21 14.9864 20.436 15.9061 19.6474C17.7889 18.0331 14.6977 16.743 13.5187 16.1112C10.754 14.6296 7.24599 14.6296 4.48131 16.1112Z" stroke="currentColor" stroke-width="2.0" />
+            <path d="M13 7.5C13 9.70914 11.2091 11.5 9 11.5C6.79086 11.5 5 9.70914 5 7.5C5 5.29086 6.79086 3.5 9 3.5C11.2091 3.5 13 5.29086 13 7.5Z" stroke="currentColor" stroke-width="2.0" />
+          </svg>
+          <span class="text">Followers</span>
+        </li>
+        <li class="tab following ${tab === "following" ? "active" : ''}" data-name="following" url="${url}/following">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M18.6161 20H19.1063C20.2561 20 21.1707 19.4761 21.9919 18.7436C24.078 16.8826 19.1741 15 17.5 15M15.5 5.06877C15.7271 5.02373 15.9629 5 16.2048 5C18.0247 5 19.5 6.34315 19.5 8C19.5 9.65685 18.0247 11 16.2048 11C15.9629 11 15.7271 10.9763 15.5 10.9312" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" />
+            <path d="M4.48131 16.1112C3.30234 16.743 0.211137 18.0331 2.09388 19.6474C3.01359 20.436 4.03791 21 5.32572 21H12.6743C13.9621 21 14.9864 20.436 15.9061 19.6474C17.7889 18.0331 14.6977 16.743 13.5187 16.1112C10.754 14.6296 7.24599 14.6296 4.48131 16.1112Z" stroke="currentColor" stroke-width="2.0" />
+            <path d="M13 7.5C13 9.70914 11.2091 11.5 9 11.5C6.79086 11.5 5 9.70914 5 7.5C5 5.29086 6.79086 3.5 9 3.5C11.2091 3.5 13 5.29086 13 7.5Z" stroke="currentColor" stroke-width="2.0" />
+          </svg>
+          <span class="text">Following</span>
+        </li>
+      </ul>
+    `;
   }
 
   getContainer = active => {
@@ -381,102 +309,96 @@ export default class ProfileSection extends HTMLElement {
           gap: 0;
         }
 
-        .tab-control {
+        ul.tabs {
           border-bottom: var(--border);
-          background-color: var(--background);
           display: flex;
-          flex-flow: column;
-          gap: 0;
-          z-index: 3;
-          width: 100%;
-          min-width: 100%;
-          position: sticky;
-          top: 60px;
-        }
-
-        .tab-control > .author {
-          border-bottom: var(--border);
-          padding: 10px 0;
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          font-weight: 400;
-          color: var(--gray-color);
-          font-family: var(--font-mono), monospace;
-          font-size: 0.9rem;
-        }
-
-        .tab-control > ul.tab {
-          height: max-content;
-          width: 100%;
-          padding: 5px 0 0 0;
+          z-index: 1;
+          flex-flow: row nowrap;
+          gap: 15px;
+          padding: 22px 0 10px;
           margin: 0;
-          list-style-type: none;
-          display: flex;
-          gap: 0;
-          align-items: center;
-          max-width: 100%;
-          overflow-x: scroll;
-          -ms-overflow-style: none;
+          width: 100%;
+          list-style: none;
+          overflow-x: auto;
           scrollbar-width: none;
+          -ms-overflow-style: none;
+          z-index: 5;
+          position: sticky;
+          top: 0;
+          background: var(--background);
         }
 
-        .tab-control > ul.tab::-webkit-scrollbar {
-          display: none !important;
+        ul.tabs::-webkit-scrollbar {
+          display: none;
           visibility: hidden;
         }
 
-        .tab-control > ul.tab > li.tab-item {
-          color: var(--gray-color);
-          font-family: var(--font-text), sans-serif;
-          font-weight: 400;
-          padding: 6px 20px 8px 0;
-          margin: 0;
+        ul.tabs > li.tab {
           display: flex;
+          flex-flow: row;
           align-items: center;
-          cursor: pointer;
-          overflow: visible;
+          gap: 5px;
+          padding: 5px 0;
+          border-radius: 12px;
+          /*background: var(--gray-background);*/
+          color: var(--text-color);
+          font-family: var(--font-main), sans-serif;
           font-size: 0.95rem;
-        }
-
-        .tab-control > ul.tab > li.tab-item > .text {
           font-weight: 500;
+          cursor: pointer;
+          transition: 0.3s;
+        }
+
+        ul.tabs > li.tab > span.count,
+        ul.tabs > li.tab > svg {
+          display: none;
+        }
+
+        ul.tabs > li.tab.active {
+          background: var(--tab-background);
+          padding: 5px 10px;
+          display: flex;
+          text-align: center;
+          color: var(--text-color);
+        }
+
+        ul.tabs > li.tab.active > span.count,
+        ul.tabs > li.tab.active > svg,
+        ul.tabs > li.tab:not(.active):hover > span.count,
+        ul.tabs > li.tab:not(.active):hover > svg {
+          display: flex;
+        }
+
+        /* style hover tab: but don't touch tab with active class */
+        ul.tabs > li.tab:not(.active):hover {
+          background: var(--tab-background);
+          padding: 5px 10px;
+          color: var(--text-color);
+        }
+
+        ul.tabs > li.tab > svg {
+          width: 19px;
+          height: 19px;
+        }
+
+        ul.tabs > li.tab > .text {
           font-size: 1rem;
+          padding: 0 5px 0 0;
+          font-weight: 500;
         }
 
-        .tab-control > ul.tab > li.tab-item:hover > .text {
-          color: transparent;
+        ul.tabs > li.tab > .count {
+          font-size: 0.85rem;
+          display: none;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          font-weight: 500;
           background: var(--accent-linear);
-          background-clip: text;
-          -webkit-background-clip: text;
-        }
-
-        .tab-control > ul.tab > li.active {
-          font-size: 0.95rem;
-        }
-
-        .tab-control > ul.tab > li.active > .text {
-          color: transparent;
-          background: var(--accent-linear);
-          background-clip: text;
-          -webkit-background-clip: text;
-          font-family: var(--font-read);
-        }
-
-        .tab-control > ul.tab span.line {
-          position: absolute;
-          z-index: 1;
-          background: var(--accent-linear);
-          display: inline-block;
-          bottom: -3px;
-          left: 12px;
-          width: 20px;
-          min-height: 5px;
-          border-top-left-radius: 5px;
-          border-top-right-radius: 5px;
-          border-bottom-left-radius: 5px;
-          border-bottom-right-radius: 5px;
-          transition: all 300ms ease-in-out;
+          font-family: var(--font-text), sans-serif;
+          color: var(--white-color);
+          padding: 1px 7px 2.5px;
+          border-radius: 10px;
         }
 
         @media screen and (max-width: 660px) {
@@ -503,6 +425,7 @@ export default class ProfileSection extends HTMLElement {
 
           a,
           span.stat,
+          ul.tabs > li.tab,
           span.action {
             cursor: default !important;
           }

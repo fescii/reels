@@ -54,7 +54,7 @@ class APIManager {
         res.on('end', () => {
           try {
             const json = JSON.parse(data);
-            if (res.statusCode >= 200 && res.statusCode < 300) {
+            if (res.statusCode >= 200 && res.statusCode < 600) {
               resolve(json);
             } else {
               reject(new Error(`HTTP error! status: ${res.statusCode}`));

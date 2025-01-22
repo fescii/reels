@@ -3,12 +3,13 @@ export default class TopicSection extends HTMLElement {
     // We are not even going to touch this.
     super();
 
-    // Get default active tab
-    this._active = this.getAttribute('active');
-
+    this.active_tab = null;
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
+    this.app = window.app;
+    this.api = this.app.api;
+    // Add popstate event listener
+    window.addEventListener('popstate', this.handlePopState);
     this.render();
   }
 
@@ -18,16 +19,20 @@ export default class TopicSection extends HTMLElement {
 
   connectedCallback() {
     const contentContainer = this.shadowObj.querySelector('div.feeds');
-    const tabContainer = this.shadowObj.querySelector('ul#tab');
+    const tabContainer = this.shadowObj.querySelector('ul.tabs');
 
-    this.updateActiveTab(tabContainer);
-    this.activateTab(contentContainer, tabContainer);
+    if(contentContainer && tabContainer) {
+      // if content container and tab container exists
+      if (contentContainer && tabContainer) {
+        this.activateTabController(tabContainer, contentContainer)
+      }
+    }
 
     // Open url
     this.openUrl();
   }
 
-   disableScroll() {
+  disableScroll() {
     // Get the current page scroll position
     let scrollTop = window.scrollY || document.documentElement.scrollTop;
     let scrollLeft = window.scrollX || document.documentElement.scrollLeft;
@@ -44,173 +49,89 @@ export default class TopicSection extends HTMLElement {
     window.onscroll = function () { };
   }
 
-  updateActiveTab = tabContainer => {
-    // Select tab with active class
-    const tab = tabContainer.querySelector(`ul#tab > li.${this._active}`);
+  activateTabController = (tabs, contentContainer) => {
+    // get the active tab
+    this.getOrSetActiveTab(tabs);
 
-    // select line
-    const line = tabContainer.querySelector('span.line');
+    // add click event listener to the tabs
+    tabs.querySelectorAll("li").forEach(tab => {
+      tab.addEventListener("click", e => {
+        e.preventDefault();
+        e.stopPropagation();
 
-    if (tab && line) {
-      tab.classList.add('active');
+        if(this.active_tab.dataset.name === tab.dataset.name) return;
 
-      // Calculate half tab width - 10px
-      const tabWidth = (tab.offsetWidth/2) - 20;
+        // remove the active class from the active tab
+        this.active_tab.classList.remove("active");
 
-      // update line
-      line.style.left = `${tab.offsetLeft + tabWidth}px`;
-    }
-    else {
-      // Select the stories tab
-      const storiesTab = tabContainer.querySelector("ul#tab > li.article");
-      storiesTab.classList.add('active');
-    }
+        // set the new active tab
+        this.active_tab = tab;
+        this.active_tab.classList.add("active");
+        const url = tab.getAttribute('url');
+
+        // update the content based on the tab
+        this.updateContent(contentContainer, tab.getAttribute('data-name'), url);
+      });
+    });
   }
 
-  activateTab = (contentContainer, tabContainer) => {
-    const outerThis = this;
-    if (tabContainer && contentContainer) {
-      const line = tabContainer.querySelector('span.line');
-      const tabItems = tabContainer.querySelectorAll('li.tab-item');
-      let activeTab = tabContainer.querySelector('li.tab-item.active');
+  getOrSetActiveTab = tabs => {
+    const tabName = this.getAttribute('active') || 'all';
+    // get the tab from the attribute or default to 'all'
+    let activeTab = tabs.querySelector('li.active');
 
-      tabItems.forEach(tab => {
-        tab.addEventListener('click', e => {
-          e.preventDefault()
-          e.stopPropagation()
+    if (!activeTab) {
+      // if no tab matches the attribute, set the first tab as active
+      activeTab = tabs.querySelector(`li.${tabName}`);
+    }
 
-          // Calculate half tab width - 10px
-          const tabWidth = (tab.offsetWidth/2) - 20;
+    activeTab.classList.add("active");
+    this.active_tab = activeTab;
+  }
 
-          line.style.left = `${tab.offsetLeft + tabWidth}px`;
+  updateContent = (contentContainer, tabName, url) => {
+    const contentMap = {
+      'article':  this.getArticle(),
+      'stories': this.getStories()
+    };
 
-          if (tab.dataset.element === activeTab.dataset.element) {
-            return;
-          }
-          else {
-            activeTab.classList.remove('active');
-            tab.classList.add('active');
-            activeTab = tab;
+    const content = contentMap[tabName] || this.getArticle();
+    contentContainer.innerHTML = content;
+    this.app.push(url, { kind: "sub", app: "topic", name: tabName, html: content }, tabName);
+    this.openUrl();
+  }
 
-            // get current feed
-            const currentFeed = outerThis.getCurrentFeed(tab.dataset.element);
-
-            // Updating History State
-            window.history.pushState(
-              { tab: tab.dataset.element, content: currentFeed},
-              tab.dataset.element, `${tab.getAttribute('url')}`
-            );
-
-            // update active attribute
-            outerThis.setAttribute('active', tab.dataset.element);
-
-            switch (tab.dataset.element) {
-              case "article":
-                contentContainer.innerHTML = outerThis.getArticle();
-                break;
-              case "stories":
-                contentContainer.innerHTML = outerThis.getStories();
-                break;
-              default:
-                break;
-            }
-
-          }
-        })
-      })
-
-      // Update state on window.onpopstate
-      window.onpopstate = event => {
-        // This event will be triggered when the browser's back button is clicked
-
-        if (event.state) {
-          if (event.state.popup) {
-            return;
-          }
-          
-          if (event.state.page) {
-            outerThis.updatePage(event.state.content)
-          }
-          else if (event.state.tab) {
-
-            // Select the state tab
-            const tab = outerThis.shadowObj.querySelector(`ul#tab > li.${event.state.tab}`);
-
-            if (tab) {
-              activeTab.classList.remove('active');
-
-              tab.classList.add('active');
-              activeTab = tab;
-
-              // Calculate half tab width - 10px
-              const tabWidth = (tab.offsetWidth/2) - 20;
-
-              // update line 
-              line.style.left = `${tab.offsetLeft + tabWidth}px`;
-
-              outerThis.updateState(event.state, contentContainer);
-
-              //Update active attribute
-              outerThis.setAttribute('active', event.state.tab);
-            }
-          }
-        }
-        else {
-           // Select li with class name as current and content Container
-           const currentTab = outerThis.shadowObj.querySelector(`ul#tab > li.tab-item.${this._active}`);
-          if (currentTab) {
-            activeTab.classList.remove('active');
-            activeTab = currentTab;
-            currentTab.classList.add('active');
-            
-            // Calculate half tab width - 10px
-            const tabWidth = (currentTab.offsetWidth/2) - 20;
-
-            // Update line
-            line.style.left = `${currentTab.offsetLeft + tabWidth}px`;
-
-            outerThis.updateDefault(contentContainer);
-
-            // Update active attribute
-            outerThis.setAttribute('active', this._active);
-          }
-        }
-      };
+  handlePopState = event => {
+    const state = event.state;
+    if (state && state.kind === 'sub' && state.app === 'topic') {
+      this.updateHistory(state.name, state.html)
     }
   }
 
-  updatePage = content => {
-    // select body
-    const body = document.querySelector('body');
+  updateHistory = (tabName, content) => {
+    const contentContainer = this.shadowObj.querySelector('div.feeds');
+    const tabs = this.shadowObj.querySelector('ul.tabs');
 
-    // populate content
-    body.innerHTML = content;
-  }
+    try {
+      this.active_tab.classList.remove('active');
+      const activeTab = tabs.querySelector(`li.${tabName}`);
+      activeTab.classList.add('active');
+      this.active_tab = activeTab;
 
-  updateState = (state, contentContainer)=> {
-    // populate content
-    contentContainer.innerHTML = state.content;
-  }
-
-  updateDefault = contentContainer => {
-    contentContainer.innerHTML = this.getContent(this._active);
-  }
-
-  // get current feed
-  getCurrentFeed = tab => {
-    switch (tab) {
-      case "article":
-        return this.getArticle();
-      case "stories":
-        return this.getStories();
-      default:
-        return this.getArticle();
+      contentContainer.innerHTML = content;
+    } catch (error) {
+      console.log(error)
+      const activeTab = tabs.querySelector('li.article');
+      activeTab.classList.add('active');
+      this.active_tab = activeTab;
+      contentContainer.innerHTML = this.getArticle()
     }
+    this.openUrl();
   }
 
   openUrl = () => {
     // get all the links
-    const links = this.shadowObj.querySelectorAll('article.article > .section a');
+    const links = this.shadowObj.querySelectorAll('.feeds > article a');
     const body = document.querySelector('body');
 
     // loop through the links
@@ -242,32 +163,41 @@ export default class TopicSection extends HTMLElement {
 
   getBody = () => {
     return /* html */`
-      ${this.getTab()}
+      ${this.getTab(this.getAttribute('active'))}
       <div class="feeds">
-        ${this.getContent(this._active)}
+        ${this.getContent(this.getAttribute('active'))}
       </div>
     `
   }
 
-  getTab = () => {
+  getTab = tab => {
     // Get url 
     let url = this.getAttribute('url');
 
     // convert url to lowercase
     url = url.toLowerCase();
+
     return /* html */`
-      <div class="tab-control">
-        <ul id="tab" class="tab">
-          <li url="${url}/article" data-element="article" class="tab-item article">
-            <span class="text">Article</span>
-          </li>
-          <li url="${url}/stories" data-element="stories" class="tab-item stories">
-            <span class="text">Stories</span>
-          </li>
-          <span class="line"></span>
-        </ul>
-      </div>
-    `
+      <ul class="tabs">
+        <li class="tab article ${tab === "article" ? "active" : ''}" data-name="article" url="${url}/article">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M12.5 3H11.5C7.02166 3 4.78249 3 3.39124 4.39124C2 5.78249 2 8.02166 2 12.5C2 16.9783 2 19.2175 3.39124 20.6088C4.78249 22 7.02166 22 11.5 22C15.9783 22 18.2175 22 19.6088 20.6088C21 19.2175 21 16.9783 21 12.5V11.5" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" />
+            <path d="M22 5.5C22 7.433 20.433 9 18.5 9C16.567 9 15 7.433 15 5.5C15 3.567 16.567 2 18.5 2C20.433 2 22 3.567 22 5.5Z" stroke="currentColor" stroke-width="2.0" />
+            <path d="M7 11H11" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M7 16H15" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span class="text">Article</span>
+        </li>
+        <li class="tab stories ${tab === "stories" ? "active" : ''}" data-name="stories" url="${url}/stories">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M10.5 8H18.5M10.5 12H13M18.5 12H16M10.5 16H13M18.5 16H16" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M7 7.5H6C4.11438 7.5 3.17157 7.5 2.58579 8.08579C2 8.67157 2 9.61438 2 11.5V18C2 19.3807 3.11929 20.5 4.5 20.5C5.88071 20.5 7 19.3807 7 18V7.5Z" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M16 3.5H11C10.07 3.5 9.60504 3.5 9.22354 3.60222C8.18827 3.87962 7.37962 4.68827 7.10222 5.72354C7 6.10504 7 6.57003 7 7.5V18C7 19.3807 5.88071 20.5 4.5 20.5H16C18.8284 20.5 20.2426 20.5 21.1213 19.6213C22 18.7426 22 17.3284 22 14.5V9.5C22 6.67157 22 5.25736 21.1213 4.37868C20.2426 3.5 18.8284 3.5 16 3.5Z" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span class="text">Stories</span>
+        </li>
+      </ul>
+    `;
   }
 
   getContent = active => {
@@ -358,103 +288,96 @@ export default class TopicSection extends HTMLElement {
           gap: 0;
         }
 
-        .tab-control {
+        ul.tabs {
           border-bottom: var(--border);
-          background-color: var(--background);
           display: flex;
-          flex-flow: column;
-          gap: 0;
-          z-index: 3;
-          width: 100%;
-          min-width: 100%;
-          position: sticky;
-          top: 60px;
-        }
-
-        .tab-control > .author {
-          border-bottom: var(--border);
-          padding: 10px 0;
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          font-weight: 400;
-          color: var(--gray-color);
-          font-family: var(--font-mono), monospace;
-          font-size: 0.9rem;
-        }
-
-        .tab-control > ul.tab {
-          height: max-content;
-          width: 100%;
-          padding: 5px 0 0 0;
+          z-index: 1;
+          flex-flow: row nowrap;
+          gap: 15px;
+          padding: 22px 0 10px;
           margin: 0;
-          list-style-type: none;
-          display: flex;
-          gap: 0;
-          align-items: center;
-          max-width: 100%;
-          overflow-x: scroll;
-          -ms-overflow-style: none;
+          width: 100%;
+          list-style: none;
+          overflow-x: auto;
           scrollbar-width: none;
+          -ms-overflow-style: none;
+          z-index: 5;
+          position: sticky;
+          top: 0;
+          background: var(--background);
         }
 
-        .tab-control > ul.tab::-webkit-scrollbar {
-          display: none !important;
+        ul.tabs::-webkit-scrollbar {
+          display: none;
           visibility: hidden;
         }
 
-        .tab-control > ul.tab > li.tab-item {
-          /* border: var(--border); */
-          color: var(--gray-color);
-          font-family: var(--font-text), sans-serif;
-          font-weight: 400;
-          padding: 6px 20px 8px 0;
-          margin: 0;
+        ul.tabs > li.tab {
           display: flex;
+          flex-flow: row;
           align-items: center;
-          cursor: pointer;
-          overflow: visible;
+          gap: 5px;
+          padding: 5px 0;
+          border-radius: 12px;
+          /*background: var(--gray-background);*/
+          color: var(--text-color);
+          font-family: var(--font-main), sans-serif;
           font-size: 0.95rem;
-        }
-
-        .tab-control > ul.tab > li.tab-item > .text {
           font-weight: 500;
+          cursor: pointer;
+          transition: 0.3s;
+        }
+
+        ul.tabs > li.tab > span.count,
+        ul.tabs > li.tab > svg {
+          display: none;
+        }
+
+        ul.tabs > li.tab.active {
+          background: var(--tab-background);
+          padding: 5px 10px;
+          display: flex;
+          text-align: center;
+          color: var(--text-color);
+        }
+
+        ul.tabs > li.tab.active > span.count,
+        ul.tabs > li.tab.active > svg,
+        ul.tabs > li.tab:not(.active):hover > span.count,
+        ul.tabs > li.tab:not(.active):hover > svg {
+          display: flex;
+        }
+
+        /* style hover tab: but don't touch tab with active class */
+        ul.tabs > li.tab:not(.active):hover {
+          background: var(--tab-background);
+          padding: 5px 10px;
+          color: var(--text-color);
+        }
+
+        ul.tabs > li.tab > svg {
+          width: 19px;
+          height: 19px;
+        }
+
+        ul.tabs > li.tab > .text {
           font-size: 1rem;
+          padding: 0 5px 0 0;
+          font-weight: 500;
         }
 
-        .tab-control > ul.tab > li.tab-item:hover > .text {
-          color: transparent;
+        ul.tabs > li.tab > .count {
+          font-size: 0.85rem;
+          display: none;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          font-weight: 500;
           background: var(--accent-linear);
-          background-clip: text;
-          -webkit-background-clip: text;
-        }
-
-        .tab-control > ul.tab > li.active {
-          font-size: 0.95rem;
-        }
-
-        .tab-control > ul.tab > li.active > .text {
-          color: transparent;
-          background: var(--accent-linear);
-          background-clip: text;
-          -webkit-background-clip: text;
-          font-family: var(--font-read);
-        }
-
-        .tab-control > ul.tab span.line {
-          position: absolute;
-          z-index: 1;
-          background: var(--accent-linear);
-          display: inline-block;
-          bottom: -3px;
-          left: 12px;
-          width: 20px;
-          min-height: 5px;
-          border-top-left-radius: 5px;
-          border-top-right-radius: 5px;
-          border-bottom-left-radius: 5px;
-          border-bottom-right-radius: 5px;
-          transition: all 300ms ease-in-out;
+          font-family: var(--font-text), sans-serif;
+          color: var(--white-color);
+          padding: 1px 7px 2.5px;
+          border-radius: 10px;
         }
 
         article.article {
@@ -654,6 +577,7 @@ export default class TopicSection extends HTMLElement {
 
           a,
           span.stat,
+          ul.tabs > li.tab,
           span.action {
             cursor: default !important;
           }

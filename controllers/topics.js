@@ -41,7 +41,7 @@ const getTopic = async (req, res) => {
       return res.status(404).render('404');
     }
 
-    const topic = result.data.topic;
+    const topic = result.topic;
 
     // add tab to the topic object
     topic.tab = 'article';
@@ -63,6 +63,7 @@ const getTopic = async (req, res) => {
       data: topic
     })
   } catch (error) {
+    console.log(error)
     return res.status(500).render('500')
   }
 }
@@ -90,7 +91,7 @@ const getTopicStories = async (req, res) => {
       return res.status(404).render('404');
     }
 
-    const topic = result.data.topic;
+    const topic = result.topic;
 
     // add tab to the topic object
     topic.tab = 'stories';

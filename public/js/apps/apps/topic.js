@@ -26,7 +26,6 @@ export default class AppTopic extends HTMLElement {
   connectedCallback() {
     this.enableScroll();
     this.style.display = 'flex';
-    this.onPopEvent();
     this.checkAndAddHandler();
     this.checkNotificationPermission();
     this.performActions();
@@ -691,7 +690,8 @@ export default class AppTopic extends HTMLElement {
           flex-flow: column;
           align-items: start;
           gap: 0;
-          width: 63%;
+          padding: 20px 0 0 0;
+          width: calc(55% - 10px);
           min-height: 100vh
         }
 
@@ -844,7 +844,7 @@ export default class AppTopic extends HTMLElement {
 
         section.side {
           padding: 25px 0;
-          width: 33%;
+          width: calc(45% - 10px);
           display: flex;
           flex-flow: column;
           gap: 20px;

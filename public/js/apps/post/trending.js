@@ -31,7 +31,7 @@ export default class TrendingStory extends HTMLElement {
     const body = document.querySelector('body');
 
     // Open Full post
-    this.openFullPost(url, body);
+    this.openFullPost(url);
 
     this.openHighlights(body)
 
@@ -144,7 +144,7 @@ export default class TrendingStory extends HTMLElement {
 
     const openFull = this.shadowObj.querySelector('.actions > .action.view');
 
-    if(body && content && openFull) {
+    if(content && openFull) {
       content.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
@@ -308,7 +308,7 @@ export default class TrendingStory extends HTMLElement {
         const url = link.getAttribute('href');
 
         // link pop up
-        let linkPopUp = `<url-popup url="${url}"></url-popup>`
+        let linkPopUp = /* html */`<url-popup url="${url}"></url-popup>`
 
         // open the popup
         body.insertAdjacentHTML('beforeend', linkPopUp);
@@ -340,11 +340,11 @@ export default class TrendingStory extends HTMLElement {
     let url = this.getAttribute('url');
     url = url.trim().toLowerCase();
     return /*html*/`
-      <div class="content" id="content">
+      <div class="content">
         <h3 class="title">
           <a href="${url}" class="link">${this.getAttribute('story-title')}</a>
         </h3>
-        ${this.getSummery()}
+        <div id="content">${this.getSummery()}</div>
       </div>
 		`;
   }

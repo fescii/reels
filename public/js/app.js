@@ -52,12 +52,9 @@ export default class AppMain extends HTMLElement {
   // noinspection JSMethodCanBeStatic
   connectedCallback() {
     this.setUpEvents()
-    this.getRenderedContent()
   }
 
-  getRenderedContent = () => {
-    // get the rendered content as a string
-    const flow = this.shadowObj.querySelector('section.flow');
+  getRenderedContent = flow => {
     return flow.innerHTML;
   }
 
@@ -110,11 +107,26 @@ export default class AppMain extends HTMLElement {
   }
 
   navigate = content => {
-    window.scrollTo(0, 0);
     this.content = content;
     const container = this.shadowObj.querySelector('section.flow');
+    const currentContent = this.getRenderedContent(container);
+
+    // replace current history
+    this.replaceHistory({ kind: 'app', html: currentContent });
+
+    // set the loader
     container.innerHTML = this.getLoader();
+    window.scrollTo(0, 0);
+    // set the content
     this.setContent(container)
+  }
+
+  replaceHistory = state => {
+    // get current URL
+    const url = window.location.href;
+
+    // replace the current history entry
+    this.replace(url, state, url);
   }
 
   /**
@@ -141,6 +153,7 @@ export default class AppMain extends HTMLElement {
 
   handlePopState = event => {
     const state = event.state;
+    console.log('App state', state);
     if (state && state.kind === 'app') {
       this.updateHistory(state.html)
     }
@@ -152,13 +165,11 @@ export default class AppMain extends HTMLElement {
     this.content = content;
     const container = this.shadowObj.querySelector('section.flow');
     container.innerHTML = this.getLoader();
-    this.setContent(container)
-  }
-
-  disconnectedCallback() {
-    this.enableScroll();
-    // clear window.home
-    window.home = null;
+    
+    setTimeout(() => {
+      // set the content
+      container.innerHTML = this.content;
+    }, 3000);
   }
 
   registerComponents = () => {

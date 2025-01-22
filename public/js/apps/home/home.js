@@ -110,7 +110,6 @@ export default class AppHome extends HTMLElement {
     const contentContainer = this.shadowObj.querySelector('div.feeds > div.content-container');
     const tabs = this.shadowObj.querySelector('ul.tabs');
 
-
     try {
       this.active_tab.classList.remove('active');
       const activeTab = tabs.querySelector(`li.${tabName}`);

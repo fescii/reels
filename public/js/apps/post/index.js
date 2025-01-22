@@ -1,10 +1,10 @@
 // Import all posts
-import QuickPost from "./quick.post.js";
-import PollPoll from "./poll.post.js";
+import QuickPost from "./quick.js";
+import PollPoll from "./poll.js";
 import StoryPost from "./story.js";
 import TrendingStory from "./trending.js";
-import PreviewPost from "./preview.post.js";
-import ReplyPost from "./reply.post.js";
+import PreviewPost from "./preview.js";
+import ReplyPost from "./reply.js";
 
 // Export all posts
 export default function posts() {

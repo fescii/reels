@@ -63,10 +63,20 @@ export default class AppMain extends HTMLElement {
     this.style.setProperty('display', 'flex')
     const container = this.shadowObj.querySelector('section.flow');
 
-    if(container) this.setContent(container);
+    if(container) this.initContent(container);
 
     // request user to enable notifications
     this.checkNotificationPermission();
+  }
+
+  initContent = container => {
+    setTimeout(() => {
+      // set the content
+      container.innerHTML = this.content;
+      
+      // replace current history
+      this.replaceHistory({ kind: 'app', html: this.content });
+    }, 3000);
   }
 
   checkNotificationPermission = async () => {
@@ -109,10 +119,6 @@ export default class AppMain extends HTMLElement {
   navigate = content => {
     this.content = content;
     const container = this.shadowObj.querySelector('section.flow');
-    const currentContent = this.getRenderedContent(container);
-
-    // replace current history
-    this.replaceHistory({ kind: 'app', html: currentContent });
 
     // set the loader
     container.innerHTML = this.getLoader();
@@ -153,7 +159,7 @@ export default class AppMain extends HTMLElement {
 
   handlePopState = event => {
     const state = event.state;
-    console.log('App state', state);
+    // console.log('App state', state);
     if (state && state.kind === 'app') {
       this.updateHistory(state.html)
     }

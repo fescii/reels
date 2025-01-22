@@ -65,7 +65,6 @@ export default class PreviewPost extends HTMLElement {
     // Add the loader
     contentContainer.innerHTML = this.getLoader();
 		const previewLoader = this.shadowObj.querySelector('#loader-container');
-
     // Check if reply or story is already fetched
     if (this._story || this._reply) {
       // remove the loader
@@ -270,11 +269,11 @@ export default class PreviewPost extends HTMLElement {
     const contentStr = poll.content.replace(/<[^>]*>/g, '');
     const contentLength = contentStr.length;
 
-    let chars = 250;
+    let chars = 200;
 
     // Check if its a mobile view
     if (mql.matches) {
-      chars = 200;
+      chars = 180;
     }
 
     // Check if content length is greater than :chars
@@ -323,8 +322,7 @@ export default class PreviewPost extends HTMLElement {
 
   trimContent = text => {
     // if text is less than 150 characters
-    if (text.length <= 200) return text;
-
+    if (text.length <= 150) return text;
 
     // check for mobile view
     const mql = window.matchMedia('(max-width: 660px)');
@@ -332,10 +330,10 @@ export default class PreviewPost extends HTMLElement {
     // Check if its a mobile view
     if (mql.matches) {
       // return text substring: 150 characters + ...
-      return text.substring(0, 200) + '...';
+      return text.substring(0, 120) + '...';
     } else {
       // trim the text to 250 characters
-      return text.substring(0, 300) + '...';
+      return text.substring(0, 150) + '...';
     }
   }
 
@@ -746,8 +744,8 @@ export default class PreviewPost extends HTMLElement {
   }
 
   getLoader() {
-    return `
-      <div id="loader-container">
+    return /* html */`
+      <div class="loader-container" id="loader-container">
 				<div class="loader"></div>
 			</div>
     `
@@ -799,37 +797,56 @@ export default class PreviewPost extends HTMLElement {
           min-width: 100%;
         }
 
-        #loader-container {
-          padding: 10px 0;
-          width: 50px;
-          background-color: var(--loader-background);
-          backdrop-filter: blur(1px);
-          -webkit-backdrop-filter: blur(1px);
+        div.loader-container {
           display: flex;
           align-items: center;
-          justify-content: center;
-          border-radius: inherit;
-          -webkit-border-radius: inherit;
-          -moz-border-radius: inherit;
+          justify-content: start;
+          width: 100%;
+          min-height: 50px;
+          padding: 0 0 0 12px;
+          height: 50px;
+          min-width: 100%;
         }
 
-        #loader-container > .loader {
-          width: 20px;
+        div.loader-container > .loader {
+          width: 12px;
           aspect-ratio: 1;
-          --_g: no-repeat radial-gradient(farthest-side, #18A565 94%, #0000);
-          --_g1: no-repeat radial-gradient(farthest-side, #21D029 94%, #0000);
-          --_g2: no-repeat radial-gradient(farthest-side, #df791a 94%, #0000);
-          --_g3: no-repeat radial-gradient(farthest-side, #f09c4e 94%, #0000);
-          background:    var(--_g) 0 0,    var(--_g1) 100% 0,    var(--_g2) 100% 100%,    var(--_g3) 0 100%;
-          background-size: 30% 30%;
-          animation: l38 .9s infinite ease-in-out;
-          -webkit-animation: l38 .9s infinite ease-in-out;
+          border-radius: 50%;
+          background: var(--accent-linear);
+          display: grid;
+          animation: l22-0 2s infinite linear;
         }
 
-        @keyframes l38 {
-          100% {
-            background-position: 100% 0, 100% 100%, 0 100%, 0 0
-          }
+        div.loader-container > .loader:before {
+          content: "";
+          grid-area: 1/1;
+          margin: 15%;
+          border-radius: 50%;
+          background: var(--second-linear);
+          transform: rotate(0deg) translate(150%);
+          animation: l22 1s infinite;
+        }
+
+        div.loader-container > .loader:after {
+          content: "";
+          grid-area: 1/1;
+          margin: 15%;
+          border-radius: 50%;
+          background: var(--accent-linear);
+          transform: rotate(0deg) translate(150%);
+          animation: l22 1s infinite;
+        }
+
+        div.loader-container > .loader:after {
+          animation-delay: -.5s
+        }
+
+        @keyframes l22-0 {
+          100% {transform: rotate(1turn)}
+        }
+
+        @keyframes l22 {
+          100% {transform: rotate(1turn) translate(150%)}
         }
 
         .welcome {

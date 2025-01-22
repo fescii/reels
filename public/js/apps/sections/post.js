@@ -115,15 +115,6 @@ export default class PostSection extends HTMLElement {
       activeTab = tabs.querySelector(`li.${tabName}`);
     }
 
-    const contentMap = {
-      'replies': this.getReplies(),
-      'likes': this.getLikes()
-    };
-
-    const content = contentMap[tabName] || this.getReplies();
-    
-    this.app.replace(activeTab.getAttribute('url'), { kind: "sub", app: "post", name: tabName, html: content }, tabName);
-
     activeTab.classList.add("active");
     this.active_tab = activeTab;
   }

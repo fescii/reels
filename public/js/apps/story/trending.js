@@ -85,8 +85,8 @@ export default class TrendingStories extends HTMLElement {
       const images = story.images ? story.images.join(',') : ''; 
       return /*html*/`
         <trending-story story="story" hash="${story.hash}" url="${url}" images="${images}"
-          topics="${story.topics.length === 0 ? 'story' : story.topics }" story-title="${story.title}" time="${story.createdAt}" replies-url="/api/v1${url}/replies" 
-          likes-url="/api/v1${url}/likes" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" likes="${story.likes}" 
+          topics="${story.topics.length === 0 ? 'story' : story.topics }" story-title="${story.title}" time="${story.createdAt}" replies-url="${url}/replies" 
+          likes-url="${url}/likes" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" likes="${story.likes}" 
           views="${story.views}" 
           author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
           author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'

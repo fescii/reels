@@ -71,17 +71,6 @@ export default class AppHome extends HTMLElement {
       activeTab = tabs.querySelector(`li.${tabName}`);
     }
 
-    const contentMap = {
-      'all': this.getAll(),
-      'stories': this.getStories(),
-      'replies': this.getReplies(),
-      'users': this.getUsers()
-    };
-
-    const content = contentMap[tabName] || this.getAll();
-    
-    this.app.replace(activeTab.getAttribute('url'), { kind: "sub", app: "home", name: tabName, html: content }, tabName);
-
     activeTab.classList.add("active");
     this.active_tab = activeTab;
   }

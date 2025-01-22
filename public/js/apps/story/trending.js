@@ -285,6 +285,35 @@ export default class TrendingStories extends HTMLElement {
           100% {transform: rotate(1turn) translate(150%)}
         }
 
+        .title {
+          display: flex;
+					width: 100%;
+          flex-flow: column;
+					padding: 5px 10px 6px;
+          margin: 0 0 0 -2px;
+          gap: 0;
+					background: var(--light-linear);
+					border-radius: 7px;
+        }
+
+        .title > h2 {
+          font-size: 1.5rem;
+          font-weight: 500;
+          font-family: var(--font-text), sans-serif;
+          margin: 0;
+          color: var(--text-color);
+        }
+
+        .title > p.info {
+          margin: 0;
+          font-size: 0.9rem;
+          font-style: italic;
+          font-weight: 400;
+          font-family: var(--font-text), sans-serif;
+          margin: 0;
+          color: var(--text-color);
+        }
+
         div.empty {
           width: 100%;
           padding: 15px 0;

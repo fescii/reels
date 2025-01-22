@@ -1,4 +1,4 @@
-export default class TopicPopup extends HTMLElement {
+export default class StatsPopup extends HTMLElement {
   constructor() {
 
     // We are not even going to touch this.
@@ -32,23 +32,29 @@ export default class TopicPopup extends HTMLElement {
     }
   }
 
-  fetchTopics = contentContainer => {
+  fetchTopics = (contentContainer) => {
+    const outerThis = this;
 		const topicsLoader = this.shadowObj.querySelector('.loader-container');
     setTimeout(async () => {
       try {
-      const data = this.api.get(this._url, { content: 'json' })
-
+      const data = await this.api.get(this._url, { content: 'json' });
+      // check for success response
       if (data.success) {
-        const content = this.getHighlights(data.data);
+        // update the content
+        const content = outerThis.getHighlights(data.data);
+        // remove the loader
         topicsLoader.remove();
+        // insert the content
         contentContainer.insertAdjacentHTML('beforeend', content);
       } else {
-        const content = this.getEmpty();
+        // display error message
+        const content = outerThis.getEmpty();
         topicsLoader.remove();
         contentContainer.insertAdjacentHTML('beforeend', content);
       }
       } catch (error) {
-      const content = this.getEmpty();
+      // display error message
+      const content = outerThis.getEmpty();
       topicsLoader.remove();
       contentContainer.insertAdjacentHTML('beforeend', content);
       }
@@ -134,7 +140,7 @@ export default class TopicPopup extends HTMLElement {
 
   getTemplate() {
     // Show HTML Here
-    return /*html*/`
+    return `
       <div class="overlay"></div>
       <section id="content" class="content">
         ${this.getWelcome()}
@@ -143,7 +149,7 @@ export default class TopicPopup extends HTMLElement {
   }
 
   getWelcome() {
-    return /*html*/`
+    return /* html */`
       <div class="welcome">
 				<ul class="highlights">
           ${this.getLoader()}
@@ -155,16 +161,27 @@ export default class TopicPopup extends HTMLElement {
   getHighlights = data => {
     // Get the number of followers, views, stories and topics
     const followers = this.parseToNumber(this.getAttribute('followers'));
-    const views = this.parseToNumber(this.getAttribute('views'));
+    const views = data.all;
     const stories = this.parseToNumber(this.getAttribute('stories'));
+    const topics = data.topics;
 
-    const subscribers = this.parseToNumber(this.getAttribute('subscribers'));
+    const replies = this.parseToNumber(this.getAttribute('replies'));
 
     // get current and last month views
     const currentMonthViews = data.current;
     const lastMonthViews = data.last;
 
     let name = this.getAttribute('name');
+
+    if (name) {
+      name = name.split(' ');
+
+      name = name[0];
+      name = name.toLowerCase();
+    }
+    else {
+      name = 'User'
+    }
 
     // calculate the percentage increase or decrease in views
     const percentage = lastMonthViews === 0 ? 100 : ((currentMonthViews - lastMonthViews) / lastMonthViews) * 100;
@@ -182,9 +199,9 @@ export default class TopicPopup extends HTMLElement {
 
     // format the number of followers, views, stories and topics
     const followersFormatted = this.formatNumber(followers);
-    const viewsFormatted = this.formatNumber(views);
+    const viewsFormatted = this.formatNumber(currentMonthViews);
     const storiesFormatted = this.formatNumber(stories);
-    const subFormatted = this.formatNumber(subscribers);
+    const topicsFormatted = this.formatNumber(topics);
 
     return /* html */`
       <li class="item">
@@ -204,17 +221,7 @@ export default class TopicPopup extends HTMLElement {
           </svg>
         </span>
         <span class="link">
-          <span class="numbers" id="views">${viewsFormatted}</span> all time views
-        </span>
-      </li>
-      <li class="item">
-        <span class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-            <path d="M10.5 3.5H1.75a.25.25 0 0 0-.25.25v.32L8 7.88l3.02-1.77a.75.75 0 0 1 .758 1.295L8.379 9.397a.75.75 0 0 1-.758 0L1.5 5.809v6.441c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25v-4.5a.75.75 0 0 1 1.5 0v4.5A1.75 1.75 0 0 1 14.25 14H1.75A1.75 1.75 0 0 1 0 12.25V4.513a.75.75 0 0 1 0-.027V3.75C0 2.784.784 2 1.75 2h8.75a.75.75 0 0 1 0 1.5Z"></path><path d="M14 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"></path>
-          </svg>
-        </span>
-        <span class="link">
-          <span class="numbers" id="views">${subFormatted}</span> total subscribers
+          <span class="numbers" id="views">${viewsFormatted}</span> content views this month
         </span>
       </li>
       ${increaseOrDecrease}
@@ -225,11 +232,33 @@ export default class TopicPopup extends HTMLElement {
           </svg>
         </span>
         <span class="link">
-          <span class="numbers" id="stories">${storiesFormatted}</span> ${stories === 1 ? 'story' : 'stories'} published under this topic
+          <span class="numbers" id="stories">${storiesFormatted}</span> published ${stories === 1 ? 'story' : 'stories'}/${stories === 1 ? 'post' : 'posts'}
+        </span>
+      </li>
+      <li class="item">
+        <span class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M6.78 1.97a.75.75 0 0 1 0 1.06L3.81 6h6.44A4.75 4.75 0 0 1 15 10.75v2.5a.75.75 0 0 1-1.5 0v-2.5a3.25 3.25 0 0 0-3.25-3.25H3.81l2.97 2.97a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L1.47 7.28a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"></path>
+          </svg>
+        </span>
+        <span class="link">
+          <span class="numbers" id="replies">${replies}</span> repl${replies === 1 ? 'y' : 'ies'} added so far
+        </span>
+      </li>
+      <li class="item">
+        <span class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M6.368 1.01a.75.75 0 0 1 .623.859L6.57 4.5h3.98l.46-2.868a.75.75 0 0 1 1.48.237L12.07 4.5h2.18a.75.75 0 0 1 0 1.5h-2.42l-.64 4h2.56a.75.75 0 0 1 0 1.5h-2.8l-.46 2.869a.75.75 0 0 1-1.48-.237l.42-2.632H5.45l-.46 2.869a.75.75 0 0 1-1.48-.237l.42-2.632H1.75a.75.75 0 0 1 0-1.5h2.42l.64-4H2.25a.75.75 0 0 1 0-1.5h2.8l.46-2.868a.75.75 0 0 1 .858-.622ZM9.67 10l.64-4H6.33l-.64 4Z"></path>
+          </svg>
+        </span>
+        <span class="link">
+          subscribed to <span class="numbers" id="topics">${topicsFormatted}</span> topic${topics === 1 ? '' : 's'}
         </span>
       </li>
       <div class="empty">
-        <p class="italics">This is a summary of the topic ${name.toLowerCase()} highlights</p>
+        <p class="italics">
+          This is a summary of the user's content and interactions performance on the platform.
+        </p>
       </div>
     `
   }
@@ -258,7 +287,7 @@ export default class TopicPopup extends HTMLElement {
           </svg>
         </span>
         <span class="link">
-          ${name} has no recent content views.
+          ${name} has no content views yet
         </span>
       </li>
     `
@@ -282,7 +311,7 @@ export default class TopicPopup extends HTMLElement {
   getEmpty = () => {
     return /* html */`
       <div class="empty">
-        <p>Topic highlights could not be retrieved at the moment.</p>
+        <p>User highlights were not loaded, and error while fetching data</p>
         <p>Try refreshing the page or check your internet connection. If the problem persists, please contact support.</p>
       </div>
     `
@@ -402,22 +431,23 @@ export default class TopicPopup extends HTMLElement {
           max-height: 90%;
           height: max-content;
           border-radius: 25px;
+          position: relative;
         }
-  
+
         .welcome {
           width: 98%;
           display: flex;
           flex-flow: column;
           align-items: center;
           justify-content: center;
-          gap: 0;
+          row-gap: 0;
         }
 
         .welcome > h2 {
           width: 100%;
           font-size: 1.35rem;
           font-weight: 600;
-          margin: 0;
+          margin: 0 0 10px;
           padding: 10px 10px;
           background-color: var(--gray-background);
           text-align: center;
@@ -436,7 +466,6 @@ export default class TopicPopup extends HTMLElement {
           gap: 0px;
           justify-content: center;
           position: absolute;
-          width: max-content;
           top: 50%;
           left: 10px;
           transform: translateY(-50%);
@@ -466,7 +495,7 @@ export default class TopicPopup extends HTMLElement {
           padding: 0;
           margin: 0;
           color: var(--text-color);
-          font-family: var(--font-main), sans-serif;
+          font-family: var(--font-text), sans-serif;
           font-size: 1rem;
           font-weight: 400;
         }
@@ -545,8 +574,8 @@ export default class TopicPopup extends HTMLElement {
         }
         
         ul.highlights > li.item > .link .numbers {
-          color: var(--text-color);
-          font-weight: 500;
+          color: var(--highlight-color);
+          font-weight: 600;
           font-family: var(--font-main), sans-serif;
           font-size: 0.95rem;
           display: inline-block;
@@ -567,8 +596,7 @@ export default class TopicPopup extends HTMLElement {
           }
         }
 
-        @media screen and ( max-width: 600px ) {
-
+        @media screen and ( max-width: 600px ){
           :host {
             border: none;
             background-color: var(--modal-background);
@@ -589,7 +617,7 @@ export default class TopicPopup extends HTMLElement {
 
           #content {
             box-sizing: border-box !important;
-            padding: 5px 0 0 0;
+            padding: 15px 0 5px;
             margin: 0;
             width: 100%;
             max-width: 100%;
@@ -639,6 +667,7 @@ export default class TopicPopup extends HTMLElement {
           .welcome > .actions > .action {
             cursor: default !important;
           }
+          
         }
       </style>
     `;

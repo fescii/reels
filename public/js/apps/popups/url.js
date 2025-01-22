@@ -284,7 +284,7 @@ export default class UrlPopup extends HTMLElement {
 
           #content {
             box-sizing: border-box !important;
-            padding: 5px 0 0 0;
+            padding: 15px 0 5px;
             margin: 0;
             width: 100%;
             max-width: 100%;

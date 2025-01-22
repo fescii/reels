@@ -524,7 +524,7 @@ export default class PostOptions extends HTMLElement {
         #content {
           z-index: 1;
           background-color: var(--background);
-          padding: 20px;
+          padding: 15px 10px;
           display: flex;
           flex-flow: column;
           align-items: center;

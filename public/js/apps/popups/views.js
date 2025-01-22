@@ -1,10 +1,8 @@
-export default class ContactPopup extends HTMLElement {
+export default class ViewsPopup extends HTMLElement {
   constructor() {
 
     // We are not even going to touch this.
     super();
-
-    this._url = this.getAttribute('url');
 
     // let's create our shadow root
     this.shadowObj = this.attachShadow({mode: 'open'});
@@ -17,12 +15,13 @@ export default class ContactPopup extends HTMLElement {
   }
 
   connectedCallback() {
+    
     this.disableScroll();
 
     // Select the close button & overlay
     const overlay = this.shadowObj.querySelector('.overlay');
     const btns = this.shadowObj.querySelectorAll('.cancel-btn');
-    const contentContainer = this.shadowObj.querySelector('div.options');
+    const contentContainer = this.shadowObj.querySelector('ul.highlights');
 
     // Close the modal
     if (overlay && btns && contentContainer) {
@@ -33,38 +32,69 @@ export default class ContactPopup extends HTMLElement {
 
   fetchTopics = (contentContainer) => {
     const outerThis = this;
-		const topicsLoader = this.shadowObj.querySelector('.loader-container');
-    const str = this.getAttribute('contact');
-    // console.log(str)
-    let contact= null;
-    if (str !== null || str !== '' || str !== 'null') {
-      try {
-        contact = JSON.parse(str);
-      }
-      catch (error) {
-        console.log(error)
-        contact = null;
-      }
-    }
+		const statsLoader = this.shadowObj.querySelector('.loader-container');
 		setTimeout(() => {
-      if (contact === undefined || contact === null) {
-        // display error message
-        const content = outerThis.getEmpty();
-        topicsLoader.remove();
+      const content = outerThis.getHighlights();
+        // remove the loader
+        statsLoader.remove();
+        // insert the content
         contentContainer.insertAdjacentHTML('beforeend', content);
-        return;
-      }
-      // update the content
-      const content = outerThis.getContactOptions(contact);
-      // remove the loader
-      topicsLoader.remove();
-      // insert the content
-      contentContainer.insertAdjacentHTML('beforeend', content);
-		}, 2000)
+		}, 1000)
 	}
 
+  convertToBool = str => {
+    switch (str) {
+      case 'true':
+        return true;
+      case 'false':
+        return false;
+      default:
+        return false;
+    }
+  }
+
+  formatNumber = n => {
+    if (n >= 0 && n <= 999) {
+      return n.toString();
+    } else if (n >= 1000 && n <= 9999) {
+      const value = (n / 1000).toFixed(2);
+      return `${value}k`;
+    } else if (n >= 10000 && n <= 99999) {
+      const value = (n / 1000).toFixed(1);
+      return `${value}k`;
+    } else if (n >= 100000 && n <= 999999) {
+      const value = (n / 1000).toFixed(0);
+      return `${value}k`;
+    } else if (n >= 1000000 && n <= 9999999) {
+      const value = (n / 1000000).toFixed(2);
+      return `${value}M`;
+    } else if (n >= 10000000 && n <= 99999999) {
+      const value = (n / 1000000).toFixed(1);
+      return `${value}M`;
+    } else if (n >= 100000000 && n <= 999999999) {
+      const value = (n / 1000000).toFixed(0);
+      return `${value}M`;
+    } else if (n >= 1000000000) {
+      return "1B+";
+    }
+    else {
+      return 0;
+    }
+  }
+
+  parseToNumber = num_str => {
+    // Try parsing the string to an integer
+    const num = parseInt(num_str);
+
+    // Check if parsing was successful
+    if (!isNaN(num)) {
+      return num;
+    } else {
+      return 0;
+    }
+  }
+
   disconnectedCallback() {
-    
     this.enableScroll()
   }
 
@@ -102,7 +132,7 @@ export default class ContactPopup extends HTMLElement {
 
   getTemplate() {
     // Show HTML Here
-    return /*html*/`
+    return `
       <div class="overlay"></div>
       <section id="content" class="content">
         ${this.getWelcome()}
@@ -113,97 +143,72 @@ export default class ContactPopup extends HTMLElement {
   getWelcome() {
     return /*html*/`
       <div class="welcome">
-				<div class="options">
+				<ul class="highlights">
           ${this.getLoader()}
-        </div>
+        </ul>
 			</div>
     `
   }
 
-  getContactOptions = data => {
+  getHighlights = () => {
+    // Get the number of followers, views, stories and topics
+    const likes = this.parseToNumber(this.getAttribute('likes'));
+    const you = this.convertToBool(this.getAttribute('liked'));
+    const views = this.parseToNumber(this.getAttribute('views'));
+    const replies = this.parseToNumber(this.getAttribute('replies'));
+
+    // format the number of followers, views, stories and topics
+    const likesFormatted = this.formatNumber(likes);
+    const viewsFormatted = this.formatNumber(views);
+
+    // construct you text
+    let youText = you ? 'You and ' : '';
+
+    let textContent = `${youText}<span class="numbers">${this.formatNumber(likes - 1)}</span> other ${likes - 1 === 1 ? 'person' : 'people'} likes this`;
+    
+    if(you && likes === 1) {
+      textContent = `You like this content`;
+    }
+    else if (!you) {
+      textContent = `<span class="numbers">${likesFormatted}</span> ${likes === 1 ? 'person' : 'people'} likes this content`;
+    }
+
+
     return /* html */`
-      ${data.x ? this.getX(data.x) : ''}
-      ${data.linkedin ? this.getLinkedIn(data.linkedin) : ''}
-      ${data.threads ? this.getThreads(data.threads) : ''}
-      ${data.email ? this.getEmail(data.email) : ''}
-      ${data.website ? this.getWebsite(data.website) : ''}
+      <li class="item">
+        <span class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="m8 14.25.345.666a.75.75 0 0 1-.69 0l-.008-.004-.018-.01a7.152 7.152 0 0 1-.31-.17 22.055 22.055 0 0 1-3.434-2.414C2.045 10.731 0 8.35 0 5.5 0 2.836 2.086 1 4.25 1 5.797 1 7.153 1.802 8 3.02 8.847 1.802 10.203 1 11.75 1 13.914 1 16 2.836 16 5.5c0 2.85-2.045 5.231-3.885 6.818a22.066 22.066 0 0 1-3.744 2.584l-.018.01-.006.003h-.002ZM4.25 2.5c-1.336 0-2.75 1.164-2.75 3 0 2.15 1.58 4.144 3.365 5.682A20.58 20.58 0 0 0 8 13.393a20.58 20.58 0 0 0 3.135-2.211C12.92 9.644 14.5 7.65 14.5 5.5c0-1.836-1.414-3-2.75-3-1.373 0-2.609.986-3.029 2.456a.749.749 0 0 1-1.442 0C6.859 3.486 5.623 2.5 4.25 2.5Z"></path>
+          </svg>
+        </span>
+        <span class="link">
+          ${textContent}
+        </span>
+      </li>
+      <li class="item">
+        <span class="icon increase">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M4.53 4.75A.75.75 0 0 1 5.28 4h6.01a.75.75 0 0 1 .75.75v6.01a.75.75 0 0 1-1.5 0v-4.2l-5.26 5.261a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L9.48 5.5h-4.2a.75.75 0 0 1-.75-.75Z"></path>
+          </svg>
+        </span>
+        <span class="link">
+          This content has <span class="numbers" id="views">${viewsFormatted}</span> total ${views === 1 ? 'view' : 'views'}
+        </span>
+      </li>
+      <li class="item">
+        <span class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M6.78 1.97a.75.75 0 0 1 0 1.06L3.81 6h6.44A4.75 4.75 0 0 1 15 10.75v2.5a.75.75 0 0 1-1.5 0v-2.5a3.25 3.25 0 0 0-3.25-3.25H3.81l2.97 2.97a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L1.47 7.28a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"></path>
+          </svg>
+        </span>
+        <span class="link">
+          This content has <span class="numbers" id="replies">${replies === 0 ? 'no' : replies}</span> repl${replies === 1 ? 'y' : 'ies'} so far
+        </span>
+      </li>
       <div class="empty">
-        <p class="italics">The above is only contact information shared by the user.</p>
-      </div>
-		`
-  }
-
-  getX = username => {
-    return /*html*/`
-      <a href="https://x.com/${username}" target="_blank" rel="noopener" class="link x">
-        <span class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-twitter-x" viewBox="0 0 16 16">
-            <path  d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z" />
-          </svg>
-        </span>
-        <span class="text">X(Twitter)</span>
-      </a>
-    `
-  }
-
-  getLinkedIn = username => {
-    return /*html*/`
-      <a href="https://linkedin.com/in/${username}" target="_blank" rel="noopener" class="link linkedin">
-        <span class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-linkedin" viewBox="0 0 16 16">
-            <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z" />
-          </svg>
-        </span>
-        <span class="text">LinkedIn</span>
-      </a>
-    `
-  }
-
-  getThreads = username => {
-    return /*html*/`
-      <a href="https://threads.net/@${username}" target="_blank" rel="noopener" class="link threads">
-        <span class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-threads" viewBox="0 0 16 16">
-            <path d="M6.321 6.016c-.27-.18-1.166-.802-1.166-.802.756-1.081 1.753-1.502 3.132-1.502.975 0 1.803.327 2.394.948s.928 1.509 1.005 2.644q.492.207.905.484c1.109.745 1.719 1.86 1.719 3.137 0 2.716-2.226 5.075-6.256 5.075C4.594 16 1 13.987 1 7.994 1 2.034 4.482 0 8.044 0 9.69 0 13.55.243 15 5.036l-1.36.353C12.516 1.974 10.163 1.43 8.006 1.43c-3.565 0-5.582 2.171-5.582 6.79 0 4.143 2.254 6.343 5.63 6.343 2.777 0 4.847-1.443 4.847-3.556 0-1.438-1.208-2.127-1.27-2.127-.236 1.234-.868 3.31-3.644 3.31-1.618 0-3.013-1.118-3.013-2.582 0-2.09 1.984-2.847 3.55-2.847.586 0 1.294.04 1.663.114 0-.637-.54-1.728-1.9-1.728-1.25 0-1.566.405-1.967.868ZM8.716 8.19c-2.04 0-2.304.87-2.304 1.416 0 .878 1.043 1.168 1.6 1.168 1.02 0 2.067-.282 2.232-2.423a6.2 6.2 0 0 0-1.528-.161"/>
-          </svg>
-        </span>
-        <span class="text">Threads</span>
-      </a>
-    `
-  }
-
-  getEmail = email => {
-    return /*html*/`
-      <a href="mailto:${email}" class="link email">
-        <span class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-paper" viewBox="0 0 16 16">
-            <path d="M4 0a2 2 0 0 0-2 2v1.133l-.941.502A2 2 0 0 0 0 5.4V14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5.4a2 2 0 0 0-1.059-1.765L14 3.133V2a2 2 0 0 0-2-2zm10 4.267.47.25A1 1 0 0 1 15 5.4v.817l-1 .6zm-1 3.15-3.75 2.25L8 8.917l-1.25.75L3 7.417V2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1zm-11-.6-1-.6V5.4a1 1 0 0 1 .53-.882L2 4.267zm13 .566v5.734l-4.778-2.867zm-.035 6.88A1 1 0 0 1 14 15H2a1 1 0 0 1-.965-.738L8 10.083zM1 13.116V7.383l4.778 2.867L1 13.117Z" />
-          </svg>
-        </span>
-        <span class="text">Email</span>
-      </a>
-    `
-  }
-
-  getWebsite = website => {
-    return /*html*/`
-      <a href="${website}" target="_blank" rel="noopener" class="link website">
-        <span class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-link-45deg" viewBox="0 0 16 16">
-            <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/>
-            <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/>
-          </svg>
-        </span>
-        <span class="text">Website</span>
-      </a>
-    `
-  }
-
-  getEmpty = () => {
-    return /* html */`
-      <div class="empty">
-        <p>This user hasn't publicly shared any contact information. Note that this information is only available if the user chose to share it publicly.</p>
-        <p class="italics">You can still interact with the user via public information on their profile.</p>
+        <p> 
+          Views are simply the number of times the this content has been viewed by others.
+        </p>
       </div>
     `
   }
@@ -383,7 +388,6 @@ export default class ContactPopup extends HTMLElement {
 
         div.empty > p {
           width: 100%;
-          text-align: center;
           padding: 0;
           margin: 0;
           color: var(--text-color);
@@ -393,81 +397,93 @@ export default class ContactPopup extends HTMLElement {
         }
 
         div.empty > p.italics {
-          margin: 5px 0 0 0;
           font-style: italic;
         }
         
-        .options {
+        ul.highlights {
           width: 100%;
-          padding: 5px 0;
+          padding: 0;
+          margin: 0;
+          list-style-type: none;
+          display: flex;
+          flex-flow: column;
+          gap: 10px;
+        }
+        
+        ul.highlights > li.item {
+          padding: 0;
+          margin: 0;
+          width: 100%;
           display: flex;
           flex-flow: row;
-          flex-wrap: wrap;
-          gap: 15px;
+          align-items: center;
+          flex-wrap: nowrap;
+          gap: 10px;
+        }
+        
+        ul.highlights > li.item > .icon {
+          display: flex;
           align-items: center;
           justify-content: center;
+          height: 26px;
+          width: 26px;
+          min-height: 26px;
+          min-width: 26px;
+          max-height: 26px;
+          max-width: 26px;
+          padding: 3px;
+          border-radius: 50px;
+          -webkit-border-radius: 50px;
+          -moz-border-radius: 50px;
+          background-color: var(--gray-background);
+          color: var(--gray-color);
+          font-size: 0.9rem;
+          font-weight: 500;
+          text-transform: capitalize;
+        }
+        
+        ul.highlights > li.item > .icon > svg {
+          height: 15px;
+          width: 15px;
         }
 
-        .options a.link {
-          display: flex;
-          flex-flow: row;
-          align-items: center;
-          justify-content: center;
-          gap: 5px;
-          margin: 5px 8px 0;
-          padding: 5px 15px 5px 12px;
-          background-color: var(--gray-background);
-          border-radius: 12px;
-          text-decoration: none;
+        ul.highlights > li.item > .icon.increase {
+          background: var(--accent-linear);
+          color: var(--white-color);
+        }
+
+        ul.highlights > li.item > .icon.decrease {
+          background: var(--error-linear);
+          color: var(--white-color);
+        }
+        
+        ul.highlights > li.item > .link {
           color: var(--text-color);
-          font-family: var(--font-text), sans-serif;
+          font-family: var(--font-main), sans-serif;
           font-size: 1rem;
           font-weight: 400;
+          text-decoration: none;
         }
-
-        .options a.link > .icon {
-          width: 25px;
-          height: 25px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        
+        ul.highlights > li.item > a.link:hover {
+          color: var(--text-color);
         }
-
-        .options a.link.x {
-          background: linear-gradient(103.53deg, #1DA1F2 -6.72%, #0A95D7 109.77%);
-          color: var(--white-color);
+        
+        ul.highlights > li.item > .link .numbers {
+          color: var(--highlight-color);
+          font-weight: 600;
+          font-family: var(--font-main), sans-serif;
+          font-size: 0.95rem;
+          display: inline-block;
+          margin: 0 0 -2px 0;
         }
-
-        .options a.link.facebook {
-          background: linear-gradient(103.53deg, #1877F2 -6.72%, #0A5A9C 109.77%);
-          color: var(--white-color);
-        }
-
-        .options a.link.linkedin {
-          background: linear-gradient(103.53deg, #0077B5 -6.72%, #005684 109.77%);
-          color: var(--white-color);
-        }
-
-        .options a.link.mail {
-          background: linear-gradient(103.53deg, #D44638 -6.72%, #D44638 109.77%);
-          color: var(--white-color);
-        }
-
-        .share-buttons > a.whatsapp {
-          background: linear-gradient(103.53deg, #25D366 -6.72%, #25D366 109.77%);
-        }
-
-        .options a.link > .icon svg {
-          width: 15px;
-          height: 15px;
-          color: inherit;
-        }
-
-        .options a.link > .text {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: inherit;
+        
+        ul.highlights > li.item.last {
+          background-color: var(--gray-background);
+          padding: 10px;
+          margin: 5px 0;
+          border-radius: 12px;
+          -webkit-border-radius: 12px;
         }
 
         @media screen and ( max-width: 850px ){
@@ -495,13 +511,9 @@ export default class ContactPopup extends HTMLElement {
             left: 0;
           }
 
-          a {
-            cursor: default !important;
-          }
-
           #content {
             box-sizing: border-box !important;
-            padding: 5px 0 0 0;
+            padding: 15px 0 5px;
             margin: 0;
             width: 100%;
             max-width: 100%;
@@ -534,6 +546,39 @@ export default class ContactPopup extends HTMLElement {
 
           .welcome > .actions {
             width: 100%;
+          }
+
+          .welcome > .actions .action {
+            background: var(--stage-no-linear);
+            text-decoration: none;
+            padding: 7px 20px 8px;
+            cursor: default;
+            margin: 10px 0;
+            width: 120px;
+            cursor: default !important;
+            border-radius: 12px;
+          }
+
+          div.empty {
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-flow: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+          }
+  
+          div.empty > p {
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            text-align: start;
+            color: var(--text-color);
+            font-family: var(--font-text), sans-serif;
+            font-size: 1rem;
+            font-weight: 400;
           }
 
           .welcome > h2 > span.control,

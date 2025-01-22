@@ -303,7 +303,7 @@ export default class NotifyPopup extends HTMLElement {
 
           #content {
             box-sizing: border-box !important;
-            padding: 18px 0 0 0;
+            padding: 18px 0 10px;
             margin: 0;
             width: 100%;
             max-width: 100%;

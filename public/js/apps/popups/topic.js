@@ -1,12 +1,15 @@
-export default class ViewsPopup extends HTMLElement {
+export default class TopicPopup extends HTMLElement {
   constructor() {
 
     // We are not even going to touch this.
     super();
 
+    this._url = this.getAttribute('url');
+
     // let's create our shadow root
     this.shadowObj = this.attachShadow({mode: 'open'});
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -15,7 +18,6 @@ export default class ViewsPopup extends HTMLElement {
   }
 
   connectedCallback() {
-    
     this.disableScroll();
 
     // Select the close button & overlay
@@ -30,28 +32,28 @@ export default class ViewsPopup extends HTMLElement {
     }
   }
 
-  fetchTopics = (contentContainer) => {
-    const outerThis = this;
-		const statsLoader = this.shadowObj.querySelector('.loader-container');
-		setTimeout(() => {
-      const content = outerThis.getHighlights();
-        // remove the loader
-        statsLoader.remove();
-        // insert the content
-        contentContainer.insertAdjacentHTML('beforeend', content);
-		}, 1000)
-	}
+  fetchTopics = contentContainer => {
+		const topicsLoader = this.shadowObj.querySelector('.loader-container');
+    setTimeout(async () => {
+      try {
+      const data = this.api.get(this._url, { content: 'json' })
 
-  convertToBool = str => {
-    switch (str) {
-      case 'true':
-        return true;
-      case 'false':
-        return false;
-      default:
-        return false;
-    }
-  }
+      if (data.success) {
+        const content = this.getHighlights(data.data);
+        topicsLoader.remove();
+        contentContainer.insertAdjacentHTML('beforeend', content);
+      } else {
+        const content = this.getEmpty();
+        topicsLoader.remove();
+        contentContainer.insertAdjacentHTML('beforeend', content);
+      }
+      } catch (error) {
+      const content = this.getEmpty();
+      topicsLoader.remove();
+      contentContainer.insertAdjacentHTML('beforeend', content);
+      }
+    }, 2000);
+	}
 
   formatNumber = n => {
     if (n >= 0 && n <= 999) {
@@ -132,7 +134,7 @@ export default class ViewsPopup extends HTMLElement {
 
   getTemplate() {
     // Show HTML Here
-    return `
+    return /*html*/`
       <div class="overlay"></div>
       <section id="content" class="content">
         ${this.getWelcome()}
@@ -150,41 +152,90 @@ export default class ViewsPopup extends HTMLElement {
     `
   }
 
-  getHighlights = () => {
+  getHighlights = data => {
     // Get the number of followers, views, stories and topics
-    const likes = this.parseToNumber(this.getAttribute('likes'));
-    const you = this.convertToBool(this.getAttribute('liked'));
+    const followers = this.parseToNumber(this.getAttribute('followers'));
     const views = this.parseToNumber(this.getAttribute('views'));
-    const replies = this.parseToNumber(this.getAttribute('replies'));
+    const stories = this.parseToNumber(this.getAttribute('stories'));
+
+    const subscribers = this.parseToNumber(this.getAttribute('subscribers'));
+
+    // get current and last month views
+    const currentMonthViews = data.current;
+    const lastMonthViews = data.last;
+
+    let name = this.getAttribute('name');
+
+    // calculate the percentage increase or decrease in views
+    const percentage = lastMonthViews === 0 ? 100 : ((currentMonthViews - lastMonthViews) / lastMonthViews) * 100;
+
+    let increaseOrDecrease = this.getLevel(name);
+
+    // check if last month views is 0 and this month views is also 0
+    if (lastMonthViews > 0 || currentMonthViews > 0) {
+      // convert percentage to 1 decimal place if it is a decimal
+      const percentageFormatted = percentage % 1 === 0 ? percentage : percentage.toFixed(1);
+
+      // get the increase or decrease in views
+      increaseOrDecrease = percentage > 0 ? this.getIncrease(percentageFormatted) : this.getDecrease(Math.abs(percentageFormatted));
+    }
 
     // format the number of followers, views, stories and topics
-    const likesFormatted = this.formatNumber(likes);
+    const followersFormatted = this.formatNumber(followers);
     const viewsFormatted = this.formatNumber(views);
-
-    // construct you text
-    let youText = you ? 'You and ' : '';
-
-    let textContent = `${youText}<span class="numbers">${this.formatNumber(likes - 1)}</span> other ${likes - 1 === 1 ? 'person' : 'people'} likes this`;
-    
-    if(you && likes === 1) {
-      textContent = `You like this content`;
-    }
-    else if (!you) {
-      textContent = `<span class="numbers">${likesFormatted}</span> ${likes === 1 ? 'person' : 'people'} likes this content`;
-    }
-
+    const storiesFormatted = this.formatNumber(stories);
+    const subFormatted = this.formatNumber(subscribers);
 
     return /* html */`
       <li class="item">
         <span class="icon">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-            <path d="m8 14.25.345.666a.75.75 0 0 1-.69 0l-.008-.004-.018-.01a7.152 7.152 0 0 1-.31-.17 22.055 22.055 0 0 1-3.434-2.414C2.045 10.731 0 8.35 0 5.5 0 2.836 2.086 1 4.25 1 5.797 1 7.153 1.802 8 3.02 8.847 1.802 10.203 1 11.75 1 13.914 1 16 2.836 16 5.5c0 2.85-2.045 5.231-3.885 6.818a22.066 22.066 0 0 1-3.744 2.584l-.018.01-.006.003h-.002ZM4.25 2.5c-1.336 0-2.75 1.164-2.75 3 0 2.15 1.58 4.144 3.365 5.682A20.58 20.58 0 0 0 8 13.393a20.58 20.58 0 0 0 3.135-2.211C12.92 9.644 14.5 7.65 14.5 5.5c0-1.836-1.414-3-2.75-3-1.373 0-2.609.986-3.029 2.456a.749.749 0 0 1-1.442 0C6.859 3.486 5.623 2.5 4.25 2.5Z"></path>
+            <path d="M2 5.5a3.5 3.5 0 1 1 5.898 2.549 5.508 5.508 0 0 1 3.034 4.084.75.75 0 1 1-1.482.235 4 4 0 0 0-7.9 0 .75.75 0 0 1-1.482-.236A5.507 5.507 0 0 1 3.102 8.05 3.493 3.493 0 0 1 2 5.5ZM11 4a3.001 3.001 0 0 1 2.22 5.018 5.01 5.01 0 0 1 2.56 3.012.749.749 0 0 1-.885.954.752.752 0 0 1-.549-.514 3.507 3.507 0 0 0-2.522-2.372.75.75 0 0 1-.574-.73v-.352a.75.75 0 0 1 .416-.672A1.5 1.5 0 0 0 11 5.5.75.75 0 0 1 11 4Zm-5.5-.5a2 2 0 1 0-.001 3.999A2 2 0 0 0 5.5 3.5Z"></path>
           </svg>
         </span>
         <span class="link">
-          ${textContent}
+          <span class="numbers" id="followers">${followersFormatted}</span> ${followers === 1 ? 'person' : 'people'} follows ${name.toLowerCase()}
         </span>
       </li>
+      <li class="item">
+        <span class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M6 2c.306 0 .582.187.696.471L10 10.731l1.304-3.26A.751.751 0 0 1 12 7h3.25a.75.75 0 0 1 0 1.5h-2.742l-1.812 4.528a.751.751 0 0 1-1.392 0L6 4.77 4.696 8.03A.75.75 0 0 1 4 8.5H.75a.75.75 0 0 1 0-1.5h2.742l1.812-4.529A.751.751 0 0 1 6 2Z"></path>
+          </svg>
+        </span>
+        <span class="link">
+          <span class="numbers" id="views">${viewsFormatted}</span> all time views
+        </span>
+      </li>
+      <li class="item">
+        <span class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M10.5 3.5H1.75a.25.25 0 0 0-.25.25v.32L8 7.88l3.02-1.77a.75.75 0 0 1 .758 1.295L8.379 9.397a.75.75 0 0 1-.758 0L1.5 5.809v6.441c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25v-4.5a.75.75 0 0 1 1.5 0v4.5A1.75 1.75 0 0 1 14.25 14H1.75A1.75 1.75 0 0 1 0 12.25V4.513a.75.75 0 0 1 0-.027V3.75C0 2.784.784 2 1.75 2h8.75a.75.75 0 0 1 0 1.5Z"></path><path d="M14 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"></path>
+          </svg>
+        </span>
+        <span class="link">
+          <span class="numbers" id="views">${subFormatted}</span> total subscribers
+        </span>
+      </li>
+      ${increaseOrDecrease}
+      <li class="item">
+        <span class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M0 3.75C0 2.784.784 2 1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14H1.75A1.75 1.75 0 0 1 0 12.25Zm1.75-.25a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25v-8.5a.25.25 0 0 0-.25-.25ZM3.5 6.25a.75.75 0 0 1 .75-.75h7a.75.75 0 0 1 0 1.5h-7a.75.75 0 0 1-.75-.75Zm.75 2.25h4a.75.75 0 0 1 0 1.5h-4a.75.75 0 0 1 0-1.5Z"></path>
+          </svg>
+        </span>
+        <span class="link">
+          <span class="numbers" id="stories">${storiesFormatted}</span> ${stories === 1 ? 'story' : 'stories'} published under this topic
+        </span>
+      </li>
+      <div class="empty">
+        <p class="italics">This is a summary of the topic ${name.toLowerCase()} highlights</p>
+      </div>
+    `
+  }
+
+  getIncrease = percentage => {
+    return /*html*/`
       <li class="item">
         <span class="icon increase">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
@@ -192,23 +243,47 @@ export default class ViewsPopup extends HTMLElement {
           </svg>
         </span>
         <span class="link">
-          This content has <span class="numbers" id="views">${viewsFormatted}</span> total ${views === 1 ? 'view' : 'views'}
+          <span class="numbers" id="percentage">${percentage}%</span> increase in views this month
         </span>
       </li>
+    `
+  }
+
+  getLevel = name => {
+    return /*html*/`
       <li class="item">
         <span class="icon">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-            <path d="M6.78 1.97a.75.75 0 0 1 0 1.06L3.81 6h6.44A4.75 4.75 0 0 1 15 10.75v2.5a.75.75 0 0 1-1.5 0v-2.5a3.25 3.25 0 0 0-3.25-3.25H3.81l2.97 2.97a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L1.47 7.28a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"></path>
+            <path d="M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5Zm-1.43-.75a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"></path>
           </svg>
         </span>
         <span class="link">
-          This content has <span class="numbers" id="replies">${replies === 0 ? 'no' : replies}</span> repl${replies === 1 ? 'y' : 'ies'} so far
+          ${name} has no recent content views.
         </span>
       </li>
+    `
+  }
+
+  getDecrease = percentage => {
+    return /*html*/`
+      <li class="item">
+        <span class="icon decrease">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M4.22 4.179a.75.75 0 0 1 1.06 0l5.26 5.26v-4.2a.75.75 0 0 1 1.5 0v6.01a.75.75 0 0 1-.75.75H5.28a.75.75 0 0 1 0-1.5h4.2L4.22 5.24a.75.75 0 0 1 0-1.06Z"></path>
+          </svg>
+        </span>
+        <span class="link">
+          <span class="numbers" id="percentage">${percentage}%</span> decrease in views this month
+        </span>
+      </li>
+    `
+  }
+
+  getEmpty = () => {
+    return /* html */`
       <div class="empty">
-        <p> 
-          Views are simply the number of times the this content has been viewed by others.
-        </p>
+        <p>Topic highlights could not be retrieved at the moment.</p>
+        <p>Try refreshing the page or check your internet connection. If the problem persists, please contact support.</p>
       </div>
     `
   }
@@ -327,7 +402,6 @@ export default class ViewsPopup extends HTMLElement {
           max-height: 90%;
           height: max-content;
           border-radius: 25px;
-          position: relative;
         }
   
         .welcome {
@@ -336,14 +410,14 @@ export default class ViewsPopup extends HTMLElement {
           flex-flow: column;
           align-items: center;
           justify-content: center;
-          row-gap: 0;
+          gap: 0;
         }
 
         .welcome > h2 {
           width: 100%;
           font-size: 1.35rem;
           font-weight: 600;
-          margin: 0 0 10px;
+          margin: 0;
           padding: 10px 10px;
           background-color: var(--gray-background);
           text-align: center;
@@ -362,6 +436,7 @@ export default class ViewsPopup extends HTMLElement {
           gap: 0px;
           justify-content: center;
           position: absolute;
+          width: max-content;
           top: 50%;
           left: 10px;
           transform: translateY(-50%);
@@ -391,13 +466,13 @@ export default class ViewsPopup extends HTMLElement {
           padding: 0;
           margin: 0;
           color: var(--text-color);
-          font-family: var(--font-text), sans-serif;
+          font-family: var(--font-main), sans-serif;
           font-size: 1rem;
           font-weight: 400;
         }
 
         div.empty > p.italics {
-          font-style: italic;
+          font-family: var(--font-main), sans-serif;
         }
         
         ul.highlights {
@@ -470,8 +545,8 @@ export default class ViewsPopup extends HTMLElement {
         }
         
         ul.highlights > li.item > .link .numbers {
-          color: var(--highlight-color);
-          font-weight: 600;
+          color: var(--text-color);
+          font-weight: 500;
           font-family: var(--font-main), sans-serif;
           font-size: 0.95rem;
           display: inline-block;
@@ -492,7 +567,8 @@ export default class ViewsPopup extends HTMLElement {
           }
         }
 
-        @media screen and ( max-width: 600px ){
+        @media screen and ( max-width: 600px ) {
+
           :host {
             border: none;
             background-color: var(--modal-background);
@@ -513,7 +589,7 @@ export default class ViewsPopup extends HTMLElement {
 
           #content {
             box-sizing: border-box !important;
-            padding: 5px 0 0 0;
+            padding: 15px 0 5px;
             margin: 0;
             width: 100%;
             max-width: 100%;
@@ -557,28 +633,6 @@ export default class ViewsPopup extends HTMLElement {
             width: 120px;
             cursor: default !important;
             border-radius: 12px;
-          }
-
-          div.empty {
-            width: 100%;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-flow: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-          }
-  
-          div.empty > p {
-            width: 100%;
-            padding: 0;
-            margin: 0;
-            text-align: start;
-            color: var(--text-color);
-            font-family: var(--font-text), sans-serif;
-            font-size: 1rem;
-            font-weight: 400;
           }
 
           .welcome > h2 > span.control,

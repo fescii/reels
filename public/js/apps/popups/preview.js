@@ -1191,7 +1191,7 @@ export default class PreviewPopup extends HTMLElement {
 
           #content {
             box-sizing: border-box !important;
-            padding: 10px 0;
+            padding: 15px 0 10px;
             margin: 0;
             width: 100%;
             max-width: 100%;

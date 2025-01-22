@@ -25,20 +25,14 @@ export default class AppPost extends HTMLElement {
   connectedCallback() {
     // Change style to flex
     this.style.display='flex';
-
     this.openUrl();
-
     // request user to enable notifications
     this.checkNotificationPermission();
-
     // connect to the WebSocket
     this.checkAndAddHandler();
-
     // mql query at: 660px
     const mql = window.matchMedia('(max-width: 660px)');
-
     this.watchMediaQuery(mql);
-
     // scroll the window to the top and set height to 100vh
     window.scrollTo(0, 0);
   }
@@ -71,21 +65,15 @@ export default class AppPost extends HTMLElement {
     // Handle the message in this component
     // console.log('Message received in component:', message);
     const data = message.data;
-
     if (message.type !== 'action') return;
 
     const user = data?.user;
     const userHash = window.hash;
-
     const hash = this.getAttribute('hash').toUpperCase();
     const authorHash = this.getAttribute('author-hash').toUpperCase();
-
     const author = this.shadowObj.querySelector('author-wrapper');
-
     const wrapper = this.shadowObj.querySelector('action-wrapper');
-
     const VotesWrapper = this.shadowObj.querySelector('poll-wrapper');
-
     const target = data.hashes.target;
 
     // handle connect action

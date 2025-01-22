@@ -2,18 +2,15 @@ export default class AppUser extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-
     this.setTitle();
-
     this.boundHandleWsMessage = this.handleWsMessage.bind(this);
     this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
-
     this._open = this.setOpen(this.getAttribute('current'));
-
     this._current = this.getAttribute('current') || 'stats';
-
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
+    // Add popstate event listener
+    window.addEventListener('popstate', this.handlePopState);
     this.app = window.app;
     this.api = this.app.api;
     this.render();
@@ -58,14 +55,11 @@ export default class AppUser extends HTMLElement {
 
     url = url.trim().toLowerCase();
 
-    // Get the body
-    const body = document.querySelector('body');
-
     // select the button
     const btn = this.shadowObj.querySelector('section.tab > div.header > svg');
 
     // select the header-wrapper
-    const headerWrapper = this.shadowObj.querySelector('header-wrapper');
+    const headerWrapper = this.shadowObj.querySelector('div.user-title');
 
     // Watch for media query changes
     this.watchMediaQuery(mql)
@@ -89,9 +83,9 @@ export default class AppUser extends HTMLElement {
       this.activateCloseTabs(mql.matches, btn, contentContainer, tabContainer);
     }
 
-    if (url && body) {
+    if (url) {
       // Open user profile
-      this.handleUserClick(url, body);
+      this.handleUserClick(url);
     }
   }
 
@@ -254,45 +248,34 @@ export default class AppUser extends HTMLElement {
   }
 
   // Open user profile
-  handleUserClick = (url, body) => {
-    const outerThis = this;
+  handleUserClick = url => {
     // get a.meta.link
     const content = this.shadowObj.querySelector('section.tab > div.header > .name > a.username');
 
     // Get full post
     const profile =  this.getProfile();
 
-    if(body && content) { 
+    if(content) { 
       content.addEventListener('click', event => {
         event.preventDefault();
+        event.stopImmediatePropagation();
+        event.stopPropagation();
         
-        // replace and push states
-        outerThis.replaceAndPushStates(url, body, profile);
-
-        body.innerHTML = profile;
+        // push the post to the app
+        this.pushApp(url, profile);;
       })
     }
   }
 
-  replaceAndPushStates = (url, body, profile) => {
-    // get the first custom element in the body
-    const firstElement = body.firstElementChild;
+  pushApp = (url, content) => {
+    this.app.push(url, { kind: "app", name: 'profile', html: content }, url);
+    // navigate to the content
+    this.navigateTo(content);
+  }
 
-    // convert the custom element to a string
-    const elementString = firstElement.outerHTML;
-  
-    // get window location
-    const pageUrl = window.location.href;
-    window.history.replaceState(
-      { page: 'page', content: elementString },
-      url, pageUrl
-    );
-
-    // Updating History State
-    window.history.pushState(
-      { page: 'page', content: profile},
-      url, url
-    );
+  navigateTo = content => {
+    // navigate to the content
+    this.app.navigate(content);
   }
 
   activateBtn = (mql, contentContainer, tabContainer, btn) => {
@@ -437,83 +420,53 @@ export default class AppUser extends HTMLElement {
         }
       })
     });
-
-    // Update state on window.onpopstate
-    window.onpopstate = event => {
-      // This event will be triggered when the browser's back button is clicked
-
-      // Check if event state is available
-      if (event.state) {
-        if (event.state.popup) {
-          return;
-        }
-        
-        if (event.state.page) {
-          outerThis.updatePage(event.state.content)
-        }
-        else if (event.state.tab) {
-          // Select the state tab
-          const tab = tabContainer.querySelector(`li.${event.state.tab}`);
-
-          if (tab) {
-            activeTab.classList.remove('active');
-
-            //Update status
-            this._status = false;
-
-            // Update current attribute
-            this.setAttribute('current', tab.dataset.name);
-
-            // Update current text
-            this.updateCurrentText(tab, headerWrapper);
-
-            tab.classList.add('active');
-            activeTab = tab;
-
-            // Remove any child elements of the content container which is not section
-            const children = Array.from(contentContainer.children);
-            if (children) {
-              children.forEach(child => {
-                if (!child.classList.contains('remains')) {
-                  child.remove();
-                }
-              })
-            }
-
-            outerThis.updateState(event.state, contentContainer);
-          }
-        }
-      }
-      else {
-        // Select li with class name as current and content Container
-        const currentTab = tabContainer.querySelector(`section.tab li.${outerThis._current}`);
-        if (currentTab) {
-          activeTab.classList.remove('active');
-
-          // Update status
-          activeTab = currentTab;
-          currentTab.classList.add('active');
-
-          //update current text
-          outerThis.updateCurrentText(currentTab, headerWrapper);
-
-          outerThis.populateContent(outerThis._current, contentContainer);
-        }
-      }
-    };
   }
 
-  updatePage = content => {
-    // select body
-    const body = document.querySelector('body');
+  handlePopState = event => {
+    const tabContainer = this.shadowObj.querySelector('section.tab');
+    const contentContainer = this.shadowObj.querySelector('div.content-container');
+    const headerWrapper = this.shadowObj.querySelector('div.user-title');
+    let activeTab = tabContainer.querySelector('li.active');
+    const outerThis = this;
+    const state = event.state;
+    if (state && state.kind === 'sub' && state.app === 'user') {
+      this.updateHistory(state.name, state.html)
+      // Select the state tab
+      const tab = tabContainer.querySelector(`li.${state.name}`);
 
-    // populate content
-    body.innerHTML = content;
+      if (tab) {
+        activeTab.classList.remove('active');
+
+        //Update status
+        this._status = false;
+
+        // Update current attribute
+        this.setAttribute('current', tab.dataset.name);
+
+        // Update current text
+        this.updateCurrentText(tab, headerWrapper);
+
+        tab.classList.add('active');
+        activeTab = tab;
+
+        // Remove any child elements of the content container which is not section
+        const children = Array.from(contentContainer.children);
+        if (children) {
+          children.forEach(child => {
+            if (!child.classList.contains('remains')) {
+              child.remove();
+            }
+          })
+        }
+
+        outerThis.updateState(event.state, contentContainer);
+      }
+    }
   }
 
   updateState = (state, contentContainer)=> {
     // populate content
-    this.populateContent(state.tab, contentContainer);
+    this.populateContent(state.name, contentContainer);
   }
 
   watchMediaQuery = mql => {
@@ -545,8 +498,9 @@ export default class AppUser extends HTMLElement {
     // Get the span.text from tab
     const text = tab.querySelector('span.text');
 
-    // change section attribute of header-wrapper
-    headerWrapper.setAttribute('section', text.textContent);
+    // select h3 and update text
+    const h3 = headerWrapper.querySelector('h3.name');
+    h3.textContent = text.textContent;
   }
 
   disableScroll() {
@@ -580,11 +534,7 @@ export default class AppUser extends HTMLElement {
       // Populate Content
       outerThis.populateContent(tab.dataset.name, contentContainer);
 
-      // Updating History State
-      window.history.pushState(
-        { tab: tab.dataset.name },
-        tab.dataset.name, `${tab.getAttribute('url')}`
-      );
+      this.app.push(tab.getAttribute('url'), { kind: "sub", app: "user", name: tab.dataset.name }, tab.dataset.name);
     }, 300);
   }
 
@@ -679,7 +629,7 @@ export default class AppUser extends HTMLElement {
   }
 
   getLoader() {
-    return `
+    return /* html */`
       <div id="loader-container">
 				<div class="loader"></div>
 			</div>
@@ -742,11 +692,13 @@ export default class AppUser extends HTMLElement {
   }
 
   getTop = () => {
-    return /* html */ `
-      <header-wrapper section="Your stats" type="user"
-        user-url="${this.getAttribute('url')}" auth-url="${this.getAttribute('auth-url')}"
-        url="${this.getAttribute('url')}" search-url="${this.getAttribute('search-url')}">
-      </header-wrapper>
+    return /*html*/`
+      <div class="user-title">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+          <path d="M7.78 12.53a.75.75 0 0 1-1.06 0L2.47 8.28a.75.75 0 0 1 0-1.06l4.25-4.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L4.81 7h7.44a.75.75 0 0 1 0 1.5H4.81l2.97 2.97a.75.75 0 0 1 0 1.06Z"></path>
+        </svg>
+        <h3 class="name">Your stats</h3>
+      </div>
     `
   }
 
@@ -1255,6 +1207,33 @@ export default class AppUser extends HTMLElement {
           display: flex;
           flex-flow: column;
           gap: 0px;
+        }
+
+        .user-title {
+          color: var(--title-color);
+          display: flex;
+          flex-flow: row;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .user-title > .left h3 {
+          margin: 0;
+          font-family: var(--font-main), sans-serif;
+          font-size: 1.3rem;
+          font-weight: 600;
+        }
+
+        .user-title svg {
+          color: var(--title-color);
+          cursor: pointer;
+          width: 28px;
+          height: 28px;
+          margin: 0 0 0 -3px;
+        }
+
+        .user-title > svg:hover {
+          color: var(--accent-color);
         }
 
         .top-nav {

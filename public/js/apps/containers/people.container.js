@@ -8,7 +8,7 @@ export default class PeopleContainer extends HTMLElement {
 		// let's create our shadow root
 		this.shadowObj = this.attachShadow({ mode: "open" });
 		this.app = window.app;
-    this.api = this.app.api;s
+    this.api = this.app.api;
 		this.render();
 	}
 
@@ -23,7 +23,6 @@ export default class PeopleContainer extends HTMLElement {
 	}
 
 	fetchPeople = contentContainer => {
-    const outerThis = this;
 		const peopleLoader = this.shadowObj.querySelector('people-loader');
 		setTimeout(async () => {
 			try {

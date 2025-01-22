@@ -289,7 +289,6 @@ export default class AppPost extends HTMLElement {
     const mql = window.matchMedia('(max-width: 660px)');
     if (mql.matches) {
       return /* html */`
-        ${this.getTop()}
         ${this.getReply(this.getAttribute('story'))}
         ${this.getAuthor()}
         ${this.getContent()}
@@ -300,7 +299,6 @@ export default class AppPost extends HTMLElement {
     else {
       return /* html */`
         <div class="feeds">
-          ${this.getTop()}
           ${this.getReply(this.getAttribute('story'))}
           ${this.getContent()}
           ${this.getPost(story)}
@@ -352,15 +350,6 @@ export default class AppPost extends HTMLElement {
         replies="${this.getAttribute('replies')}" likes="${this.getAttribute('likes')}"
         replies-url="${this.getAttribute('replies-url')}" likes-url="${this.getAttribute('likes-url')}">
       </post-section>
-    `
-  }
-
-  getTop = () => {
-    return /* html */ `
-      <header-wrapper section="Post" type="post"
-        user-url="${this.getAttribute('user-url')}" auth-url="${this.getAttribute('auth-url')}"
-        url="${this.getAttribute('story-url')}" search-url="${this.getAttribute('search-url')}">
-      </header-wrapper>
     `
   }
 
@@ -522,12 +511,12 @@ export default class AppPost extends HTMLElement {
           display: flex;
           flex-flow: column;
           gap: 0;
-          width: 63%;
+          width: calc(55% - 10px);
         }
 
         div.side {
           padding: 25px 0;
-          width: 33%;
+          width: calc(545% - 10px);
           display: flex;
           flex-flow: column;
           gap: 20px;

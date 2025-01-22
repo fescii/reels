@@ -33,7 +33,7 @@ export default class StoryPost extends HTMLElement {
     // Open Full post
     this.openFullPost(url);
 
-    this.openHighlights(body)
+    this.openHighlights(document.boy)
 
     // Open Url
     this.openUrl();

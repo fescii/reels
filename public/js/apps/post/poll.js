@@ -16,7 +16,8 @@ export default class PollPost extends HTMLElement {
       rootMargin: '0px',
       threshold: 0.5, // Consider the post visible when 50% is in view
     };
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -207,13 +208,10 @@ export default class PollPost extends HTMLElement {
 
     url = url.trim().toLowerCase();
 
-    // Get the body
-    const body = document.querySelector('body');
-
     // get current content
     const content = this.shadowObj.querySelector('#content')
 
-    if(body && content) {
+    if(content) {
       content.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
@@ -222,33 +220,21 @@ export default class PollPost extends HTMLElement {
         // Get full post
         const post =  this.getFullPost();
 
-        // replace and push states
-        this.replaceAndPushStates(url, body, post);
-
-        body.innerHTML = post;
+        // push the post to the app
+        this.pushApp(url, post);
       })
     }
   }
 
-  replaceAndPushStates = (url, body, post) => {
-    // get the first custom element in the body
-    const firstElement = body.firstElementChild;
+  pushApp = (url, content) => {
+    this.app.push(url, { kind: "app", name: 'story', html: content }, url);
+    // navigate to the content
+    this.navigateTo(content);
+  }
 
-    // convert the custom element to a string
-     const elementString = firstElement.outerHTML;
-
-    // get window location
-    const pageUrl = window.location.href;
-    window.history.replaceState(
-      { page: 'page', content: elementString },
-      url, pageUrl
-    );
-
-    // Updating History State
-    window.history.pushState(
-      { page: 'page', content: post},
-      url, url
-    );
+  navigateTo = content => {
+    // navigate to the content
+    this.app.navigate(content);
   }
 
   disableScroll() {

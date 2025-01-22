@@ -4,9 +4,7 @@ export default class PreviewPopup extends HTMLElement {
     super();
 
     this._url = this.getAttribute('url');
-
     this._story = '';
-
     // let's create our shadow root
     this.shadowObj = this.attachShadow({mode: 'open'});
     this.app = window.app;
@@ -389,50 +387,35 @@ export default class PreviewPopup extends HTMLElement {
   }
 
   openStory = () => {
-    // Get the body
-    const body = document.querySelector('body');
-
     // get current content
     const content = this.shadowObj.querySelector('.actions > .action#view-action');
 
-    if(body && content) {
+    if(content) {
       content.addEventListener('click', event => {
         event.preventDefault();
+        event.stopImmediatePropagation();
+        event.stopPropagation();
 
         let url = content.getAttribute('href');
 
         // Get full post
         const post =  this._story;
   
-        // replace and push states
-        this.replaceAndPushStates(url, body, post);
-
-        body.innerHTML = post;
+        // push the post to the app
+        this.pushApp(url, post);
       })
     }
   }
 
-  // Replace and push states
-  replaceAndPushStates = (url, body, post) => {
-    // get the first custom element in the body
-    const firstElement = body.firstElementChild;
+  pushApp = (url, content) => {
+    this.app.push(url, { kind: "app", name: 'app', html: content }, url);
+    // navigate to the content
+    this.navigateTo(content);
+  }
 
-    // convert the custom element to a string
-    const elementString = firstElement.outerHTML;
-
-    // Replace the content with the current url and body content
-    // get window location
-    const pageUrl = window.location.href;
-    window.history.replaceState(
-      { page: 'page', content: elementString },
-      url, pageUrl
-    );
-
-    // Updating History State
-    window.history.pushState(
-      { page: 'page', content: post},
-      url, url
-    );
+  navigateTo = content => {
+    // navigate to the content
+    this.app.navigate(content);
   }
 
   mapStory = story => {

@@ -2,13 +2,10 @@ export default class PreviewPost extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-
     this._url = this.getAttribute('url');
-
     this._story = null;
     this._reply = null;
     this._item = '';
-
     // let's create our shadow root
     this.shadowObj = this.attachShadow({mode: 'open'});
     this.app = window.app;
@@ -269,11 +266,11 @@ export default class PreviewPost extends HTMLElement {
     const contentStr = poll.content.replace(/<[^>]*>/g, '');
     const contentLength = contentStr.length;
 
-    let chars = 200;
+    let chars = 150;
 
     // Check if its a mobile view
     if (mql.matches) {
-      chars = 180;
+      chars = 120;
     }
 
     // Check if content length is greater than :chars
@@ -435,49 +432,36 @@ export default class PreviewPost extends HTMLElement {
   }
 
   openStory = () => {
-    // Get the body
-    const body = document.querySelector('body');
-
     // get current content
     const content = this.shadowObj.querySelector('.actions > .action#view-action');
 
-    if(body && content) {
+    if(content) {
       content.addEventListener('click', event => {
         event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
 
+        // get url
         let url = content.getAttribute('href');
 
         // Get full post
         const post =  this._item;
   
-        // replace and push states
-        this.replaceAndPushStates(url, body, post);
-
-        body.innerHTML = post;
+        // push the post to the app
+        this.pushApp(url, post);
       })
     }
   }
 
-  replaceAndPushStates = (url, body, post) => {
-    // get the first custom element in the body
-    const firstElement = body.firstElementChild;
+  pushApp = (url, content) => {
+    this.app.push(url, { kind: "app", name: 'story', html: content }, url);
+    // navigate to the content
+    this.navigateTo(content);
+  }
 
-    // convert the custom element to a string
-    const elementString = firstElement.outerHTML;
-
-    // Replace the content with the current url and body content
-    // get window location
-    const pageUrl = window.location.href;
-    window.history.replaceState(
-      { page: 'page', content: elementString },
-      url, pageUrl
-    );
-
-    // Updating History State
-    window.history.pushState(
-      { page: 'page', content: post},
-      url, url
-    );
+  navigateTo = content => {
+    // navigate to the content
+    this.app.navigate(content);
   }
 
   mapStory = story => {

@@ -10,7 +10,8 @@ export default class StoryPost extends HTMLElement {
 
     this.boundHandleWsMessage = this.handleWsMessage.bind(this);
     this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -28,12 +29,9 @@ export default class StoryPost extends HTMLElement {
     let url = this.getAttribute('url');
 
     url = url.trim().toLowerCase();
- 
-    // Get the body
-    const body = document.querySelector('body');
 
     // Open Full post
-    this.openFullPost(url, body);
+    this.openFullPost(url);
 
     this.openHighlights(body)
 
@@ -132,10 +130,10 @@ export default class StoryPost extends HTMLElement {
     // remove all html tags and classes and extra spaces and tabs
     content = content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 
-    let summary = content.substring(0, 250);
+    let summary = content.substring(0, 200);
 
     if (mql.matches) {
-      summary = content.substring(0, 230);
+      summary = content.substring(0, 150);
     }
 
     // return the summary: first 200 characters
@@ -145,65 +143,45 @@ export default class StoryPost extends HTMLElement {
     };
   }
 
-  openFullPost = (url, body) => {
+  openFullPost = url => {
     // get h3 > a.link
     const content = this.shadowObj.querySelector('div.content');
 
     const openFull = this.shadowObj.querySelector('.actions > .action.view');
 
-    if(body && content && openFull) {
+    if(content && openFull) {
       content.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
 
-        // scroll to the top of the page
-        window.scrollTo(0, 0);
-
         // Get full post
         const post =  this.getFullPost();
   
-        // replace and push states
-        this.replaceAndPushStates(url, body, post);
-
-        body.innerHTML = post;
+        // push the post to the app
+        this.pushApp(url, post);
       })
 
       openFull.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
 
-        // scroll to the top of the page
-        window.scrollTo(0, 0);
-
         // Get full post
         const post =  this.getFullPost();
-  
-        // replace and push states
-        this.replaceAndPushStates(url, body, post);
-
-        body.innerHTML = post;
+        // push the post to the app
+        this.pushApp(url, post);
       })
     }
   }
 
-  replaceAndPushStates = (url, body, post) => {
-    // get the first custom element in the body
-    const firstElement = body.firstElementChild;
+  pushApp = (url, content) => {
+    this.app.push(url, { kind: "app", name: 'story', html: content }, url);
+    // navigate to the content
+    this.navigateTo(content);
+  }
 
-    // convert the custom element to a string
-    const elementString = firstElement.outerHTML;
-    // get window location
-    const pageUrl = window.location.href;
-    window.history.replaceState(
-      { page: 'page', content: elementString },
-      url, pageUrl
-    );
-
-    // Updating History State
-    window.history.pushState(
-      { page: 'page', content: post},
-      url, url
-    );
+  navigateTo = content => {
+    // navigate to the content
+    this.app.navigate(content);
   }
 
   openHighlights = body => {

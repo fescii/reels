@@ -109,10 +109,12 @@ export default class AppMain extends HTMLElement {
     }, 5000);
   }
 
-  navigate = () => {
-    // navigate to the new page
-    this.shadowObj.innerHTML = html;
-    this.setUpEvents();
+  navigate = content => {
+    window.scrollTo(0, 0);
+    this.content = content;
+    const container = this.shadowObj.querySelector('section.flow');
+    container.innerHTML = this.getLoader();
+    this.setContent(container)
   }
 
   /**
@@ -145,6 +147,8 @@ export default class AppMain extends HTMLElement {
   }
 
   updateHistory = content => {
+    // scroll to the top of the page
+    window.scrollTo(0, 0);
     this.content = content;
     const container = this.shadowObj.querySelector('section.flow');
     container.innerHTML = this.getLoader();

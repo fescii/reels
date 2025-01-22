@@ -2,15 +2,13 @@ export default class TrendingStory extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-
     this._data = this.getSummaryAndWords();
-
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.boundHandleWsMessage = this.handleWsMessage.bind(this);
     this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
-
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -140,7 +138,7 @@ export default class TrendingStory extends HTMLElement {
     };
   }
 
-  openFullPost = (url, body) => {
+  openFullPost = url => {
     // get h3 > a.link
     const content = this.shadowObj.querySelector('div.content');
 
@@ -151,34 +149,34 @@ export default class TrendingStory extends HTMLElement {
         event.preventDefault();
         event.stopPropagation();
 
-        // scroll to the top of the page
-        window.scrollTo(0, 0);
-
         // Get full post
         const post =  this.getFullPost();
   
-        // replace and push states
-        this.replaceAndPushStates(url, body, post);
-
-        body.innerHTML = post;
+        // push the post to the app
+        this.pushApp(url, post);
       })
 
       openFull.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
 
-        // scroll to the top of the page
-        window.scrollTo(0, 0);
-
         // Get full post
         const post =  this.getFullPost();
-  
-        // replace and push states
-        this.replaceAndPushStates(url, body, post);
-
-        body.innerHTML = post;
+        // push the post to the app
+        this.pushApp(url, post);
       })
     }
+  }
+
+  pushApp = (url, content) => {
+    this.app.push(url, { kind: "app", name: 'story', html: content }, url);
+    // navigate to the content
+    this.navigateTo(content);
+  }
+
+  navigateTo = content => {
+    // navigate to the content
+    this.app.navigate(content);
   }
 
   openHighlights = body => {

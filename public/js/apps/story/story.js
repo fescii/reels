@@ -4,19 +4,15 @@ export default class AppStory extends HTMLElement {
     super();
     this._data = this.getSummaryAndWords();
     this.setTitle(this.getAttribute('story-title'));
-
     this.viewed = false;
-
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.boundHandleWsMessage = this.handleWsMessage.bind(this);
     this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
     this.mql = window.matchMedia('(max-width: 770px)');
+    this.app = window.app;
     this.topics = this.getTopics();
-
     this._content = this.innerHTML
-
     this.render();
   }
 

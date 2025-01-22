@@ -1,13 +1,13 @@
-import JoinPopup from "./join.popup.js";
-import UrlPopup from "./url.popup.js"
-import StatsPopup from "./stats.popup.js"
-import ContactPopup from "./contact.popup.js"
-import TopicPopup from "./topic.popup.js"
-import ViewsPopup from "./views.popup.js"
-import PreviewPopup from "./preview.popup.js"
-import NotifyPopup from "./notify.popup.js"
-import PostOptions from "./options.popup.js"
-import ImagePopup from "./image.popup.js"
+import JoinPopup from "./join.js";
+import UrlPopup from "./url.js"
+import StatsPopup from "./stats.js"
+import ContactPopup from "./contact.js"
+import TopicPopup from "./topic.js"
+import ViewsPopup from "./views.js"
+import PreviewPopup from "./preview.js"
+import NotifyPopup from "./notify.js"
+import PostOptions from "./options.js"
+import ImagePopup from "./images.js"
 
 
 export default function popups() {

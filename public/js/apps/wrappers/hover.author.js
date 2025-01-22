@@ -1,10 +1,8 @@
 export default class HoverAuthor extends HTMLElement {
   constructor() {
     super();
-
     this._authenticated = window.hash ? true : false;
     this._you = this.getAttribute('you') === 'true';
-
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.parent = this.getRootNode().host;
     this.app = window.app;
@@ -42,14 +40,13 @@ export default class HoverAuthor extends HTMLElement {
   connectedCallback() {
     const mql = window.matchMedia('(max-width: 660px)');
     let url = this.getAttribute('url').trim().toLowerCase();
-    const body = document.querySelector('body');
     const contentContainer = this.shadowObj.querySelector('div.content-container');
 
     if (contentContainer) {
       this.mouseEvents(url, mql.matches, contentContainer);
     }
 
-    this.handleUserClick(mql.matches, url, body, contentContainer);
+    this.handleUserClick(mql.matches, url, contentContainer);
   }
 
   textToBoolean = text => text === 'true';
@@ -71,32 +68,35 @@ export default class HoverAuthor extends HTMLElement {
     }
   }
 
-  handleUserClick = (mql, url, body, contentContainer) => {
+  handleUserClick = (mql, url, contentContainer) => {
     const content = this.shadowObj.querySelector('a.meta.link');
-    if (body && content) {
+    if (content) {
       content.addEventListener('click', event => {
         event.preventDefault();
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+        
         this.enableScroll();
         const profile = this.getProfile();
         if (mql) {
           contentContainer.style.display = 'flex';
           this.fetchContent(url, mql, contentContainer);
         } else {
-          this.replaceAndPushStates(url, body, profile);
-          body.innerHTML = profile;
+          this.pushApp(url, profile);
         }
       });
     }
   }
 
-  replaceAndPushStates = (url, body, profile) => {
-    this.enableScroll();
-    const firstElement = body.firstElementChild;
-    const elementString = firstElement.outerHTML;
-    body.classList.remove('stop-scrolling');
-    const pageUrl = window.location.href;
-    window.history.replaceState({ page: 'page', content: elementString }, url, pageUrl);
-    window.history.pushState({ page: 'page', content: profile }, url, url);
+  pushApp = (url, content) => {
+    this.app.push(url, { kind: "app", name: 'profile', html: content }, url);
+    // navigate to the content
+    this.navigateTo(content);
+  }
+
+  navigateTo = content => {
+    // navigate to the content
+    this.app.navigate(content);
   }
 
   mouseEvents = (url, mql, contentContainer) => {

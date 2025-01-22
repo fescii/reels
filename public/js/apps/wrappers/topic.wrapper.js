@@ -18,7 +18,7 @@ export default class TopicWrapper extends HTMLElement {
     let url = this.getAttribute('url').trim().toLowerCase();
     this.checkAndAddHandler();
     const body = document.querySelector('body');
-    this.openTopicPage(url, body);
+    this.openTopicPage(url);
     this.performActions();
     this.openHighlights(body);
   }
@@ -228,46 +228,34 @@ export default class TopicWrapper extends HTMLElement {
   }
 
   // Open topic page
-  openTopicPage = (url, body) => {
-    const outerThis = this;
+  openTopicPage = url => {
     // get a.meta.link
     const content = this.shadowObj.querySelector('a.action.view');
 
-    if(body && content) { 
+    if(content) { 
       content.addEventListener('click', event => {
         event.preventDefault();
+        event.stopImmediatePropagation();
+        event.stopPropagation();
 
         // Get full post
         const topic =  this.getTopic();
         
-        // replace and push states
-        outerThis.replaceAndPushStates(url, body, topic);
-
-        body.innerHTML = topic;
+        // push the post to the app
+        this.pushApp(url, topic);
       })
     }
   }
 
-  // Replace and push states
-  replaceAndPushStates = (url, body, topic) => {
-    // Replace the content with the current url and body content
-    // get the first custom element in the body
-    const firstElement = body.firstElementChild;
+  pushApp = (url, content) => {
+    this.app.push(url, { kind: "app", name: 'topic', html: content }, url);
+    // navigate to the content
+    this.navigateTo(content);
+  }
 
-    // convert the custom element to a string
-     const elementString = firstElement.outerHTML;
-    // get window location
-    const pageUrl = window.location.href;
-    window.history.replaceState(
-      { page: 'page', content: elementString },
-      url, pageUrl
-    );
-
-    // Updating History State
-    window.history.pushState(
-      { page: 'page', content: topic},
-      url, url
-    );
+  navigateTo = content => {
+    // navigate to the content
+    this.app.navigate(content);
   }
 
   formatNumber = n => {

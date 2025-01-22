@@ -343,32 +343,6 @@ export default class AppTopic extends HTMLElement {
     }
   }
 
-  onPopEvent = () => {
-    const outerThis = this;
-    // Update state on window.onpopstate
-    window.onpopstate = event => {
-      // This event will be triggered when the browser's back button is clicked
-
-      if (event.state) {
-        if (event.state.popup) {
-          return;
-        }
-
-        if (event.state.page) {
-          outerThis.updatePage(event.state.content)
-        }
-      }
-    }
-  }
-
-  updatePage = content => {
-    // select body
-    const body = document.querySelector('body');
-
-    // populate content
-    body.innerHTML = content;
-  }
-
   disableScroll() {
     // Get the current page scroll position
     let scrollTop = window.scrollY || document.documentElement.scrollTop;
@@ -452,7 +426,6 @@ export default class AppTopic extends HTMLElement {
     const mql = window.matchMedia('(max-width: 660px)');
     if (mql.matches) {
       return /* html */`
-        ${this.getTop()}
         ${this.getAuthor()}
         ${this.getHeader()}
         ${this.getSection()}
@@ -461,7 +434,6 @@ export default class AppTopic extends HTMLElement {
     else {
       return /* html */`
         <section class="main">
-          ${this.getTop()}
           ${this.getHeader()}
           ${this.getSection()}
         </section>
@@ -476,7 +448,7 @@ export default class AppTopic extends HTMLElement {
   }
 
   getStories = () => {
-    return `
+    return /* html */`
       <stories-feed stories="all" url="/U0A89BA6/stories"></stories-feed>
     `
   }
@@ -532,16 +504,6 @@ export default class AppTopic extends HTMLElement {
     
     // Return the parsed HTML
     return tempElement.innerHTML;
-  }
-
-  getTop = () => {
-    //get url from the attribute
-    let url = this.getAttribute('url');
-    // trim and convert to lowercase
-    url = url.trim().toLowerCase();
-    return /* html */ `
-      <header-wrapper section="Topic" type="topic" url="${url}"></header-wrapper>
-    `
   }
 
   getInfo = () => {

@@ -39,8 +39,8 @@ export default class UserWrapper extends HTMLElement {
     let url = this.getAttribute('url').trim().toLowerCase();
     this.checkAndAddHandler();
     const body = document.querySelector('body');
-    this.handleUserClick(url, body);
-    this.handleActionClick(url, body);
+    this.handleUserClick(url);
+    this.handleActionClick(url);
     this.performActions();
     this.openHighlights(body);
   }
@@ -105,36 +105,45 @@ export default class UserWrapper extends HTMLElement {
     }
   }
 
-  handleUserClick = (url, body) => {
+  handleUserClick = url => {
     const content = this.shadowObj.querySelector('a#username');
     const profile = this.getProfile();
-    if (body && content) {
+    if (content) {
       content.addEventListener('click', event => {
         event.preventDefault();
-        this.replaceAndPushStates(url, body, profile);
-        body.innerHTML = profile;
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+
+        // push the post to the app
+        this.pushApp(url, profile);
       });
     }
   }
 
-  handleActionClick = (url, body) => {
+  handleActionClick = url => {
     const content = this.shadowObj.querySelector('a.action.view');
     const profile = this.getProfile();
-    if (body && content) {
+    if (content) {
       content.addEventListener('click', event => {
         event.preventDefault();
-        this.replaceAndPushStates(url, body, profile);
-        body.innerHTML = profile;
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+
+        // push the post to the app
+        this.pushApp(url, profile);
       });
     }
   }
 
-  replaceAndPushStates = (url, body, profile) => {
-    const firstElement = body.firstElementChild;
-    const elementString = firstElement.outerHTML;
-    const pageUrl = window.location.href;
-    window.history.replaceState({ page: 'page', content: elementString }, url, pageUrl);
-    window.history.pushState({ page: 'page', content: profile }, url, url);
+  pushApp = (url, content) => {
+    this.app.push(url, { kind: "app", name: 'profile', html: content }, url);
+    // navigate to the content
+    this.navigateTo(content);
+  }
+
+  navigateTo = content => {
+    // navigate to the content
+    this.app.navigate(content);
   }
 
   performActions = () => {

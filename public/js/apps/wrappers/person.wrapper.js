@@ -32,8 +32,7 @@ export default class PersonWrapper extends HTMLElement {
   connectedCallback() {
     let url = this.getAttribute('url').trim().toLowerCase();
     this.checkAndAddHandler();
-    const body = document.querySelector('body');
-    this.handleUserClick(url, body);
+    this.handleUserClick(url);
     this.performActions();
   }
 
@@ -84,24 +83,30 @@ export default class PersonWrapper extends HTMLElement {
 
   textToBoolean = text => text === 'true';
 
-  handleUserClick = (url, body) => {
+  handleUserClick = url => {
     const content = this.shadowObj.querySelector('a#username');
-    if (body && content) {
+    if (content) {
       content.addEventListener('click', event => {
         event.preventDefault();
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+        
         const profile = this.getProfile();
-        this.replaceAndPushStates(url, body, profile);
-        body.innerHTML = profile;
+        // push the post to the app
+        this.pushApp(url, profile);
       });
     }
   }
 
-  replaceAndPushStates = (url, body, profile) => {
-    const firstElement = body.firstElementChild;
-    const elementString = firstElement.outerHTML;
-    const pageUrl = window.location.href;
-    window.history.replaceState({ page: 'page', content: elementString }, url, pageUrl);
-    window.history.pushState({ page: 'page', content: profile }, url, url);
+  pushApp = (url, content) => {
+    this.app.push(url, { kind: "app", name: 'profile', html: content }, url);
+    // navigate to the content
+    this.navigateTo(content);
+  }
+
+  navigateTo = content => {
+    // navigate to the content
+    this.app.navigate(content);
   }
 
   performActions = () => {

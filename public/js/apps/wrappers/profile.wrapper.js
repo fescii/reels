@@ -50,15 +50,13 @@ export default class ProfileWrapper extends HTMLElement {
   }
 
   connectedCallback() {
-    const body = document.querySelector('body');
-
     // perform actions
     this.performActions();
 
     // open highlights
     this.openHighlights();
     this.openContact();
-    this.openSettings(body);
+    this.openSettings();
   }
 
   textToBoolean = text => {
@@ -69,7 +67,7 @@ export default class ProfileWrapper extends HTMLElement {
     this.parent.setAttribute(name, value);
   }
 
-   disableScroll() {
+  disableScroll() {
     // Get the current page scroll position
     let scrollTop = window.scrollY || document.documentElement.scrollTop;
     let scrollLeft = window.scrollX || document.documentElement.scrollLeft;
@@ -87,23 +85,22 @@ export default class ProfileWrapper extends HTMLElement {
   }
 
   // Open user profile
-  openSettings = (body) => {
+  openSettings = () => {
     const outerThis = this;
     // get a.meta.link
     const content = this.shadowObj.querySelector('.actions > a.action.edit');
 
-    if(body && content) { 
+    if(content) { 
       content.addEventListener('click', event => {
         event.preventDefault();
+        event.stopImmediatePropagation();
+        event.stopPropagation();
 
         const url = content.getAttribute('href');
-
         try {
           const profile =  outerThis.getEdit();
-        
-          // replace and push states
-          outerThis.replaceAndPushStates(url, body, profile);
-          body.innerHTML = profile;
+          // push the post to the app
+        this.pushApp(url, profile);
         } catch (error) {
           window.location.href = url;
         }
@@ -111,25 +108,15 @@ export default class ProfileWrapper extends HTMLElement {
     }
   }
 
-  replaceAndPushStates = (url, body, profile) => {
-    // Replace the content with the current url and body content
-    // get the first custom element in the body
-    const firstElement = body.firstElementChild;
+  pushApp = (url, content) => {
+    this.app.push(url, { kind: "app", name: 'user', html: content }, url);
+    // navigate to the content
+    this.navigateTo(content);
+  }
 
-    // convert the custom element to a string
-    const elementString = firstElement.outerHTML;
-    // get window location
-    const pageUrl = window.location.href;
-    window.history.replaceState(
-      { page: 'page', content: elementString },
-      url, pageUrl
-    );
-
-    // Updating History State
-    window.history.pushState(
-      { page: 'page', content: profile},
-      url, url
-    );
+  navigateTo = content => {
+    // navigate to the content
+    this.app.navigate(content);
   }
 
   openHighlights = () => {

@@ -1,5 +1,4 @@
 import AuthorWrapper from "./author.wrapper.js"
-import HeaderWrapper from "./header.wrapper.js"
 import PersonWrapper from "./person.wrapper.js"
 import ProfileWrapper from "./profile.wrapper.js"
 import ShareWrapper from "./share.wrapper.js"
@@ -15,7 +14,6 @@ import ImagesUploader from "./images.uploader.js"
 export default function wrappers() {
   // Register wrappers
   customElements.define("author-wrapper", AuthorWrapper);
-  customElements.define("header-wrapper", HeaderWrapper);
   customElements.define("person-wrapper", PersonWrapper);
   customElements.define("profile-wrapper", ProfileWrapper);
   customElements.define("share-wrapper", ShareWrapper);

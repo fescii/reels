@@ -1,10 +1,8 @@
 export default class AuthorWrapper extends HTMLElement {
   constructor() {
     super();
-
     this._authenticated = window.hash ? true : false;
     this._you = this.getAttribute('you') === 'true';
-
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.parent = this.getRootNode().host;
     this.app = window.app;
@@ -44,8 +42,8 @@ export default class AuthorWrapper extends HTMLElement {
     const body = document.querySelector('body');
 
     this.expandCollapse();
-    this.handleUserClick(url, body);
-    this.handleActionClick(url, body);
+    this.handleUserClick(url);
+    this.handleActionClick(url);
     this.performActions();
     this.openHighlights(body);
   }
@@ -63,36 +61,45 @@ export default class AuthorWrapper extends HTMLElement {
     }
   }
 
-  handleUserClick = (url, body) => {
+  handleUserClick = url => {
     const content = this.shadowObj.querySelector('a#username');
-    if (body && content) {
+    if (content) {
       content.addEventListener('click', event => {
         event.preventDefault();
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+
         const profile = this.getProfile();
-        this.replaceAndPushStates(url, body, profile);
-        body.innerHTML = profile;
+        // push the post to the app
+        this.pushApp(url, profile);
       });
     }
   }
 
-  handleActionClick = (url, body) => {
+  handleActionClick = url => {
     const content = this.shadowObj.querySelector('a.action.view');
-    if (body && content) {
+    if (content) {
       content.addEventListener('click', event => {
         event.preventDefault();
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+        
         const profile = this.getProfile();
-        this.replaceAndPushStates(url, body, profile);
-        body.innerHTML = profile;
+        // push the post to the app
+        this.pushApp(url, profile);
       });
     }
   }
 
-  replaceAndPushStates = (url, body, profile) => {
-    const firstElement = body.firstElementChild;
-    const elementString = firstElement.outerHTML;
-    const pageUrl = window.location.href;
-    window.history.replaceState({ page: 'page', content: elementString }, url, pageUrl);
-    window.history.pushState({ page: 'page', content: profile }, url, url);
+  pushApp = (url, content) => {
+    this.app.push(url, { kind: "app", name: 'profile', html: content }, url);
+    // navigate to the content
+    this.navigateTo(content);
+  }
+
+  navigateTo = content => {
+    // navigate to the content
+    this.app.navigate(content);
   }
 
   disableScroll() {

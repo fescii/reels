@@ -382,7 +382,7 @@ export default class AppHome extends HTMLElement {
           display: flex;
           flex-flow: column;
           gap: 0;
-          width: calc(60% - 15px);
+          width: calc(55% - 15px);
         }
 
         .content-container {
@@ -397,7 +397,7 @@ export default class AppHome extends HTMLElement {
           padding: 25px 0;
           margin: 0;
           background-color: transparent;
-          width: calc(40% - 15px);
+          width: calc(45% - 15px);
           height: max-content;
           display: flex;
           flex-flow: column;

@@ -558,7 +558,7 @@ export default class AppStory extends HTMLElement {
 
         div.content {
           padding: 0;
-          width: calc(60% - 10px);
+          width: calc(55% - 10px);
           display: flex;
           flex-flow: column;
           gap: 0;
@@ -572,10 +572,10 @@ export default class AppStory extends HTMLElement {
         }
 
         section.side {
-          padding: 25px 0;
+          padding: 25px 0 0 10px;
           margin: 0;
           background-color: transparent;
-          width: calc(40% - 10px);
+          width: calc(45% - 10px);
           height: max-content;
           display: flex;
           flex-flow: column;

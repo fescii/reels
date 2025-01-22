@@ -132,10 +132,10 @@ export default class StoryPost extends HTMLElement {
     // remove all html tags and classes and extra spaces and tabs
     content = content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 
-    let summary = content.substring(0, 500);
+    let summary = content.substring(0, 250);
 
     if (mql.matches) {
-      summary = content.substring(0, 250);
+      summary = content.substring(0, 230);
     }
 
     // return the summary: first 200 characters

@@ -36,8 +36,7 @@ export default class TopicPopup extends HTMLElement {
 		const topicsLoader = this.shadowObj.querySelector('.loader-container');
     setTimeout(async () => {
       try {
-      const data = this.api.get(this._url, { content: 'json' })
-
+      const data = await this.api.get(this._url, { content: 'json' })
       if (data.success) {
         const content = this.getHighlights(data.data);
         topicsLoader.remove();

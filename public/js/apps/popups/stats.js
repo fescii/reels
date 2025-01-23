@@ -37,26 +37,25 @@ export default class StatsPopup extends HTMLElement {
 		const topicsLoader = this.shadowObj.querySelector('.loader-container');
     setTimeout(async () => {
       try {
-      const data = await this.api.get(this._url, { content: 'json' });
-      // check for success response
-      if (data.success) {
-        // update the content
-        const content = outerThis.getHighlights(data.data);
-        // remove the loader
-        topicsLoader.remove();
-        // insert the content
-        contentContainer.insertAdjacentHTML('beforeend', content);
-      } else {
+        const data = await this.api.get(this._url, { content: 'json' });
+        if (data.success) {
+          // update the content
+          const content = outerThis.getHighlights(data.data);
+          // remove the loader
+          topicsLoader.remove();
+          // insert the content
+          contentContainer.insertAdjacentHTML('beforeend', content);
+        } else {
+          // display error message
+          const content = outerThis.getEmpty();
+          topicsLoader.remove();
+          contentContainer.insertAdjacentHTML('beforeend', content);
+        }
+      } catch (error) {
         // display error message
         const content = outerThis.getEmpty();
         topicsLoader.remove();
         contentContainer.insertAdjacentHTML('beforeend', content);
-      }
-      } catch (error) {
-      // display error message
-      const content = outerThis.getEmpty();
-      topicsLoader.remove();
-      contentContainer.insertAdjacentHTML('beforeend', content);
       }
     }, 2000);
 	}

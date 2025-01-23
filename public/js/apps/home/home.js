@@ -520,7 +520,34 @@ export default class AppHome extends HTMLElement {
             display: flex;
             flex-flow: column;
             gap: 0;
-            padding: 0 0 50px 0;
+            padding: 0 0 50px;
+            width: 100%;
+          }
+
+          ul.tabs {
+            border-bottom: var(--border);
+            display: flex;
+            z-index: 1;
+            flex-flow: row nowrap;
+            gap: 15px;
+            padding: 15px 10px 10px;
+            margin: 0;
+            width: 100%;
+            list-style: none;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            z-index: 5;
+            position: sticky;
+            top: 0;
+            background: var(--background);
+          }
+
+          .content-container {
+            display: flex;
+            flex-flow: column;
+            gap: 0;
+            padding: 0 10px;
             width: 100%;
           }
 

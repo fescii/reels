@@ -137,7 +137,9 @@ export default class ProfileSection extends HTMLElement {
   getBody = () => {
     return /* html */`
       <div class="content-container">
-        ${this.getTab(this.getAttribute('active'))}
+        <div class="tab-controller">
+          ${this.getTab(this.getAttribute('active'))}
+        </div>
         ${this.getContent()}
       </div>
     `
@@ -309,10 +311,21 @@ export default class ProfileSection extends HTMLElement {
           gap: 0;
         }
 
+        div.tab-controller {
+          display: flex;
+          z-index: 5;
+          padding: 0;
+          margin: 0;
+          width: 100%;
+          z-index: 5;
+          position: sticky;
+          top: 0;
+          background: var(--background);
+        }
+
         ul.tabs {
           border-bottom: var(--border);
           display: flex;
-          z-index: 1;
           flex-flow: row nowrap;
           gap: 15px;
           padding: 22px 0 10px;
@@ -322,10 +335,6 @@ export default class ProfileSection extends HTMLElement {
           overflow-x: auto;
           scrollbar-width: none;
           -ms-overflow-style: none;
-          z-index: 5;
-          position: sticky;
-          top: 0;
-          background: var(--background);
         }
 
         ul.tabs::-webkit-scrollbar {
@@ -412,6 +421,22 @@ export default class ProfileSection extends HTMLElement {
 					.action,
 					a {
 						cursor: default !important;
+          }
+
+          .feeds {
+            padding: 0 10px 30px;
+          }
+
+          div.tab-controller {
+            display: flex;
+            z-index: 5;
+            padding: 0 10px;
+            margin: 0;
+            width: 100%;
+            z-index: 5;
+            position: sticky;
+            top: 0;
+            background: var(--background);
           }
 
           ::-webkit-scrollbar {

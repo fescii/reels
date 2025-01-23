@@ -41,7 +41,7 @@ const getPerson = async (req, res) => {
       return res.status(404).render('404');
     }
 
-    const user = result.data.user;
+    const user = result.user;
     user.tab = 'stories';
 
     const { title, image, description } = meta(user);
@@ -58,6 +58,7 @@ const getPerson = async (req, res) => {
       data: user, meta: metaData
     })
   } catch (error) {
+    // console.log(error)
     return res.status(500).render('500')
   }
 }
@@ -85,7 +86,7 @@ const getUserReplies = async (req, res) => {
       return res.status(404).render('404');
     }
 
-    const user = result.data.user;
+    const user = result.user;
     user.tab = 'replies';
 
     const { title, image, description } = meta(user);
@@ -128,7 +129,7 @@ const getUserFollowers = async (req, res) => {
       return res.status(404).render('404');
     }
 
-    const user = result.data.user;
+    const user = result.user;
     user.tab = 'followers';
 
     const { title, image, description } = meta(user);
@@ -172,7 +173,7 @@ const getUserFollowing = async (req, res) => {
       return res.status(404).render('404');
     }
 
-    const user = result.data.user;
+    const user = result.user;
     user.tab = 'following';
 
     const { title, image, description } = meta(user);
@@ -208,7 +209,7 @@ const getAccount = async (req, res) => {
   }
 
   try {
-    const result = await api.get('/u/profile', {
+    const result = await api.get('/u/user', {
       "x-access-token": token
     });
 
@@ -216,7 +217,7 @@ const getAccount = async (req, res) => {
       return res.status(404).render('404');
     }
 
-    const user = result.data.user;
+    const user = result.user;
 
     // if not user, render the 404 page
     if (!user) {

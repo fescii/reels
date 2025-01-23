@@ -146,7 +146,7 @@ export default class StoryPost extends HTMLElement {
   openFullPost = url => {
     // get h3 > a.link
     const content = this.shadowObj.querySelector('div.content');
-
+    const title = this.shadowObj.querySelector('h3.title > a.link');
     const openFull = this.shadowObj.querySelector('.actions > .action.view');
 
     if(content && openFull) {
@@ -170,6 +170,16 @@ export default class StoryPost extends HTMLElement {
         // push the post to the app
         this.pushApp(url, post);
       })
+
+      title.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Get full post
+        const post =  this.getFullPost();
+        // push the post to the app
+        this.pushApp(url, post);
+      });
     }
   }
 
@@ -345,10 +355,10 @@ export default class StoryPost extends HTMLElement {
     let url = this.getAttribute('url');
     url = url.trim().toLowerCase();
     return /*html*/`
+      <h3 class="title">
+        <a href="${url}" class="link">${this.getAttribute('story-title')}</a>
+      </h3>
       <div class="content" id="content">
-        <h3 class="title">
-          <a href="${url}" class="link">${this.getAttribute('story-title')}</a>
-        </h3>
         ${this.getSummery()}
       </div>
 		`;

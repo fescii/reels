@@ -862,6 +862,10 @@ export default class ProfileWrapper extends HTMLElement {
             -webkit-appearance: none;
           }
 
+          :host {
+            padding: 0 10px;
+          }
+
           a,
           .stats > .stat {
             cursor: default !important;

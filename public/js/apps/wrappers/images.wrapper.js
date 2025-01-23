@@ -5,7 +5,9 @@ export default class ImagesWrapper extends HTMLElement {
 
 		// let's create our shadow root
 		this.shadowObj = this.attachShadow({ mode: "open" });
-
+		this.app = window.app;
+    this.api = this.app.api;
+		window.addEventListener('popstate', this.handlePopState);
 		this.render();
 	}
 
@@ -66,14 +68,32 @@ export default class ImagesWrapper extends HTMLElement {
 		if(body && popup) {
 			// insert popup before body end
 			body.insertAdjacentHTML("beforeend", popup);
+
+			// push and # history state
+			this.pushApp('#image');
 		}
 	}
+
+	pushApp = hash => {
+    this.app.push(hash, { kind: "hash", name: 'image', }, hash);
+  }
+
+	handlePopState = event => {
+    const state = event.state;
+    if (state && state.kind === 'hash' && state.app === 'image') {
+      // remove popup
+			const popup = document.querySelector("image-popup");
+			if(popup) {
+				popup.remove();
+			}
+    }
+  }
 
 	getTemplate = () => {
 		const imagesArrayStr = this.getAttribute("images");
 		const images = imagesArrayStr.split(",");
 		// Show HTML Here
-		return `
+		return /* html */`
 			<div class="images">
       	${this.getBody(images)}
 			</div>

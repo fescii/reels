@@ -163,7 +163,9 @@ export default class TopicSection extends HTMLElement {
 
   getBody = () => {
     return /* html */`
-      ${this.getTab(this.getAttribute('active'))}
+      <div class="tab-controller">
+        ${this.getTab(this.getAttribute('active'))}
+      </div>
       <div class="feeds">
         ${this.getContent(this.getAttribute('active'))}
       </div>
@@ -288,10 +290,21 @@ export default class TopicSection extends HTMLElement {
           gap: 0;
         }
 
+        div.tab-controller {
+          display: flex;
+          z-index: 5;
+          padding: 0;
+          margin: 0;
+          width: 100%;
+          z-index: 5;
+          position: sticky;
+          top: 0;
+          background: var(--background);
+        }
+
         ul.tabs {
           border-bottom: var(--border);
           display: flex;
-          z-index: 1;
           flex-flow: row nowrap;
           gap: 15px;
           padding: 22px 0 10px;
@@ -301,10 +314,6 @@ export default class TopicSection extends HTMLElement {
           overflow-x: auto;
           scrollbar-width: none;
           -ms-overflow-style: none;
-          z-index: 5;
-          position: sticky;
-          top: 0;
-          background: var(--background);
         }
 
         ul.tabs::-webkit-scrollbar {
@@ -385,10 +394,19 @@ export default class TopicSection extends HTMLElement {
           display: flex;
           flex-flow: column;
           color: var(--read-color);
-          font-family: var(--font-text), sans-serif;
+          font-family: var(--font-main), sans-serif;
           gap: 10px;
           font-size: 1rem;
           font-weight: 400;
+        }
+
+        div.feeds {
+          width: 100%;
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+          padding: 0;
+          margin: 0;
         }
 
         article.article * {
@@ -553,13 +571,6 @@ export default class TopicSection extends HTMLElement {
         }
 
         @media screen and (max-width: 660px) {
-          .tab-control {
-            border-bottom: var(--border-mobile);
-            margin: 0;
-            position: sticky;
-            top: 50px;
-          }
-
           .tab-control > ul.tab > li.tab-item,
 					.action,
 					a {
@@ -570,12 +581,41 @@ export default class TopicSection extends HTMLElement {
             -webkit-appearance: none;
           }
 
-          a,
-          .stats > .stat {
-            cursor: default !important;
+          div.tab-controller {
+            display: flex;
+            z-index: 5;
+            padding: 0 10px;
+            margin: 0;
+            width: 100%;
+            position: sticky;
+            top: 0;
+            background: var(--background);
+          }
+
+          div.feeds {
+            width: 100%;
+            display: flex;
+            flex-flow: column;
+            gap: 0;
+            padding: 0 10px 60px;
+            margin: 0;
+          }
+
+          article.article {
+            margin: 0;
+            padding: 10px 0;
+            height: max-content;
+            display: flex;
+            flex-flow: column;
+            color: var(--read-color);
+            font-family: var(--font-main), sans-serif;
+            gap: 10px;
+            font-size: 1rem;
+            font-weight: 400;
           }
 
           a,
+          .stats > .stat,
           span.stat,
           ul.tabs > li.tab,
           span.action {

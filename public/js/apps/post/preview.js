@@ -876,7 +876,7 @@ export default class PreviewPost extends HTMLElement {
         .preview p,
         .preview h3 {
           margin: 0;
-          font-family: var(--font-read), sans-serif;
+          font-family: var(--font-main), sans-serif;
           line-height: 1.2;
         }
 

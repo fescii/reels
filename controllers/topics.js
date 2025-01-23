@@ -3,8 +3,10 @@ const api = require('./api');
 const meta = data => {
   const image = '/static/img/favi.png';
   const title = 'Topic | ' + data.name;
+  // create a deep copy of the data content(summary) and remove all html tags
+  const summary = data.summary;
 
-  let content = data.summary.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  let content = summary.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
   if (content == null) {
     content = "This story has no content.";
   }
@@ -63,7 +65,7 @@ const getTopic = async (req, res) => {
       data: topic
     })
   } catch (error) {
-    console.log(error)
+    // console.log(error)
     return res.status(500).render('500')
   }
 }

@@ -425,8 +425,10 @@ export default class AppTopic extends HTMLElement {
     const mql = window.matchMedia('(max-width: 660px)');
     if (mql.matches) {
       return /* html */`
-        ${this.getAuthor()}
-        ${this.getHeader()}
+        <div class="main-container">
+          ${this.getAuthor()}
+          ${this.getHeader()}
+        </div>
         ${this.getSection()}
       `;
     }
@@ -882,7 +884,11 @@ export default class AppTopic extends HTMLElement {
             gap: 0;
 					}
 
-          
+          section.main {
+            width: 100%;
+            padding: 0;
+          }
+
           .text-content > .topic-head {
             padding: 15px 0 0 0;
           }
@@ -896,10 +902,11 @@ export default class AppTopic extends HTMLElement {
 						cursor: default !important;
           }
 
-          .section.main {
+          div.main-container {
             display: flex;
             flex-flow: column;
             gap: 0;
+            padding: 10px 10px 0;
             width: 100%;
           }
 

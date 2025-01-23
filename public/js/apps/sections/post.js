@@ -175,7 +175,9 @@ export default class PostSection extends HTMLElement {
 
   getContent = () => {
     return /* html */`
-      ${this.getTab(this.getAttribute('active'))}
+      <div class="tab-controller">
+        ${this.getTab(this.getAttribute('active'))}
+      </div>
       <div class="feeds">
         ${this.getContainer(this.getAttribute('active'))}
       </div>
@@ -307,10 +309,21 @@ export default class PostSection extends HTMLElement {
           gap: 0;
         }
 
+        div.tab-controller {
+          display: flex;
+          z-index: 5;
+          padding: 0;
+          margin: 0;
+          width: 100%;
+          z-index: 5;
+          position: sticky;
+          top: 0;
+          background: var(--background);
+        }
+
         ul.tabs {
           border-bottom: var(--border);
           display: flex;
-          z-index: 1;
           flex-flow: row nowrap;
           gap: 15px;
           padding: 22px 0 10px;
@@ -320,10 +333,6 @@ export default class PostSection extends HTMLElement {
           overflow-x: auto;
           scrollbar-width: none;
           -ms-overflow-style: none;
-          z-index: 5;
-          position: sticky;
-          top: 0;
-          background: var(--background);
         }
 
         ul.tabs::-webkit-scrollbar {
@@ -401,21 +410,29 @@ export default class PostSection extends HTMLElement {
 
         @media screen and (max-width: 660px) {
           :host {
-            padding: 0;
+            padding: 0 0 30px;
           }
 
-          .tab-control {
-            border-bottom: var(--border);
+          div.tab-controller {
+            display: flex;
+            z-index: 5;
+            padding: 0 10px;
             margin: 0;
+            width: 100%;
+            z-index: 5;
             position: sticky;
-            top: 50px;
+            top: 0;
+            background: var(--background);
           }
 
           ::-webkit-scrollbar {
             -webkit-appearance: none;
           }
 
-          a,.tab-control > ul.tab > li.tab-item,
+          div.content-container > .feeds {
+            padding: 0 10px;
+          }
+
 					.action,
           ul.tabs > li.tab,
           .stats > .stat,

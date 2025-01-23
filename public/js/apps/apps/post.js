@@ -6,10 +6,8 @@ export default class AppPost extends HTMLElement {
 
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.boundHandleWsMessage = this.handleWsMessage.bind(this);
     this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
-
     this.render();
   }
 
@@ -262,7 +260,7 @@ export default class AppPost extends HTMLElement {
 
   getTemplate = () => {
     // Show HTML Here
-    return `
+    return /* html */`
       <div class="container">
         ${this.getBody()}
       </div>
@@ -277,19 +275,23 @@ export default class AppPost extends HTMLElement {
     const mql = window.matchMedia('(max-width: 660px)');
     if (mql.matches) {
       return /* html */`
-        ${this.getReply(this.getAttribute('story'))}
-        ${this.getAuthor()}
-        ${this.getContent()}
-        ${this.getPost(story)}
+        <div class="content-container">
+          ${this.getReply(this.getAttribute('story'))}
+          ${this.getAuthor()}
+          ${this.getContent()}
+          ${this.getPost(story)}
+        </div>
         ${this.getSection()}
       `;
     }
     else {
       return /* html */`
         <div class="feeds">
-          ${this.getReply(this.getAttribute('story'))}
-          ${this.getContent()}
-          ${this.getPost(story)}
+          <div class="content-container">
+            ${this.getReply(this.getAttribute('story'))}
+            ${this.getContent()}
+            ${this.getPost(story)}
+          </div>
           ${this.getSection()}
         </div>
         <div class="side">
@@ -543,6 +545,13 @@ export default class AppPost extends HTMLElement {
           font-weight: 400;
         }
 
+        .content-container {
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+          width: 100%;
+        }
+
         .content {
           display: flex;
           font-size: 1.05rem; 
@@ -648,9 +657,10 @@ export default class AppPost extends HTMLElement {
           }
         }
 
-				@media screen and (max-width:660px) {
+				@media screen and (max-width: 660px) {
 					:host {
             font-size: 16px;
+            padding: 10px 0;
 					}
 
           .container {
@@ -658,7 +668,16 @@ export default class AppPost extends HTMLElement {
             flex-flow: column;
             justify-content: flex-start;
             gap: 0;
+            padding: 0;
             min-height: max-content;
+          }
+
+          .content-container {
+            display: flex;
+            flex-flow: column;
+            gap: 0;
+            padding: 0 10px;
+            width: 100%;
           }
 
 					::-webkit-scrollbar {

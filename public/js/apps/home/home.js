@@ -220,7 +220,9 @@ export default class AppHome extends HTMLElement {
     if (this.mql.matches) {
       return /* html */`
         <div class="feeds">
-          ${this.getTab(this.getAttribute('tab'))}
+          <div class="tab-controller">
+            ${this.getTab(this.getAttribute('tab'))}
+          </div>
           <div class="content-container">
             ${this.getCurrent()}
           </div>
@@ -230,7 +232,9 @@ export default class AppHome extends HTMLElement {
     else {
       return /* html */`
         <div class="feeds">
-          ${this.getTab(this.getAttribute('tab'))}
+          <div class="tab-controller">
+            ${this.getTab(this.getAttribute('tab'))}
+          </div>
           <div class="content-container">
             ${this.getCurrent()}
           </div>
@@ -403,10 +407,21 @@ export default class AppHome extends HTMLElement {
           display: none;
         }
 
+        div.tab-controller {
+          display: flex;
+          z-index: 5;
+          padding: 0;
+          margin: 0;
+          width: 100%;
+          z-index: 5;
+          position: sticky;
+          top: 0;
+          background: var(--background);
+        }
+
         ul.tabs {
           border-bottom: var(--border);
           display: flex;
-          z-index: 1;
           flex-flow: row nowrap;
           gap: 15px;
           padding: 22px 0 10px;
@@ -416,10 +431,6 @@ export default class AppHome extends HTMLElement {
           overflow-x: auto;
           scrollbar-width: none;
           -ms-overflow-style: none;
-          z-index: 5;
-          position: sticky;
-          top: 0;
-          background: var(--background);
         }
 
         ul.tabs::-webkit-scrollbar {
@@ -505,7 +516,7 @@ export default class AppHome extends HTMLElement {
           }
         }
 
-        @media screen and (max-width: 700px) {
+        @media screen and (max-width: 660px) {
           :host {
             font-size: 16px;
 						padding: 0;
@@ -524,19 +535,12 @@ export default class AppHome extends HTMLElement {
             width: 100%;
           }
 
-          ul.tabs {
-            border-bottom: var(--border);
+          div.tab-controller {
             display: flex;
-            z-index: 1;
-            flex-flow: row nowrap;
-            gap: 15px;
-            padding: 15px 10px 10px;
+            z-index: 5;
+            padding: 0 10px;
             margin: 0;
             width: 100%;
-            list-style: none;
-            overflow-x: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
             z-index: 5;
             position: sticky;
             top: 0;
@@ -556,7 +560,7 @@ export default class AppHome extends HTMLElement {
             margin: 0;
             width: 100%;
           }
-         }
+        }
 
 				@media screen and (max-width:660px) {
 					::-webkit-scrollbar {

@@ -129,9 +129,9 @@ export default class HoverAuthor extends HTMLElement {
     const content = this.getContent();
     setTimeout(() => {
       contentContainer.innerHTML = content;
-      this.activateView(url, body);
+      this.activateView(url);
       this.performActions();
-      this.activateUsernameLink(url, body);
+      this.activateUsernameLink(url);
       this.openHighlights(body, contentContainer);
       if (mql) {
         const overlayBtn = this.shadowObj.querySelector('span.pointer');
@@ -149,14 +149,13 @@ export default class HoverAuthor extends HTMLElement {
     }, 2000);
   }
 
-  activateView = (url, body) => {
+  activateView = url => {
     const content = this.shadowObj.querySelector('.actions > a.action.view');
-    if (body && content) {
+    if (content) {
       content.addEventListener('click', event => {
         event.preventDefault();
         const profile = this.getProfile();
-        this.replaceAndPushStates(url, body, profile);
-        body.innerHTML = profile;
+        this.pushApp(url, profile);
         setTimeout(() => {
           this.enableScroll();
         }, 2000);
@@ -164,16 +163,14 @@ export default class HoverAuthor extends HTMLElement {
     }
   }
 
-  activateUsernameLink = (url, body) => {
+  activateUsernameLink = url => {
     const content = this.shadowObj.querySelector('.top > .name > a.username');
-    if (body && content) {
+    if (content) {
       content.addEventListener('click', event => {
         event.preventDefault();
         this.enableScroll();
-        body.classList.remove('stop-scrolling');
         const profile = this.getProfile();
-        this.replaceAndPushStates(url, body, profile);
-        body.innerHTML = profile;
+        this.pushApp(url, profile);
         setTimeout(() => {
           this.enableScroll();
         }, 2000);

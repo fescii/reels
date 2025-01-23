@@ -5,12 +5,9 @@ export default class QuickPost extends HTMLElement {
 
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.boundHandleWsMessage = this.handleWsMessage.bind(this);
     this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
-
     this.noPreview = this.convertToBoolean(this.getAttribute('no-preview'));
-
     this.viewTimer = null;
     this.hasBeenViewed = false;
     this.observerOptions = {

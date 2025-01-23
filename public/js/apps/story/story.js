@@ -338,12 +338,14 @@ export default class AppStory extends HTMLElement {
   getBody = () => {
     if (this.mql.matches) {
       return /* html */`
-        ${this.getAuthor()}
         <div class="content" id="content-container">
-          ${this.getHeader()}
-          ${this.getContent()}
-          ${this.getMeta()}
-          ${this.getStats()}
+          <div class="content-wrapper">
+            ${this.getAuthor()}
+            ${this.getHeader()}
+            ${this.getContent()}
+            ${this.getMeta()}
+            ${this.getStats()}
+          </div>
           ${this.getSection()}
         </div>
       `;
@@ -351,10 +353,12 @@ export default class AppStory extends HTMLElement {
     else {
       return /* html */`
         <div class="content" id="content-container">
-          ${this.getHeader()}
-          ${this.getContent()}
-          ${this.getMeta()}
-          ${this.getStats()}
+          <div class="content-wrapper">
+            ${this.getHeader()}
+            ${this.getContent()}
+            ${this.getMeta()}
+            ${this.getStats()}
+          </div>
           ${this.getSection()}
         </div>
 
@@ -673,6 +677,13 @@ export default class AppStory extends HTMLElement {
           font-weight: 400;
         }
 
+        .content-wrapper {
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+          padding: 0;
+        }
+
         article.article {
           margin: 3px 0 0;
           font-size: 1.05rem;
@@ -885,7 +896,7 @@ export default class AppStory extends HTMLElement {
           }
         }
 
-				@media screen and (max-width:660px) {
+				@media screen and (max-width: 660px) {
 					:host {
             font-size: 16px;
 						padding: 0;
@@ -905,12 +916,19 @@ export default class AppStory extends HTMLElement {
             margin: 0;
           }
 
+          .content-wrapper {
+            display: flex;
+            flex-flow: column;
+            gap: 0;
+            padding: 0 10px;
+          }
+
           div.content {
             width: 100%;
             display: flex;
             flex-flow: column;
             gap: 0;
-            padding: 0 0 80px;
+            padding: 0;
           }
 
 					.action,

@@ -229,7 +229,7 @@ export default class PostSection extends HTMLElement {
 
   getReplies = () => {
     return /*html*/`
-      <replies-feed hash="${this.getAttribute('hash')}" replies="${this.getAttribute('replies')}" page="1" no-preview="true"
+      <replies-feed section="post" hash="${this.getAttribute('hash')}" replies="${this.getAttribute('replies')}" page="1" no-preview="true"
         url="${this.getAttribute('replies-url')}" kind="${this.getAttribute('kind')}">
       </replies-feed>
     `

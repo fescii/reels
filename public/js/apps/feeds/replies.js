@@ -6,6 +6,7 @@ export default class ReplyFeed extends HTMLElement {
     this._page = this.parseToNumber(this.getAttribute('page'));
     this._url = this.getAttribute('url');
     this._kind = this.getAttribute('kind');
+    this.section = this.getAttribute('section');
     this._isFirstLoad = true;
     this.app = window.app;
     this.api = this.app.api;
@@ -217,11 +218,12 @@ export default class ReplyFeed extends HTMLElement {
       // replace all " and ' with &quot; and &apos; to avoid breaking the html
       bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
       const images = reply.images ? reply.images.join(',') : null;
+      const preview = this.section === "post" ? `no-preview="true"` : `preview="false"`;
       return /*html*/`
-        <quick-post story="reply" hash="${reply.hash}" url="/r/${reply.hash}" likes="${reply.likes}" replies="${reply.replies}" liked="${reply.liked}"
+        <quick-post story="reply" ${preview} hash="${reply.hash}" url="/r/${reply.hash}" likes="${reply.likes}" replies="${reply.replies}" liked="${reply.liked}"
           views="${reply.views}" time="${reply.createdAt}" replies-url="/r/${reply.hash}/replies" likes-url="/r/${reply.hash}/likes" images='${images}'
           author-hash="${author.hash}" author-you="${reply.you}" author-url="/u/${author.hash}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-          author-stories="${author.stories}" author-replies="${author.replies}" parent="${reply.story ? reply.story : reply.reply}" no-preview="false"
+          author-stories="${author.stories}" author-replies="${author.replies}" parent="${reply.story ? reply.story : reply.reply}"
           author-img="${author.picture}" author-verified="${author.verified}" author-name="${author.name}" author-followers="${author.followers}"
           author-following="${author.following}" author-follow="${author.is_following}" author-bio="${bio}">
           ${reply.content}

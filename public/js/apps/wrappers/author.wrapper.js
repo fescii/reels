@@ -350,12 +350,11 @@ export default class AuthorWrapper extends HTMLElement {
   }
 
   getContent = () => {
-    const mql = window.matchMedia('(max-width: 660px)');
     return /* html */`
       ${this.getSvg()}
 		  ${this.getHeader()}
       ${this.getStats()}
-      ${this.getBio(mql.matches)}
+      ${this.getBio()}
       ${this.getActions()}
 		`
   }
@@ -475,22 +474,20 @@ export default class AuthorWrapper extends HTMLElement {
 		`
   }
 
-  getBio = mql => {
+  getBio = () => {
     // Get bio content
     let bio = this.getAttribute('bio') || 'The user has not added their bio yet.'
 
     // trim white spaces
     bio = bio.trim();
 
-    let bioLines = bio.length > 150 ? `<p>${bio.substring(0, 150)}..</p>` : `<p>${bio}</p>`;
+    // let bioLines = bio.length > 150 ? `<p>${bio.substring(0, 150)}..</p>` : `<p>${bio}</p>`;
 
-    if (!mql) {
-      // separate by new lines
-      const bioArray = bio.split('\n');
+    // separate by new lines
+    const bioArray = bio.split('\n');
 
-      // trim each line and ignore empty lines
-      bioLines = bioArray.map(line => line.trim()).filter(line => line !== '').map(line => `<p>${line}</p>`).join('');
-    }
+    // trim each line and ignore empty lines
+    const bioLines = bioArray.map(line => line.trim()).filter(line => line !== '').map(line => `<p>${line}</p>`).join('');
 
     return /*html*/`
       <div class="bio">

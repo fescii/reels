@@ -240,10 +240,10 @@ export default class AppSearch extends HTMLElement {
       'topics': this.getTopics(),
       'stories': this.getStories(),
       'replies': this.getReplies(),
-      'users': this.getPeople()
+      'people': this.getPeople()
     };
 
-    const content = contentMap[tabName] || this.getAll();
+    const content = contentMap[tabName] || this.getStories();
     contentContainer.innerHTML = content;
     this.app.push(url, { kind: "sub", app: "search", name: tabName, html: content }, tabName);
   }
@@ -496,7 +496,7 @@ export default class AppSearch extends HTMLElement {
           </svg>
           <span class="text">Topics</span>
         </li>
-        <li class="tab users ${tab === "users" ? "active" : ''}" data-name="users">
+        <li class="tab people ${tab === "people" ? "active" : ''}" data-name="people">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
             <path d="M18.6161 20H19.1063C20.2561 20 21.1707 19.4761 21.9919 18.7436C24.078 16.8826 19.1741 15 17.5 15M15.5 5.06877C15.7271 5.02373 15.9629 5 16.2048 5C18.0247 5 19.5 6.34315 19.5 8C19.5 9.65685 18.0247 11 16.2048 11C15.9629 11 15.7271 10.9763 15.5 10.9312" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" />
             <path d="M4.48131 16.1112C3.30234 16.743 0.211137 18.0331 2.09388 19.6474C3.01359 20.436 4.03791 21 5.32572 21H12.6743C13.9621 21 14.9864 20.436 15.9061 19.6474C17.7889 18.0331 14.6977 16.743 13.5187 16.1112C10.754 14.6296 7.24599 14.6296 4.48131 16.1112Z" stroke="currentColor" stroke-width="2.0" />
@@ -911,8 +911,8 @@ export default class AppSearch extends HTMLElement {
             align-items: center;
             flex-wrap: nowrap;
             gap: 0;
-            margin: 0 0 0 28px;
-            width: calc(100% - 28px);
+            margin: 0 0 0 25px;
+            width: calc(100% - 25px);
           }
 
           form.search > .contents > input {

@@ -78,7 +78,7 @@ export default class StoryFeed extends HTMLElement {
     const outerThis = this;
     try {
       const result = await this.api.get(url, { content: 'json' });
-
+      // console.log(result);
       if (!result.success) {
         outerThis.handleFetchError(storiesContainer);
         return;

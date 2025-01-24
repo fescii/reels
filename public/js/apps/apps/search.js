@@ -4,21 +4,17 @@ export default class AppSearch extends HTMLElement {
     super();
 
     // Get default tab
-    this._tab = this.getAttribute('tab');
-
+    this.active_tab = null;
     // get query
     this._query = this.getAttribute('query');
-
     //Get url in lowercase
     this._url = this.getAttribute('url').trim().toLowerCase();
-
     this._active = null;
-
+    this.app = window.app;
+    this.api = this.app.api;
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.setTitle();
-
     this.render();
   }
 
@@ -71,20 +67,16 @@ export default class AppSearch extends HTMLElement {
   connectedCallback() {
     this.enableScroll();
 
-    // request user to enable notifications
-    this.checkNotificationPermission();
-
     // Activate tab
     const contentContainer = this.shadowObj.querySelector('div.content-container');
-    const tabContainer = this.shadowObj.querySelector('ul#tab');
+    const tabContainer = this.shadowObj.querySelector('ul.tabs');
     const form = this.shadowObj.querySelector('form.search');
 
     // activate popstate
     this.activateOnPopState();
   
     if (contentContainer && tabContainer && form) {
-      this.updateActiveTab(this._tab, tabContainer);
-      this.activateTab(contentContainer, tabContainer);
+      this.activateTabController(tabContainer, contentContainer);
       this.activateForm(form, tabContainer, contentContainer);
       this.updateInput(form);
 
@@ -100,12 +92,6 @@ export default class AppSearch extends HTMLElement {
     this.watchMediaQuery(mql, contentContainer);
   }
 
-    checkNotificationPermission = async () => {
-    if(window.notify && !window.notify.permission) {
-      await window.notify.requestPermission();
-    }
-  }
-
   disconnectedCallback() {
     this.enableScroll()
   }
@@ -117,12 +103,11 @@ export default class AppSearch extends HTMLElement {
       this.render();
 
       const contentContainer = this.shadowObj.querySelector('div.content-container');
-      const tabContainer = this.shadowObj.querySelector('ul#tab');
+      const tabContainer = this.shadowObj.querySelector('ul.tabs');
       const form = this.shadowObj.querySelector('form.search');
     
       if (contentContainer && tabContainer && form) {
-        this.updateActiveTab(this._tab, tabContainer);
-        this.activateTab(contentContainer, tabContainer);
+        this.activateTabController(tabContainer, contentContainer);
         this.activateForm(form, tabContainer, contentContainer);
         this.updateInput(form);
       }
@@ -146,32 +131,6 @@ export default class AppSearch extends HTMLElement {
     window.onscroll = function () { };
   }
 
-  updateActiveTab = (active, tabContainer) => {
-    // Select tab with active class
-    const tab = this.shadowObj.querySelector(`ul#tab > li.${active}`);
-
-    // select line
-    const line = tabContainer.querySelector('span.line');
-
-    if (tab && line) {
-      tab.classList.add('active');
-
-      // update active tab
-      this._active = tab;
-
-      // Calculate half tab width - 10px
-      const tabWidth = (tab.offsetWidth/2) - 20;
-
-      // update line
-      line.style.left = `${tab.offsetLeft + tabWidth}px`;
-    }
-    else {
-      // Select the stories tab
-      const storiesTab = this.shadowObj.querySelector("ul#tab > li.stories");
-      storiesTab.classList.add('active');
-    }
-  }
-
   activateForm = (form, tabContainer, contentContainer) => {
     const outerThis = this;
     form.addEventListener('submit', e => {
@@ -188,117 +147,127 @@ export default class AppSearch extends HTMLElement {
       outerThis._query = query;
 
       // update query attribute
-      outerThis.setAttribute('query', outerThis._query);
+      this.setAttribute('query', outerThis._query);
 
       // update title of the document
       document.title = `Search query -  ${query}`;
 
       // update url
-      outerThis._url = `/search?q=${query}`;
+      this._url = `/search?q=${query}`;
 
       // update setKey
-      outerThis.setKey(form);
+      this.setKey(form);
 
-      // update url attribute
-      outerThis.setAttribute('url', outerThis._url);
-
-      // update search bar url by adding query
-      window.history.replaceState(null, null, outerThis._url);
+      // get tab container
+      let tab;
+      if(this.active_tab) {
+        tab = this.active_tab.dataset.name;
+      } else {
+        tab = 'stories';
+      }
 
       // update tab attribute
       outerThis.setAttribute('tab', 'stories');
 
-      // get tab container
-      const tab = outerThis.getContainer('stories');
-
       // remove active tab
-      outerThis.removeActiveTab(tabContainer);
+      outerThis.removeActiveTab(tabContainer, tab);
 
-      // Set active tab
-      outerThis.updateActiveTab('stories', tabContainer);
+      // update url attribute
+      this.setAttribute('url', outerThis._url);
 
       // update content
-      contentContainer.innerHTML = tab;
+      contentContainer.innerHTML = outerThis.getContainer(tab);
     });
   }
 
-  removeActiveTab = tabContainer => {
+  removeActiveTab = (tabContainer, name) => {
     // remove active tab
-    const activeTab = tabContainer.querySelector('li.tab-item.active');
+    const activeTab = tabContainer.querySelector('li.tab.active');
+    // select the active tab
+    const selectedTab = tabContainer.querySelector(`li.tab.${name}`);
     if (activeTab) {
       activeTab.classList.remove('active');
+      selectedTab.classList.add('active');
     }
   }
 
-  activateTab = (contentContainer, tabContainer) => {
-    const outerThis = this;
+  activateTabController = (tabs, contentContainer) => {
+    // get the active tab
+    this.getOrSetActiveTab(tabs);
 
-    const line = tabContainer.querySelector('span.line');
-    const tabItems = tabContainer.querySelectorAll('li.tab-item');
+    // add click event listener to the tabs
+    tabs.querySelectorAll("li").forEach(tab => {
+      tab.addEventListener("click", e => {
+        e.preventDefault();
+        e.stopPropagation();
 
-    tabItems.forEach(tab => {
-      tab.addEventListener('click', e => {
-        e.preventDefault()
-        e.stopPropagation()
+        if(this.active_tab.dataset.name === tab.dataset.name) return;
 
-        // Calculate half tab width - 10px
-        const tabWidth = (tab.offsetWidth / 2) - 20;
+        // remove the active class from the active tab
+        this.active_tab.classList.remove("active");
 
-        line.style.left = `${tab.offsetLeft + tabWidth}px`;
+        // set the new active tab
+        this.active_tab = tab;
+        this.active_tab.classList.add("active");
+        const url = tab.getAttribute('url');
 
-        if (tab.dataset.element === outerThis._active.dataset.element) {
-          return;
-        }
-        else {
-          outerThis._active.classList.remove('active');
-          tab.classList.add('active');
-          outerThis._active = tab;
-
-          // update tab attribute  and this._tab
-          outerThis._tab = tab.dataset.element;
-          outerThis.setAttribute('tab', outerThis._tab);
-
-          // update tab attribute  and this._tab
-          outerThis._tab = tab.dataset.element;
-
-          if (tab.dataset.element === "stories") {
-            contentContainer.innerHTML = outerThis.getStories();
-          } else if (tab.dataset.element === "replies") {
-            contentContainer.innerHTML = outerThis.getReplies();
-          } else if (tab.dataset.element === "topics") {
-            contentContainer.innerHTML = outerThis.getTopics();
-          } else if (tab.dataset.element === "people") {
-            contentContainer.innerHTML = outerThis.getPeople();
-          } else {
-            contentContainer.innerHTML = outerThis.getStories();
-          }
-        }
-      })
+        // update the content based on the tab
+        this.updateContent(contentContainer, tab.getAttribute('data-name'), url);
+      });
     });
   }
 
-  updateState = (state, contentContainer) => {
-    // populate content
-    contentContainer.innerHTML = state.content;
+  getOrSetActiveTab = tabs => {
+    const tabName = this.getAttribute('tab') || 'all';
+    // get the tab from the attribute or default to 'all'
+    let activeTab = tabs.querySelector('li.active');
+
+    if (!activeTab) {
+      // if no tab matches the attribute, set the first tab as active
+      activeTab = tabs.querySelector(`li.${tabName}`);
+    }
+
+    activeTab.classList.add("active");
+    this.active_tab = activeTab;
   }
 
-  updateDefault = contentContainer => {
-    contentContainer.innerHTML = this.getContainer(this._tab);
+  updateContent = (contentContainer, tabName, url) => {
+    const contentMap = {
+      'topics': this.getTopics(),
+      'stories': this.getStories(),
+      'replies': this.getReplies(),
+      'users': this.getPeople()
+    };
+
+    const content = contentMap[tabName] || this.getAll();
+    contentContainer.innerHTML = content;
+    this.app.push(url, { kind: "sub", app: "search", name: tabName, html: content }, tabName);
   }
 
-  selectCurrentFeed = tab => {
-    // Select the current feed
-    switch (tab) {
-      case "stories":
-        return this.getStories();
-      case "replies":
-        return this.getReplies();
-      case "topics":
-        return this.getTopics();
-      case "people":
-        return this.getPeople();
-      default:
-        break;
+  handlePopState = event => {
+    const state = event.state;
+    if (state && state.kind === 'sub' && state.app === 'search') {
+      this.updateHistory(state.name, state.html)
+    }
+  }
+
+  updateHistory = (tabName, content) => {
+    const contentContainer = this.shadowObj.querySelector('div.feeds > div.content-container');
+    const tabs = this.shadowObj.querySelector('ul.tabs');
+
+    try {
+      this.active_tab.classList.remove('active');
+      const activeTab = tabs.querySelector(`li.${tabName}`);
+      activeTab.classList.add('active');
+      this.active_tab = activeTab;
+
+      contentContainer.innerHTML = content;
+    } catch (error) {
+      console.log(error)
+      const activeTab = tabs.querySelector('li.all');
+      activeTab.classList.add('active');
+      this.active_tab = activeTab;
+      contentContainer.innerHTML = this.getAll()
     }
   }
 
@@ -375,7 +344,9 @@ export default class AppSearch extends HTMLElement {
     if (mql.matches) {
       return /* html */`
         ${this.getForm()}
-        ${this.getTab()}
+        <div class="tab-controller">
+          ${this.getTab(this.getAttribute('tab'))}
+        </div>
         <div class="content-container">
           ${this.getContainer(this._tab)}
         </div>
@@ -385,7 +356,9 @@ export default class AppSearch extends HTMLElement {
       return /* html */`
         <section class="main">
           ${this.getForm()}
-          ${this.getTab()}
+          <div class="tab-controller">
+            ${this.getTab(this.getAttribute('tab'))}
+          </div>
           <div class="content-container">
             ${this.getContainer(this._tab)}
           </div>
@@ -485,26 +458,42 @@ export default class AppSearch extends HTMLElement {
     `
   }
 
-  getTab = () => {
+  getTab = tab => {
     return /* html */`
-      <div class="tab-control">
-        <ul id="tab" class="tab">
-          <li data-element="stories" class="tab-item stories">
-            <span class="text">Stories</span>
-          </li>
-          <li data-element="replies" class="tab-item replies">
-            <span class="text">Replies</span>
-          </li>
-          <li data-element="topics" class="tab-item topics">
-            <span class="text">Topics</span>
-          </li>
-          <li data-element="people" class="tab-item people">
-            <span class="text">People</span>
-          </li>
-          <span class="line"></span>
-        </ul>
-      </div>
-    `
+      <ul class="tabs">
+        <li class="tab stories ${tab === "stories" ? "active" : ''}" data-name="stories">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M10.5 8H18.5M10.5 12H13M18.5 12H16M10.5 16H13M18.5 16H16" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M7 7.5H6C4.11438 7.5 3.17157 7.5 2.58579 8.08579C2 8.67157 2 9.61438 2 11.5V18C2 19.3807 3.11929 20.5 4.5 20.5C5.88071 20.5 7 19.3807 7 18V7.5Z" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M16 3.5H11C10.07 3.5 9.60504 3.5 9.22354 3.60222C8.18827 3.87962 7.37962 4.68827 7.10222 5.72354C7 6.10504 7 6.57003 7 7.5V18C7 19.3807 5.88071 20.5 4.5 20.5H16C18.8284 20.5 20.2426 20.5 21.1213 19.6213C22 18.7426 22 17.3284 22 14.5V9.5C22 6.67157 22 5.25736 21.1213 4.37868C20.2426 3.5 18.8284 3.5 16 3.5Z" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span class="text">Stories</span>
+        </li>
+        <li class="tab replies ${tab === "replies" ? "active" : ''}" data-name="replies">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M8 13.5H16M8 8.5H12" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M6.09881 19C4.7987 18.8721 3.82475 18.4816 3.17157 17.8284C2 16.6569 2 14.7712 2 11V10.5C2 6.72876 2 4.84315 3.17157 3.67157C4.34315 2.5 6.22876 2.5 10 2.5H14C17.7712 2.5 19.6569 2.5 20.8284 3.67157C22 4.84315 22 6.72876 22 10.5V11C22 14.7712 22 16.6569 20.8284 17.8284C19.6569 19 17.7712 19 14 19C13.4395 19.0125 12.9931 19.0551 12.5546 19.155C11.3562 19.4309 10.2465 20.0441 9.14987 20.5789C7.58729 21.3408 6.806 21.7218 6.31569 21.3651C5.37769 20.6665 6.29454 18.5019 6.5 17.5" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" />
+          </svg>
+          <span class="text">Replies</span>
+        </li>
+        <li class="tab topics ${tab === "topics" ? "active" : ''}" data-name="topics">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <ellipse cx="18" cy="10" rx="4" ry="8" stroke="currentColor" stroke-width="12.50" />
+            <path d="M18 2C14.8969 2 8.46512 4.37761 4.77105 5.85372C3.07942 6.52968 2 8.17832 2 10C2 11.8217 3.07942 13.4703 4.77105 14.1463C8.46512 15.6224 14.8969 18 18 18" stroke="currentColor" stroke-width="12.50" />
+            <path d="M11 22L9.05674 20.9303C6.94097 19.7657 5.74654 17.4134 6.04547 15" stroke="currentColor" stroke-width="12.50" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span class="text">Topics</span>
+        </li>
+        <li class="tab users ${tab === "users" ? "active" : ''}" data-name="users">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M18.6161 20H19.1063C20.2561 20 21.1707 19.4761 21.9919 18.7436C24.078 16.8826 19.1741 15 17.5 15M15.5 5.06877C15.7271 5.02373 15.9629 5 16.2048 5C18.0247 5 19.5 6.34315 19.5 8C19.5 9.65685 18.0247 11 16.2048 11C15.9629 11 15.7271 10.9763 15.5 10.9312" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" />
+            <path d="M4.48131 16.1112C3.30234 16.743 0.211137 18.0331 2.09388 19.6474C3.01359 20.436 4.03791 21 5.32572 21H12.6743C13.9621 21 14.9864 20.436 15.9061 19.6474C17.7889 18.0331 14.6977 16.743 13.5187 16.1112C10.754 14.6296 7.24599 14.6296 4.48131 16.1112Z" stroke="currentColor" stroke-width="2.0" />
+            <path d="M13 7.5C13 9.70914 11.2091 11.5 9 11.5C6.79086 11.5 5 9.70914 5 7.5C5 5.29086 6.79086 3.5 9 3.5C11.2091 3.5 13 5.29086 13 7.5Z" stroke="currentColor" stroke-width="2.0" />
+          </svg>
+          <span class="text">People</span>
+        </li>
+      </ul>
+    `;
   }
 
   getStyles() {
@@ -713,90 +702,103 @@ export default class AppSearch extends HTMLElement {
           -moz-border-radius: 50px;
         }
 
-        .tab-control {
-          border-bottom: var(--border);
-          background-color: var(--background);
+        div.tab-controller {
           display: flex;
-          flex-flow: column;
-          padding: 5px 0 0 0;
-          gap: 0;
           z-index: 5;
-          width: 100%;
-          position: sticky;
-          top: 60px;
-        }
-
-        .tab-control > ul.tab {
-          height: max-content;
-          width: 100%;
           padding: 0;
           margin: 0;
-          list-style-type: none;
-          display: flex;
-          gap: 0;
-          align-items: center;
-          max-width: 100%;
-          overflow-x: scroll;
-          -ms-overflow-style: none;
-          scrollbar-width: none;
+          width: 100%;
+          z-index: 5;
+          position: sticky;
+          top: 0;
+          background: var(--background);
         }
 
-        .tab-control > ul.tab::-webkit-scrollbar {
-          display: none !important;
+        ul.tabs {
+          border-bottom: var(--border);
+          display: flex;
+          flex-flow: row nowrap;
+          gap: 15px;
+          padding: 22px 0 10px;
+          margin: 0;
+          width: 100%;
+          list-style: none;
+          overflow-x: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        ul.tabs::-webkit-scrollbar {
+          display: none;
           visibility: hidden;
         }
 
-        .tab-control > ul.tab > li.tab-item {
-          color: var(--gray-color);
-          font-family: var(--font-text), sans-serif;
-          font-weight: 400;
-          padding: 6px 20px 8px 0;
-          margin: 0;
+        ul.tabs > li.tab {
           display: flex;
+          flex-flow: row;
           align-items: center;
-          cursor: pointer;
-          overflow: visible;
+          gap: 5px;
+          padding: 5px 0;
+          border-radius: 12px;
+          /*background: var(--gray-background);*/
+          color: var(--text-color);
+          font-family: var(--font-main), sans-serif;
           font-size: 0.95rem;
-        }
-
-        .tab-control > ul.tab > li.tab-item > .text {
           font-weight: 500;
+          cursor: pointer;
+          transition: 0.3s;
+        }
+
+        ul.tabs > li.tab > span.count,
+        ul.tabs > li.tab > svg {
+          display: none;
+        }
+
+        ul.tabs > li.tab.active {
+          background: var(--tab-background);
+          padding: 5px 10px;
+          display: flex;
+          text-align: center;
+          color: var(--text-color);
+        }
+
+        ul.tabs > li.tab.active > span.count,
+        ul.tabs > li.tab.active > svg,
+        ul.tabs > li.tab:not(.active):hover > span.count,
+        ul.tabs > li.tab:not(.active):hover > svg {
+          display: flex;
+        }
+
+        /* style hover tab: but don't touch tab with active class */
+        ul.tabs > li.tab:not(.active):hover {
+          background: var(--tab-background);
+          padding: 5px 10px;
+          color: var(--text-color);
+        }
+
+        ul.tabs > li.tab > svg {
+          width: 19px;
+          height: 19px;
+        }
+
+        ul.tabs > li.tab > .text {
           font-size: 1rem;
+          padding: 0 5px 0 0;
+          font-weight: 500;
         }
 
-        .tab-control > ul.tab > li.tab-item:hover > .text {
-          color: transparent;
+        ul.tabs > li.tab > .count {
+          font-size: 0.85rem;
+          display: none;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          font-weight: 500;
           background: var(--accent-linear);
-          background-clip: text;
-          -webkit-background-clip: text;
-        }
-
-        .tab-control > ul.tab > li.active {
-          font-size: 0.95rem;
-        }
-
-        .tab-control > ul.tab > li.active > .text {
-          color: transparent;
-          background: var(--accent-linear);
-          background-clip: text;
-          -webkit-background-clip: text;
-          font-family: var(--font-read);
-        }
-
-        .tab-control > ul.tab span.line {
-          position: absolute;
-          z-index: 1;
-          background: var(--accent-linear);
-          display: inline-block;
-          bottom: -3px;
-          left: 12px;
-          width: 20px;
-          min-height: 5px;
-          border-top-left-radius: 5px;
-          border-top-right-radius: 5px;
-          border-bottom-left-radius: 5px;
-          border-bottom-right-radius: 5px;
-          transition: all 300ms ease-in-out;
+          font-family: var(--font-text), sans-serif;
+          color: var(--white-color);
+          padding: 1px 7px 2.5px;
+          border-radius: 10px;
         }
 
         div.content-container {
@@ -878,7 +880,7 @@ export default class AppSearch extends HTMLElement {
             height: 42px;
           }
 
-          .tab-control > ul.tab > li.tab-item,
+          ul.tabs > li.tab,
 					a {
 						cursor: default !important;
           }
@@ -900,12 +902,20 @@ export default class AppSearch extends HTMLElement {
             width: 100%;
           }
 
-          .tab-control {
-            border: none;
-            padding: 0;
-            border-bottom: var(--border);
+          div.tab-controller {
+            display: flex;
+            z-index: 5;
+            padding: 0 10px;
+            margin: 0;
+            width: 100%;
+            z-index: 5;
             position: sticky;
-            top: 60px;
+            top: 0;
+            background: var(--background);
+          }
+
+          div.content-container {
+            padding: 0 0 55px;
           }
 
           section.side {

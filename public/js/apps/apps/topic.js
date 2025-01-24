@@ -797,13 +797,13 @@ export default class AppTopic extends HTMLElement {
           display: flex;
           flex-flow: row;
           gap: 20px;
-          padding: 3px 0 10px 0;
+          padding: 3px 0;
           margin: 0;
         }
 
         .text-content > .actions > .action {
           text-decoration: none;
-          padding: 2px 10px 3px 10px;
+          padding: 5px 10px;
           font-weight: 400;
           background: var(--accent-linear);
           color: var(--white-color);
@@ -819,14 +819,11 @@ export default class AppTopic extends HTMLElement {
           border-radius: 10px;
         }
 
-        .text-content > .actions > .action.stats {
-          background: var(--second-linear);
-        }
-
         .text-content > .actions > .action.edit,
+        .text-content > .actions > .action.stats,
         .text-content > .actions > .action.following,
         .text-content > .actions > .action.subscribed {
-          padding: 2px 10px 3px 10px;
+          padding: 5px 10px;
           font-weight: 400;
           background: unset;
           border: var(--action-border);

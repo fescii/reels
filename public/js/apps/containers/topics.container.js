@@ -54,7 +54,7 @@ export default class TopicsContainer extends HTMLElement {
     try {
       // fetch 
       const result = await this.api.get(url, { content: 'json' }, { allow: true, duration: 7200 });
-
+      // console.log(result)
       // if result is not successful
       if (!result.success) {
         topicsContainer.innerHTML = outerThis.getWrongMessage();
@@ -62,14 +62,14 @@ export default class TopicsContainer extends HTMLElement {
         return;
       }
 
-      const data = result.data;
+      const topics = result.topics;
 
-      if (data.topics.length === 0) {
+      if (topics.length === 0) {
         topicsContainer.innerHTML = outerThis.getEmptyMsg();
         return;
       }
 
-      const content = outerThis.mapFields(data.topics);
+      const content = outerThis.mapFields(topics);
       topicsContainer.insertAdjacentHTML('beforebegin', outerThis.getTitle())
       topicsContainer.innerHTML = content
       outerThis.setLastItem(topicsContainer);

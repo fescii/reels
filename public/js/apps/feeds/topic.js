@@ -77,7 +77,7 @@ export default class TopicFeed extends HTMLElement {
   fetching = async (url, topicsContainer) => {
     const outerThis = this;
     try {
-      const result = this.api.get(url, { content: 'json' })
+      const result = await this.api.get(url, { content: 'json' })
       console.log(result)
       if (!result.success) {
         outerThis._empty = true;
@@ -87,16 +87,16 @@ export default class TopicFeed extends HTMLElement {
         return;
       }
 
-      const data = result.data;
-      if (data.last && outerThis._page === 1 && data.topics.length === 0) {
+      const topics = result.topics;
+      if (outerThis._page === 1 && topics.length === 0) {
         outerThis._empty = true;
         outerThis._block = true;
         outerThis.populateTopics(outerThis.getEmptyMsg(outerThis._kind), topicsContainer);
       }
-      else if (data.last && data.topics.length < 10) {
+      else if (topics.length < 10) {
         outerThis._empty = true;
         outerThis._block = true;
-        const content = outerThis.mapFields(data.topics);
+        const content = outerThis.mapFields(topics);
         outerThis.populateTopics(content, topicsContainer);
         outerThis.populateTopics(outerThis.getLastMessage(outerThis._kind), topicsContainer);
       }
@@ -104,7 +104,7 @@ export default class TopicFeed extends HTMLElement {
         outerThis._empty = false;
         outerThis._block = false;
 
-        const content = outerThis.mapFields(data.topics);
+        const content = outerThis.mapFields(topics);
         outerThis.populateTopics(content, topicsContainer);
         outerThis.scrollEvent(topicsContainer);
       }

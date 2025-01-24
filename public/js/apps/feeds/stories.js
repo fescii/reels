@@ -6,6 +6,7 @@ export default class StoryFeed extends HTMLElement {
     this._page = this.parseToNumber(this.getAttribute('page'));
     this._url = this.getAttribute('url');
     this._kind = this.getAttribute('kind');
+    this._query = this.setQuery(this.getAttribute('query'));
     this._isFirstLoad = true;
     this.app = window.app;
     this.api = this.app.api;
@@ -16,6 +17,8 @@ export default class StoryFeed extends HTMLElement {
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
   }
+
+  setQuery = query => !(!query || query === "" || query !== "true");
 
   connectedCallback() {
     const storiesContainer = this.shadowObj.querySelector('.stories');
@@ -139,8 +142,7 @@ export default class StoryFeed extends HTMLElement {
     if (!this._block && !this._empty) {
       // Set blocks before fetching
       this._block = true;  // Block further fetches while this one is in progress
-      
-      const url = `${this._url}?page=${this._page}`;
+      const url = this._query ? `${this._url}&page=${this._page}` : `${this._url}?page=${this._page}`;
       
       setTimeout(() => {
         this.fetching(url, storiesContainer);

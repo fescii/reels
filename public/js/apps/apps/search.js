@@ -156,6 +156,9 @@ export default class AppSearch extends HTMLElement {
       // update url
       this._url = `/search?q=${query}`;
 
+      // add query to the url: only the query not history or state
+      this.app.push(`/search?q=${query}`, { kind: "sub", app: "search", name: query, type: 'query' }, `/search?q=${query}`);
+
       // update setKey
       this.setKey(form);
 
@@ -248,27 +251,35 @@ export default class AppSearch extends HTMLElement {
   handlePopState = event => {
     const state = event.state;
     if (state && state.kind === 'sub' && state.app === 'search') {
-      this.updateHistory(state.name, state.html)
+      this.updateHistory(state.name, state.type);
     }
   }
 
-  updateHistory = (tabName, content) => {
-    const contentContainer = this.shadowObj.querySelector('div.feeds > div.content-container');
-    const tabs = this.shadowObj.querySelector('ul.tabs');
+  updateHistory = (name, type) => {
+    const tabContainer = this.shadowObj.querySelector('ul.tabs');
+    const contentContainer = this.shadowObj.querySelector('div.content-container');
+    const form = this.shadowObj.querySelector('form.search');
 
-    try {
-      this.active_tab.classList.remove('active');
-      const activeTab = tabs.querySelector(`li.${tabName}`);
-      activeTab.classList.add('active');
-      this.active_tab = activeTab;
+    if (type === 'query') {
+      this._query = name;
+      this.setKey(form);
+      this.updateContent(contentContainer, this.active_tab.dataset.name, this.active_tab.getAttribute('url'));
+    } else {
+      const tab = tabContainer.querySelector(`li.tab.${name}`);
 
-      contentContainer.innerHTML = content;
-    } catch (error) {
-      console.log(error)
-      const activeTab = tabs.querySelector('li.all');
-      activeTab.classList.add('active');
-      this.active_tab = activeTab;
-      contentContainer.innerHTML = this.getAll()
+      if (tab) {
+        // Remove active class from current active tab
+        if (this.active_tab) {
+          this.active_tab.classList.remove('active');
+        }
+
+        // Set new active tab
+        this.active_tab = tab;
+        this.active_tab.classList.add('active');
+
+        // Update content based on the new active tab
+        this.updateContent(contentContainer, name, tab.getAttribute('url'));
+      }
     }
   }
 
@@ -479,9 +490,9 @@ export default class AppSearch extends HTMLElement {
         </li>
         <li class="tab topics ${tab === "topics" ? "active" : ''}" data-name="topics">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
-            <ellipse cx="18" cy="10" rx="4" ry="8" stroke="currentColor" stroke-width="1.5" />
-            <path d="M18 2C14.8969 2 8.46512 4.37761 4.77105 5.85372C3.07942 6.52968 2 8.17832 2 10C2 11.8217 3.07942 13.4703 4.77105 14.1463C8.46512 15.6224 14.8969 18 18 18" stroke="currentColor" stroke-width="1.5" />
-            <path d="M11 22L9.05674 20.9303C6.94097 19.7657 5.74654 17.4134 6.04547 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            <ellipse cx="18" cy="10" rx="4" ry="8" stroke="currentColor" stroke-width="2.0" />
+            <path d="M18 2C14.8969 2 8.46512 4.37761 4.77105 5.85372C3.07942 6.52968 2 8.17832 2 10C2 11.8217 3.07942 13.4703 4.77105 14.1463C8.46512 15.6224 14.8969 18 18 18" stroke="currentColor" stroke-width="2.0" />
+            <path d="M11 22L9.05674 20.9303C6.94097 19.7657 5.74654 17.4134 6.04547 15" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
           <span class="text">Topics</span>
         </li>
@@ -572,7 +583,7 @@ export default class AppSearch extends HTMLElement {
           font-weight: 500;
           color: var(--text-color);
           font-family: var(--font-text);
-          margin: 0 0 5px;
+          margin: 5px 0;
         }
 
         p.search > span.key {
@@ -858,6 +869,8 @@ export default class AppSearch extends HTMLElement {
 					}
 
           ul.tabs > li.tab,
+          form.search > .contents > button,
+          button,
 					a {
 						cursor: default !important;
           }
@@ -933,6 +946,15 @@ export default class AppSearch extends HTMLElement {
 
           div.content-container {
             padding: 0 10px 35px;
+          }
+
+          p.search {
+            font-size: 1.15rem;
+            font-weight: 500;
+            color: var(--text-color);
+            font-family: var(--font-text);
+            margin: 18px 0 0;
+            padding: 0 10px;
           }
 
           section.side {

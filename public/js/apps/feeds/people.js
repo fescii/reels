@@ -7,12 +7,15 @@ export default class PeopleFeed extends HTMLElement {
     this._total = this.parseToNumber(this.getAttribute('total'));
     this._kind = this.getAttribute('kind');
     this._url = this.getAttribute('url');
-    this._isFirstLoad = true; // Add this line
+    this._query = this.setQuery(this.getAttribute('query'));
+    this._isFirstLoad = true; // Added this line
     this.app = window.app;
     this.api = this.app.api;
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.render();
   }
+
+  setQuery = query => !(!query || query === "" || query !== "true");
 
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
@@ -135,7 +138,7 @@ export default class PeopleFeed extends HTMLElement {
       // Block further fetches while this one is in progress
       this._block = true;
       
-      const url = `${this._url}?page=${this._page}`;
+      const url = this._query ? `${this._url}&page=${this._page}` : `${this._url}?page=${this._page}`;
       
       setTimeout(() => {
         this.fetching(url, peopleContainer);

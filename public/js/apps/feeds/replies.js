@@ -7,12 +7,15 @@ export default class ReplyFeed extends HTMLElement {
     this._url = this.getAttribute('url');
     this._kind = this.getAttribute('kind');
     this.section = this.getAttribute('section');
+    this._query = this.setQuery(this.getAttribute('query'));
     this._isFirstLoad = true;
     this.app = window.app;
     this.api = this.app.api;
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.render();
   }
+
+  setQuery = query => !(!query || query === "" || query !== "true");
 
   convertToBoolean = value => {
     return value === "true";
@@ -144,7 +147,7 @@ export default class ReplyFeed extends HTMLElement {
       // Set blocks before fetching
       this._block = true;  // Block further fetches while this one is in progress
       
-      const url = `${this._url}?page=${this._page}`;
+      const url = this._query ? `${this._url}&page=${this._page}` : `${this._url}?page=${this._page}`;
       
       setTimeout(() => {
         this.fetching(url, repliesContainer);
@@ -335,7 +338,7 @@ export default class ReplyFeed extends HTMLElement {
   getLastMessage = text => {
     // get the next attribute
     if (text === "post") {
-      return `
+      return /* html */`
         <div class="finish">
           <h2 class="finish-title">No more replies!</h2>
           <p class="desc">
@@ -562,6 +565,45 @@ export default class ReplyFeed extends HTMLElement {
         }
 
         div.finish button.finish {
+          border: none;
+          background: var(--accent-linear);
+          font-family: var(--font-main), sans-serif;
+          text-decoration: none;
+          color: var(--white-color);
+          margin: 10px 0 0;
+          font-size: 1rem;
+          font-weight: 500;
+          cursor: pointer;
+          display: flex;
+          width: max-content;
+          flex-flow: row;
+          align-items: center;
+          text-transform: capitalize;
+          justify-content: center;
+          padding: 7px 18px 8px;
+          border-radius: 50px;
+          -webkit-border-radius: 50px;
+          -moz-border-radius: 50px;
+        }
+
+        div.finish > h2.finish-title {
+          margin: 10px 0 0 0;
+          font-size: 1rem;
+          font-weight: 500;
+          font-family: var(--font-read), sans-serif;
+          color: var(--text-color);
+        }
+
+        div.finish > p.desc {
+          margin: 0;
+          font-size: 0.85rem;
+          font-family: var(--font-read), sans-serif;
+          color: var(--gray-color);
+          line-height: 1.4;
+          text-align: center;
+        }
+
+        div.finish > button.finish {
           border: none;
           background: var(--accent-linear);
           font-family: var(--font-main), sans-serif;

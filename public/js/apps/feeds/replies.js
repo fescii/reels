@@ -272,9 +272,9 @@ export default class ReplyFeed extends HTMLElement {
   getEmptyMsg = text => {
     // get the next attribute
    if (text === "post") {
-    return `
+    return /* html */`
       <div class="finish">
-        <h2 class="finish__title">No replies found!</h2>
+        <h2 class="finish-title">No replies found!</h2>
         <p class="desc">
           The post has no replies yet. You can be the first one to reply or come back later, once available they'll appear here.
         </p>
@@ -284,7 +284,7 @@ export default class ReplyFeed extends HTMLElement {
    else if(text === "reply") {
     return `
       <div class="finish">
-        <h2 class="finish__title">No replies found!</h2>
+        <h2 class="finish-title">No replies found!</h2>
         <p class="desc">
           The reply has no replies yet. You can be the first one to reply or come back later, once available they'll appear here.
         </p>
@@ -294,7 +294,7 @@ export default class ReplyFeed extends HTMLElement {
    else if(text === "story") {
     return `
       <div class="finish">
-        <h2 class="finish__title">No replies found!</h2>
+        <h2 class="finish-title">No replies found!</h2>
         <p class="desc">
           The story has no replies yet. You can be the first one to reply or come back later, once available they'll appear here.
         </p>
@@ -305,7 +305,7 @@ export default class ReplyFeed extends HTMLElement {
     return `
       <div class="finish">
         <h2 class="title">No replies found!</h2>
-        <p class="finish__title">
+        <p class="finish-title">
           There are no replies found for this search. You can try a different searching using a different keyword.
         </p>
       </div>
@@ -314,7 +314,7 @@ export default class ReplyFeed extends HTMLElement {
    else if(text === "user") {
     return `
       <div class="finish">
-        <h2 class="finish__title">No replies found!</h2>
+        <h2 class="finish-title">No replies found!</h2>
         <p class="desc">
           The user has no replies yet. You can come back later, once available they'll appear here.
         </p>
@@ -323,7 +323,7 @@ export default class ReplyFeed extends HTMLElement {
    } else {
     return `
       <div class="finish">
-        <h2 class="finish__title">No replies found!</h2>
+        <h2 class="finish-title">No replies found!</h2>
         <p class="desc">
           There are no replies yet. You can come back later, once available they'll appear here.
         </p>
@@ -337,7 +337,7 @@ export default class ReplyFeed extends HTMLElement {
     if (text === "post") {
       return `
         <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
+          <h2 class="finish-title">No more replies!</h2>
           <p class="desc">
             You have exhausted all of the post's replies. You can add a new reply or come back later to check for new replies.
           </p>
@@ -347,7 +347,7 @@ export default class ReplyFeed extends HTMLElement {
     else if(text === "reply") {
       return `
         <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
+          <h2 class="finish-title">No more replies!</h2>
           <p class="desc">
             You have exhausted all of the reply's replies. You can add a new reply or come back later to check for new replies.
           </p>
@@ -357,7 +357,7 @@ export default class ReplyFeed extends HTMLElement {
     else if(text === "story") {
       return `
         <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
+          <h2 class="finish-title">No more replies!</h2>
           <p class="desc">
             You have exhausted all of the story's replies. You can add a new reply or come back later to check for new replies.
           </p>
@@ -367,7 +367,7 @@ export default class ReplyFeed extends HTMLElement {
     else if(text === "search") {
       return `
         <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
+          <h2 class="finish-title">No more replies!</h2>
           <p class="desc">
             You have exhausted all of the search's results. You can try a different search using a different keyword.
           </p>
@@ -377,7 +377,7 @@ export default class ReplyFeed extends HTMLElement {
     else if(text === "user") {
       return `
         <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
+          <h2 class="finish-title">No more replies!</h2>
           <p class="desc">
             You have exhausted all of the user's replies. You can always come back later to check for new replies.
           </p>
@@ -387,7 +387,7 @@ export default class ReplyFeed extends HTMLElement {
     else {
       return `
         <div class="finish">
-          <h2 class="finish__title">No more replies!</h2>
+          <h2 class="finish-title">No more replies!</h2>
           <p class="desc">
             You have reached the end of the replies. You can always come back later to check for new replies.
           </p>
@@ -400,7 +400,7 @@ export default class ReplyFeed extends HTMLElement {
   getWrongMessage = () => {
     return /* html */`
       <div class="finish">
-        <h2 class="finish__title">Something went wrong!</h2>
+        <h2 class="finish-title">Something went wrong!</h2>
         <p class="desc">
           An error occurred while retrieving replies. Please check your connection and try again.
         </p>
@@ -524,6 +524,14 @@ export default class ReplyFeed extends HTMLElement {
           gap: 0;
         }
 
+        div.stories {
+          padding: 0;
+          width: 100%;
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+        }
+
         div.finish {
           padding: 10px 0 40px;
           width: 100%;
@@ -536,7 +544,7 @@ export default class ReplyFeed extends HTMLElement {
           gap: 5px;
         }
 
-        div.finish > h2.finish__title {
+        div.finish h2.title {
           margin: 10px 0 0 0;
           font-size: 1rem;
           font-weight: 500;
@@ -544,7 +552,7 @@ export default class ReplyFeed extends HTMLElement {
           color: var(--text-color);
         }
 
-        div.finish > p.desc {
+        div.finish p.finish-title {
           margin: 0;
           font-size: 0.85rem;
           font-family: var(--font-read), sans-serif;
@@ -553,7 +561,7 @@ export default class ReplyFeed extends HTMLElement {
           text-align: center;
         }
 
-        div.finish > button.finish {
+        div.finish button.finish {
           border: none;
           background: var(--accent-linear);
           font-family: var(--font-main), sans-serif;

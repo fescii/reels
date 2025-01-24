@@ -149,6 +149,11 @@ export default class APIManager {
   async #request(url, options = {}, cacheOptions = {}) {
     const fullURL = this.baseURL + url;
     const request = this.#generateCacheKey(fullURL, options);
+  
+    // Ensure body is included in the fetch options if present
+    if (options?.body) {
+      options.body = JSON.stringify(options.body);
+    }
 
     // Check cache first - will automatically handle expiry
     const cachedData = await this.#handleCache(request, cacheOptions);

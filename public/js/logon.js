@@ -1,5 +1,5 @@
 // noinspection RegExpRedundantEscape
-
+import APIManager from "./api.js";
 export default class AppLogon extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
@@ -8,8 +8,7 @@ export default class AppLogon extends HTMLElement {
 
     // check if the user is authenticated
     this._authenticated = window.hash ? true : false;
-    this.app = window.app;
-    this.api = this.app.api;
+    this.api = new APIManager('/api/v1', 9500, 'v1');
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: 'open' });
 
@@ -578,6 +577,8 @@ export default class AppLogon extends HTMLElement {
       result,
       error
     } = await outerThis.apiLogin(data);
+
+    console.log(result)
 
     // If error occurs
     if (error) {
@@ -1555,8 +1556,8 @@ export default class AppLogon extends HTMLElement {
 					Connect with vibrant minds and share or contribute to ideas that can change the world.
           Join our community today, and start sharing your thoughts.
 				</p>
-				<a href=${this.getAttribute('login')} class="login">Login</a>
-				<a href=${this.getAttribute('register')} class="register">Register</a>
+				<a href="${this.getAttribute('login')}" class="login">Login</a>
+				<a href="${this.getAttribute('register')}" class="register">Register</a>
         <p class="forgot">
           Forgot your password? <a href="${this.getAttribute('forgot')}" class="forgot">Click here</a>
         </p>
@@ -1566,7 +1567,7 @@ export default class AppLogon extends HTMLElement {
 						<path
 							d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
 					</svg>
-					By continuing you indicate that you agree to <a href="" class="aduki">aduki's</a> <a href="">Terms of Service</a> and <a href="">Privacy
+					By continuing you indicate that you agree to <a href="/soon" class="aduki">aduki's</a> <a href="/soon">Terms of Service</a> and <a href="">Privacy
 						Policy</a>.
 				</div>
 			</div>

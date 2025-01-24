@@ -14,7 +14,7 @@ const join = async (req, res) => {
     url: '/join',
   }
 
-  res.render('pages/main', {
+  res.render('pages/auth', {
     meta: meta, data: {
       name: 'join'
     }

@@ -200,7 +200,6 @@ export default class PostSection extends HTMLElement {
             <path d="M6.09881 19C4.7987 18.8721 3.82475 18.4816 3.17157 17.8284C2 16.6569 2 14.7712 2 11V10.5C2 6.72876 2 4.84315 3.17157 3.67157C4.34315 2.5 6.22876 2.5 10 2.5H14C17.7712 2.5 19.6569 2.5 20.8284 3.67157C22 4.84315 22 6.72876 22 10.5V11C22 14.7712 22 16.6569 20.8284 17.8284C19.6569 19 17.7712 19 14 19C13.4395 19.0125 12.9931 19.0551 12.5546 19.155C11.3562 19.4309 10.2465 20.0441 9.14987 20.5789C7.58729 21.3408 6.806 21.7218 6.31569 21.3651C5.37769 20.6665 6.29454 18.5019 6.5 17.5" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" />
           </svg>
           <span class="text">Replies</span>
-          <span class="count">${this.formatNumber(this.getAttribute("replies"))}</span>
           <span class="bar"></span>
         </li>
         <li class="tab likes ${tab === "likes" ? "active" : ''}" data-name="likes" url="${url}/likes">
@@ -210,7 +209,6 @@ export default class PostSection extends HTMLElement {
             <path d="M13 7.5C13 9.70914 11.2091 11.5 9 11.5C6.79086 11.5 5 9.70914 5 7.5C5 5.29086 6.79086 3.5 9 3.5C11.2091 3.5 13 5.29086 13 7.5Z" stroke="currentColor" stroke-width="2.0" />
           </svg>
           <span class="text">Likes</span>
-          <span class="count">${this.formatNumber(this.getAttribute("likes"))}</span>
           <span class="bar"></span>
         </li>
       </ul>
@@ -354,7 +352,7 @@ export default class PostSection extends HTMLElement {
           font-size: 0.95rem;
           font-weight: 500;
           cursor: pointer;
-          transition: 0.3s;
+          transition: all 0.3s;
           position: relative;
         }
 
@@ -366,7 +364,7 @@ export default class PostSection extends HTMLElement {
         ul.tabs > li.tab > span.bar {
           display: none;
           width: 100%;
-          height: 2px;
+          height: 4px;
           background: var(--accent-color);
           position: absolute;
           bottom: 0;
@@ -375,16 +373,14 @@ export default class PostSection extends HTMLElement {
         }
 
         ul.tabs > li.tab.active {
-          color: var(--accent-color);
-          padding: 10px 0;
+          color: var(--text-color);
+          padding: 10px 4px 12px;
           display: flex;
           text-align: center;
         }
 
-        ul.tabs > li.tab.active > span.count,
         ul.tabs > li.tab.active > svg,
         ul.tabs > li.tab.active > span.bar,
-        ul.tabs > li.tab:not(.active):hover > span.count,
         ul.tabs > li.tab:not(.active):hover > span.bar,
         ul.tabs > li.tab:not(.active):hover > svg {
           display: flex;
@@ -392,11 +388,13 @@ export default class PostSection extends HTMLElement {
 
         /* style hover tab: but don't touch tab with active class */
         ul.tabs > li.tab:not(.active):hover {
-          padding: 10px 0;
-          color: var(--accent-color);
+          padding: 10px 2px;
+          color: var(--text-color);
         }
 
         ul.tabs > li.tab > svg {
+          display: none;
+          margin-bottom: -2px;
           width: 17px;
           height: 17px;
         }
@@ -404,21 +402,25 @@ export default class PostSection extends HTMLElement {
         ul.tabs > li.tab > .text {
           font-size: 0.95rem;
           font-family: var(--font-text), sans-serif;
-          padding: 0 5px 0 0;
+          padding: 0 2px 0 0;
           font-weight: 500;
         }
 
         ul.tabs > li.tab > .count {
-          font-size: 0.8rem;
+          font-size: 0.95rem;
           display: none;
+          margin-bottom: -2px;
           align-items: center;
           justify-content: center;
           text-align: center;
           font-weight: 500;
-          background: var(--accent-linear);
-          font-family: var(--font-read), sans-serif;
-          color: var(--white-color);
-          padding: 1px 7px 2px;
+          background: var(--text-color);
+          font-family: var(--font-text), sans-serif;
+          color: transparent;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          padding: 0;
           border-radius: 10px;
         }
 
@@ -437,6 +439,13 @@ export default class PostSection extends HTMLElement {
             position: sticky;
             top: 0;
             background: var(--background);
+          }
+
+          ul.tabs > li.tab:not(.active):hover > span.count,
+          ul.tabs > li.tab:not(.active):hover > span.bar,
+          ul.tabs > li.tab:not(.active):hover > svg {
+            /* unset hover effect on mobile */
+            display: none;
           }
 
           ::-webkit-scrollbar {

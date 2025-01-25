@@ -185,29 +185,17 @@ export default class AppPost extends HTMLElement {
     }
   }
 
-  formatDateWithRelativeTime = isoDateStr => {
-    // 1. Convert ISO date string with timezone to local Date object
-    let date;
-    try {
-      date = new Date(isoDateStr);
-    }
-    catch (error) {
-      date = new Date(Date.now())
-    }
+  // Get lapse time
+  getLapseTime = isoDateStr => {
+    const dateIso = new Date(isoDateStr); // ISO strings with timezone are automatically handled
+    let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    // Get date
-    const localDate = date.toLocaleDateString('en-US', {
-      year: 'numeric', month: 'short', day: '2-digit'
-    });
+    // Convert posted time to the current timezone
+    const date = new Date(dateIso.toLocaleString('en-US', { timeZone: userTimezone }));
 
-    // Get time
-    let localTime = date.toLocaleDateString('en-US', {
-      hour: 'numeric', minute: '2-digit', hour12: true
-    });
-
-    localTime = localTime.split(',')[1].trim();
-
-    return {dateStr: localDate, timeStr: localTime }
+    return `
+      ${date.toLocaleDateString('en-US', { weekday: 'short' })} • ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+    `
   }
 
   watchMediaQuery = mql => {
@@ -367,14 +355,9 @@ export default class AppPost extends HTMLElement {
   }
 
   getMeta = () => {
-    let dateObject = this.formatDateWithRelativeTime(this.getAttribute('time'))
     return /* html */`
       <div class="meta">
-        <span class="sp">on</span>
-        <time class="published" datetime="${this.getAttribute('time')}">${dateObject.dateStr}</time>
-        <span class="sp">•</span>
-        <span class="sp">at</span>
-        <span class="time">${dateObject.timeStr}</span>
+        <span class="time">${this.getLapseTime(this.getAttribute('time'))}</span>
       </div>
     `
   }

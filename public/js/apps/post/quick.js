@@ -570,12 +570,12 @@ export default class QuickPost extends HTMLElement {
 
   getFullCss = () => {
     if(this.noPreview) {
-      return "padding: 10px 0 5px;"
+      return "padding: 7px 0 5px;"
     } else {
       if(this.getAttribute('story') === 'reply') {
-        return "padding: 10px 0 15px;"
+        return "padding: 7px 0 15px;"
       } else {
-        return "padding: 10px 0 10px;"
+        return "padding: 7px 0 5px;"
       }
     }
   }

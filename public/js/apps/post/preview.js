@@ -886,7 +886,7 @@ export default class PreviewPost extends HTMLElement {
         }
 
         .preview.feed {
-          padding: 0 0 0 16px;
+          padding: 0 0 0 19px;
         }
 
         .preview::before {

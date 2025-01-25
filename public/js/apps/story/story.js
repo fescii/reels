@@ -310,52 +310,9 @@ export default class AppStory extends HTMLElement {
     // Convert posted time to the current timezone
     const date = new Date(dateIso.toLocaleString('en-US', { timeZone: userTimezone }));
 
-    // Get the current time
-    const currentTime = new Date();
-
-    // Get the difference in time
-    const timeDifference = currentTime - date;
-
-    // Get the seconds
-    const seconds = timeDifference / 1000;
-
-    // Check if seconds is less than 60: return Just now
-    if (seconds < 60) {
-      return 'Just now';
-    }
-
-    // check if seconds is less than 86400 and dates are equal: Today, 11:30 AM
-    if (seconds < 86400 && date.getDate() === currentTime.getDate()) {
-      return `
-        <span class="name">Today,</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
-      `
-    } else if (seconds < 86400 && date.getDate() !== currentTime.getDate()) {
-      return `
-        <span class="name">Yesterday,</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
-      `
-    }
-
-    // check if seconds is less than 604800: Friday, 11:30 AM
-    if (seconds <= 604800) {
-      return `
-        <span class="name">${date.toLocaleDateString('en-US', { weekday: 'long' })},</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
-      `
-    }
-
-    // Check if the date is in the current year and seconds is less than 31536000: Dec 12, 11:30 AM
-    if (seconds < 31536000 && date.getFullYear() === currentTime.getFullYear()) {
-      return `
-        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })},</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
-      `
-    } else if(seconds < 31536000 && date.getFullYear() !== currentTime.getFullYear()) {
-      return `
-        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span> • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
-      `
-    } else {
-      return `
-        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span> • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
-      `
-    }
+    return `
+      ${date.toLocaleDateString('en-US', { weekday: 'short' })} • ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+    `
   }
 
   getTemplate = () => {

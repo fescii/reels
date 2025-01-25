@@ -369,12 +369,12 @@ export default class PostSection extends HTMLElement {
           position: absolute;
           bottom: 0;
           left: 0;
-          border-radius: 12px 12px 0 0;
+          border-radius: 5px;
         }
 
         ul.tabs > li.tab.active {
           color: var(--text-color);
-          padding: 10px 4px 12px;
+          padding: 10px 4px;
           display: flex;
           text-align: center;
         }

@@ -388,10 +388,10 @@ export default class AppProfile extends HTMLElement {
           }
         }
 
-				@media screen and (max-width:660px) {
+				@media screen and (max-width: 660px) {
 					:host {
             font-size: 16px;
-						padding: 0;
+						padding: 5px 0 0 0;
             margin: 0;
             display: flex;
             flex-flow: column;

@@ -168,6 +168,7 @@ export default class ProfileSection extends HTMLElement {
             <path d="M16 3.5H11C10.07 3.5 9.60504 3.5 9.22354 3.60222C8.18827 3.87962 7.37962 4.68827 7.10222 5.72354C7 6.10504 7 6.57003 7 7.5V18C7 19.3807 5.88071 20.5 4.5 20.5H16C18.8284 20.5 20.2426 20.5 21.1213 19.6213C22 18.7426 22 17.3284 22 14.5V9.5C22 6.67157 22 5.25736 21.1213 4.37868C20.2426 3.5 18.8284 3.5 16 3.5Z" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
           <span class="text">Stories</span>
+          <span class="bar"></span>
         </li>
         <li class="tab replies ${tab === "replies" ? "active" : ''}" data-name="replies" url="${url}/replies">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
@@ -175,6 +176,7 @@ export default class ProfileSection extends HTMLElement {
             <path d="M6.09881 19C4.7987 18.8721 3.82475 18.4816 3.17157 17.8284C2 16.6569 2 14.7712 2 11V10.5C2 6.72876 2 4.84315 3.17157 3.67157C4.34315 2.5 6.22876 2.5 10 2.5H14C17.7712 2.5 19.6569 2.5 20.8284 3.67157C22 4.84315 22 6.72876 22 10.5V11C22 14.7712 22 16.6569 20.8284 17.8284C19.6569 19 17.7712 19 14 19C13.4395 19.0125 12.9931 19.0551 12.5546 19.155C11.3562 19.4309 10.2465 20.0441 9.14987 20.5789C7.58729 21.3408 6.806 21.7218 6.31569 21.3651C5.37769 20.6665 6.29454 18.5019 6.5 17.5" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" />
           </svg>
           <span class="text">Replies</span>
+          <span class="bar"></span>
         </li>
         <li class="tab followers ${tab === "followers" ? "active" : ''}" data-name="followers" url="${url}/followers">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
@@ -183,6 +185,7 @@ export default class ProfileSection extends HTMLElement {
             <path d="M13 7.5C13 9.70914 11.2091 11.5 9 11.5C6.79086 11.5 5 9.70914 5 7.5C5 5.29086 6.79086 3.5 9 3.5C11.2091 3.5 13 5.29086 13 7.5Z" stroke="currentColor" stroke-width="2.0" />
           </svg>
           <span class="text">Followers</span>
+          <span class="bar"></span>
         </li>
         <li class="tab following ${tab === "following" ? "active" : ''}" data-name="following" url="${url}/following">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
@@ -191,6 +194,7 @@ export default class ProfileSection extends HTMLElement {
             <path d="M13 7.5C13 9.70914 11.2091 11.5 9 11.5C6.79086 11.5 5 9.70914 5 7.5C5 5.29086 6.79086 3.5 9 3.5C11.2091 3.5 13 5.29086 13 7.5Z" stroke="currentColor" stroke-width="2.0" />
           </svg>
           <span class="text">Following</span>
+          <span class="bar"></span>
         </li>
       </ul>
     `;
@@ -325,10 +329,11 @@ export default class ProfileSection extends HTMLElement {
 
         ul.tabs {
           border-bottom: var(--border);
+          /* border-top: var(--border);*/
           display: flex;
           flex-flow: row nowrap;
           gap: 15px;
-          padding: 22px 0 10px;
+          padding: 0;
           margin: 0;
           width: 100%;
           list-style: none;
@@ -347,15 +352,14 @@ export default class ProfileSection extends HTMLElement {
           flex-flow: row;
           align-items: center;
           gap: 5px;
-          padding: 5px 0;
-          border-radius: 12px;
-          /*background: var(--gray-background);*/
-          color: var(--text-color);
+          padding: 10px 0;
+          color: var(--gray-color);
           font-family: var(--font-main), sans-serif;
           font-size: 0.95rem;
           font-weight: 500;
           cursor: pointer;
-          transition: 0.3s;
+          transition: all 0.3s;
+          position: relative;
         }
 
         ul.tabs > li.tab > span.count,
@@ -363,50 +367,66 @@ export default class ProfileSection extends HTMLElement {
           display: none;
         }
 
-        ul.tabs > li.tab.active {
-          background: var(--tab-background);
-          padding: 5px 10px;
-          display: flex;
-          text-align: center;
-          color: var(--text-color);
+        ul.tabs > li.tab > span.bar {
+          display: none;
+          width: 100%;
+          height: 2px;
+          background: var(--accent-color);
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          border-radius: 5px;
         }
 
-        ul.tabs > li.tab.active > span.count,
+        ul.tabs > li.tab.active {
+          color: var(--text-color);
+          padding: 10px 4px;
+          display: flex;
+          text-align: center;
+        }
+
         ul.tabs > li.tab.active > svg,
-        ul.tabs > li.tab:not(.active):hover > span.count,
+        ul.tabs > li.tab.active > span.bar,
+        ul.tabs > li.tab:not(.active):hover > span.bar,
         ul.tabs > li.tab:not(.active):hover > svg {
           display: flex;
         }
 
         /* style hover tab: but don't touch tab with active class */
         ul.tabs > li.tab:not(.active):hover {
-          background: var(--tab-background);
-          padding: 5px 10px;
+          padding: 10px 2px;
           color: var(--text-color);
         }
 
         ul.tabs > li.tab > svg {
-          width: 19px;
-          height: 19px;
+          display: none;
+          margin-bottom: -2px;
+          width: 17px;
+          height: 17px;
         }
 
         ul.tabs > li.tab > .text {
-          font-size: 1rem;
-          padding: 0 5px 0 0;
+          font-size: 0.95rem;
+          font-family: var(--font-text), sans-serif;
+          padding: 0 2px 0 0;
           font-weight: 500;
         }
 
         ul.tabs > li.tab > .count {
-          font-size: 0.85rem;
+          font-size: 0.95rem;
           display: none;
+          margin-bottom: -2px;
           align-items: center;
           justify-content: center;
           text-align: center;
           font-weight: 500;
-          background: var(--accent-linear);
+          background: var(--text-color);
           font-family: var(--font-text), sans-serif;
-          color: var(--white-color);
-          padding: 1px 7px 2.5px;
+          color: transparent;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          padding: 0;
           border-radius: 10px;
         }
 
@@ -437,6 +457,13 @@ export default class ProfileSection extends HTMLElement {
             position: sticky;
             top: 0;
             background: var(--background);
+          }
+
+          ul.tabs > li.tab:not(.active):hover > span.count,
+          ul.tabs > li.tab:not(.active):hover > span.bar,
+          ul.tabs > li.tab:not(.active):hover > svg {
+            /* unset hover effect on mobile */
+            display: none;
           }
 
           ::-webkit-scrollbar {

@@ -470,12 +470,12 @@ export default class AppHome extends HTMLElement {
           position: absolute;
           bottom: 0;
           left: 0;
-          border-radius: 12px 12px 0 0;
+          border-radius: 5px;
         }
 
         ul.tabs > li.tab.active {
           color: var(--text-color);
-          padding: 10px 4px 12px;
+          padding: 10px 4px;
           display: flex;
           text-align: center;
         }
@@ -566,6 +566,13 @@ export default class AppHome extends HTMLElement {
             position: sticky;
             top: 0;
             background: var(--background);
+          }
+
+          ul.tabs > li.tab:not(.active):hover > span.count,
+          ul.tabs > li.tab:not(.active):hover > span.bar,
+          ul.tabs > li.tab:not(.active):hover > svg {
+            /* unset hover effect on mobile */
+            display: none;
           }
 
           .content-container {

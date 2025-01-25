@@ -312,7 +312,6 @@ export default class PollPost extends HTMLElement {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
-  // Get lapse time
   getLapseTime = isoDateStr => {
     const dateIso = new Date(isoDateStr); // ISO strings with timezone are automatically handled
     let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -329,41 +328,32 @@ export default class PollPost extends HTMLElement {
     // Get the seconds
     const seconds = timeDifference / 1000;
 
-    // Check if seconds is less than 60: return Just now
-    if (seconds < 60) {
-      return 'Just now';
-    }
-
     // check if seconds is less than 86400 and dates are equal: Today, 11:30 AM
     if (seconds < 86400 && date.getDate() === currentTime.getDate()) {
       return `
-        <span class="name">Today,</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        Today • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
       `
     } else if (seconds < 86400 && date.getDate() !== currentTime.getDate()) {
       return `
-        <span class="name">Yesterday,</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        Yesterday • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
       `
     }
 
     // check if seconds is less than 604800: Friday, 11:30 AM
     if (seconds <= 604800) {
       return `
-        <span class="name">${date.toLocaleDateString('en-US', { weekday: 'long' })},</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        ${date.toLocaleDateString('en-US', { weekday: 'long' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
       `
     }
 
     // Check if the date is in the current year and seconds is less than 31536000: Dec 12, 11:30 AM
     if (seconds < 31536000 && date.getFullYear() === currentTime.getFullYear()) {
       return `
-        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })},</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
-      `
-    } else if(seconds < 31536000 && date.getFullYear() !== currentTime.getFullYear()) {
-      return `
-        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+        ${date.toLocaleDateString('en-US', { weekday: 'short' })} • ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
       `
     } else {
       return `
-        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+        ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
       `
     }
   }
@@ -585,15 +575,22 @@ export default class PollPost extends HTMLElement {
         }
 
         .meta.bottom-meta {
+          margin:  0;
           padding: 5px 0 0;
+          display: flex;
+          position: relative;
+          color: var(--gray-color);
+          align-items: center;
+          font-family: var(--font-text), sans-serif;
+          gap: 8px;
+          font-size: 1rem;
+          font-weight: 600;
         }
 
-        .meta.bottom-meta > time.time > span.name {
-          font-weight: 500;
-          /*font-size: 0.9rem;*/
-          margin: 0;
-          /* font-family: var(--font-read), sans-serif; */
-          text-transform: uppercase;
+        .meta.bottom-meta > .sp {
+          font-size: 1.25rem;
+          color: var(--gray-color);
+          font-weight: 400;
         }
 
         .content {

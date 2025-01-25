@@ -1147,7 +1147,7 @@ export default class AppUser extends HTMLElement {
       following="${this.getAttribute('user-following')}" user-follow="${this.getAttribute('user-follow')}" bio="${this.getAttribute('user-bio')}">
     </app-profile>
    `
- }
+  }
 
   getStyles() {
     return /* css */`
@@ -1215,17 +1215,19 @@ export default class AppUser extends HTMLElement {
           flex-flow: row;
           align-items: center;
           gap: 10px;
+          padding: 15px 0 0;
         }
 
         .user-title > .left h3 {
           margin: 0;
-          font-family: var(--font-main), sans-serif;
-          font-size: 1.3rem;
-          font-weight: 600;
+          font-family: var(--font-text), sans-serif;
+          font-size: 1.35rem;
+          font-weight: 500;
         }
 
         .user-title svg {
           color: var(--title-color);
+          display: none;
           cursor: pointer;
           width: 28px;
           height: 28px;
@@ -1314,6 +1316,8 @@ export default class AppUser extends HTMLElement {
           padding: 0;
           margin: 0;
           display: flex;
+          align-items: flex-start;
+          flex-flow: row-reverse;
           justify-content: space-between;
           gap: 30px;
           min-height: 100vh;
@@ -1343,11 +1347,14 @@ export default class AppUser extends HTMLElement {
         section.tab > div.header {
           display: flex;
           width: 100%;
+          border-bottom: var(--border);
           background-color: var(--background);
-          gap: 0;
-          padding: 22px 0 5px 0;
+          gap: 7px;
+          width: 100%;
+          max-width: 100%;
+          padding: 15px 0 10px 0;
+          margin: 0 0 5px;
           max-height: max-content;
-          margin: 0;
           display: flex;
           align-items: center;
           position: sticky;
@@ -1357,6 +1364,7 @@ export default class AppUser extends HTMLElement {
 
         section.tab > div.header > svg {
           cursor: pointer;
+          display: none;
           color: var(--title-color);
           width: 35px;
           height: 35px;
@@ -1372,7 +1380,7 @@ export default class AppUser extends HTMLElement {
           align-items: center;
           justify-content: center;
           position: relative;
-          margin: 0 3px 0 0;
+          margin: 0;
           width: 45px;
           height: 45px;
           min-width: 45px;
@@ -1456,26 +1464,25 @@ export default class AppUser extends HTMLElement {
         }
 
         section.tab > div.header > .name {
-          margin: 0 0 0 5px;
+          margin: 0;
           display: flex;
           justify-content: center;
           flex-flow: column;
           gap: 3px;
-          width: calc(100% - 80px);
-          max-width: calc(100% - 80px);
+          width: calc(100% - 52px);
+          max-width: calc(100% - 52px);
         }
 
         section.tab > div.header > .name > h4.name {
           margin: 0;
           display: flex;
           align-items: center;
-          width: 100%;
-          max-width: 100%;
           gap: 5px;
           color: var(--title-color);
           font-family: var(--font-main), sans-serif;
           font-size: 1rem;
           font-weight: 500;
+          /** add ellipsis */
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;

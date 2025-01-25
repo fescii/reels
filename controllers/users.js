@@ -209,7 +209,7 @@ const getAccount = async (req, res) => {
   }
 
   try {
-    const result = await api.get('/u/user', {
+    const result = await api.get('/u/account', {
       "x-access-token": token
     });
 

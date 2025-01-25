@@ -299,7 +299,7 @@ export default class StoriesStat extends HTMLElement {
           flex-flow: column;
           gap: 10px;
           justify-content: center;
-          padding: 0 0 10px;
+          padding: 10px 0;
         }
 
         .title {
@@ -347,6 +347,7 @@ export default class StoriesStat extends HTMLElement {
           gap: 20px;
           padding: 6px 0;
           width: 100%;
+          max-width: 100%;
         }
 
         .cards > .card {
@@ -354,7 +355,8 @@ export default class StoriesStat extends HTMLElement {
           flex-flow: column;
           gap: 7px;
           padding: 8px 15px;
-          min-width: 200px;
+          min-width: calc(33.33% - 20px);
+          width: calc(33.33% - 20px);
           background-color: var(--stat-background);
           justify-content: center;
           border-radius: 10px;

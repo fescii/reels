@@ -40,9 +40,9 @@ class APIManager {
     if (pendingRequest) return pendingRequest;
 
     const requestOptions = {
-      ...options,
+      // ...options,
       ...this.httpsAgentOptions,
-      headers: this.#processHeaders(options.headers)
+      ...this.#processHeaders(options)
     };
 
     const requestPromise = new Promise((resolve, reject) => {

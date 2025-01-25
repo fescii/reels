@@ -26,7 +26,7 @@ module.exports = app => {
   app.get('/home/all', all);
 
   // Route for handling(rendering) home page
-  app.get('/home/stories', home);
+  app.get('/home/stories', stories);
 
   // Route for handling(rendering) home page
   app.get('/home/replies', replies);

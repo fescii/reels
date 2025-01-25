@@ -224,7 +224,7 @@ export default class AppHome extends HTMLElement {
             ${this.getTab(this.getAttribute('tab'))}
           </div>
           <div class="content-container">
-            ${this.getCurrent()}
+            ${this.getCurrent(this.getAttribute('tab'))}
           </div>
         <div>
       `;
@@ -236,7 +236,7 @@ export default class AppHome extends HTMLElement {
             ${this.getTab(this.getAttribute('tab'))}
           </div>
           <div class="content-container">
-            ${this.getCurrent()}
+            ${this.getCurrent(this.getAttribute('tab'))}
           </div>
         </div>
         <div class="side">
@@ -247,8 +247,7 @@ export default class AppHome extends HTMLElement {
     }
   }
 
-  getCurrent = () => {
-    const tabName = this.active_tab ? this.active_tab.getAttribute('data-name') : this.getAttribute('tab') || 'all';
+  getCurrent = tabName => {
     switch (tabName) {
       case 'all':
         return this.getAll();
@@ -545,6 +544,10 @@ export default class AppHome extends HTMLElement {
             position: sticky;
             top: 0;
             background: var(--background);
+          }
+
+          ul.tabs {
+            padding: 15px 0 10px;
           }
 
           .content-container {

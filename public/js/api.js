@@ -29,17 +29,18 @@ export default class APIManager {
   }
 
   #processHeaders(options = {}) {
-    const headers = { ...options.headers };
+    const contentType = options?.content;
+    const headers = new Headers();
     
-    if (options.headers?.content) {
-      const contentType = options.headers.content;
-      delete headers.content;
+    if (contentType) {
+      headers.set('Content-Type', this.contentTypes[contentType]);
+    }
 
-      if (typeof contentType === 'string' && this.contentTypes[contentType]) {
-        headers['Content-Type'] = this.contentTypes[contentType];
-      } else if (typeof contentType === 'string') {
-        headers['Content-Type'] = contentType;
-      }
+    // if options.headers is an object, iterate over it and set each header
+    if (options.headers && typeof options.headers === 'object') {
+      Object.entries(options.headers).forEach(([key, value]) => {
+        headers.set(key, value);
+      });
     }
 
     return headers;
@@ -149,11 +150,6 @@ export default class APIManager {
   async #request(url, options = {}, cacheOptions = {}) {
     const fullURL = this.baseURL + url;
     const request = this.#generateCacheKey(fullURL, options);
-  
-    // Ensure body is included in the fetch options if present
-    if (options?.body) {
-      options.body = JSON.stringify(options.body);
-    }
 
     // Check cache first - will automatically handle expiry
     const cachedData = await this.#handleCache(request, cacheOptions);
@@ -172,13 +168,33 @@ export default class APIManager {
 
     const processedHeaders = this.#processHeaders(options);
 
+    // create body if needed
+    if (options.body && typeof options.body === 'object') {
+      // add procesed Headers
+      options.headers = processedHeaders;
+
+      if (processedHeaders.get('Content-Type') === this.contentTypes.json) {
+        options.body = JSON.stringify(options.body);
+      } else if (processedHeaders.get('Content-Type') === this.contentTypes.form) {
+        const formData = new URLSearchParams();
+        Object.entries(options.body).forEach(([key, value]) => {
+          formData.append(key, value);
+        });
+        options.body = formData;
+      }
+    }
+
     const fetchPromise = (async () => {
       try {
         const response = await fetch(request.url, {
-          ...options,
+          method: options.method,
+          body: options.body,
           headers: processedHeaders,
-          signal: controller.signal
+          signal: controller.signal,
+          credentials: 'include'
         });
+
+        // console.log(response);
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

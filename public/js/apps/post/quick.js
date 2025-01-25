@@ -279,22 +279,38 @@ export default class QuickPost extends HTMLElement {
     if (seconds < 60) {
       return 'Just now';
     }
-    // check if seconds is less than 86400: return time AM/PM
-    if (seconds < 86400) {
-      return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+
+    // check if seconds is less than 86400 and dates are equal: Today, 11:30 AM
+    if (seconds < 86400 && date.getDate() === currentTime.getDate()) {
+      return `
+        <span class="name">Today,</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
+    } else if (seconds < 86400 && date.getDate() !== currentTime.getDate()) {
+      return `
+        <span class="name">Yesterday,</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
     }
 
-    // check if seconds is less than 604800: return day and time
+    // check if seconds is less than 604800: Friday, 11:30 AM
     if (seconds <= 604800) {
-      return date.toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: true });
+      return `
+        <span class="name">${date.toLocaleDateString('en-US', { weekday: 'long' })},</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
     }
 
-    // Check if the date is in the current year:: return date and month short 2-digit year without time
-    if (date.getFullYear() === currentTime.getFullYear()) {
-      return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', });
-    }
-    else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    // Check if the date is in the current year and seconds is less than 31536000: Dec 12, 11:30 AM
+    if (seconds < 31536000 && date.getFullYear() === currentTime.getFullYear()) {
+      return `
+        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })},</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
+    } else if(seconds < 31536000 && date.getFullYear() !== currentTime.getFullYear()) {
+      return `
+        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+      `
+    } else {
+      return `
+        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+      `
     }
   }
 
@@ -406,6 +422,7 @@ export default class QuickPost extends HTMLElement {
       ${this.getHeader()}
       ${this.getContent()}
       ${this.getImages()}
+      ${this.getOn()}
       ${this.getFooter()}
       ${this.getReply(this.getAttribute('story'))}
     `;
@@ -416,7 +433,13 @@ export default class QuickPost extends HTMLElement {
       <div class="meta top-meta">
         <span class="by">by</span>
         ${this.getAuthorHover()}
-        <span class="sp">•</span>
+      </div>
+    `
+  }
+
+  getOn = () => {
+    return /*html*/`
+      <div class="meta bottom-meta">
         <time class="time" datetime="${this.getAttribute('time')}">
           ${this.getLapseTime(this.getAttribute('time'))}
         </time>
@@ -654,6 +677,18 @@ export default class QuickPost extends HTMLElement {
           background: var(--accent-linear);
           background-clip: text;
           -webkit-background-clip: text;
+        }
+
+        .meta.bottom-meta {
+          padding: 5px 0 0;
+        }
+
+        .meta.bottom-meta > time.time > span.name {
+          font-weight: 500;
+          /*font-size: 0.9rem;*/
+          margin: 0;
+          /* font-family: var(--font-read), sans-serif; */
+          text-transform: uppercase;
         }
 
         .content {

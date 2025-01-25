@@ -53,10 +53,10 @@ export default class HomePeople extends HTMLElement {
 
     try {
       const result = await this.api.get(this.url, { content: 'json' }, { allow: true, duration: 7200 });
-      const data = result.data;
+      const people = result.users;
 
       if (result.success) {
-        if (data.people.length === 0) {
+        if (people.length === 0) {
           peopleLoader.remove();
           contentContainer.insertAdjacentHTML('beforeend', this.getEmpty());
           return;
@@ -64,7 +64,7 @@ export default class HomePeople extends HTMLElement {
 
         peopleLoader.remove();
         contentContainer.insertAdjacentHTML('beforebegin', this.getTitle());
-        contentContainer.insertAdjacentHTML('beforeend', this.mapUsers(data.people));
+        contentContainer.insertAdjacentHTML('beforeend', this.mapUsers(people));
 
         if (mql) {
           this.activateControls(contentContainer);

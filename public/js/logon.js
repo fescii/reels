@@ -615,15 +615,16 @@ export default class AppLogon extends HTMLElement {
     const outerThis = this;
     const loginUrl = outerThis.getAttribute('api-login');
     try {
-      const body = JSON.stringify(data);
-      const result = await this.api.post(loginUrl, { content: 'json', body });
+      const result = await this.api.post(loginUrl, { content: 'json', body: data });
 
+      console.log(result)
       return  {
         result: result,
         error: null
       }
     }
     catch (error) {
+      console.log(error)
       return {
         result: null,
         error: error

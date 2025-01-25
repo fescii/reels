@@ -58,17 +58,19 @@ export default class HomeTopics extends HTMLElement {
         return;
       }
 
-      const data = result.data;
+      // console.log(result)
 
-      if (data.topics.length === 0) {
+      const topics = result.topics;
+
+      if (topics.length === 0) {
         topicsContainer.innerHTML = outerThis.getEmptyMsg();
         return;
       }
 
-      this.handleFetchSuccess(data, topicsContainer, this.mql);
+      this.handleFetchSuccess(topics, topicsContainer);
     })
-    .catch(error => {
-      console.log(error)
+    .catch(_error => {
+      // console.log(error)
       this.handleFetchError(topicsContainer);
     });
   }
@@ -78,8 +80,8 @@ export default class HomeTopics extends HTMLElement {
     this.activateRefresh();
   }
 
-  handleFetchSuccess = (data, topicsContainer, mql) => {
-    const content = this.mapFields(data.topics);
+  handleFetchSuccess = (topics, topicsContainer) => {
+    const content = this.mapFields(topics);
     topicsContainer.insertAdjacentHTML('beforebegin', this.getTitle());
     topicsContainer.innerHTML = content;
     this.setLastItem(topicsContainer);

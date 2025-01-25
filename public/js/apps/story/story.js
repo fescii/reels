@@ -625,8 +625,8 @@ export default class AppStory extends HTMLElement {
         div.head > h1.story-title {
           margin: 15px 0 0 0;
           padding: 0;
-          font-weight: 700;
-          font-size: 1.7rem;
+          font-weight: 600;
+          font-size: 1.6rem;
           line-height: 1.2;
           font-family: var(--font-main), sans-serif;
           color: var(--title-color);

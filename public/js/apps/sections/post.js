@@ -201,6 +201,7 @@ export default class PostSection extends HTMLElement {
           </svg>
           <span class="text">Replies</span>
           <span class="count">${this.formatNumber(this.getAttribute("replies"))}</span>
+          <span class="bar"></span>
         </li>
         <li class="tab likes ${tab === "likes" ? "active" : ''}" data-name="likes" url="${url}/likes">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
@@ -210,6 +211,7 @@ export default class PostSection extends HTMLElement {
           </svg>
           <span class="text">Likes</span>
           <span class="count">${this.formatNumber(this.getAttribute("likes"))}</span>
+          <span class="bar"></span>
         </li>
       </ul>
     `;
@@ -327,7 +329,7 @@ export default class PostSection extends HTMLElement {
           display: flex;
           flex-flow: row nowrap;
           gap: 15px;
-          padding: 22px 0 10px;
+          padding: 0;
           margin: 0;
           width: 100%;
           list-style: none;
@@ -346,15 +348,14 @@ export default class PostSection extends HTMLElement {
           flex-flow: row;
           align-items: center;
           gap: 5px;
-          padding: 5px 0;
-          border-radius: 12px;
-          /*background: var(--gray-background);*/
-          color: var(--text-color);
+          padding: 10px 0;
+          color: var(--gray-color);
           font-family: var(--font-main), sans-serif;
           font-size: 0.95rem;
           font-weight: 500;
           cursor: pointer;
           transition: 0.3s;
+          position: relative;
         }
 
         ul.tabs > li.tab > span.count,
@@ -362,50 +363,62 @@ export default class PostSection extends HTMLElement {
           display: none;
         }
 
+        ul.tabs > li.tab > span.bar {
+          display: none;
+          width: 100%;
+          height: 2px;
+          background: var(--accent-color);
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          border-radius: 12px 12px 0 0;
+        }
+
         ul.tabs > li.tab.active {
-          background: var(--tab-background);
-          padding: 5px 10px;
+          color: var(--accent-color);
+          padding: 10px 0;
           display: flex;
           text-align: center;
-          color: var(--text-color);
         }
 
         ul.tabs > li.tab.active > span.count,
         ul.tabs > li.tab.active > svg,
+        ul.tabs > li.tab.active > span.bar,
         ul.tabs > li.tab:not(.active):hover > span.count,
+        ul.tabs > li.tab:not(.active):hover > span.bar,
         ul.tabs > li.tab:not(.active):hover > svg {
           display: flex;
         }
 
         /* style hover tab: but don't touch tab with active class */
         ul.tabs > li.tab:not(.active):hover {
-          background: var(--tab-background);
-          padding: 5px 10px;
-          color: var(--text-color);
+          padding: 10px 0;
+          color: var(--accent-color);
         }
 
         ul.tabs > li.tab > svg {
-          width: 19px;
-          height: 19px;
+          width: 17px;
+          height: 17px;
         }
 
         ul.tabs > li.tab > .text {
-          font-size: 1rem;
+          font-size: 0.95rem;
+          font-family: var(--font-text), sans-serif;
           padding: 0 5px 0 0;
           font-weight: 500;
         }
 
         ul.tabs > li.tab > .count {
-          font-size: 0.85rem;
+          font-size: 0.8rem;
           display: none;
           align-items: center;
           justify-content: center;
           text-align: center;
           font-weight: 500;
           background: var(--accent-linear);
-          font-family: var(--font-text), sans-serif;
+          font-family: var(--font-read), sans-serif;
           color: var(--white-color);
-          padding: 1px 7px 2.5px;
+          padding: 1px 7px 2px;
           border-radius: 10px;
         }
 
@@ -424,10 +437,6 @@ export default class PostSection extends HTMLElement {
             position: sticky;
             top: 0;
             background: var(--background);
-          }
-
-          ul.tabs {
-            padding: 10px 0;
           }
 
           ::-webkit-scrollbar {

@@ -323,6 +323,7 @@ export default class PostSection extends HTMLElement {
 
         ul.tabs {
           border-bottom: var(--border);
+          border-top: var(--border);
           display: flex;
           flex-flow: row nowrap;
           gap: 15px;
@@ -423,6 +424,10 @@ export default class PostSection extends HTMLElement {
             position: sticky;
             top: 0;
             background: var(--background);
+          }
+
+          ul.tabs {
+            padding: 10px 0;
           }
 
           ::-webkit-scrollbar {

@@ -29,11 +29,10 @@ export default class StoryPost extends HTMLElement {
     let url = this.getAttribute('url');
 
     url = url.trim().toLowerCase();
-
     // Open Full post
     this.openFullPost(url);
 
-    this.openHighlights(document.boy)
+    this.openHighlights(document.body)
 
     // Open Url
     this.openUrl();
@@ -452,7 +451,6 @@ export default class StoryPost extends HTMLElement {
   getHeader = () => {
     return /*html*/`
       <div class="meta top-meta">
-        <span class="by">by</span>
         ${this.getAuthorHover()}
       </div>
     `
@@ -604,7 +602,7 @@ export default class StoryPost extends HTMLElement {
           font-size: 16px;
           border-bottom: var(--border);
           font-family: var(--font-main), sans-serif;
-          padding: 10px 0 10px;
+          padding: 10px 0 12px;
           margin: 0;
           width: 100%;
           display: flex;
@@ -675,7 +673,7 @@ export default class StoryPost extends HTMLElement {
           left: 0;
           width: 100%;
           padding: 5px 0;
-          display: flex;
+          display: none;
           align-items: end;
           justify-content: center;
           min-height: 60px;
@@ -699,7 +697,7 @@ export default class StoryPost extends HTMLElement {
           font-size: 1rem;
           padding: 0;
           line-height: 1.4;
-          font-family: var(--font-text), sans-serif;
+          font-family: var(--font-main), sans-serif;
         }
 
         .content p:last-of-type {
@@ -744,8 +742,8 @@ export default class StoryPost extends HTMLElement {
         }
 
         .meta > time.time {
-          font-family: var(--font-text), sans-serif;
-          font-size: 0.83rem;
+          font-family: var(--font-read), sans-serif;
+          font-size: 0.8rem;
           font-weight: 500;
           margin: 1px 0 0 0;
         }
@@ -764,6 +762,10 @@ export default class StoryPost extends HTMLElement {
           background: var(--accent-linear);
           background-clip: text;
           -webkit-background-clip: text;
+        }
+
+        .meta.top-meta {
+          width: 100%;
         }
 
         .meta.bottom-meta {

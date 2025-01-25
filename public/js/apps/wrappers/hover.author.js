@@ -100,14 +100,15 @@ export default class HoverAuthor extends HTMLElement {
   }
 
   mouseEvents = (url, mql, contentContainer) => {
-    const metaLink = this.shadowObj.querySelector('div.author');
+    const content = this.shadowObj.querySelector('div.author');
+    const metaLink = this.shadowObj.querySelector('div.author > a.meta.link');
     if (metaLink) {
       if (!mql) {
         metaLink.addEventListener('mouseenter', () => {
           contentContainer.style.display = 'flex';
           this.fetchContent(url, mql, contentContainer);
         });
-        metaLink.addEventListener('mouseleave', () => {
+        content.addEventListener('mouseleave', () => {
           contentContainer.style.display = 'none';
           contentContainer.innerHTML = this.getLoader();
         });
@@ -670,6 +671,7 @@ export default class HoverAuthor extends HTMLElement {
         :host {
           /*border: var(--border);*/
           font-size: 16px;
+          width: 100%;
           padding: 0;
           display: flex;
           flex-flow: column;
@@ -678,10 +680,10 @@ export default class HoverAuthor extends HTMLElement {
         }
 
         .author {
+          width: 100%;
           position: relative;
           padding: 0;
           height: 30px;
-          width: max-content;
           display: flex;
           flex-flow: column;
           justify-content: center;
@@ -689,13 +691,15 @@ export default class HoverAuthor extends HTMLElement {
         }
         
         a.meta.link {
+          width: max-content;
           height: max-content;
           display: flex;
           height: 30px;
           align-items: center;
           font-family: var(--font-mono),monospace;
+          font-weight: 600;
           gap: 5px;
-          font-size: 0.9rem;
+          font-size: 0.85rem;
           line-height: 1.5;
           text-decoration: none;
           text-decoration: none;
@@ -711,11 +715,12 @@ export default class HoverAuthor extends HTMLElement {
           z-index: 4;
           background-color: var(--background);
           top: 0;
-          left: -30px;
+          left: 0;
           top: calc(100% - 1px);
           box-shadow: var(--card-box-shadow-alt);
           padding: 10px;
           width: 380px;
+          max-width: 100%;
           height: max-content;
           display: none;
           flex-flow: column;
@@ -742,7 +747,7 @@ export default class HoverAuthor extends HTMLElement {
         .content-container  span.pointer {
           position: absolute;
           top: -5px;
-          left: 70px;
+          left: 50px;
           rotate: 45deg;
           width: 10px;
           height: 10px;

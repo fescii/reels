@@ -302,29 +302,60 @@ export default class AppStory extends HTMLElement {
     `
   }
 
-  formatDateWithRelativeTime = isoDateStr => {
-    // 1. Convert ISO date string with timezone to local Date object
-    let date;
-    try {
-      date = new Date(isoDateStr);
+  // Get lapse time
+  getLapseTime = isoDateStr => {
+    const dateIso = new Date(isoDateStr); // ISO strings with timezone are automatically handled
+    let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    // Convert posted time to the current timezone
+    const date = new Date(dateIso.toLocaleString('en-US', { timeZone: userTimezone }));
+
+    // Get the current time
+    const currentTime = new Date();
+
+    // Get the difference in time
+    const timeDifference = currentTime - date;
+
+    // Get the seconds
+    const seconds = timeDifference / 1000;
+
+    // Check if seconds is less than 60: return Just now
+    if (seconds < 60) {
+      return 'Just now';
     }
-    catch (error) {
-      date = new Date(Date.now())
+
+    // check if seconds is less than 86400 and dates are equal: Today, 11:30 AM
+    if (seconds < 86400 && date.getDate() === currentTime.getDate()) {
+      return `
+        <span class="name">Today,</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
+    } else if (seconds < 86400 && date.getDate() !== currentTime.getDate()) {
+      return `
+        <span class="name">Yesterday,</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
     }
 
-    // Get date
-    const localDate = date.toLocaleDateString('en-US', {
-      year: 'numeric', month: 'short', day: '2-digit'
-    });
+    // check if seconds is less than 604800: Friday, 11:30 AM
+    if (seconds <= 604800) {
+      return `
+        <span class="name">${date.toLocaleDateString('en-US', { weekday: 'long' })},</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
+    }
 
-    // Get time
-    let localTime = date.toLocaleDateString('en-US', {
-      hour: 'numeric', minute: '2-digit', hour12: true
-    });
-
-    localTime = localTime.split(',')[1].trim();
-
-    return { dateStr: localDate, timeStr: localTime }
+    // Check if the date is in the current year and seconds is less than 31536000: Dec 12, 11:30 AM
+    if (seconds < 31536000 && date.getFullYear() === currentTime.getFullYear()) {
+      return `
+        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })},</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
+    } else if(seconds < 31536000 && date.getFullYear() !== currentTime.getFullYear()) {
+      return `
+        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span> • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
+    } else {
+      return `
+        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span> • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
+    }
   }
 
   getTemplate = () => {
@@ -383,8 +414,7 @@ export default class AppStory extends HTMLElement {
   getHover = () => {
     return /*html*/`
       <div class="top-meta">
-        <span class="by">by</span>
-        ${this.getAuthorHover()}
+        <span class="user-name">${this.getAttribute('author-name')}</span>
         <span class="sp">•</span>
         <span class="read">${this.calculateReadTime()}</span> <span class="text">min read</span>
       </div>
@@ -430,22 +460,6 @@ export default class AppStory extends HTMLElement {
 		`
   }
 
-  getAuthorHover = () => {
-    let url = this.getAttribute('author-url');
-    url = url.trim().toLowerCase();
-    let bio = this.getAttribute('author-bio') || 'This author has not provided a bio yet.';
-    // replace all " and ' with &quot; and &apos; to avoid breaking the html
-    bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-    return /* html */`
-			<hover-author url="${url}" you="${this.getAttribute('author-you')}" hash="${this.getAttribute('author-hash')}"
-        picture="${this.getAttribute('author-img')}" name="${this.getAttribute('author-name')}" contact='${this.getAttribute("author-contact")}'
-        stories="${this.getAttribute('author-stories')}" replies="${this.getAttribute('author-replies')}"
-        followers="${this.getAttribute('author-followers')}" following="${this.getAttribute('author-following')}" user-follow="${this.getAttribute('author-follow')}"
-        verified="${this.getAttribute('author-verified')}" bio="${bio}">
-      </hover-author>
-		`
-  }
-
   getSection = () => {
     return /* html */`
       <post-section url="${this.getAttribute('url')}" active="${this.getAttribute('tab')}" section-title="Story" 
@@ -465,14 +479,9 @@ export default class AppStory extends HTMLElement {
   }
 
   getMeta = () => {
-    let dateObject = this.formatDateWithRelativeTime(this.getAttribute('time'))
     return /* html */`
       <div class="meta">
-        <span class="sp">on</span>
-        <time class="published" datetime="${this.getAttribute('time')}">${dateObject.dateStr}</time>
-        <span class="sp">•</span>
-        <span class="sp">at</span>
-        <span class="time">${dateObject.timeStr}</span>
+        <span class="time">${this.getLapseTime(this.getAttribute('time'))}</span>
       </div>
     `
   }
@@ -626,7 +635,7 @@ export default class AppStory extends HTMLElement {
         .top-meta {
           border-bottom: var(--border);
           /* border-top: var(--border); */
-          margin: 0 0 12px;
+          margin: 0;
           padding: 0 0 5px;
           display: flex;
           position: relative;
@@ -654,6 +663,17 @@ export default class AppStory extends HTMLElement {
           font-size: 1.35rem;
           color: var(--text-color);
           font-weight: 400;
+        }
+
+        .top-meta > span.user-name {
+          max-width: 50%;
+          /* add ellipsis to the text */
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          font-size: 1rem;
+          font-weight: 500;
+          font-family: var(--font-main), sans-serif;
         }
 
         .meta {
@@ -899,7 +919,7 @@ export default class AppStory extends HTMLElement {
 				@media screen and (max-width: 660px) {
 					:host {
             font-size: 16px;
-						padding: 0;
+						padding: 5px 0 0 0;
             margin: 0;
             display: flex;
             min-height: max-content;

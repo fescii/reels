@@ -633,6 +633,7 @@ export default class PreviewPost extends HTMLElement {
     } else return '';
   }
 
+  // Get lapse time
   getLapseTime = isoDateStr => {
     const dateIso = new Date(isoDateStr); // ISO strings with timezone are automatically handled
     let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -653,38 +654,66 @@ export default class PreviewPost extends HTMLElement {
     if (seconds < 60) {
       return 'Just now';
     }
-    // check if seconds is less than 86400: return time AM/PM
-    if (seconds < 86400) {
-      return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+
+    // check if seconds is less than 86400 and dates are equal: Today, 11:30 AM
+    if (seconds < 86400 && date.getDate() === currentTime.getDate()) {
+      return `
+        <span class="name">Today,</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
+    } else if (seconds < 86400 && date.getDate() !== currentTime.getDate()) {
+      return `
+        <span class="name">Yesterday,</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
     }
 
-    // check if seconds is less than 604800: return day and time
+    // check if seconds is less than 604800: Friday, 11:30 AM
     if (seconds <= 604800) {
-      return date.toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: true });
+      return `
+        <span class="name">${date.toLocaleDateString('en-US', { weekday: 'long' })},</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
     }
 
-    // Check if the date is in the current year:: return date and month short 2-digit year without time
-    if (date.getFullYear() === currentTime.getFullYear()) {
-      return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', });
-    }
-    else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    // Check if the date is in the current year and seconds is less than 31536000: Dec 12, 11:30 AM
+    if (seconds < 31536000 && date.getFullYear() === currentTime.getFullYear()) {
+      return `
+        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })},</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
+    } else if(seconds < 31536000 && date.getFullYear() !== currentTime.getFullYear()) {
+      return `
+        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+      `
+    } else {
+      return `
+        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+      `
     }
   }
 
   getContent = (content, url, views, likes, author) => {
     return /*html*/`
+      ${this.getHeader(author)}
       <p>${content}</p>
       ${this.getImages(this._story ? this._story.images : this._reply.images)}
-      <span class="meta">
-        <span class="by">by</span>
-        ${this.getAuthorHover(author)}
-        <span class="sp">•</span>
-        <time class="time" datetime="${author.time}">
-          ${this.getLapseTime(author.time)}
-        </time>
-      </span>
+      ${this.getOn(author.time)}
       ${this.getActions(likes, views, url)}
+    `
+  }
+
+  getHeader = author => {
+    return /*html*/`
+      <div class="meta top-meta">
+        ${this.getAuthorHover(author)}
+      </div>
+    `
+  }
+
+  getOn = time => {
+    return /*html*/`
+      <div class="meta bottom-meta">
+        <time class="time" datetime="${time}">
+          ${this.getLapseTime(time)}
+        </time>
+      </div>
     `
   }
 
@@ -1112,27 +1141,47 @@ export default class PreviewPost extends HTMLElement {
 
         .meta > span.by {
           font-weight: 500;
-          font-size: 0.93rem;
-          margin: 0 0 1px 1px;
-        }
-
-        .meta > span.hash {
-          background: var(--action-linear);
-          font-family: var(--font-mono), monospace;
-          font-size: 0.9rem;
-          line-height: 1;
-          color: transparent;
-          font-weight: 600;
-          background-clip: text;
-          -webkit-background-clip: text;
-          -moz-background-clip: text;
+          font-size: 0.95rem;
+          margin: 0 0 1px 0;
         }
 
         .meta > time.time {
-          font-family: var(--font-text), sans-serif;
-          font-size: 0.83rem;
+          font-family: var(--font-read), sans-serif;
+          font-size: 0.8rem;
           font-weight: 500;
           margin: 1px 0 0 0;
+        }
+
+        .meta a.link {
+          text-decoration: none;
+          color: transparent;
+          background-image: var(--action-linear);
+          background-clip: text;
+          -webkit-background-clip: text;
+        }
+
+        .meta.top-meta {
+          width: 100%;
+        }
+
+        .meta  a.author-link {
+          text-decoration: none;
+          color: transparent;
+          background: var(--accent-linear);
+          background-clip: text;
+          -webkit-background-clip: text;
+        }
+
+        .meta.bottom-meta {
+          padding: 5px 0 0;
+        }
+
+        .meta.bottom-meta > time.time > span.name {
+          font-weight: 500;
+          /*font-size: 0.9rem;*/
+          margin: 0;
+          /* font-family: var(--font-read), sans-serif; */
+          text-transform: uppercase;
         }
 
         div.empty {

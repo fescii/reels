@@ -1090,14 +1090,14 @@ export default class AppMain extends HTMLElement {
 					
 					section.nav > div.mobile-nav > div.icons > span.icon > span.text {
 						font-size: 0.8rem;
-						font-family: var(--font-read), sans-serif;
+						font-family: var(--font-text), sans-serif;
 						color: inherit;
 						display: flex;
 					}
 					
 					section.nav > div.mobile-nav > div.icons > span.icon.active > span.text {
 						font-family: var(--font-text), sans-serif;
-						font-weight: 500;
+						font-weight: 600;
             color: transparent;
             background: var(--accent-linear);
             -webkit-background-clip: text;

@@ -431,7 +431,6 @@ export default class QuickPost extends HTMLElement {
   getHeader = () => {
     return /*html*/`
       <div class="meta top-meta">
-        <span class="by">by</span>
         ${this.getAuthorHover()}
       </div>
     `
@@ -574,9 +573,9 @@ export default class QuickPost extends HTMLElement {
       return "padding: 10px 0 5px;"
     } else {
       if(this.getAttribute('story') === 'reply') {
-        return "padding: 10px 0 13px;"
+        return "padding: 10px 0 15px;"
       } else {
-        return "padding: 10px 0 5px;"
+        return "padding: 10px 0 10px;"
       }
     }
   }
@@ -657,8 +656,8 @@ export default class QuickPost extends HTMLElement {
         }
 
         .meta > time.time {
-          font-family: var(--font-text), sans-serif;
-          font-size: 0.83rem;
+          font-family: var(--font-read), sans-serif;
+          font-size: 0.8rem;
           font-weight: 500;
           margin: 1px 0 0 0;
         }
@@ -677,6 +676,10 @@ export default class QuickPost extends HTMLElement {
           background: var(--accent-linear);
           background-clip: text;
           -webkit-background-clip: text;
+        }
+
+        .meta.top-meta {
+          width: 100%;
         }
 
         .meta.bottom-meta {

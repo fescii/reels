@@ -572,6 +572,10 @@ export default class FormBio extends HTMLElement {
             -webkit-appearance: none;
           }
 
+          :host {
+            padding: 0 10px;
+          }
+
           form.fields .actions > .action {
             cursor: default !important;
           }

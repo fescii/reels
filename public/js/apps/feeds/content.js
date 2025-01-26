@@ -64,7 +64,7 @@ export default class ContentFeed extends HTMLElement {
     const outerThis = this;
 
     try {
-      const data = this.api.get(url, { content: 'json' })
+      const data = await this.api.get(url, { content: 'json' })
 
       if (!data.success) {
         outerThis._empty = true;

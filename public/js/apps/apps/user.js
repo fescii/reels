@@ -59,7 +59,12 @@ export default class AppUser extends HTMLElement {
     this.watchMediaQuery(mql)
 
     // get tab where class is this._current
-    const currentTab = tabContainer.querySelector(`li.${this._current}`);
+    let currentTab = tabContainer.querySelector(`li.${this._current}`);
+
+    if(!currentTab) {
+      currentTab = tabContainer.querySelector('li.tab-item.stats');
+      this._current = 'stats';
+    }
 
     if (currentTab && tabContainer && contentContainer && btn) {
       // Activate the tab
@@ -511,7 +516,7 @@ export default class AppUser extends HTMLElement {
 
     // Select li with class name as current and content Container
     const currentItem = tabContainer.querySelector(`li.${this._current}`);
-
+    // console.log("Reached", currentItem);
     // If selection is available
     if(currentItem) {
       currentItem.classList.add('active');
@@ -561,8 +566,7 @@ export default class AppUser extends HTMLElement {
       contentContainer.innerHTML = this.getContent();
     } else if (name === 'logout') {
       this.logout();
-    }
-    else {
+    } else {
       contentContainer.innerHTML = this.getStats();
     }
   }
@@ -596,7 +600,7 @@ export default class AppUser extends HTMLElement {
 
   getLoader() {
     return /* html */`
-      <div id="loader-container">
+      <div id="loader-container" class="loader-container">
 				<div class="loader"></div>
 			</div>
     `
@@ -746,21 +750,15 @@ export default class AppUser extends HTMLElement {
   getSoon = () => {
     return /* html */`
       <div class="privacy coming-soon">
-        <h3 class="title">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-            <path
-              d="M.143 2.31a.75.75 0 0 1 1.047-.167l14.5 10.5a.75.75 0 1 1-.88 1.214l-2.248-1.628C11.346 13.19 9.792 14 8 14c-1.981 0-3.67-.992-4.933-2.078C1.797 10.832.88 9.577.43 8.9a1.619 1.619 0 0 1 0-1.797c.353-.533.995-1.42 1.868-2.305L.31 3.357A.75.75 0 0 1 .143 2.31Zm1.536 5.622A.12.12 0 0 0 1.657 8c0 .021.006.045.022.068.412.621 1.242 1.75 2.366 2.717C5.175 11.758 6.527 12.5 8 12.5c1.195 0 2.31-.488 3.29-1.191L9.063 9.695A2 2 0 0 1 6.058 7.52L3.529 5.688a14.207 14.207 0 0 0-1.85 2.244ZM8 3.5c-.516 0-1.017.09-1.499.251a.75.75 0 1 1-.473-1.423A6.207 6.207 0 0 1 8 2c1.981 0 3.67.992 4.933 2.078 1.27 1.091 2.187 2.345 2.637 3.023a1.62 1.62 0 0 1 0 1.798c-.11.166-.248.365-.41.587a.75.75 0 1 1-1.21-.887c.148-.201.272-.382.371-.53a.119.119 0 0 0 0-.137c-.412-.621-1.242-1.75-2.366-2.717C10.825 4.242 9.473 3.5 8 3.5Z">
-            </path>
-          </svg>
-          <span class="text">
-            Wait, I can explain 🤭, this feature is under development
-          </span>
-        </h3>
-        <p class="info">
-          We are constantly working on improving our platform and adding new features. <br /> Our team is currently developing this feature and it will be available in the near future. <br />
-          We appreciate your patience and understanding. Stay tuned for updates and exciting announcements.<br /> <br />
-          Thank you for being a part of our community!
-        </p>
+      <h3 class="title">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+        <path d="M.143 2.31a.75.75 0 0 1 1.047-.167l14.5 10.5a.75.75 0 1 1-.88 1.214l-2.248-1.628C11.346 13.19 9.792 14 8 14c-1.981 0-3.67-.992-4.933-2.078C1.797 10.832.88 9.577.43 8.9a1.619 1.619 0 0 1 0-1.797c.353-.533.995-1.42 1.868-2.305L.31 3.357A.75.75 0 0 1 .143 2.31Zm1.536 5.622A.12.12 0 0 0 1.657 8c0 .021.006.045.022.068.412.621 1.242 1.75 2.366 2.717C5.175 11.758 6.527 12.5 8 12.5c1.195 0 2.31-.488 3.29-1.191L9.063 9.695A2 2 0 0 1 6.058 7.52L3.529 5.688a14.207 14.207 0 0 0-1.85 2.244ZM8 3.5c-.516 0-1.017.09-1.499.251a.75.75 0 1 1-.473-1.423A6.207 6.207 0 0 1 8 2c1.981 0 3.67.992 4.933 2.078 1.27 1.091 2.187 2.345 2.637 3.023a1.62 1.62 0 0 1 0 1.798c-.11.166-.248.365-.41.587a.75.75 0 1 1-1.21-.887c.148-.201.272-.382.371-.53a.119.119 0 0 0 0-.137c-.412-.621-1.242-1.75-2.366-2.717C10.825 4.242 9.473 3.5 8 3.5Z"></path>
+        </svg>
+        <span class="text">Coming soon!</span>
+      </h3>
+      <p class="info">
+        We are working on this feature. It will be available soon. Thank you for your patience!
+      </p>
       </div>
     `
   }
@@ -1556,7 +1554,7 @@ export default class AppUser extends HTMLElement {
 
         div.coming-soon > .title {
           color: var(--title-color);
-          font-family: var(--title-text), sans-serif;
+          font-family: var(--title-main), sans-serif;
           font-size: 1.3rem;
           font-weight: 600;
           margin: 0 0 10px 0;
@@ -1731,7 +1729,7 @@ export default class AppUser extends HTMLElement {
 				@media screen and (max-width: 660px) {
 					:host {
             font-size: 16px;
-            padding: 0 10px;
+            padding: 0;
 					}
 
           div.themes > .themes-container > .theme button,
@@ -1756,14 +1754,14 @@ export default class AppUser extends HTMLElement {
             display: flex;
             flex-flow: column;
             align-items: start;
-            min-height: 70vh;
-            padding: 0;
+            min-height: 100vh;
+            padding: 0 0 60px 0;
             gap: 0;
             width: 100%;
           }
 
           section.tab {
-            padding: 0;
+            padding: 0 10px;
             width: 100%;
             min-width: 100%;
             max-height: max-content;
@@ -1831,7 +1829,7 @@ export default class AppUser extends HTMLElement {
             align-items: center;
             justify-content: center;
             margin: 15px 0 0 0;
-            padding: 20px 0;
+            padding: 20px 10px;
             width: 100%;
             min-height: max-content;
             height: 100%;

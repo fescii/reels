@@ -217,25 +217,26 @@ export default class ContentContainer extends HTMLElement {
 
         .top > .desc {
           margin: 0;
-          padding: 0 0 5px;
+          padding: 0;
           color: var(--text-color);
           font-size: 1rem;
           font-family: var(--font-main), sans-serif;
         }
 
         .actions {
-          border-bottom: var(--border);
           background-color: var(--background);
           display: flex;
           flex-flow: column;
           gap: 0;
           z-index: 3;
+          padding: 10px 0 0;
           width: 100%;
           position: sticky;
-          top: 60px;
+          top: 0;
         }
 
         .actions > ul.tab {
+          border-bottom: var(--border);
           height: max-content;
           width: 100%;
           padding: 0;
@@ -323,9 +324,23 @@ export default class ContentContainer extends HTMLElement {
             -webkit-appearance: none;
           }
 
+          .top {
+            padding: 0 10px;
+          }
+
           .actions {
             position: sticky;
-            top: 50px;
+            width: 100%;
+            padding: 10px 10px 0;
+            top: 0;
+          }
+
+          .content {
+            display: flex;
+            flex-flow: column;
+            gap: 10px;
+            padding: 0 10px;
+            width: 100%;
           }
 
           a,

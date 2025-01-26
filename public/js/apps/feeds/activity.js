@@ -63,7 +63,8 @@ export default class ActivityFeed extends HTMLElement {
     const outerThis = this;
 
     try {
-      const data = this.api.get(url, { content: 'json' })
+      const data = await this.api.get(url, { content: 'json' })
+      // console.log(data)
 
       if(!data.success ||!data.activities) {
         outerThis._empty = true;

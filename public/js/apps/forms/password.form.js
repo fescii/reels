@@ -570,7 +570,11 @@ export default class FormPassword extends HTMLElement {
           ::-webkit-scrollbar {
             -webkit-appearance: none;
           }
-          
+
+          :host {
+            padding: 0 10px;
+          }
+
           form.fields .actions > .action {
             cursor: default !important;
           }

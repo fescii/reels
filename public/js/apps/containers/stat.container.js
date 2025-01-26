@@ -216,7 +216,6 @@ export default class StatContainer extends HTMLElement {
         }
 
         .actions {
-          border-bottom: var(--border);
           background-color: var(--background);
           display: flex;
           flex-flow: column;
@@ -229,6 +228,7 @@ export default class StatContainer extends HTMLElement {
         }
 
         .actions > ul.tab {
+          border-bottom: var(--border);
           height: max-content;
           width: 100%;
           padding: 0;
@@ -292,7 +292,7 @@ export default class StatContainer extends HTMLElement {
           background: var(--accent-linear);
           display: inline-block;
           bottom: -2.5px;
-          left: 0px;
+          left: 10px;
           width: 20px;
           min-height: 5px;
           border-top-left-radius: 5px;
@@ -315,9 +315,23 @@ export default class StatContainer extends HTMLElement {
             -webkit-appearance: none;
           }
 
+          .top {
+            padding: 0 10px;
+          }
+
           .actions {
             position: sticky;
+            width: 100%;
+            padding: 10px 10px 0;
             top: 0;
+          }
+
+          .content {
+            display: flex;
+            flex-flow: column;
+            gap: 10px;
+            padding: 0 10px 30px;
+            width: 100%;
           }
 
           a,

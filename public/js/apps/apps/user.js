@@ -1150,35 +1150,6 @@ export default class AppUser extends HTMLElement {
           gap: 0px;
         }
 
-        .user-title {
-          color: var(--title-color);
-          display: flex;
-          flex-flow: row;
-          align-items: center;
-          gap: 10px;
-          padding: 15px 0 0;
-        }
-
-        .user-title > .left h3 {
-          margin: 0;
-          font-family: var(--font-text), sans-serif;
-          font-size: 1.35rem;
-          font-weight: 500;
-        }
-
-        .user-title svg {
-          color: var(--title-color);
-          display: none;
-          cursor: pointer;
-          width: 28px;
-          height: 28px;
-          margin: 0 0 0 -3px;
-        }
-
-        .user-title > svg:hover {
-          color: var(--accent-color);
-        }
-
         .top-nav {
           border-bottom: var(--border);
           color: var(--title-color);
@@ -1216,41 +1187,54 @@ export default class AppUser extends HTMLElement {
           margin: 0 0 0 -8px;
         }
 
-        #loader-container {
-          position: absolute;
-          top: 0;
-          left: 0;
-          bottom: calc(40% - 35px);
-          right: 0;
-          z-index: 5;
-          background-color: var(--loader-background);
-          backdrop-filter: blur(1px);
-          -webkit-backdrop-filter: blur(1px);
+        div.loader-container {
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: inherit;
-          -webkit-border-radius: inherit;
-          -moz-border-radius: inherit;
+          width: 100%;
+          min-height: 200px;
+          min-width: 100%;
         }
 
-        #loader-container > .loader {
-          width: 35px;
+        div.loader-container > .loader {
+          width: 20px;
           aspect-ratio: 1;
-          --_g: no-repeat radial-gradient(farthest-side, #18A565 94%, #0000);
-          --_g1: no-repeat radial-gradient(farthest-side, #21D029 94%, #0000);
-          --_g2: no-repeat radial-gradient(farthest-side, #df791a 94%, #0000);
-          --_g3: no-repeat radial-gradient(farthest-side, #f09c4e 94%, #0000);
-          background:    var(--_g) 0 0,    var(--_g1) 100% 0,    var(--_g2) 100% 100%,    var(--_g3) 0 100%;
-          background-size: 30% 30%;
-          animation: l38 .9s infinite ease-in-out;
-          -webkit-animation: l38 .9s infinite ease-in-out;
+          border-radius: 50%;
+          background: var(--accent-linear);
+          display: grid;
+          animation: l22-0 2s infinite linear;
         }
 
-        @keyframes l38 {
-          100% {
-            background-position: 100% 0, 100% 100%, 0 100%, 0 0
-          }
+        div.loader-container > .loader:before {
+          content: "";
+          grid-area: 1/1;
+          margin: 15%;
+          border-radius: 50%;
+          background: var(--second-linear);
+          transform: rotate(0deg) translate(150%);
+          animation: l22 1s infinite;
+        }
+
+        div.loader-container > .loader:after {
+          content: "";
+          grid-area: 1/1;
+          margin: 15%;
+          border-radius: 50%;
+          background: var(--accent-linear);
+          transform: rotate(0deg) translate(150%);
+          animation: l22 1s infinite;
+        }
+
+        div.loader-container > .loader:after {
+          animation-delay: -.5s
+        }
+
+        @keyframes l22-0 {
+          100% {transform: rotate(1turn)}
+        }
+
+        @keyframes l22 {
+          100% {transform: rotate(1turn) translate(150%)}
         }
 
         main.profile {
@@ -1544,8 +1528,8 @@ export default class AppUser extends HTMLElement {
           position: relative;
           flex-flow: column;
           align-items: start;
-          padding: ;
           gap: 0;
+          padding: 15px 0 0 0;
           width: 70%;
         }
 

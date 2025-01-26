@@ -91,7 +91,7 @@ export default class ActivityFeed extends HTMLElement {
         outerThis.populateActivities(content, activitiesContainer);
       }
     } catch (error) {
-      // console.log(error)
+      console.log(error)
       outerThis._empty = true;
       outerThis._block = true;
       outerThis.populateActivities(outerThis.getWrongMessage(), activitiesContainer);

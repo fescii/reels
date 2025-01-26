@@ -26,7 +26,7 @@ export default class RepliesStat extends HTMLElement {
   }
 
   connectedCallback() {
-    
+    this.enableScroll();
   }
 
   formatNumber = n => {
@@ -77,7 +77,7 @@ export default class RepliesStat extends HTMLElement {
     }
   }
 
-   disableScroll() {
+  disableScroll() {
     // Get the current page scroll position
     let scrollTop = window.scrollY || document.documentElement.scrollTop;
     let scrollLeft = window.scrollX || document.documentElement.scrollLeft;
@@ -174,7 +174,7 @@ export default class RepliesStat extends HTMLElement {
     const difference = Math.abs(change);
 
     if (change > 0) {
-      icon = `
+      icon = /* html */`
         <span class="change up">
           ${this._up}
           <span class="percentage up">${this.formatNumber(difference)}</span>
@@ -183,7 +183,7 @@ export default class RepliesStat extends HTMLElement {
 
     }
     else {
-      icon = `
+      icon = /* html */`
         <span class="change down">
           ${this._down}
           <span class="percentage up">${this.formatNumber(difference)}</span>
@@ -208,14 +208,13 @@ export default class RepliesStat extends HTMLElement {
     let icon = ''
     const lastReplies = this.parseToNumber(this.getAttribute('replies-last'));
     const currentReplies = this.parseToNumber(this.getAttribute('replies'));
-
     const change = this.calculateDifference(lastReplies, currentReplies);
 
     // if change is negative, we need to make it positive
     const difference = Math.abs(change);
 
     if (change > 0) {
-      icon = `
+      icon = /* html */`
         <span class="change up">
           ${this._up}
           <span class="percentage up">${this.formatNumber(difference)}</span>
@@ -224,7 +223,7 @@ export default class RepliesStat extends HTMLElement {
 
     }
     else {
-      icon = `
+      icon = /* html */`
         <span class="change down">
           ${this._down}
           <span class="percentage up">${this.formatNumber(difference)}</span>
@@ -350,7 +349,7 @@ export default class RepliesStat extends HTMLElement {
           display: flex;
           flex-flow: column;
           gap: 7px;
-          padding: 8px 15px;
+          padding: 4px 10px;
           min-width: calc(33.33% - 20px);
           width: calc(33.33% - 20px);
           background-color: var(--stat-background);
@@ -431,35 +430,6 @@ export default class RepliesStat extends HTMLElement {
           :host {
             padding-bottom: 25px;
             gap: 0;
-          }
-
-          .cards {
-            display: flex;
-            flex-flow: column;
-            justify-content: center;
-            align-items: center;
-            gap: 0;
-            padding: 0;
-            width: 100%;
-          }
-
-          .cards > .card {
-            background-color: transparent;
-            border-bottom: var(--border);
-            display: flex;
-            flex-flow: column;
-            width: 100%;
-            gap: 10px;
-            padding: 10px 5px;
-            border-radius: 0;
-          }
-
-          .cards > .card > h4.title {
-            color: var(--gray-color);
-            font-size: 1rem;
-            font-weight: 500;
-            font-family: var(--font-text), sans-serif;
-            margin: 0 0 0 -2px;
           }
         }
       </style>

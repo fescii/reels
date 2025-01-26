@@ -335,6 +335,10 @@ export default class ContentContainer extends HTMLElement {
             top: 0;
           }
 
+          .actions > ul.tab span.line {
+            left: 10px;
+          }
+
           .content {
             display: flex;
             flex-flow: column;

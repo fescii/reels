@@ -290,7 +290,7 @@ export default class UpdateContainer extends HTMLElement {
           background: var(--accent-linear);
           display: inline-block;
           bottom: -2.5px;
-          left: 10px;
+          left: 0;
           width: 20px;
           min-height: 5px;
           border-top-left-radius: 5px;
@@ -323,6 +323,10 @@ export default class UpdateContainer extends HTMLElement {
             width: 100%;
             padding: 10px 10px 0;
             top: 0;
+          }
+
+          .actions > ul.tab span.line {
+            left: 10px;
           }
 
           .content {

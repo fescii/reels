@@ -159,7 +159,7 @@ export default class AllStat extends HTMLElement {
       icon = `
         <span class="change up">
           ${this._up}
-          <span class="percentage">${percentage}%</span>
+          <span class="percentage">${this.formatNumber(percentage)}%</span>
         </span>
       `;
 
@@ -168,7 +168,7 @@ export default class AllStat extends HTMLElement {
       icon = `
         <span class="change down">
           ${this._down}
-          <span class="percentage">${percentage}%</span>
+          <span class="percentage">${this.formatNumber(percentage)}%</span>
         </span>
       `;
     }
@@ -184,11 +184,11 @@ export default class AllStat extends HTMLElement {
               ${this.formatNumber(currentAll)}
             </h2>
           </div>
-          <span class="desc">Total stats</span>
+          <span class="desc">All stats</span>
         </div>
         <div class="compared">
           ${icon}
-          <span class="info">Compared to prior month</span>
+          <span class="info">This month</span>
         </div>
       </div>
     `
@@ -208,7 +208,7 @@ export default class AllStat extends HTMLElement {
       icon = `
         <span class="change up">
           ${this._up}
-          <span class="percentage">${percentage}%</span>
+          <span class="percentage">${this.formatNumber(percentage)}%</span>
         </span>
       `;
 
@@ -217,7 +217,7 @@ export default class AllStat extends HTMLElement {
       icon = `
         <span class="change down">
           ${this._down}
-          <span class="percentage">${percentage}%</span>
+          <span class="percentage">${this.formatNumber(percentage)}%</span>
         </span>
       `;
     }
@@ -237,7 +237,7 @@ export default class AllStat extends HTMLElement {
         </div>
         <div class="compared">
           ${icon}
-          <span class="info">Compared to prior month</span>
+          <span class="info">This month</span>
         </div>
       </div>
     `
@@ -253,11 +253,13 @@ export default class AllStat extends HTMLElement {
     // if percentageChange is negative, we need to make it positive
     const percentage = Math.abs(percentageChange);
 
+    // if percentageChange is more than 1k
+
     if (percentageChange > 0) {
       icon = `
         <span class="change up">
           ${this._up}
-          <span class="percentage">${percentage}%</span>
+          <span class="percentage">${this.formatNumber(percentage)}%</span>
         </span>
       `;
 
@@ -266,7 +268,7 @@ export default class AllStat extends HTMLElement {
       icon = `
         <span class="change down">
           ${this._down}
-          <span class="percentage">${percentage}%</span>
+          <span class="percentage">${this.formatNumber(percentage)}%</span>
         </span>
       `;
     }
@@ -286,7 +288,7 @@ export default class AllStat extends HTMLElement {
         </div>
         <div class="compared">
           ${icon}
-          <span class="info">Compared to prior month</span>
+          <span class="info">This month</span>
         </div>
       </div>
     `
@@ -425,7 +427,7 @@ export default class AllStat extends HTMLElement {
           color: var(--text-color);
           font-size: 1.25rem;
           font-weight: 600;
-          font-family: var(--font-main), sans-serif;
+          font-family: var(--font-text), sans-serif;
           margin: 0;
         }
 
@@ -461,6 +463,7 @@ export default class AllStat extends HTMLElement {
 
         .content > .main .compared > .change.up .percentage {
           color: transparent;
+          font-family: var(--font-text), sans-serif;
           background: var(--accent-linear);
           background-clip: text;
           -webkit-background-clip: text;
@@ -470,7 +473,7 @@ export default class AllStat extends HTMLElement {
           /* color: var(--text-color); */
           font-size: 1.05rem;
           font-weight: 500;
-          font-family: var(--font-read), sans-serif;
+          font-family: var(--font-text), sans-serif;
           margin: 0;
         }
 
@@ -492,28 +495,8 @@ export default class AllStat extends HTMLElement {
           }
 
           :host {
-            border-bottom: none;
             gap: 0;
             padding: 10px 0;
-          }
-
-          .content {
-            display: flex;
-            flex-flow: column;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            padding: 6px 0;
-            width: 100%;
-          }
-
-          .content > .main {
-            border-bottom: var(--border);
-            width: 100%;
-            display: flex;
-            flex-flow: column;
-            gap: 0;
-            padding: 0 5px 10px;
           }
         }
       </style>

@@ -66,22 +66,21 @@ export default class StatFeed extends HTMLElement {
     const outerThis = this;
 
     try {
-      const data = this.api.get(url, { content: 'json' })
+      const data = await this.api.get(url, { content: 'json' })
 
       if (!data.success) {
         outerThis._empty = true;
         outerThis._block = true;
         outerThis.populateFeeds(outerThis.getWrongMessage(), feedContainer);
         outerThis.activateRefresh();
+        return;
       }
-
 
       if (data.stories) {
         if (data.stories.length === 0 && outerThis._page === 1) {
           outerThis._empty = true;
           outerThis._block = true;
           outerThis.populateFeeds(outerThis.getEmptyMsg(), feedContainer);
-          
         } else if (data.stories.length < 10) {
           outerThis._empty = true;
           outerThis._block = true;

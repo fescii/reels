@@ -354,7 +354,7 @@ export default class StoriesStat extends HTMLElement {
           display: flex;
           flex-flow: column;
           gap: 7px;
-          padding: 8px 15px;
+          padding: 4px 10px;
           min-width: calc(33.33% - 20px);
           width: calc(33.33% - 20px);
           background-color: var(--stat-background);
@@ -440,35 +440,6 @@ export default class StoriesStat extends HTMLElement {
             padding-bottom: 10px;
             border: none;
             gap: 0;
-          }
-
-          .cards {
-            display: flex;
-            flex-flow: column;
-            justify-content: center;
-            align-items: center;
-            gap: 0;
-            padding: 0;
-            width: 100%;
-          }
-
-          .cards > .card {
-            background-color: transparent;
-            border-bottom: var(--border);
-            display: flex;
-            flex-flow: column;
-            width: 100%;
-            gap: 5px;
-            padding: 10px 5px;
-            border-radius: 0;
-          }
-
-          .cards > .card > h4.title {
-            color: var(--gray-color);
-            font-size: 1rem;
-            font-weight: 500;
-            font-family: var(--font-text), sans-serif;
-            margin: 0 0 0 -2px;
           }
         }
       </style>

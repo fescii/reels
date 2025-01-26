@@ -291,8 +291,8 @@ export default class StatContainer extends HTMLElement {
           z-index: 1;
           background: var(--accent-linear);
           display: inline-block;
-          bottom: -2.5px;
-          left: 10px;
+          bottom: -2px;
+          left: 0;
           width: 20px;
           min-height: 5px;
           border-top-left-radius: 5px;
@@ -317,6 +317,10 @@ export default class StatContainer extends HTMLElement {
 
           .top {
             padding: 0 10px;
+          }
+
+          .actions > ul.tab span.line {
+            left: 10px;
           }
 
           .actions {

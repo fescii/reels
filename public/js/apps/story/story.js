@@ -352,7 +352,7 @@ export default class AppStory extends HTMLElement {
 
         <section class="side">
           ${this.getAuthor()}
-          <trending-stories url="/h/trend"></trending-stories>
+          <trending-stories url="/h/trend" limit="6"></trending-stories>
           ${this.getInfo()}
         </section>
       `;

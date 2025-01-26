@@ -5,6 +5,8 @@ import AppSearch from "./search.js";
 import AppTopic from "./topic.js";
 import AppUser from "./user.js";
 import AppOffline from "./offline.js";
+import AppUpdates from "./updates.js";
+import AppThemes from "./themes.js";
 
 
 export default function apps() {
@@ -15,4 +17,6 @@ export default function apps() {
   customElements.define("app-topic", AppTopic);
   customElements.define("app-user", AppUser);
   customElements.define("app-offline", AppOffline);
+  customElements.define("app-updates", AppUpdates);
+  customElements.define("app-themes", AppThemes);
 }

@@ -4,7 +4,7 @@ export default class TrendingStories extends HTMLElement {
     super();
 
     this._url = this.getAttribute('url');
-
+    this._limit = parseInt(this.getAttribute('limit', 10));
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.app = window.app;
@@ -50,8 +50,9 @@ export default class TrendingStories extends HTMLElement {
 
   fetchStories = async contentContainer => {
     const outerThis = this;
+    const url = `${this._url}?limit=${this._limit}`;
     try {
-      const data = await this.api.get(this._url, { content: 'json' });
+      const data = await this.api.get(url, { content: 'json' });
 
       if (data.success) {
         if (data.stories.length === 0) {

@@ -18,7 +18,7 @@ export default class AppUser extends HTMLElement {
 
   setTitle = () => {
     // update title of the document
-    document.title = 'Account - Manage your account settings, and view your stats';
+    document.title = 'Account | Manage your account settings, and view your stats';
   }
 
   render() {
@@ -83,65 +83,6 @@ export default class AppUser extends HTMLElement {
       // Open user profile
       this.handleUserClick(url);
     }
-  }
-
-  activateThemeIcons = () => {
-    const btns = this.shadowObj.querySelectorAll('div.themes > .themes-container > .theme > button');
-    if (btns) {
-      // select the other btn and remove activated class
-      btns.forEach(btn => {
-        btn.addEventListener('click', event => {
-          event.preventDefault();
-          const currentTheme = btn.getAttribute('name');
-          this.setTheme(currentTheme);
-  
-          // select the other btn and remove activated class
-          btns.forEach(btnInner => {
-            btnInner.classList.remove('activated');
-            btnInner.textContent = 'Activate';
-          });
-  
-          // update 
-          btn.classList.toggle('activated');
-          btn.textContent = 'Activated'
-        });
-      });
-    }
-  }
-
-  setTheme = currentTheme =>{
-    // Check the current theme
-    const htmlElement = document.documentElement;
-    const metaThemeColor = document.querySelector("meta[name=theme-color]");
-
-    // Check if the current theme is: system
-    if (currentTheme === 'system') {
-      // Get the system theme
-      currentTheme = this.getSystemTheme();
-
-      // Update the data-theme attribute
-      htmlElement.setAttribute('data-theme', currentTheme);
-
-      // Store the preference in local storage
-      localStorage.setItem('theme', 'system');
-
-      // Update the theme-color meta tag
-      metaThemeColor.setAttribute("content", currentTheme === 'dark' ? '#000000' : '#ffffff');
-      return;
-    }
-    
-    // Update the data-theme attribute
-    htmlElement.setAttribute('data-theme', currentTheme);
-    
-    // Store the preference in local storage
-    localStorage.setItem('theme', currentTheme);
-
-    // Update the theme-color meta tag
-    metaThemeColor.setAttribute("content", currentTheme === 'dark' ? '#000000' : '#ffffff');
-  }
-
-  getSystemTheme = () => {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
 
   logout = async () => {
@@ -559,9 +500,6 @@ export default class AppUser extends HTMLElement {
       contentContainer.innerHTML = this.getActivity();
     } else if (name === 'updates') {
       contentContainer.innerHTML = this.getUpdates();
-    } else if (name === 'theme') {
-      contentContainer.innerHTML = this.getThemes();
-      this.activateThemeIcons();
     } else if (name === 'content') {
       contentContainer.innerHTML = this.getContent();
     } else if (name === 'logout') {
@@ -763,89 +701,6 @@ export default class AppUser extends HTMLElement {
     `
   }
 
-  getThemes = () =>  {
-    // get theme from local storage
-    const theme = localStorage.getItem('theme') || 'light';
-
-    return /* html */`
-      <div class="themes">
-        <div class="top">
-          <p class="desc">
-            Choose a theme that suits your preference. You can switch between light and dark themes at any time.<br>
-            <span>Note that in the near future, we will be adding more themes to choose from, and will also allow you to create or customize your own theme.</span>
-          </p>
-        </div>
-        <div class="themes-container">
-          ${this.getCurrentTheme(theme)}
-        </div>
-        <p class="soon">
-          More themes will appear here once they are available. Stay tuned for updates and exciting announcements.
-        </p>
-      </div>
-    `;
-  }
-
-  getCurrentTheme = data => {
-    if (data === 'dark') {
-      return /*html*/`
-        <div class="theme">
-          <h4 class="name">Light</h4>
-          <p class="description">Light background, dark-colored text, improves readability.</p>
-          <button class="btn" name="light">Activate</button>
-        </div>
-        <div class="theme">
-          <h4 class="name">Dark</h4>
-          <p class="description">Dark background, light-colored text, reduces eye strain.
-          </p>
-          <button class="btn activated" name="dark">Activated</button>
-        </div>
-        <div class="theme">
-          <h4 class="name">System</h4>
-          <p class="description">Set the app's theme based on your system settings.</p>
-          <button class="btn" name="system">Activate</button>
-        </div>
-      `
-    } else if (data === 'system') {
-      return /*html*/`
-        <div class="theme">
-          <h4 class="name">Light</h4>
-          <p class="description">Light background, dark-colored text, improves readability.</p>
-          <button class="btn" name="light">Activate</button>
-        </div>
-        <div class="theme">
-          <h4 class="name">Dark</h4>
-          <p class="description">Dark background, light-colored text, reduces eye strain.</p>
-          <button class="btn" name="dark">Activate</button>
-        </div>
-        <div class="theme">
-          <h4 class="name">System</h4>
-          <p class="description">Set the app's theme based on your system settings.</p>
-          <button class="btn activated" name="system">Activated</button>
-        </div>
-      `
-    }
-    else {
-      return /*html*/`
-        <div class="theme">
-          <h4 class="name">Light</h4>
-          <p class="description">Light background, dark-colored text, improves readability.</p>
-          <button class="btn activated" name="light">Activated</button>
-        </div>
-        <div class="theme">
-          <h4 class="name">Dark</h4>
-          <p class="description">Dark background, light-colored text, reduces eye strain.
-          </p>
-          <button class="btn" name="dark">Activate</button>
-        </div>
-        <div class="theme">
-          <h4 class="name">System</h4>
-          <p class="description">Set the app's theme based on your system settings.</p>
-          <button class="btn" name="system">Activate</button>
-        </div>
-      `
-    }
-  }
-
   getUpdates = () => {
     return /* html */`
       <update-container url="/user/updates" api-all="/n/all" api-users="/n/users" notification="true"
@@ -902,15 +757,6 @@ export default class AppUser extends HTMLElement {
                 <path d="M580.3 267.2c56.2-56.2 56.2-147.3 0-203.5C526.8 10.2 440.9 7.3 383.9 57.2l-6.1 5.4c-10 8.7-11 23.9-2.3 33.9s23.9 11 33.9 2.3l6.1-5.4c38-33.2 95.2-31.3 130.9 4.4c37.4 37.4 37.4 98.1 0 135.6L433.1 346.6c-37.4 37.4-98.2 37.4-135.6 0c-35.7-35.7-37.6-92.9-4.4-130.9l4.7-5.4c8.7-10 7.7-25.1-2.3-33.9s-25.1-7.7-33.9 2.3l-4.7 5.4c-49.8 57-46.9 142.9 6.6 196.4c56.2 56.2 147.3 56.2 203.5 0L580.3 267.2zM59.7 244.8C3.5 301 3.5 392.1 59.7 448.2c53.6 53.6 139.5 56.4 196.5 6.5l6.1-5.4c10-8.7 11-23.9 2.3-33.9s-23.9-11-33.9-2.3l-6.1 5.4c-38 33.2-95.2 31.3-130.9-4.4c-37.4-37.4-37.4-98.1 0-135.6L207 165.4c37.4-37.4 98.1-37.4 135.6 0c35.7 35.7 37.6 92.9 4.4 130.9l-5.4 6.1c-8.7 10-7.7 25.1 2.3 33.9s25.1 7.7 33.9-2.3l5.4-6.1c49.9-57 47-142.9-6.5-196.5c-56.2-56.2-147.3-56.2-203.5 0L59.7 244.8z" />
               </svg>
               <span class="text">Your socials</span>
-            </a>
-          </li>
-          <li url="/user/theme" class="tab-item theme" data-name="theme">
-            <span class="line"></span>
-            <a href="/user/theme" class="tab-link">
-              <svg height="16" viewBox="0 0 16 16" fill="currentColor" width="16">
-                <path d="M11.134 1.535c.7-.509 1.416-.942 2.076-1.155.649-.21 1.463-.267 2.069.34.603.601.568 1.411.368 2.07-.202.668-.624 1.39-1.125 2.096-1.011 1.424-2.496 2.987-3.775 4.249-1.098 1.084-2.132 1.839-3.04 2.3a3.744 3.744 0 0 1-1.055 3.217c-.431.431-1.065.691-1.657.861-.614.177-1.294.287-1.914.357A21.151 21.151 0 0 1 .797 16H.743l.007-.75H.749L.742 16a.75.75 0 0 1-.743-.742l.743-.008-.742.007v-.054a21.25 21.25 0 0 1 .13-2.284c.067-.647.187-1.287.358-1.914.17-.591.43-1.226.86-1.657a3.746 3.746 0 0 1 3.227-1.054c.466-.893 1.225-1.907 2.314-2.982 1.271-1.255 2.833-2.75 4.245-3.777ZM1.62 13.089c-.051.464-.086.929-.104 1.395.466-.018.932-.053 1.396-.104a10.511 10.511 0 0 0 1.668-.309c.526-.151.856-.325 1.011-.48a2.25 2.25 0 1 0-3.182-3.182c-.155.155-.329.485-.48 1.01a10.515 10.515 0 0 0-.309 1.67Zm10.396-10.34c-1.224.89-2.605 2.189-3.822 3.384l1.718 1.718c1.21-1.205 2.51-2.597 3.387-3.833.47-.662.78-1.227.912-1.662.134-.444.032-.551.009-.575h-.001V1.78c-.014-.014-.113-.113-.548.027-.432.14-.995.462-1.655.942Zm-4.832 7.266-.001.001a9.859 9.859 0 0 0 1.63-1.142L7.155 7.216a9.7 9.7 0 0 0-1.161 1.607c.482.302.889.71 1.19 1.192Z"></path>
-              </svg>
-              <span class="text">Appearance</span>
             </a>
           </li>
         </ul>
@@ -1590,109 +1436,6 @@ export default class AppUser extends HTMLElement {
           text-align: center;
         }
 
-        div.themes {
-          display: flex;
-          flex-flow: column;
-          padding: 0;
-          width: 100%;
-          height: max-content;
-          gap: 10px;
-          min-height: max-content;
-          height: max-content;
-        }
-
-        div.themes > .top > .desc {
-          margin: 0;
-          padding: 10px 0 0;
-          color: var(--text-color);
-          line-height: 1.2;
-          font-size: 1rem;
-          font-family: var(--font-main), sans-serif;
-        }
-
-        div.themes > .top > .desc > span {
-          display: inline-block;
-          margin: 10px 0 5px;
-          color: var(--gray-color);
-          font-size: 0.85rem;
-          font-style: italic;
-          font-family: var(--font-read), sans-serif;
-        }
-
-        div.themes > .themes-container {
-          display: flex;
-          color: var(--text-color);
-          padding: 0;
-          gap: 20px;
-          width: 100%;
-          min-height: max-content;
-          height: 100%;
-        }
-
-        div.themes > .themes-container > .theme {
-          display: flex;
-          flex-flow:column;
-          justify-content: space-between;
-          color: var(--text-color);
-          padding: 0;
-          gap: 5px;
-          width: 100%;
-          height: 100%;
-        }
-
-        div.themes > .themes-container > .theme h4.name {
-          margin: 0;
-          font-weight: 600;
-          font-size: 1.15rem;
-          color: var(--title-color);
-        }
-
-        div.themes > .themes-container > .theme p.description {
-          margin: 0 0 5px;
-          font-size: 0.95rem;
-          color: var(--gray-color);
-        }
-
-        div.themes > .themes-container > .theme button {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 4px 15px 5px;
-          height: max-content;
-          width: max-content;
-          border-radius: 10px;
-          -webkit-border-radius: 10px;
-          -moz-border-radius: 10px;
-          background: var(--accent-linear);
-          color: var(--white-color);
-          font-weight: 500;
-          font-size: 0.9rem;
-          line-height: 1.3;
-          font-weight: 500;
-          font-family: var(--font-text), sans-serif;
-          cursor: pointer;
-          outline: none;
-          border: none;
-          text-transform: capitalize;
-        }
-
-        div.themes > .themes-container > .theme button.activated {
-          background: none;
-          padding: 4px 10px 5px;
-          color: var(--highlight-color);
-          background-color: var(--gray-background);
-        }
-
-        div.themes p.soon {
-          margin: 5px 0;
-          padding: 10px 0;
-          color: var(--gray-color);
-          font-size: 0.85rem;
-          font-style: italic;
-          font-family: var(--font-read), sans-serif;
-          border-top: var(--border);
-        }
-
 				@media screen and (max-width: 900px) {
           section.tab {
             padding: 0;
@@ -1701,29 +1444,6 @@ export default class AppUser extends HTMLElement {
           section.content {
             width: 62%;
           }
-
-          div.themes > .themes-container {
-            flex-flow: column;
-            gap: 0;
-          }
-
-          div.themes > .themes-container > .theme {
-            display: flex;
-            flex-flow:column;
-            color: var(--text-color);
-            margin: 0 0 5px;
-            padding: 10px 0;
-            gap: 5px;
-            width: 100%;
-            min-height: max-content;
-            height: 100%;
-            border-top: var(--border);
-          }
-
-          div.themes > .themes-container > .theme:last-of-type {
-            margin: 0;
-            padding: 10px 0 0;
-          }
         }
 
 				@media screen and (max-width: 660px) {
@@ -1731,11 +1451,6 @@ export default class AppUser extends HTMLElement {
             font-size: 16px;
             padding: 0;
 					}
-
-          div.themes > .themes-container > .theme button,
-          svg {
-            cursor: default !important;
-          }
 
           main.profile {
             padding: 0;

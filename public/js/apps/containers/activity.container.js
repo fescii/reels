@@ -5,7 +5,6 @@ export default class ActivityContainer extends HTMLElement {
 
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.render();
   }
 
@@ -85,6 +84,7 @@ export default class ActivityContainer extends HTMLElement {
   getHeader = () => {
     return /* html */`
       <div class="top">
+        <h4 class="title">Your activity</h4>
         <p class="desc">
           Your activity is a summary of your interactions on the platform. You can view your stories, replies and likes.
         </p>
@@ -181,27 +181,25 @@ export default class ActivityContainer extends HTMLElement {
           display: flex;
           flex-flow: column;
           gap: 5px;
-          padding: 0;
+          padding: 5px 0 0;
           width: 100%;
         }
 
         .top > h4.title {
-          border-bottom: var(--border-mobile);
           display: flex;
           align-items: center;
           color: var(--title-color);
           font-size: 1.3rem;
           font-weight: 500;
           margin: 0;
-          padding: 0 0 6px 0;
+          padding: 0;
         }
 
         .top > .desc {
           margin: 0;
-          padding: 6px 0 10px;
+          padding: 0 0 5px;
           color: var(--text-color);
           font-size: 1rem;
-          line-height: 1.3;
           font-family: var(--font-main), sans-serif;
         }
 
@@ -302,13 +300,6 @@ export default class ActivityContainer extends HTMLElement {
 
           ::-webkit-scrollbar {
             -webkit-appearance: none;
-          }
-
-          .top > .desc {
-            margin: 0;
-            padding: 6px 0 10px;
-            font-size: 1rem;
-            line-height: 1.5;
           }
 
           .actions {

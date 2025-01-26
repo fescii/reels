@@ -40,5 +40,5 @@ module.exports = (app) => {
   app.get('/user', getAccount);
 
   // Route for handling user settings page
-  app.get('/user/:current', getAccount);
+  app.get('/user/:tab', getAccount);
 }

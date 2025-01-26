@@ -235,7 +235,8 @@ const getAccount = async (req, res) => {
     };
 
     // set tab to the current tab or default to stats
-    const current = req.query.tab || 'stats';
+    const current = req.params.tab || 'stats';
+    user.tab = current;
 
     // get meta data for the user
     const { title, image, description } = meta(user);
@@ -249,7 +250,7 @@ const getAccount = async (req, res) => {
     }
 
     res.render('pages/user', {
-      data: user, meta: metaData, current
+      data: user, meta: metaData
     })
   } catch (error) {
     return res.status(500).render('500');

@@ -8,4 +8,6 @@ module.exports = (app) => {
   require('./feeds')(app);
   require('./public')(app);
   require('./errors')(app);
+  require('./themes')(app);
+  require('./updates')(app);
 }

@@ -7,6 +7,8 @@ const feedsController = require("./feeds");
 const publicController = require("./public");
 const errorsController = require("./errors");
 const topicsController = require("./topics");
+const themesController = require("./themes");
+const updatesController = require("./updates");
 
 
 // Export all controllers as a single object
@@ -18,5 +20,7 @@ module.exports = {
   feeds: feedsController,
   public: publicController,
   errors: errorsController,
-  topics: topicsController
+  topics: topicsController,
+  themes: themesController,
+  updates: updatesController
 };

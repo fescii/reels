@@ -1,0 +1,1 @@
+<app-themes url="/themes"></app-themes>

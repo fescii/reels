@@ -234,8 +234,9 @@ export default class ImagesSmall extends HTMLElement {
 					position: relative;
 					cursor: pointer;
 					overflow: hidden;
-					height: 60px;
-					min-width: 60px;
+					height: 100px;
+					max-width: 80px;
+					width: 80px;
 					border-radius: 12px;
 				}
 
@@ -249,9 +250,7 @@ export default class ImagesSmall extends HTMLElement {
 
 				.image-container > img {
 					height: 100%;
-					width: auto;
-					min-width: 60px;
-					max-height: 60px;
+					width: 100%;
 					object-fit: cover;
 					object-position: center;
 					border-radius: 12px;

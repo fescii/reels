@@ -7,7 +7,7 @@ module.exports = (app) => {
   require('./search')(app);
   require('./feeds')(app);
   require('./public')(app);
-  require('./errors')(app);
   require('./themes')(app);
   require('./updates')(app);
+  require('./errors')(app);
 }

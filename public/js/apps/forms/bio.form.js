@@ -2,10 +2,8 @@ export default class FormBio extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this._url = this.getAttribute('api');
     this.app = window.app;
     this.api = this.app.api;
@@ -137,7 +135,7 @@ export default class FormBio extends HTMLElement {
   }
 
   getButtonLoader() {
-    return `
+    return /* html */`
       <span id="btn-loader">
 				<span class="loader"></span>
 			</span>
@@ -175,6 +173,7 @@ export default class FormBio extends HTMLElement {
   getHeader = () => {
     return /* html */`
       <div class="top">
+        <h4 class="title">Your bio</h4>
         <p class="desc">
           Your bio is a brief summary of yourself. It should be no more than 160 characters in length.
           Use this space to highlight your interests, skills, or any other relevant information about yourself.
@@ -305,19 +304,18 @@ export default class FormBio extends HTMLElement {
         }
 
         .top > h4.title {
-          border-bottom: var(--border-mobile);
           display: flex;
           align-items: center;
           color: var(--title-color);
           font-size: 1.3rem;
           font-weight: 500;
           margin: 0;
-          padding: 0 0 6px 0;
+          padding: 0;
         }
 
         .top > .desc {
           margin: 0;
-          padding: 10px 0;
+          padding: 0 0 5px;
           color: var(--text-color);
           font-size: 1rem;
           font-family: var(--font-main), sans-serif;
@@ -572,14 +570,6 @@ export default class FormBio extends HTMLElement {
         @media screen and (max-width:600px) {
           ::-webkit-scrollbar {
             -webkit-appearance: none;
-          }
-
-          .top > .desc {
-            margin: 0;
-            padding: 6px 0 10px;
-            font-size: 1rem;
-            line-height: 1.5;
-            font-family: var(--font-main), sans-serif;
           }
 
           form.fields .actions > .action {

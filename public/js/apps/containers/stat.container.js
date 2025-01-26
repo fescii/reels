@@ -4,10 +4,8 @@ export default class StatContainer extends HTMLElement {
     super();
 
     this._url = this.getAttribute('api') || '/u/stats';
-
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.render();
   }
 
@@ -104,6 +102,7 @@ export default class StatContainer extends HTMLElement {
   getHeader = () => {
     return /* html */`
       <div class="top">
+        <h4 class="title">Your stats</h4>
         <p class="desc">
           Your stats are a summary of your interactions on the platform. You can view your stories, replies and likes and it updates on a daily basis.
         </p>
@@ -194,24 +193,23 @@ export default class StatContainer extends HTMLElement {
           display: flex;
           flex-flow: column;
           gap: 5px;
-          padding: 0;
+          padding: 5px 0 0;
           width: 100%;
         }
 
         .top > h4.title {
-          border-bottom: var(--border-mobile);
           display: flex;
           align-items: center;
           color: var(--title-color);
           font-size: 1.3rem;
           font-weight: 500;
           margin: 0;
-          padding: 0 0 6px 0;
+          padding: 0;
         }
 
         .top > .desc {
           margin: 0;
-          padding: 10px 0;
+          padding: 0 0 5px;
           color: var(--text-color);
           font-size: 1rem;
           font-family: var(--font-main), sans-serif;
@@ -223,10 +221,11 @@ export default class StatContainer extends HTMLElement {
           display: flex;
           flex-flow: column;
           gap: 0;
+          padding: 5px 0 0;
           z-index: 3;
           width: 100%;
           position: sticky;
-          top: 60px;
+          top: 0;
         }
 
         .actions > ul.tab {
@@ -304,7 +303,6 @@ export default class StatContainer extends HTMLElement {
         }
 
         .content {
-          /* border: var(--border); */
           display: flex;
           flex-flow: column;
           gap: 10px;
@@ -317,18 +315,9 @@ export default class StatContainer extends HTMLElement {
             -webkit-appearance: none;
           }
 
-          .top > .desc {
-            margin: 0;
-            padding: 6px 0 10px;
-            color: var(--text-color);
-            font-size: 1rem;
-            line-height: 1.3;
-            font-family: var(--font-main), sans-serif;
-          }
-
           .actions {
             position: sticky;
-            top: 50px;
+            top: 0;
           }
 
           a,
@@ -336,7 +325,6 @@ export default class StatContainer extends HTMLElement {
             cursor: default !important;
           }
         }
-
       </style>
     `;
   }

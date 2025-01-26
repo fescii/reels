@@ -111,7 +111,6 @@ export default class StoriesContainer extends HTMLElement {
     }
   }
 
-
   mapFields = data => {
     return data.map(story => {
       const author = story.story_author;
@@ -338,6 +337,10 @@ export default class StoriesContainer extends HTMLElement {
 
         @keyframes l22-0 {
           100% {transform: rotate(1turn)}
+        }
+
+        @keyframes l22 {
+          100% {transform: rotate(1turn) translate(150%)}
         }
 
         div.empty {

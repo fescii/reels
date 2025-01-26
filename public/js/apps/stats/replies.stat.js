@@ -362,7 +362,7 @@ export default class RepliesStat extends HTMLElement {
           color: var(--text-color);
           font-size: 1rem;
           font-weight: 500;
-          font-family: var(--font-main), sans-serif;
+          font-family: var(--font-text), sans-serif;
           margin: 0;
         }
 
@@ -372,7 +372,7 @@ export default class RepliesStat extends HTMLElement {
           flex-flow: row;
           gap: 15px;
           align-items: end;
-          font-family: var(--font-main), sans-serif;
+          font-family: var(--font-text), sans-serif;
           margin: 0;
         }
 
@@ -380,7 +380,7 @@ export default class RepliesStat extends HTMLElement {
           color: var(--text-color);
           font-size: 1.25rem;
           font-weight: 600;
-          font-family: var(--font-main), sans-serif;
+          font-family: var(--font-text), sans-serif;
           margin: 0;
         }
 
@@ -421,18 +421,6 @@ export default class RepliesStat extends HTMLElement {
 
         .cards > .card > .stat > .change.up > svg {
           margin: 0;
-        }
-
-        @media screen and (max-width:950px) {
-          .cards > .card {
-            min-width: 150px;
-          }
-        }
-
-        @media screen and (max-width:800px) {
-          .cards > .card {
-            min-width: 120px;
-          }
         }
 
         @media screen and (max-width:660px) {

@@ -187,6 +187,7 @@ export default class FormPassword extends HTMLElement {
   getHeader = () => {
     return /* html */`
       <div class="top">
+        <h4 class="title">Your password</h4>
         <p class="desc">
           Your password is how you will log in to your account. You can change your password using the form below. You're required to enter your current password, then your new password.
         </p>
@@ -316,19 +317,18 @@ export default class FormPassword extends HTMLElement {
         }
 
         .top > h4.title {
-          border-bottom: var(--border-mobile);
           display: flex;
           align-items: center;
           color: var(--title-color);
           font-size: 1.3rem;
           font-weight: 500;
           margin: 0;
-          padding: 0 0 6px 0;
+          padding: 0;
         }
 
         .top > .desc {
           margin: 0;
-          padding: 10px 0;
+          padding: 0 0 5px;
           color: var(--text-color);
           font-size: 1rem;
           font-family: var(--font-main), sans-serif;
@@ -570,15 +570,7 @@ export default class FormPassword extends HTMLElement {
           ::-webkit-scrollbar {
             -webkit-appearance: none;
           }
-
-          .top > .desc {
-            margin: 0;
-            padding: 6px 0 10px;
-            font-size: 1rem;
-            line-height: 1.5;
-            font-family: var(--font-main), sans-serif;
-          }
-
+          
           form.fields .actions > .action {
             cursor: default !important;
           }

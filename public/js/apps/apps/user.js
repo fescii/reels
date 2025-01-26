@@ -38,9 +38,6 @@ export default class AppUser extends HTMLElement {
     // Add this component handler to the window wss object
     this.checkAndAddHandler();
 
-    // request user to enable notifications
-    this.checkNotificationPermission();
-
     // Check if the display is greater than 600px using mql
     const mql = window.matchMedia('(max-width: 660px)');
 
@@ -58,21 +55,15 @@ export default class AppUser extends HTMLElement {
     // select the button
     const btn = this.shadowObj.querySelector('section.tab > div.header > svg');
 
-    // select the header-wrapper
-    const headerWrapper = this.shadowObj.querySelector('div.user-title');
-
     // Watch for media query changes
     this.watchMediaQuery(mql)
 
     // get tab where class is this._current
     const currentTab = tabContainer.querySelector(`li.${this._current}`);
 
-    if (currentTab && headerWrapper && tabContainer && contentContainer && btn) {
-      // Update the header-wrapper section attribute
-      this.updateCurrentText(currentTab, headerWrapper);
-
+    if (currentTab && tabContainer && contentContainer && btn) {
       // Activate the tab
-      this.activateTab(mql.matches, headerWrapper, tabContainer, contentContainer);
+      this.activateTab(mql.matches, tabContainer, contentContainer);
 
       // activate the button
       this.activateBtn(mql.matches, contentContainer, tabContainer, btn);
@@ -86,12 +77,6 @@ export default class AppUser extends HTMLElement {
     if (url) {
       // Open user profile
       this.handleUserClick(url);
-    }
-  }
-
-  checkNotificationPermission = async () => {
-    if(window.notify && !window.notify.permission) {
-      await window.notify.requestPermission();
     }
   }
 
@@ -374,7 +359,7 @@ export default class AppUser extends HTMLElement {
     }
   }
 
-  activateTab = (mql, headerWrapper, tabContainer, contentContainer) => {
+  activateTab = (mql, tabContainer, contentContainer) => {
     const outerThis = this;
 
     // select all tab
@@ -406,9 +391,6 @@ export default class AppUser extends HTMLElement {
           // Update current attribute
           this.setAttribute('current', tab.dataset.name);
 
-          // update current text
-          this.updateCurrentText(tab, headerWrapper);
-
           // Add loader
           contentContainer.innerHTML = this.getLoader();
 
@@ -425,7 +407,6 @@ export default class AppUser extends HTMLElement {
   handlePopState = event => {
     const tabContainer = this.shadowObj.querySelector('section.tab');
     const contentContainer = this.shadowObj.querySelector('div.content-container');
-    const headerWrapper = this.shadowObj.querySelector('div.user-title');
     let activeTab = tabContainer.querySelector('li.active');
     const outerThis = this;
     const state = event.state;
@@ -441,9 +422,6 @@ export default class AppUser extends HTMLElement {
 
         // Update current attribute
         this.setAttribute('current', tab.dataset.name);
-
-        // Update current text
-        this.updateCurrentText(tab, headerWrapper);
 
         tab.classList.add('active');
         activeTab = tab;
@@ -491,15 +469,6 @@ export default class AppUser extends HTMLElement {
       // activate the button
       this.activateBtn(mql.matches, contentContainer, tabContainer, btn);
     });
-  }
-
-  updateCurrentText = (tab, headerWrapper) => {
-    // Get the span.text from tab
-    const text = tab.querySelector('span.text');
-
-    // select h3 and update text
-    const h3 = headerWrapper.querySelector('h3.name');
-    h3.textContent = text.textContent;
   }
 
   disableScroll() {
@@ -1769,7 +1738,7 @@ export default class AppUser extends HTMLElement {
           border-top: var(--border);
         }
 
-				@media screen and (max-width:900px) {
+				@media screen and (max-width: 900px) {
           section.tab {
             padding: 0;
             width: 33%;
@@ -1802,9 +1771,10 @@ export default class AppUser extends HTMLElement {
           }
         }
 
-				@media screen and (max-width:660px) {
+				@media screen and (max-width: 660px) {
 					:host {
             font-size: 16px;
+            padding: 0 10px;
 					}
 
           div.themes > .themes-container > .theme button,
@@ -1874,6 +1844,7 @@ export default class AppUser extends HTMLElement {
 
           section.tab > div.header > svg {
             transition: all 0.3s ease-in-out;
+            display: inline-block;
             position: absolute;
             right: 10px;
             top: 18px;

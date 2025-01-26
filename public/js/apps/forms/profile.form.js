@@ -267,6 +267,7 @@ export default class FormProfile extends HTMLElement {
   getHeader = () => {
     return /* html */`
       <div class="top">
+        <h4 class="title">Your picture</h4>
         <p class="desc">
           Your profile picture is how people will recognize you on the platform. You can use a photo of yourself or an avatar. <br>
           <span>Note that the image will be cropped to a square and resized to 300x300 pixels, and may take time to reflect everywhere due to local cache.<span>
@@ -397,19 +398,18 @@ export default class FormProfile extends HTMLElement {
         }
 
         .top > h4.title {
-          border-bottom: var(--border-mobile);
           display: flex;
           align-items: center;
           color: var(--title-color);
           font-size: 1.3rem;
           font-weight: 500;
           margin: 0;
-          padding: 0 0 6px 0;
+          padding: 0;
         }
 
         .top > .desc {
           margin: 0;
-          padding: 10px 0;
+          padding: 0 0 5px;
           color: var(--text-color);
           font-size: 1rem;
           font-family: var(--font-main), sans-serif;
@@ -719,14 +719,6 @@ export default class FormProfile extends HTMLElement {
         @media screen and (max-width:600px) {
           ::-webkit-scrollbar {
             -webkit-appearance: none;
-          }
-
-          .top > .desc {
-            margin: 0;
-            padding: 6px 0 10px;
-            font-size: 1rem;
-            line-height: 1.5;
-            font-family: var(--font-main), sans-serif;
           }
 
           form.fields .actions > .action {

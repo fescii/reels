@@ -238,9 +238,7 @@ export default class StatFeed extends HTMLElement {
   getLoader() {
     return /* html */`
       <div class="loader-container">
-        <span id="btn-loader">
-          <span class="loader-alt"></span>
-        </span>
+        <div class="loader"></div>
       </div>
     `
   }
@@ -352,55 +350,53 @@ export default class StatFeed extends HTMLElement {
         }
 
         div.loader-container {
-          position: relative;
-          width: 100%;
-          height: 150px;
-          padding: 20px 0 0 0;
-        }
-
-        #btn-loader {
-          position: absolute;
-          top: 0;
-          left: 0;
-          bottom: 0;
-          right: 0;
-          z-index: 5;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: inherit;
+          width: 100%;
+          min-height: 200px;
+          min-width: 100%;
         }
 
-        #btn-loader > .loader-alt {
-          width: 35px;
-          aspect-ratio: 1;
-          --_g: no-repeat radial-gradient(farthest-side, #18A565 94%, #0000);
-          --_g1: no-repeat radial-gradient(farthest-side, #21D029 94%, #0000);
-          --_g2: no-repeat radial-gradient(farthest-side, #df791a 94%, #0000);
-          --_g3: no-repeat radial-gradient(farthest-side, #f09c4e 94%, #0000);
-          background:    var(--_g) 0 0,    var(--_g1) 100% 0,    var(--_g2) 100% 100%,    var(--_g3) 0 100%;
-          background-size: 30% 30%;
-          animation: l38 .9s infinite ease-in-out;
-          -webkit-animation: l38 .9s infinite ease-in-out;
-        }
-
-        #btn-loader > .loader {
+        div.loader-container > .loader {
           width: 20px;
           aspect-ratio: 1;
-          --_g: no-repeat radial-gradient(farthest-side, #ffffff 94%, #0000);
-          --_g1: no-repeat radial-gradient(farthest-side, #ffffff 94%, #0000);
-          --_g2: no-repeat radial-gradient(farthest-side, #df791a 94%, #0000);
-          --_g3: no-repeat radial-gradient(farthest-side, #f09c4e 94%, #0000);
-          background:    var(--_g) 0 0,    var(--_g1) 100% 0,    var(--_g2) 100% 100%,    var(--_g3) 0 100%;
-          background-size: 30% 30%;
-          animation: l38 .9s infinite ease-in-out;
-          -webkit-animation: l38 .9s infinite ease-in-out;
+          border-radius: 50%;
+          background: var(--accent-linear);
+          display: grid;
+          animation: l22-0 2s infinite linear;
         }
 
-        @keyframes l38 {
-          100% {
-            background-position: 100% 0, 100% 100%, 0 100%, 0 0
-          }
+        div.loader-container > .loader:before {
+          content: "";
+          grid-area: 1/1;
+          margin: 15%;
+          border-radius: 50%;
+          background: var(--second-linear);
+          transform: rotate(0deg) translate(150%);
+          animation: l22 1s infinite;
+        }
+
+        div.loader-container > .loader:after {
+          content: "";
+          grid-area: 1/1;
+          margin: 15%;
+          border-radius: 50%;
+          background: var(--accent-linear);
+          transform: rotate(0deg) translate(150%);
+          animation: l22 1s infinite;
+        }
+
+        div.loader-container > .loader:after {
+          animation-delay: -.5s
+        }
+
+        @keyframes l22-0 {
+          100% {transform: rotate(1turn)}
+        }
+
+        @keyframes l22 {
+          100% {transform: rotate(1turn) translate(150%)}
         }
 
         .activities {

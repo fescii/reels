@@ -430,7 +430,6 @@ export default class AppUser extends HTMLElement {
     const outerThis = this;
     const state = event.state;
     if (state && state.kind === 'sub' && state.app === 'user') {
-      this.updateHistory(state.name, state.html)
       // Select the state tab
       const tab = tabContainer.querySelector(`li.${state.name}`);
 
@@ -459,14 +458,14 @@ export default class AppUser extends HTMLElement {
           })
         }
 
-        outerThis.updateState(event.state, contentContainer);
+        outerThis.updateState(event.state.name, contentContainer);
       }
     }
   }
 
-  updateState = (state, contentContainer)=> {
+  updateState = (name, contentContainer)=> {
     // populate content
-    this.populateContent(state.name, contentContainer);
+    this.populateContent(name, contentContainer);
   }
 
   watchMediaQuery = mql => {

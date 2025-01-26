@@ -214,7 +214,16 @@ const getAccount = async (req, res) => {
     });
 
     if (!result.success) {
-      return res.status(404).render('404');
+      // if result.unverified, redirect to the unverified page
+      if (result.unverified) {
+        return res.redirect('/join/login?next=/user');
+      } else if(result.error) {
+        // if result.error, render the 500 page
+        return res.status(500).render('500');
+      }
+      else {
+        return res.status(404).render('404');
+      }
     }
 
     const user = result.user;

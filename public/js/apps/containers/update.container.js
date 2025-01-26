@@ -85,6 +85,7 @@ export default class UpdateContainer extends HTMLElement {
   getHeader = () => {
     return /* html */`
       <div class="top">
+        <h4 class="title">Your updates</h4>
         <p class="desc">
           Your updates contains summary of all actions performed by other users on your content or profile.
           You can filter by stories, replies, people, and topics.<br>
@@ -183,27 +184,25 @@ export default class UpdateContainer extends HTMLElement {
           display: flex;
           flex-flow: column;
           gap: 5px;
-          padding: 0;
+          padding: 5px 0 0;
           width: 100%;
         }
 
         .top > h4.title {
-          border-bottom: var(--border-mobile);
           display: flex;
           align-items: center;
           color: var(--title-color);
           font-size: 1.3rem;
           font-weight: 500;
           margin: 0;
-          padding: 0 0 6px 0;
+          padding: 0;
         }
 
         .top > .desc {
           margin: 0;
-          padding: 6px 0 10px;
+          padding: 0;
           color: var(--text-color);
           font-size: 1rem;
-          line-height: 1.5;
           font-family: var(--font-main), sans-serif;
         }
 
@@ -216,18 +215,19 @@ export default class UpdateContainer extends HTMLElement {
         }
 
         .actions {
-          border-bottom: var(--border);
           background-color: var(--background);
           display: flex;
           flex-flow: column;
           gap: 0;
           z-index: 3;
+          padding: 10px 0 0;
           width: 100%;
           position: sticky;
-          top: 60px;
+          top: 0;
         }
 
         .actions > ul.tab {
+          border-bottom: var(--border);
           height: max-content;
           width: 100%;
           padding: 0;
@@ -290,7 +290,7 @@ export default class UpdateContainer extends HTMLElement {
           background: var(--accent-linear);
           display: inline-block;
           bottom: -2.5px;
-          left: 0px;
+          left: 10px;
           width: 20px;
           min-height: 5px;
           border-top-left-radius: 5px;
@@ -314,16 +314,23 @@ export default class UpdateContainer extends HTMLElement {
             -webkit-appearance: none;
           }
 
-          .top > .desc {
-            margin: 0;
-            padding: 6px 0 10px;
-            font-size: 1rem;
-            line-height: 1.5;
+          .top {
+            padding: 0 10px;
           }
 
           .actions {
             position: sticky;
-            top: 50px;
+            width: 100%;
+            padding: 10px 10px 0;
+            top: 0;
+          }
+
+          .content {
+            display: flex;
+            flex-flow: column;
+            gap: 10px;
+            padding: 0 10px;
+            width: 100%;
           }
 
           a,

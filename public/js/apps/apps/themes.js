@@ -22,6 +22,14 @@ export default class AppThemes extends HTMLElement {
 
   connectedCallback() {
     this.enableScroll();
+    this.watchMql();
+    this.activateThemeIcons();
+  }
+
+  watchMql = () => {
+    this.mql.addEventListener('change', (e) => {
+      this.render();
+    });
   }
 
   activateThemeIcons = () => {
@@ -140,6 +148,7 @@ export default class AppThemes extends HTMLElement {
     return /* html */`
       <div class="themes">
         <div class="top">
+          <h4 class="title">Your themes</h4>
           <p class="desc">
             Choose a theme that suits your preference. You can switch between light and dark themes at any time.<br>
             <span>Note that in the near future, we will be adding more themes to choose from, and will also allow you to create or customize your own theme.</span>
@@ -289,7 +298,7 @@ export default class AppThemes extends HTMLElement {
           flex-flow: column;
           align-items: start;
           gap: 0;
-          padding: 0;
+          padding: 20px 0;
           width: calc(55% - 10px);
           min-height: 100vh;
         }
@@ -303,6 +312,16 @@ export default class AppThemes extends HTMLElement {
           gap: 10px;
           min-height: max-content;
           height: max-content;
+        }
+
+        div.themes > .top > h4.title {
+          display: flex;
+          align-items: center;
+          color: var(--title-color);
+          font-size: 1.3rem;
+          font-weight: 500;
+          margin: 0;
+          padding: 0;
         }
 
         div.themes > .top > .desc {
@@ -416,6 +435,29 @@ export default class AppThemes extends HTMLElement {
           display: none;
         }
 
+        div.themes > .themes-container {
+          flex-flow: column;
+          gap: 0;
+        }
+
+        div.themes > .themes-container > .theme {
+          display: flex;
+          flex-flow:column;
+          color: var(--text-color);
+          margin: 0 0 5px;
+          padding: 10px 0;
+          gap: 5px;
+          width: 100%;
+          min-height: max-content;
+          height: 100%;
+          border-top: var(--border);
+        }
+
+        div.themes > .themes-container > .theme:last-of-type {
+          margin: 0;
+          padding: 10px 0 0;
+        }
+
         @media screen and (max-width:900px) {
           section.main {
             width: 58%;
@@ -424,35 +466,12 @@ export default class AppThemes extends HTMLElement {
           section.side {
             width: 40%;
           }
-
-          div.themes > .themes-container {
-            flex-flow: column;
-            gap: 0;
-          }
-
-          div.themes > .themes-container > .theme {
-            display: flex;
-            flex-flow:column;
-            color: var(--text-color);
-            margin: 0 0 5px;
-            padding: 10px 0;
-            gap: 5px;
-            width: 100%;
-            min-height: max-content;
-            height: 100%;
-            border-top: var(--border);
-          }
-
-          div.themes > .themes-container > .theme:last-of-type {
-            margin: 0;
-            padding: 10px 0 0;
-          }
         }
 
 				@media screen and (max-width:660px) {
 					:host {
             font-size: 16px;
-						padding: 0;
+						padding: 20px 10px;
             margin: 0;
             display: flex;
             flex-flow: column;

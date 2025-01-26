@@ -22,10 +22,13 @@ export default class AppUpdates extends HTMLElement {
 
   connectedCallback() {
     this.enableScroll();
+    this.watchMql();
   }
 
-  disconnectedCallback() {
-    this.enableScroll()
+  watchMql = () => {
+    this.mql.addEventListener('change', (e) => {
+      this.render();
+    });
   }
 
   disableScroll() {
@@ -54,28 +57,15 @@ export default class AppUpdates extends HTMLElement {
   }
 
   getBody = () => {
-    const mql = window.matchMedia('(max-width: 660px)');
-    if (mql.matches) {
+    if (this.mql.matches) {
       return /* html */`
-        ${this.getForm()}
-        <div class="tab-controller">
-          ${this.getTab(this.getAttribute('tab'))}
-        </div>
-        <div class="content-container">
-          ${this.getContainer(this._tab)}
-        </div>
+        ${this.getUpdates()}
       `;
     }
     else {
       return /* html */`
         <section class="main">
-          ${this.getForm()}
-          <div class="tab-controller">
-            ${this.getTab(this.getAttribute('tab'))}
-          </div>
-          <div class="content-container">
-            ${this.getContainer(this._tab)}
-          </div>
+          ${this.getUpdates()}
         </section>
         <section class="side">
           <trending-stories url="/h/trend" limit="10"></trending-stories>
@@ -83,6 +73,14 @@ export default class AppUpdates extends HTMLElement {
         </section>
       `;
     }
+  }
+
+  getUpdates = () => {
+    return /* html */`
+      <update-container url="/user/updates" api-all="/n/all" api-users="/n/users" notification="true"
+        api-stories="/n/stories" api-replies="/n/replies" api-topics="/n/topics">
+      </update-container>
+    `;
   }
 
   getInfo = () => {
@@ -158,7 +156,7 @@ export default class AppUpdates extends HTMLElement {
           flex-flow: column;
           align-items: start;
           gap: 0;
-          padding: 0;
+          padding: 20px 0;
           width: calc(55% - 10px);
           min-height: 100vh;
         }
@@ -205,7 +203,7 @@ export default class AppUpdates extends HTMLElement {
 				@media screen and (max-width:660px) {
 					:host {
             font-size: 16px;
-						padding: 0;
+						padding: 15px 0 55px;
             margin: 0;
             display: flex;
             flex-flow: column;
@@ -222,23 +220,6 @@ export default class AppUpdates extends HTMLElement {
           button,
 					a {
 						cursor: default !important;
-          }
-
-          .section.main {
-            display: flex;
-            flex-flow: column;
-            gap: 0;
-            width: 100%;
-          }
-
-          div.content-container {
-            padding: 0 10px 35px;
-          }
-
-          section.side {
-            padding: 0;
-            display: none;
-            width: 100%;
           }
 				}
 	    </style>

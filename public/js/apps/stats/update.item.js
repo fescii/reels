@@ -140,7 +140,6 @@ export default class UpdateItem extends HTMLElement {
     window.onscroll = function () { };
   }
 
-  // Get lapse time
   getLapseTime = isoDateStr => {
     const dateIso = new Date(isoDateStr); // ISO strings with timezone are automatically handled
     let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -157,34 +156,33 @@ export default class UpdateItem extends HTMLElement {
     // Get the seconds
     const seconds = timeDifference / 1000;
 
-    // Check if seconds is less than 60: return Just now
-    if (seconds < 60) {
-      return 'Just now';
+    // check if seconds is less than 86400 and dates are equal: Today, 11:30 AM
+    if (seconds < 86400 && date.getDate() === currentTime.getDate()) {
+      return `
+        Today • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
+    } else if (seconds < 86400 && date.getDate() !== currentTime.getDate()) {
+      return `
+        Yesterday • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
     }
 
-    // check for minutes
-    if (seconds < 3600) {
-      const min = Math.floor(seconds / 60)
-      return `${min === 1 ? '1 min' : min + ' mins'}`;
-    }
-
-    // check for hours
-    if (seconds < 86400) {
-      const hours = Math.floor(seconds / 3600)
-      return `${hours === 1 ? '1 hr' : hours + ' hrs'}`;
-    }
-
-    // check if seconds is less than 604800: return day and time
+    // check if seconds is less than 604800: Friday, 11:30 AM
     if (seconds <= 604800) {
-      return date.toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: true });
+      return `
+        ${date.toLocaleDateString('en-US', { weekday: 'short' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
     }
 
-    // Check if the date is in the current year:: return date and month short 2-digit year without time
-    if (date.getFullYear() === currentTime.getFullYear()) {
-      return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', });
-    }
-    else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    // Check if the date is in the current year and seconds is less than 31536000: Dec 12, 11:30 AM
+    if (seconds < 31536000 && date.getFullYear() === currentTime.getFullYear()) {
+      return `
+        ${date.toLocaleDateString('en-US', { weekday: 'short' })} • ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+      `
+    } else {
+      return `
+        ${date.toLocaleDateString('en-US', { weekday: 'short' })} • ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+      `
     }
   }
 
@@ -451,7 +449,7 @@ export default class UpdateItem extends HTMLElement {
 
         .content {
           color: var(--text-color);
-          font-family: var(--font-text), sans-serif;
+          font-family: var(--font-main), sans-serif;
           display: flex;
           flex-flow: column;
           font-size: 1rem;
@@ -463,8 +461,10 @@ export default class UpdateItem extends HTMLElement {
         .content h4 {
           color: var(--title-color);
           font-weight: 500;
+          padding: 0 0 3px;
+          line-height: 1.3;
           font-size: 1.1rem;
-          font-family: var(--font-text), sans-serif;
+          font-family: var(--font-main), sans-serif;
         }
 
         .foot {
@@ -525,11 +525,13 @@ export default class UpdateItem extends HTMLElement {
         .actions > .action.plain {
           padding: 0;
           pointer-events: none;
-          font-family: var(--font-main), sans-serif;
           color: var(--gray-color);
-          font-size: 0.95rem;
           border: none;
           background: none;
+          font-family: var(--font-read), sans-serif;
+          font-size: 0.95rem;
+          font-weight: 500;
+          margin: 1px 0 0 0;
         }
 
         .actions > .action.plain > span.text {

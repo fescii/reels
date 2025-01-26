@@ -5,9 +5,9 @@ module.exports = (app) => {
   require('./stories')(app);
   require('./users')(app);
   require('./search')(app);
-  require('./feeds')(app);
-  require('./public')(app);
   require('./themes')(app);
   require('./updates')(app);
+  require('./feeds')(app);
+  require('./public')(app);
   require('./errors')(app);
 }

@@ -498,8 +498,6 @@ export default class AppUser extends HTMLElement {
       contentContainer.innerHTML = this.getSoon();
     } else if (name === 'activity') {
       contentContainer.innerHTML = this.getActivity();
-    } else if (name === 'updates') {
-      contentContainer.innerHTML = this.getUpdates();
     } else if (name === 'content') {
       contentContainer.innerHTML = this.getContent();
     } else if (name === 'logout') {
@@ -701,14 +699,6 @@ export default class AppUser extends HTMLElement {
     `
   }
 
-  getUpdates = () => {
-    return /* html */`
-      <update-container url="/user/updates" api-all="/n/all" api-users="/n/users" notification="true"
-        api-stories="/n/stories" api-replies="/n/replies" api-topics="/n/topics">
-      </update-container>
-    `;
-  }
-
   getTab = () =>  {
     return /* html */`
       <section class="tab remains">
@@ -809,15 +799,6 @@ export default class AppUser extends HTMLElement {
                 <path d="M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5Zm-1.43-.75a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"></path>
               </svg>
               <span class="text">Your activity</span>
-            </a>
-          </li>
-          <li url="/user/updates" class="tab-item updates" data-name="updates">
-            <span class="line"></span>
-            <a href="/user/updates" class="tab-link">
-              <svg height="16" viewBox="0 0 16 16" fill="currentColor" width="16">
-                <path d="M8 16a2 2 0 0 0 1.985-1.75c.017-.137-.097-.25-.235-.25h-3.5c-.138 0-.252.113-.235.25A2 2 0 0 0 8 16ZM3 5a5 5 0 0 1 10 0v2.947c0 .05.015.098.042.139l1.703 2.555A1.519 1.519 0 0 1 13.482 13H2.518a1.516 1.516 0 0 1-1.263-2.36l1.703-2.554A.255.255 0 0 0 3 7.947Zm5-3.5A3.5 3.5 0 0 0 4.5 5v2.947c0 .346-.102.683-.294.97l-1.703 2.556a.017.017 0 0 0-.003.01l.001.006c0 .002.002.004.004.006l.006.004.007.001h10.964l.007-.001.006-.004.004-.006.001-.007a.017.017 0 0 0-.003-.01l-1.703-2.554a1.745 1.745 0 0 1-.294-.97V5A3.5 3.5 0 0 0 8 1.5Z"></path>
-              </svg>
-              <span class="text">Your updates</span>
             </a>
           </li>
           <li url="/user/topics" class="tab-item topics" data-name="topics">

@@ -731,6 +731,12 @@ export default class AppMain extends HTMLElement {
 
         section.nav > ul.nav.logo {
           border: none;
+          padding: 0;
+        }
+
+        section.nav > ul.nav.main {
+          border: none;
+          padding: 5px 0;
         }
 
         section.nav > ul.nav > li {

@@ -1,10 +1,11 @@
-// import WebSocketClient from "./uws.js";
+import WebSocketClient from "./uws.js";
 import CryptoManager from "./keys/index.js";
 export default class ChatApp extends HTMLElement {
   constructor() {
     super();
     this.shadow = this.attachShadow({ mode: 'open' });
     this.active_tab = null;
+    this.ws = new WebSocketClient('wss://localhost/events');
     this.mql = window.matchMedia("(max-width: 768px)");
     this.render();
   }
@@ -77,50 +78,27 @@ export default class ChatApp extends HTMLElement {
   }
 
   formatNumber = numStr => {
-    try {
-      const num = parseInt(numStr);
+    const num = parseInt(numStr, 10);
+    if (isNaN(num)) return '0';
 
-      // less than a thousand: return the number
-      if (num < 1000) return num;
-
-      // less than a 10,000: return the number with a k with two decimal places
-      if (num < 10000) return `${(num / 1000).toFixed(2)}k`;
-
-      // less than a 100,000: return the number with a k with one decimal place
-      if (num < 100000) return `${(num / 1000).toFixed(1)}k`;
-
-      // less than a million: return the number with a k with no decimal places
-      if (num < 1000000) return `${Math.floor(num / 1000)}k`;
-
-      // less than a 10 million: return the number with an m with two decimal places
-      if (num < 10000000) return `${(num / 1000000).toFixed(2)}M`;
-
-      // less than a 100 million: return the number with an m with one decimal place
-      if (num < 100000000) return `${(num / 1000000).toFixed(1)}M`;
-
-      // less than a billion: return the number with an m with no decimal places
-      if (num < 1000000000) return `${Math.floor(num / 1000000)}M`;
-
-      // a billion or more: return the number with a B+
-      if (num >= 1000000000) return `${Math.floor(num / 1000000000)}B+`;
-
-      // else return the zero
-      return '0';
-    } catch (error) {
-      return '0';
-    }
+    if (num < 1000) return num.toString();
+    if (num < 10000) return `${(num / 1000).toFixed(2)}k`;
+    if (num < 100000) return `${(num / 1000).toFixed(1)}k`;
+    if (num < 1000000) return `${Math.floor(num / 1000)}k`;
+    if (num < 10000000) return `${(num / 1000000).toFixed(2)}M`;
+    if (num < 100000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (num < 1000000000) return `${Math.floor(num / 1000000)}M`;
+    return `${Math.floor(num / 1000000000)}B+`;
   }
 
   getTemplate() {
     if (this.mql.matches) {
       return /* html */`
-        ${this.getUsersModel()}
         ${this.getChatsContainer()}
         ${this.getStyles()}
       `;
     } else {
       return /* html */`
-        ${this.getUsersModel()}
         ${this.getBody()}
         ${this.getStyles()}
       `;
@@ -841,7 +819,7 @@ export default class ChatApp extends HTMLElement {
             height: 100dvh;
             min-height: 100dvh;
             max-height: 100dvh;
-            padding: 0;
+            padding: 0 10px 10px;
             margin: 0;
             overflow-y: auto;
             scrollbar-width: none;

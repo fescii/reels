@@ -400,57 +400,49 @@ export default class Message extends HTMLDivElement {
   }
 
   formatDateTime = str => {
-		const date = new Date(str);
+    const dateIso = new Date(str); // ISO strings with timezone are automatically handled
+    let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-		// get th, st, nd, rd for the date
-		const day = date.getDate();
-		const dayStr = day === 1 || day === 21 || day === 31 ? 'st' : day === 2 || day === 22 ? 'nd' : day === 3 || day === 23 ? 'rd' : 'th';
-		const diff = new Date() - date;
+    // Convert posted time to the current timezone
+    const date = new Date(dateIso.toLocaleString('en-US', { timeZone: userTimezone }));
 
-    // if we are in the same minute: Just now
-    if (diff < 1000 * 60) {
+    // Get the current time
+    const currentTime = new Date();
+
+    // Get the difference in time
+    const timeDifference = currentTime - date;
+
+    // Get the seconds
+    const seconds = timeDifference / 1000;
+
+    // Check if seconds is less than 60: return Just now
+    if (seconds < 60) {
       return 'Just now';
     }
-    // if we are in the same day: Today at HH:MM AM/PM
-    if (diff < 1000 * 60 * 60 * 24) {
-      // check if dates are the same
-      if (new Date().getDate() === date.getDate()) {
-        return /* html */`
-          Today at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
-        `;
+    // check if seconds is less than 86400: return time AM/PM
+    if (seconds < 86400) {
+      const isToday = date.getDate() === currentTime.getDate();
+      if (isToday) {
+        return `Today at ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
       } else {
-        return /* html */`
-          Yesterday at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
-        `;
+        return `Yesterday at ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
       }
     }
 
-    // if we are in the diff is less than 7 days: DAY AT HH:MM AM/PM
-    if (diff < 1000 * 60 * 60 * 24 * 7) {
-      return /* html */`
-        ${date.toLocaleString('default', { weekday: 'short' })} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
-      `;
+    // check if seconds is less than 604800: return day and time
+    if (seconds <= 604800) {
+      // return date.toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: true });
+      return `${date.toLocaleDateString('en-US', { weekday: 'short' })} at ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
     }
 
-    // if we are in the same month AND year: 12th APR AT HH:MM AM/PM
-    if (new Date().getMonth() === date.getMonth() && new Date().getFullYear() === date.getFullYear()) {
-      return /* html */`
-        ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
-      `;
+    // Check if the date is in the current year:: return date and month short 2-digit year without time
+    if (date.getFullYear() === currentTime.getFullYear()) {
+      return `${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', })} at ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
     }
-
-    // if we are in the same year: 12th Jan at 11:59 PM
-    if (new Date().getFullYear() === date.getFullYear()) {
-      return /* html */`
-        ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
-      `;
+    else {
+      return `${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: '2-digit' })} at ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
     }
-
-    // if we are in a different year: 12th Jan 2021 at 11:59 PM
-		return /* html */`
-      ${date.getDate()}${dayStr} ${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()} at ${date.toLocaleString('default', { hour: 'numeric', minute: 'numeric', hour12: true }).toUpperCase()}
-    `;
-	}
+  }
 
   getTemplate() {
     return /* html */`

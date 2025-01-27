@@ -110,6 +110,7 @@ Author URL: https://femar.co.ke
   --chat-you-delivered: #21d029;
   --typing-color: rgba(148 163 184 / 1);
   --message-background: linear-gradient(rgb(255, 143, 178) 0%, rgb(167, 151, 255) 50%, rgb(0, 229, 255) 100%);
+  --attachement-background: #08b86f21;
 
   --open-line: 2px solid #08b86f93;
   --open-line-mobile: 2px solid #08b86fc5;
@@ -285,6 +286,7 @@ Author URL: https://femar.co.ke
     --chat-you-delivered: #1dbb25;
     --typing-color: rgba(123, 129, 142, 1);
     --message-background: linear-gradient(rgb(64, 28, 42) 0%, rgb(38, 32, 71) 50%, rgb(0, 52, 61) 100%);
+    --attachement-background: #07a45f21;
 
     --open-line: 2px solid #07a45fcc;
     --open-line-mobile: 2px solid #07a45fe6;

@@ -504,11 +504,11 @@ export default class MessagingContainer extends HTMLElement {
         you="true" verified="false" status="sent" active="false" kind="reply" to-you="false" reply-to="John" reply-text="OMG! WWE is coming to town, are you ready?">
         Rickoshea!!!!
       </div>
-      <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/men/1.jpg" datetime="2024-12-27T17:12:00Z"
+      <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/men/1.jpg" datetime="2025-01-23T17:12:00Z"
         you="false" verified="true" status="seen" active="true" kind="message">
         Ok
       </div>
-      <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2024-12-28T20:47:00Z"
+      <div is="message-item" class="message" user-name="John Doe" user-picture="https://randomuser.me/api/portraits/women/12.jpg" datetime="2025-01-27T10:47:00Z"
         you="true" verified="true" status="sent" active="false" kind="reply" to-you="true" reply-to="Jane" reply-text="Rickoshea!!!!"
         reactions='{ "from": "angry", "to": "love" }'>
         okay

@@ -1,0 +1,12 @@
+<% var url = "/u/" + data.hash.toLowerCase() %>
+<% var contact = data.contact ? JSON.stringify(data.contact) : null; -%>
+<% var bio = data.bio === null ? 'This user has not added a bio yet.' : data.bio; -%>
+<%# replace all " and ' with &quot; and &apos; to avoid breaking the html %>
+<% bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;') -%>
+<app-chats hash="<%= data.hash %>" home-url="/home" current="<%= data.tab %>" verified="<%= data.verified %>" email="<%= data.email %>"
+  stories-url="<%= url %>/stories" replies-url="<%= url %>/replies" stories="<%= data.stories %>" replies="<%= data.replies %>" 
+  user-link="<%= data.contact.link %>" user-email="<%= data.contact.email %>" user-x="<%= data.contact.x %>" user-threads="<%= data.contact.threads %>" 
+  user-linkedin="<%= data.contact.linkedin %>" user-username="<%= data.hash %>" user-you="true" user-url="<%= url %>" user-img="<%= data.picture %>"
+  user-verified="<%= data.verified %>" user-name="<%= data.name %>" user-followers="<%= data.followers %>" user-contact='<%= contact %>'
+  user-following="<%= data.following %>" user-follow="false" user-bio="<%= bio %>">
+</app-chats>

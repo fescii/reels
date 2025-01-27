@@ -9,6 +9,7 @@ const errorsController = require("./errors");
 const topicsController = require("./topics");
 const themesController = require("./themes");
 const updatesController = require("./updates");
+const chatsController = require("./chats");
 const soonController = require("./soon");
 
 
@@ -24,5 +25,6 @@ module.exports = {
   topics: topicsController,
   themes: themesController,
   updates: updatesController,
+  chats: chatsController,
   soon: soonController,
 };

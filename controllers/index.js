@@ -9,6 +9,7 @@ const errorsController = require("./errors");
 const topicsController = require("./topics");
 const themesController = require("./themes");
 const updatesController = require("./updates");
+const soonController = require("./soon");
 
 
 // Export all controllers as a single object
@@ -22,5 +23,6 @@ module.exports = {
   errors: errorsController,
   topics: topicsController,
   themes: themesController,
-  updates: updatesController
+  updates: updatesController,
+  soon: soonController,
 };

@@ -7,6 +7,7 @@ import AppUser from "./user.js";
 import AppOffline from "./offline.js";
 import AppUpdates from "./updates.js";
 import AppThemes from "./themes.js";
+import AppSoon from "./soon.js";
 
 
 export default function apps() {
@@ -19,4 +20,5 @@ export default function apps() {
   customElements.define("app-offline", AppOffline);
   customElements.define("app-updates", AppUpdates);
   customElements.define("app-themes", AppThemes);
+  customElements.define("app-soon", AppSoon);
 }

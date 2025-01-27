@@ -467,7 +467,7 @@ export default class TrendingStory extends HTMLElement {
         <a href="${this.getAttribute('url')}" class="action view" id="view-action">view</a>
         <span class="action stats" id="close-stats">stats</span>
         <span class="action read plain">
-          <span class="no">${this.calculateReadTime()}</span> <span class="text">min read</span>
+          <span class="no">${this.calculateReadTime()}</span> <span class="text">min</span>
         </span>
         <span class="action views plain">
           <span class="no">${this.formatNumber(views)}</span> <span class="text">views</span>

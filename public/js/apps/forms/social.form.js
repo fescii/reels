@@ -43,96 +43,90 @@ export default class FormName extends HTMLElement {
   }
 
   submitForm = async form => {
-    const outerThis = this;
-    // add submit event listener
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-
-      const serverStatus = form.querySelector('.server-status');
-
-      // if server status is already showing, remove it
-      if (serverStatus) {
-        serverStatus.remove();
-      }
-
-      const actions = form.querySelector('.actions');
-
-      // show loader
-      const button = form.querySelector('.action.next');
-      button.innerHTML = outerThis.getButtonLoader();
-
-      // get and validate form data
-      const formData = new FormData(form);
-
-      // get form data
-      const data = {
-        email: formData.get('email') || null,
-        x: formData.get('x') || null,
-        linkedin: formData.get('linkedin') || null,
-        threads: formData.get('threads') || null,
-        link: formData.get('link') || null
-      };
-
-      // at least one field must be filled
-      if (!data.email && !data.x && !data.linkedin && !data.threads && !data.link) {
-        actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, 'You must fill at least one field'));
-
-        button.innerHTML = '<span class="text">Send</span>';
-        return;
-      }
-
-      // get only filled fields
-      Object.keys(data).forEach(key => {
-        if (!data[key]) { 
-          delete data[key];
-        }
-      });
-
-      try {
-        const result = this.api.patch(this._url, { content: 'json', body: JSON.stringify({ contact: data }) });
-
-        // check if request was successful
-        if (result.success) {
-          // show success message
-          actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(true, result.message));
-
-          // reset button
-          button.innerHTML = '<span class="text">Send</span>';
-        } else {
-          // show error message
-          actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, result.message));
-
-          // reset button
-          button.innerHTML = '<span class="text">Send</span>';
-        }
-      }
-      catch (error) {
-        // show error message
-        actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, 'An error occurred, please try again'));
-
-        // reset button
-        button.innerHTML = '<span class="text">Send</span>';
-      }
-
-      // remove success message
-      setTimeout(() => {
-        const serverStatus = form.querySelector('.server-status');
-        if (serverStatus) {
-          serverStatus.remove();
-        }
-      }, 5000);
-    });
+    form.addEventListener('submit', this.handleSubmit.bind(this));
   }
 
-  getServerSuccessMsg = (success, text) => {
-    if (!success) {
-      return `
-        <p class="server-status">${text}</p>
-      `
+  async handleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const actions = form.querySelector('.actions');
+    const button = form.querySelector('.action.next');
+
+    this.clearServerStatus(form);
+    this.showLoader(button);
+
+    const data = this.getFormData(form);
+
+    if (!this.validateFormData(data)) {
+      this.showServerStatus(actions, false, 'You must fill at least one field');
+      this.resetButton(button);
+      return;
     }
+
+    try {
+      const result = await this.api.patch(this._url, { content: 'json', body: { contact: data } });
+      this.handleServerResponse(actions, button, result);
+    } catch (error) {
+      this.showServerStatus(actions, false, 'An error occurred, please try again');
+      this.resetButton(button);
+    }
+
+    this.removeServerStatusAfterDelay(form);
+  }
+
+  clearServerStatus(form) {
+    const serverStatus = form.querySelector('.server-status');
+    if (serverStatus) {
+      serverStatus.remove();
+    }
+  }
+
+  showLoader(button) {
+    button.innerHTML = this.getButtonLoader();
+  }
+
+  getFormData(form) {
+    const formData = new FormData(form);
+    return {
+      email: formData.get('email') || null,
+      x: formData.get('x') || null,
+      linkedin: formData.get('linkedin') || null,
+      threads: formData.get('threads') || null,
+      link: formData.get('link') || null
+    };
+  }
+
+  validateFormData(data) {
+    return Object.values(data).some(value => value);
+  }
+
+  showServerStatus(actions, success, message) {
+    actions.insertAdjacentHTML('beforebegin', this.getServerSuccessMsg(success, message));
+  }
+
+  resetButton(button) {
+    button.innerHTML = '<span class="text">Send</span>';
+  }
+
+  handleServerResponse(actions, button, result) {
+    if (result.success) {
+      this.showServerStatus(actions, true, result.message);
+    } else {
+      this.showServerStatus(actions, false, result.message);
+    }
+    this.resetButton(button);
+  }
+
+  removeServerStatusAfterDelay(form) {
+    setTimeout(() => {
+      this.clearServerStatus(form);
+    }, 5000);
+  }
+
+  getServerSuccessMsg(success, text) {
     return `
-      <p class="server-status success">${text}</p>
-    `
+      <p class="server-status${success ? ' success' : ''}">${text}</p>
+    `;
   }
 
   getButtonLoader() {
@@ -151,7 +145,7 @@ export default class FormName extends HTMLElement {
     `;
   }
 
-  getContact = () => {
+  getContact() {
     const data = {
       email: this.getAttribute('email'),
       x: this.getAttribute('x'),
@@ -160,12 +154,12 @@ export default class FormName extends HTMLElement {
       link: this.getAttribute('link')
     };
 
-    // loop through data and replace null, undefined with null
-    Object.keys(data).forEach(key => {
+    // Replace 'null' and 'undefined' strings with null
+    for (const key in data) {
       if (data[key] === 'null' || data[key] === 'undefined' || data[key] === null) {
         data[key] = null;
       }
-    });
+    }
 
     return data;
   }
@@ -176,56 +170,11 @@ export default class FormName extends HTMLElement {
       ${this.getHeader()}
       <form class="fields initial" id="social-form">
         <div class="field bio">
-          <div class="input-group email">
-            <span class="wrapper">
-              <span class="icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-                  <path d="M1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14H1.75A1.75 1.75 0 0 1 0 12.25v-8.5C0 2.784.784 2 1.75 2ZM1.5 12.251c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V5.809L8.38 9.397a.75.75 0 0 1-.76 0L1.5 5.809v6.442Zm13-8.181v-.32a.25.25 0 0 0-.25-.25H1.75a.25.25 0 0 0-.25.25v.32L8 7.88Z"></path>
-                </svg>
-              </span>
-              ${this.getEmail(contact.email)}
-            </span>
-          </div>
-          <div class="input-group x">
-            <span class="wrapper">
-              <span class="icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-twitter-x" viewBox="0 0 16 16">
-                  <path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z" />
-                </svg>
-              </span>
-              ${this.getX(contact.x)}
-            </span>
-          </div>
-          <div class="input-group linkedin">
-            <span class="wrapper">
-              <span class="icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-linkedin" viewBox="0 0 16 16">
-                  <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z"/>
-                </svg>
-              </span>
-              ${this.getLinkedin(contact.linkedin)}
-            </span>
-          </div>
-          <div class="input-group threads">
-            <span class="wrapper">
-              <span class="icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-threads" viewBox="0 0 16 16">
-                  <path d="M6.321 6.016c-.27-.18-1.166-.802-1.166-.802.756-1.081 1.753-1.502 3.132-1.502.975 0 1.803.327 2.394.948s.928 1.509 1.005 2.644q.492.207.905.484c1.109.745 1.719 1.86 1.719 3.137 0 2.716-2.226 5.075-6.256 5.075C4.594 16 1 13.987 1 7.994 1 2.034 4.482 0 8.044 0 9.69 0 13.55.243 15 5.036l-1.36.353C12.516 1.974 10.163 1.43 8.006 1.43c-3.565 0-5.582 2.171-5.582 6.79 0 4.143 2.254 6.343 5.63 6.343 2.777 0 4.847-1.443 4.847-3.556 0-1.438-1.208-2.127-1.27-2.127-.236 1.234-.868 3.31-3.644 3.31-1.618 0-3.013-1.118-3.013-2.582 0-2.09 1.984-2.847 3.55-2.847.586 0 1.294.04 1.663.114 0-.637-.54-1.728-1.9-1.728-1.25 0-1.566.405-1.967.868ZM8.716 8.19c-2.04 0-2.304.87-2.304 1.416 0 .878 1.043 1.168 1.6 1.168 1.02 0 2.067-.282 2.232-2.423a6.2 6.2 0 0 0-1.528-.161" />
-                </svg>
-              </span>
-              ${this.getThreads(contact.threads)}
-            </span>
-          </div>
-          <div class="input-group threads">
-            <span class="wrapper">
-              <span class="icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"  fill="currentColor"  width="16" height="16">
-                  <path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path>
-                </svg>
-              </span>
-              ${this.getLink(contact.link)}
-            </span>
-          </div>
+          ${this.getInputGroup('email', contact.email, 'email', 'e.g john@example.com')}
+          ${this.getInputGroup('x', contact.x, 'text', 'Your X(twitter) username')}
+          ${this.getInputGroup('linkedin', contact.linkedin, 'text', 'Your linkedin username')}
+          ${this.getInputGroup('threads', contact.threads, 'text', 'Your threads username')}
+          ${this.getInputGroup('link', contact.link, 'url', 'Your website or a link')}
         </div>
         <div class="actions">
           <button type="submit" class="action next">
@@ -234,6 +183,50 @@ export default class FormName extends HTMLElement {
         </div>
       </form>
     `;
+  }
+
+  getInputGroup = (type, value, inputType, placeholder) => {
+    return `
+      <div class="input-group ${type}">
+        <span class="wrapper">
+          <span class="icon">
+            ${this.getIcon(type)}
+          </span>
+          <input type="${inputType}" name="${type}" id="${type}" placeholder="${placeholder}" value="${value !== 'null' && value !== undefined && value !== null ? value : ''}">
+        </span>
+      </div>
+    `;
+  }
+
+  getIcon = (type) => {
+    const icons = {
+      email: `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+          <path d="M1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14H1.75A1.75 1.75 0 0 1 0 12.25v-8.5C0 2.784.784 2 1.75 2ZM1.5 12.251c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V5.809L8.38 9.397a.75.75 0 0 1-.76 0L1.5 5.809v6.442Zm13-8.181v-.32a.25.25 0 0 0-.25-.25H1.75a.25.25 0 0 0-.25.25v.32L8 7.88Z"></path>
+        </svg>
+      `,
+      x: `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-twitter-x" viewBox="0 0 16 16">
+          <path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z" />
+        </svg>
+      `,
+      linkedin: `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-linkedin" viewBox="0 0 16 16">
+          <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z"/>
+        </svg>
+      `,
+      threads: `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-threads" viewBox="0 0 16 16">
+          <path d="M6.321 6.016c-.27-.18-1.166-.802-1.166-.802.756-1.081 1.753-1.502 3.132-1.502.975 0 1.803.327 2.394.948s.928 1.509 1.005 2.644q.492.207.905.484c1.109.745 1.719 1.86 1.719 3.137 0 2.716-2.226 5.075-6.256 5.075C4.594 16 1 13.987 1 7.994 1 2.034 4.482 0 8.044 0 9.69 0 13.55.243 15 5.036l-1.36.353C12.516 1.974 10.163 1.43 8.006 1.43c-3.565 0-5.582 2.171-5.582 6.79 0 4.143 2.254 6.343 5.63 6.343 2.777 0 4.847-1.443 4.847-3.556 0-1.438-1.208-2.127-1.27-2.127-.236 1.234-.868 3.31-3.644 3.31-1.618 0-3.013-1.118-3.013-2.582 0-2.09 1.984-2.847 3.55-2.847.586 0 1.294.04 1.663.114 0-.637-.54-1.728-1.9-1.728-1.25 0-1.566.405-1.967.868ZM8.716 8.19c-2.04 0-2.304.87-2.304 1.416 0 .878 1.043 1.168 1.6 1.168 1.02 0 2.067-.282 2.232-2.423a6.2 6.2 0 0 0-1.528-.161" />
+        </svg>
+      `,
+      link: `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"  fill="currentColor"  width="16" height="16">
+          <path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path>
+        </svg>
+      `
+    };
+    return icons[type] || '';
   }
 
   getHeader = () => {
@@ -246,71 +239,6 @@ export default class FormName extends HTMLElement {
         </p>
       </div>
     `;
-  }
-
-  getEmail = email => {
-    if(email !== 'null' && email !== undefined && email !== null) {
-      return `
-        <input type="email" name="email" id="email" placeholder="e.g john@example.com" value="${email}">
-      `;
-    }
-    else {
-      return `
-        <input type="email" name="email" id="email" placeholder="e.g john@example.com">
-      `;
-    }
-  }
-
-  getX = data => {
-    if (data !== 'null' && data !== undefined && data !== null) {
-      return `
-        <input type="text" name="x" id="x" placeholder="Your X(twitter) username" value="${data}">
-      `;
-    }
-    else {
-      return `
-        <input type="text" name="x" id="x" placeholder="Your X(twitter) username">
-      `;
-    }
-  }
-
-  getLinkedin = data => {
-    if (data !== 'null' && data !== undefined && data !== null) {
-      return `
-        <input type="text" name="linkedin" id="linkedin" placeholder="Your linkedin username" value="${data}">
-      `;
-    }
-    else {
-      return `
-        <input type="text" name="linkedin" id="linkedin" placeholder="Your linkedin username">
-      `;
-    }
-  }
-
-  getThreads = data => {
-    if (data !== 'null' && data !== undefined && data !== null) {
-      return `
-        <input type="text" name="threads" id="threads" placeholder="Your threads username" value="${data}">
-      `;
-    }
-    else {
-      return `
-        <input type="text" name="threads" id="threads" placeholder="Your threads username">
-      `;
-    }
-  }
-
-  getLink = data => {
-    if (data !== 'null' && data !== undefined && data !== null) {
-      return `
-        <input type="url" name="link" id="link" placeholder="Your website or a link" value="${data}">
-      `;
-    }
-    else {
-      return `
-        <input type="url" name="link" id="link" placeholder="Your website or a link">
-      `;
-    }
   }
 
   getStyles() {

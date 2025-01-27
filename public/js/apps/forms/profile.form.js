@@ -1,3 +1,4 @@
+import ImageProcessor from "./image.js";
 export default class FormProfile extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
@@ -5,7 +6,7 @@ export default class FormProfile extends HTMLElement {
 
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
+    this.processor = new ImageProcessor({ maxSize: 800, quality: 0.9 });
     this._url = this.getAttribute('api');
     this.app = window.app;
     this.api = this.app.api;
@@ -69,85 +70,79 @@ export default class FormProfile extends HTMLElement {
   }
 
   submitForm = async form => {
-    const outerThis = this;
-    // add submit event listener
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
+    form.addEventListener('submit', this.handleSubmit);
+  }
 
-      const serverStatus = form.querySelector('.server-status');
+  handleSubmit = async e => {
+    e.preventDefault();
+    const form = e.target;
+    const button = form.querySelector('.action.next');
+    const actions = form.querySelector('.actions');
+    const file = form.querySelector('#profile-image').files[0];
 
-      // if server status is already showing, remove it
-      if (serverStatus) {
-        serverStatus.remove();
-      }
+    this.clearServerStatus(form);
+    this.showLoader(button);
 
-      const actions = form.querySelector('.actions');
+    if (!file) {
+      this.showServerStatus(form, false, 'Please select an image');
+      this.resetButton(button);
+      return;
+    }
 
-      // show loader
-      const button = form.querySelector('.action.next');
-      button.innerHTML = outerThis.getButtonLoader();
+    try {
+      const formData = await this.prepareFormData(file);
+      const response = await this.sendFormData(formData);
+      const result = await response.json();
 
-      // get and validate form data
-      const formData = new FormData();
+      this.showServerStatus(form, result.success, result.message);
+    } catch (error) {
+      this.showServerStatus(form, false, 'An error occurred, please try again');
+    } finally {
+      this.resetButton(button);
+      this.removeServerStatusAfterDelay(form);
+    }
+  }
 
-      const file = form.querySelector('#profile-image').files[0];
+  clearServerStatus = form => {
+    const serverStatus = form.querySelector('.server-status');
+    if (serverStatus) {
+      serverStatus.remove();
+    }
+  }
 
-      if (!file) {
-        actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, 'Please select an image'));
+  showLoader = button => {
+    button.innerHTML = this.getButtonLoader();
+  }
 
-        // reset button
-        button.innerHTML = '<span class="text">Send</span>';
-        return;
-      }
+  resetButton = button => {
+    button.innerHTML = '<span class="text">Send</span>';
+  }
 
-      try {
-        // resize image
-        const { blob } = await outerThis.resizeImage(file);
+  showServerStatus = (form, success, message) => {
+    const actions = form.querySelector('.actions');
+    actions.insertAdjacentHTML('beforebegin', this.getServerSuccessMsg(success, message));
+  }
 
-        // append image to form data
-        formData.append('file', blob, 'file.webp');
+  removeServerStatusAfterDelay = form => {
+    setTimeout(() => {
+      this.clearServerStatus(form);
+    }, 5000);
+  }
 
-        // send data to server
-        const options = {
-          method: 'PATCH',
-          // add a multipart form data
-          body: formData
-        };
+  prepareFormData = async file => {
+    // const { blob } = await this.resizeImage(file);
+    const { blob } = await this.processor.processImage(file);
+    const formData = new FormData();
+    formData.append('file', blob, 'file.webp');
+    return formData;
+  }
 
-        const response = await outerThis.fetchWithTimeout(outerThis._url, options);
-        const result = await response.json();
-
-        // check if request was successful
-        if (result.success) {
-          // show success message
-          actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(true, result.message));
-
-          // reset button
-          button.innerHTML = '<span class="text">Send</span>';
-        } else {
-          // show error message
-          actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, result.message));
-
-          // reset button
-          button.innerHTML = '<span class="text">Send</span>';
-        }
-      }
-      catch (error) {
-        // show error message
-        actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, 'An error occurred, please try again'));
-
-        // reset button
-        button.innerHTML = '<span class="text">Send</span>';
-      }
-
-      // remove success message
-      setTimeout(() => {
-        const serverStatus = form.querySelector('.server-status');
-        if (serverStatus) {
-          serverStatus.remove();
-        }
-      }, 5000);
-    });
+  sendFormData = formData => {
+    const options = {
+      method: 'PATCH',
+      body: formData
+    };
+    return this.fetchWithTimeout(`/api/v1${this._url}`, options, 10000);
   }
 
   // Function to resize image and crop to square
@@ -216,16 +211,9 @@ export default class FormProfile extends HTMLElement {
     }
   };
 
-  getServerSuccessMsg = (success, text) => {
-    if (!success) {
-      return `
-        <p class="server-status">${text}</p>
-      `
-    }
-    return `
-      <p class="server-status success">${text}</p>
-    `
-  }
+  getServerSuccessMsg = (success, text) => `
+    <p class="server-status${success ? ' success' : ''}">${text}</p>
+  `;
 
   getButtonLoader() {
     return `
@@ -329,7 +317,7 @@ export default class FormProfile extends HTMLElement {
         p.server-status {
           margin: 0;
           width: 100%;
-          text-align: start;
+          text-align: center;
           font-family: var(--font-read), sans-serif;
           color: var(--error-color);
           font-weight: 500;

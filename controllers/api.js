@@ -7,7 +7,6 @@ class APIManager {
     this.defaultTimeout = defaultTimeout;
     this.pendingRequests = new Map();
     
-    // Create HTTPS agent with proper cert handling
     this.httpsAgentOptions = {
       rejectUnauthorized: true,
       key: fs.readFileSync(path.resolve(__dirname, '../ssl/key.pem')),
@@ -20,29 +19,25 @@ class APIManager {
     return {
       'Content-Type': 'application/json',
       Accept: 'application/json',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      Pragma: 'no-cache',
+      Expires: '0',
       ...headers
     };
   }
 
-  async #processResponse(response) {
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-  }
-
   async #request(url, options = {}) {
     const fullURL = this.baseURL + url;
-    
-    // Handle concurrent requests
     const pendingKey = `${fullURL}-${options.method}`;
     const pendingRequest = this.pendingRequests.get(pendingKey);
-    if (pendingRequest) return pendingRequest;
+    if (pendingRequest) {
+      this.pendingRequests.delete(pendingKey);  // Clear after use
+    }
 
     const requestOptions = {
-      // ...options,
+      ...options,
       ...this.httpsAgentOptions,
-      ...this.#processHeaders(options)
+      headers: this.#processHeaders(options.headers)
     };
 
     const requestPromise = new Promise((resolve, reject) => {
@@ -76,7 +71,7 @@ class APIManager {
       req.end();
     });
 
-    this.pendingRequests.set(pendingKey, requestPromise);
+    // this.pendingRequests.set(pendingKey, requestPromise);
     return requestPromise;
   }
 

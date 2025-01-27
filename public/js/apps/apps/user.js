@@ -478,32 +478,27 @@ export default class AppUser extends HTMLElement {
   }
 
   populateContent = (name, contentContainer) => {
-    if (name === 'stats') {
-      contentContainer.innerHTML = this.getStats();
-    } else if (name === 'name') {
-      contentContainer.innerHTML = this.getFormName();
-    } else if (name === 'bio') {
-      contentContainer.innerHTML = this.getFormBio();
-    } else if (name === 'picture') {
-      contentContainer.innerHTML = this.getFormProfile();
-    } else if (name === 'socials') {
-      contentContainer.innerHTML = this.getFormSocial();
-    } else if (name === 'email') {
-      contentContainer.innerHTML = this.getFormEmail();
-    } else if (name === 'privacy') {
-      contentContainer.innerHTML = this.getSoon();
-    } else if (name === 'password') {
-      contentContainer.innerHTML = this.getFormPassword();
-    } else if (name === 'topics') {
-      contentContainer.innerHTML = this.getSoon();
-    } else if (name === 'activity') {
-      contentContainer.innerHTML = this.getActivity();
-    } else if (name === 'content') {
-      contentContainer.innerHTML = this.getContent();
-    } else if (name === 'logout') {
-      this.logout();
+    const contentMap = {
+      'stats': this.getStats,
+      'name': this.getFormName,
+      'bio': this.getFormBio,
+      'picture': this.getFormProfile,
+      'socials': this.getFormSocial,
+      'email': this.getFormEmail,
+      'privacy': this.getSoon,
+      'password': this.getFormPassword,
+      'topics': this.getSoon,
+      'activity': this.getActivity,
+      'content': this.getContent,
+      'logout': this.logout
+    };
+
+    const contentFunction = contentMap[name] || this.getStats;
+
+    if (name === 'logout') {
+      contentFunction.call(this);
     } else {
-      contentContainer.innerHTML = this.getStats();
+      contentContainer.innerHTML = contentFunction.call(this);
     }
   }
 
@@ -551,31 +546,29 @@ export default class AppUser extends HTMLElement {
   }
 
   getBody = () => {
-    const mql = window.matchMedia('(max-width: 660px)');
-    if (mql.matches) {
-      return /* html */`
-        <main class="profile">
+    const isMobile = window.matchMedia('(max-width: 660px)').matches;
+    const tabSection = this.getTab();
+    const loader = this.getLoader();
+
+    return /* html */`
+      <main class="profile">
+        ${isMobile ? `
           <section class="content">
-            ${this.getTab()}
+            ${tabSection}
             <div class="content-container">
-              ${this.getLoader()}
+              ${loader}
             </div>
           </section>
-        </main>
-      `;
-    }
-    else {
-      return /* html */`
-        <main class="profile">
-          ${this.getTab()}
+        ` : `
+          ${tabSection}
           <section class="content">
             <div class="content-container">
-              ${this.getLoader()}
+              ${loader}
             </div>
           </section>
-        </main>
-      `;
-    }
+        `}
+      </main>
+    `;
   }
 
   checkVerified = verified => {
@@ -1497,6 +1490,7 @@ export default class AppUser extends HTMLElement {
             transition: all 0.3s ease-in-out;
             display: inline-block;
             position: absolute;
+            cursor: default !important;
             right: 10px;
             top: 18px;
             width: 23px;

@@ -81,7 +81,7 @@ export default class FormName extends HTMLElement {
       button.innerHTML = outerThis.getButtonLoader();
 
       try {
-        const result = this.api.patch(this._url, { content: 'json', body: JSON.stringify(data) });
+        const result = await this.api.patch(this._url, { content: 'json', body: data });
 
         // check if request was successful
         if (result.success) {

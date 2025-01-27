@@ -194,12 +194,6 @@ export default class APIManager {
           credentials: 'include'
         });
 
-        // console.log(response);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
         const data = await this.#processResponse(response);
         await this.#setCacheData(request, data, cacheOptions);
         return data;

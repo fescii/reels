@@ -40,98 +40,78 @@ export default class FormBio extends HTMLElement {
   }
 
   submitForm = async form => {
-    const outerThis = this;
-    // add submit event listener
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
+    form.addEventListener('submit', this.handleSubmit.bind(this));
+  }
 
+  async handleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const actions = form.querySelector('.actions');
+    const button = form.querySelector('.action.next');
+    const data = this.getFormData(form);
+
+    if (!this.validateFormData(data, actions)) return;
+
+    button.innerHTML = this.getButtonLoader();
+
+    try {
+      const result = await this.api.patch(this._url, { content: 'json', body: data });
+      this.handleServerResponse(result, actions, button);
+    } catch (error) {
+      this.showError(actions, 'An error occurred, please try again', button);
+    }
+
+    this.removeServerStatus(form);
+  }
+
+  getFormData(form) {
+    const formData = new FormData(form);
+    return {
+      bio: formData.get('bio')
+    };
+  }
+
+  validateFormData(data, actions) {
+    if (!data.bio || data.bio.length < 10) {
+      this.showError(actions, 'Bio must be at least 10 characters long');
+      return false;
+    }
+    if (data.bio.length > 300) {
+      this.showError(actions, 'Bio must not be more than 300 characters long');
+      return false;
+    }
+    return true;
+  }
+
+  handleServerResponse(result, actions, button) {
+    if (result.success) {
+      this.showSuccess(actions, result.message);
+    } else {
+      this.showError(actions, result.message);
+    }
+    button.innerHTML = '<span class="text">Send</span>';
+  }
+
+  showError(actions, message, button) {
+    actions.insertAdjacentHTML('beforebegin', this.getServerSuccessMsg(false, message));
+    if (button) button.innerHTML = '<span class="text">Send</span>';
+  }
+
+  showSuccess(actions, message) {
+    actions.insertAdjacentHTML('beforebegin', this.getServerSuccessMsg(true, message));
+  }
+
+  removeServerStatus(form) {
+    setTimeout(() => {
       const serverStatus = form.querySelector('.server-status');
-
-      // if server status is already showing, remove it
       if (serverStatus) {
         serverStatus.remove();
       }
-
-      const actions = form.querySelector('.actions');
-
-      // get and validate form data
-      const formData = new FormData(form);
-
-      // get form data
-      const data = {
-        bio: formData.get('bio')
-      };
-
-      // check if form data is valid
-      if (!data.bio || data.bio.length < 10) {
-        
-        const errorMsg = 'Bio must be at least 10 characters long';
-
-        // show error message
-        actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, errorMsg));
-
-        return;
-      }
-
-      // check if bio is more than 300 characters
-      if (data.bio.length > 300) {
-        const errorMsg = 'Bio must not be more than 300 characters long';
-
-        // show error message
-        actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, errorMsg));
-
-        return;
-      }
-
-      // show loader
-      const button = form.querySelector('.action.next');
-      button.innerHTML = outerThis.getButtonLoader();
-
-      try {
-        const result = this.api.patch(this._url, { content: 'json', body: JSON.stringify(data) });
-
-        // check if request was successful
-        if (result.success) {
-          // show success message
-          actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(true, result.message));
-
-          // reset button
-          button.innerHTML = '<span class="text">Send</span>';
-        } else {
-          // show error message
-          actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, result.message));
-
-          // reset button
-          button.innerHTML = '<span class="text">Send</span>';
-        }
-      }
-      catch (error) {
-        // show error message
-        actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, 'An error occurred, please try again'));
-
-        // reset button
-        button.innerHTML = '<span class="text">Send</span>';
-      }
-
-      // remove success message
-      setTimeout(() => {
-        const serverStatus = form.querySelector('.server-status');
-        if (serverStatus) {
-          serverStatus.remove();
-        }
-      }, 5000);
-    });
+    }, 5000);
   }
 
-  getServerSuccessMsg = (success, text) => {
-    if (!success) {
-      return `
-        <p class="server-status">${text}</p>
-      `
-    }
-    return `
-      <p class="server-status success">${text}</p>
-    `
+  getServerSuccessMsg(success, text) {
+    return success ? `<p class="server-status success">${text}</p>` : `<p class="server-status">${text}</p>`;
   }
 
   getButtonLoader() {

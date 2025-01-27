@@ -20,7 +20,8 @@ export default class FormPassword extends HTMLElement {
   connectedCallback() {
     // Get the form
     const form = this.shadowObj.querySelector('form');
-
+    // add event listeners to input fields
+    this.inputEvents(form);
     // Submit form
     this.submitForm(form);
   }
@@ -43,88 +44,87 @@ export default class FormPassword extends HTMLElement {
   }
 
   submitForm = async form => {
-    const outerThis = this;
-    // add submit event listener
     form.addEventListener('submit', async e => {
       e.preventDefault();
-
-      const serverStatus = form.querySelector('.server-status');
-
-      // if server status is already showing, remove it
-      if (serverStatus) {
-        serverStatus.remove();
-      }
-
-      const actions = form.querySelector('.actions');
-
-      // get and validate form data
-      const formData = new FormData(form);
-
-      // get form data
-      const data = {
-        old_password: formData.get('current-password').trim(),
-        password: formData.get('new-password').trim(),
-        confirm_password: formData.get('confirm-password').trim()
-      };
-
-      // check if form data is valid
-      if (!data.old_password || !data.password || !data.confirm_password) {
-        actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, 'All fields are required'));
-        return;
-      }
-
-      // check if password is i. at least 6 characters long, ii. contains a number, iii. contains a special character, iv. contains an uppercase letter using regex
-      const passwordRegex = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{6,}$/;
-
-      if (!passwordRegex.test(data.password)) {
-        actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, 'Password must be at least 6 characters long, contain a number, a special character, and an uppercase letter'));
-        return;
-      }
-
-      // check if new password and confirm password match
-      if (data.password !== data.confirm_password) {
-        actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, 'New password and confirm password do not match'));
-        return;
-      }
-
-      // show loader
-      const button = form.querySelector('.action.next');
-      button.innerHTML = outerThis.getButtonLoader();
-
-      try {
-        const result = this.api.patch(this._url, { content: 'json', body: JSON.stringify(data) });
-
-        // check if request was successful
-        if (result.success) {
-          // show success message
-          actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(true, result.message));
-
-          // reset button
-          button.innerHTML = '<span class="text">Send</span>';
-        } else {
-          // show error message
-          actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, result.message));
-
-          // reset button
-          button.innerHTML = '<span class="text">Send</span>';
-        }
-      }
-      catch (error) {
-        // show error message
-        actions.insertAdjacentHTML('beforebegin', outerThis.getServerSuccessMsg(false, 'An error occurred, please try again'));
-
-        // reset button
-        button.innerHTML = '<span class="text">Send</span>';
-      }
-
-      // remove success message
-      setTimeout(() => {
-        const serverStatus = form.querySelector('.server-status');
-        if (serverStatus) {
-          serverStatus.remove();
-        }
-      }, 5000);
+      this.handleFormSubmit(form);
     });
+  }
+
+  handleFormSubmit = async form => {
+    const serverStatus = form.querySelector('.server-status');
+    if (serverStatus) serverStatus.remove();
+
+    const actions = form.querySelector('.actions');
+    const data = this.getFormData(form);
+
+    if (!this.isFormDataValid(data, actions)) return;
+
+    const button = form.querySelector('.action.next');
+    button.innerHTML = this.getButtonLoader();
+
+    try {
+      const result = await this.api.patch(this._url, { content: 'json', body: data });
+      this.handleServerResponse(result, actions, button);
+    } catch (error) {
+      this.handleServerError(actions, button);
+    }
+
+    this.removeServerStatus();
+  }
+
+  getFormData = form => {
+    const formData = new FormData(form);
+    return {
+      old_password: formData.get('current-password').trim(),
+      password: formData.get('new-password').trim(),
+      confirm_password: formData.get('confirm-password').trim()
+    };
+  }
+
+  isFormDataValid = (data, actions) => {
+    if (!data.old_password || !data.password || !data.confirm_password) {
+      actions.insertAdjacentHTML('beforebegin', this.getServerSuccessMsg(false, 'All fields are required'));
+      this.removeServerStatus();
+      return false;
+    }
+
+    const passwordRegex = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{6,}$/;
+    if (!passwordRegex.test(data.password)) {
+      actions.insertAdjacentHTML('beforebegin', this.getServerSuccessMsg(false, 'Password must be at least 6 characters long, contain a number, a special character, and an uppercase letter'));
+      this.removeServerStatus();
+      return false;
+    }
+
+    if (data.password !== data.confirm_password) {
+      actions.insertAdjacentHTML('beforebegin', this.getServerSuccessMsg(false, 'New password and confirm password do not match'));
+      this.removeServerStatus();
+      return false;
+    }
+
+    return true;
+  }
+
+  handleServerResponse = (result, actions, button) => {
+    if (result.success) {
+      actions.insertAdjacentHTML('beforebegin', this.getServerSuccessMsg(true, result.message));
+    } else {
+      actions.insertAdjacentHTML('beforebegin', this.getServerSuccessMsg(false, result.message));
+    }
+    button.innerHTML = '<span class="text">Send</span>';
+  }
+
+  handleServerError = (actions, button) => {
+    actions.insertAdjacentHTML('beforebegin', this.getServerSuccessMsg(false, 'An error occurred, please try again'));
+    button.innerHTML = '<span class="text">Send</span>';
+  }
+
+  removeServerStatus = () => {
+    const serverStatus = this.shadowObj.querySelector('.server-status');
+    if (serverStatus) {
+      setTimeout(() => {
+        serverStatus.remove();
+      }, 5000);
+    }
   }
 
   getServerSuccessMsg = (success, text) => {
@@ -182,6 +182,121 @@ export default class FormPassword extends HTMLElement {
         </div>
       </form>
     `;
+  }
+
+  inputEvents = form => {
+    // Get all input fields
+    // const currentPassword = form.querySelector('.input-group.current-password');
+    const newPassword = form.querySelector('.input-group.new-password');
+    const confirmPassword = form.querySelector('.input-group.confirm-password');
+
+    // Add event listeners to input fields
+    // this.currentListener(currentPassword);
+    this.newListener(newPassword);
+    this.confirmListener(confirmPassword);
+  }
+
+  addInputListener = (container, message, compareValue = null) => {
+    const input = container.querySelector('input');
+    const status = container.querySelector('.status');
+
+    input.addEventListener('input', () => {
+      // validate input
+      const value = input.value.trim();
+      if (!value) {
+        container.classList.add('failed');
+        status.textContent = message;
+        status.style.display = 'inline-block';
+        return;
+      }
+
+      // test input
+      const result = this.validateInput(value);
+      if (!result.valid) {
+        container.classList.add('failed');
+        status.textContent = result.message;
+        status.style.display = 'inline-block';
+      } else {
+        // if compareValue is provided, check if values match
+        if (compareValue) {
+          if (value !== compareValue.value.trim()) {
+            container.classList.remove('success');
+            container.classList.add('failed');
+            status.textContent = 'Passwords do not match with new password';
+            status.style.display = 'inline-block';
+          } else {
+            container.classList.remove('failed');
+            container.classList.add('success');
+            status.style.display = 'none';
+          }
+        } else {
+          container.classList.remove('failed');
+          container.classList.add('success');
+          status.style.display = 'none';
+        }
+      }
+    });
+  }
+
+  currentListener = container => {
+    this.addInputListener(container, 'Current password is required');
+  }
+
+  newListener = container => {
+    this.addInputListener(container, 'New password is required');
+  }
+
+  confirmListener = container => {
+    const newPasswordInput = this.shadowObj.querySelector('.input-group.new-password input');
+    this.addInputListener(container, 'Confirm password is required', newPasswordInput);
+  }
+
+  validateInput = text => {
+    // match text with regex:
+    // i. at least 6 characters long
+    // ii. contains a number
+    // iii. contains a special character
+    // iv. contains an uppercase letter
+    
+    // check for at least 6 characters
+    if (text.length < 6) {
+      return {
+        valid: false,
+        message: 'Password must be at least 6 characters long'
+      }
+    }
+
+    // check for a number
+    const numberRegex = /\d/;
+    if (!numberRegex.test(text)) {
+      return {
+        valid: false,
+        message: 'Password must contain a number'
+      }
+    }
+
+    // check for a special character
+    const specialCharRegex = /[!@#$%^&*]/;
+    if (!specialCharRegex.test(text)) {
+      return {
+        valid: false,
+        message: 'Password must contain a special character'
+      }
+    }
+
+    // check for an uppercase letter
+    const upperCaseRegex = /[A-Z]/;
+    if (!upperCaseRegex.test(text)) {
+      return {
+        valid: false,
+        message: 'Password must contain an uppercase letter'
+      }
+    }
+
+    return {
+      valid: true,
+      message: 'Password is valid'
+    }
   }
 
   getHeader = () => {

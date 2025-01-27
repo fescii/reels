@@ -458,16 +458,6 @@ export default class AppThemes extends HTMLElement {
           padding: 10px 0 0;
         }
 
-        @media screen and (max-width:900px) {
-          section.main {
-            width: 58%;
-          }
-
-          section.side {
-            width: 40%;
-          }
-        }
-
 				@media screen and (max-width:660px) {
 					:host {
             font-size: 16px;

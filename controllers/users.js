@@ -1,5 +1,4 @@
 const api = require('./api');
-
 const meta = data => {
   // Head/Meta Start
   const title = "User | " + data.name;

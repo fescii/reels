@@ -10,6 +10,7 @@ export default class PreviewPost extends HTMLElement {
     this.shadowObj = this.attachShadow({mode: 'open'});
     this.app = window.app;
     this.api = this.app.api;
+    this.parent = this.getRootNode().host;
     this.render();
   }
 
@@ -58,162 +59,117 @@ export default class PreviewPost extends HTMLElement {
   }
 
   fetchPreview = contentContainer => {
-    const outerThis = this;
     // Add the loader
     contentContainer.innerHTML = this.getLoader();
-		const previewLoader = this.shadowObj.querySelector('#loader-container');
+    const previewLoader = this.shadowObj.querySelector('#loader-container');
+
     // Check if reply or story is already fetched
     if (this._story || this._reply) {
-      // remove the loader
-      previewLoader.remove();
-
-      if(this._story) {
-        // set this._item
-        this._item = this.mapStory(this._story);
-
-        // switch kind of story
-        switch(this._story.kind) {
-          case 'post':
-            contentContainer.innerHTML = outerThis.populatePost(this._story);
-            break;
-          case 'poll':
-            contentContainer.innerHTML = outerThis.populatePoll(this._story);
-            break;
-          case 'story':
-            contentContainer.innerHTML = outerThis.populateStory(this._story);
-            break;
-        }
-      } else {
-        // set this._item
-        this._item = this.mapReply(this._reply);
-        contentContainer.innerHTML = outerThis.populateReply(this._reply);
-      }
-
-      // activate the close button
-      outerThis.activateCloseBtn(contentContainer);
-
-      // open the story
-      this.openStory();
-
-      // open the read more
-      this.openReadMore();
-      // open the url
-      this.openUrl();
-      // style lastBlock
-      this.styleLastBlock()
+      this.handleFetchedContent(contentContainer, previewLoader);
       return;
     }
 
-		setTimeout(async () => {
+    setTimeout(async () => {
       try {
-        const result = await this.api.get(this._url, { content: 'json'}, { allow: true, duration: 7200 });
-
-        // check if not successful
-        if (!result.success) {
-          // display error message
-          const content = outerThis.getEmpty();
-          previewLoader.remove();
-          contentContainer.innerHTML = content;;
-
-          // activate close button
-          outerThis.activateCloseBtn(contentContainer);
-
-          // activate the button
-          outerThis.activateBtn(contentContainer);
-
-          return;
-        }
-
-        // check if story
-        if (result.story) {
-          const story = result.story;
-          outerThis._story = story;
-
-          // set this._item
-          this._item = this.mapStory(story);
-
-          // remove the loader
-          previewLoader.remove();
-
-          // switch kind of story
-          switch(story.kind) {
-            case 'post':
-              contentContainer.innerHTML = outerThis.populatePost(story);
-              break;
-            case 'poll':
-              contentContainer.innerHTML = outerThis.populatePoll(story);
-              break;
-            case 'story':
-              contentContainer.innerHTML = outerThis.populateStory(story);
-              break;
-          }
-
-          // activate the close button
-          outerThis.activateCloseBtn(contentContainer);
-
-          // open the story
-          this.openStory();
-
-          // open the read more
-          this.openReadMore();
-          // open the url
-          this.openUrl();
-
-          // style lastBlock
-          this.styleLastBlock()
-        }
-        else if (result.reply) {
-          const reply = result.reply;
-          outerThis._reply = reply;
-
-          // set this._item
-          this._item = this.mapReply(reply);
-          
-          // remove the loader
-          previewLoader.remove();
-
-          // insert the content
-          contentContainer.innerHTML = outerThis.populateReply(reply);
-
-          // activate the close button
-          outerThis.activateCloseBtn(contentContainer);
-
-          // open the story
-          this.openStory();
-
-          // open the read more
-          this.openReadMore();
-          // open the url
-          this.openUrl();
-          // style lastBlock
-          this.styleLastBlock()
-        }
-        else {
-          // display error message
-          const content = outerThis.getEmpty();
-          previewLoader.remove();
-          contentContainer.innerHTML = content;;
-
-          // activate close button
-          outerThis.activateCloseBtn(contentContainer);
-
-          // activate the button
-          outerThis.activateBtn(contentContainer);
-        }
+        const result = await this.api.get(this._url, { content: 'json' }, { allow: true, duration: 7200 });
+        this.handleApiResponse(result, contentContainer, previewLoader);
       } catch (error) {
-        // display error message
-        const content = outerThis.getEmpty();
-        previewLoader.remove();
-        contentContainer.innerHTML = content;;
-
-        // activate close button
-        outerThis.activateCloseBtn(contentContainer);
-
-        // activate the button
-        outerThis.activateBtn(contentContainer);
+        this.handleError(contentContainer, previewLoader, error);
       }
-		}, 100)
-	}
+    }, 100);
+  }
+
+  handleFetchedContent = (contentContainer, previewLoader) => {
+    previewLoader.remove();
+
+    if (this._story) {
+      this._item = this.mapStory(this._story);
+      this.populateContent(this._story, contentContainer);
+    } else {
+      this._item = this.mapReply(this._reply);
+      contentContainer.innerHTML = this.populateReply(this._reply);
+      this.setReply('reply', this._reply.story ? this._reply.story : this._reply.reply);
+    }
+
+    this.activateCloseBtn(contentContainer);
+    this.openStory();
+    this.openReadMore();
+    this.openUrl();
+    this.styleLastBlock();
+  }
+
+  handleApiResponse = (result, contentContainer, previewLoader) => {
+    if (!result.success) {
+      this.displayError(contentContainer, previewLoader);
+      return;
+    }
+
+    try {
+      if (result.story) {
+      this._story = result.story;
+      this._item = this.mapStory(result.story);
+      previewLoader.remove();
+      this.populateContent(result.story, contentContainer);
+      } else if (result.reply) {
+      this._reply = result.reply;
+      this._item = this.mapReply(result.reply);
+      previewLoader.remove();
+      contentContainer.innerHTML = this.populateReply(result.reply);
+      this.activateCloseBtn(contentContainer);
+      this.openStory();
+      this.openReadMore();
+      this.openUrl();
+      this.styleLastBlock();
+      this.setReply('reply', result.reply.story ? result.reply.story : result.reply.reply);
+      } else {
+      this.displayError(contentContainer, previewLoader);
+      }
+    } catch (error) {
+      console.error(error)
+      this.handleError(contentContainer, previewLoader, error);
+    }
+  }
+
+  populateContent = (story, contentContainer) => {
+    switch (story.kind) {
+      case 'post':
+        contentContainer.innerHTML = this.populatePost(story);
+        break;
+      case 'poll':
+        contentContainer.innerHTML = this.populatePoll(story);
+        break;
+      case 'story':
+        contentContainer.innerHTML = this.populateStory(story);
+        break;
+    }
+    this.activateCloseBtn(contentContainer);
+    this.openStory();
+    this.openReadMore();
+    this.openUrl();
+    this.styleLastBlock();
+  }
+
+  setReply = (kind, parent) => {
+    if(!parent) return;
+    const reply = this.getReply(kind, parent);
+
+    if (!reply || reply === '') return;
+
+    this.parent.setReply(reply);
+  }
+
+  displayError = (contentContainer, previewLoader) => {
+    const content = this.getEmpty();
+    previewLoader.remove();
+    contentContainer.innerHTML = content;
+    this.activateCloseBtn(contentContainer);
+    this.activateBtn(contentContainer);
+  }
+
+  handleError = (contentContainer, previewLoader, error) => {
+    console.error('Error fetching preview:', error);
+    this.displayError(contentContainer, previewLoader);
+  }
 
   populateStory = story => {
     const author = story.story_author
@@ -221,7 +177,7 @@ export default class PreviewPost extends HTMLElement {
     author.time = story.createdAt
     const url = `/p/${story.hash.toLowerCase()}`
     const itemContent = this.removeHtml(story.content, story.title)
-    return this.getContent(itemContent, url, story.views, story.likes, author);
+    return this.getContent(itemContent, url, story.views, story.likes, author, story.kind)
   }
 
   populateReply = reply => {
@@ -230,7 +186,7 @@ export default class PreviewPost extends HTMLElement {
     author.time = reply.createdAt;
     const url = `/r/${reply.hash.toLowerCase()}`;
     const itemContent = this.getPost(reply.content);
-    return this.getContent(itemContent, url, reply.views, reply.likes, author);
+    return this.getContent(itemContent, url, reply.views, reply.likes, author, 'reply');
   }
 
   populatePost = story => {
@@ -239,7 +195,7 @@ export default class PreviewPost extends HTMLElement {
     author.time = story.createdAt
     const url = `/p/${story.hash.toLowerCase()}`
     const itemContent = this.getPost(story.content);
-    return this.getContent(itemContent, url, story.views, story.likes, author);
+    return this.getContent(itemContent, url, story.views, story.likes, author, story.kind);
   }
 
   populatePoll = story => {
@@ -257,7 +213,7 @@ export default class PreviewPost extends HTMLElement {
     }
     const pollContent = this.getPoll(poll);
     const url =`/p/${story.hash.toLowerCase()}`;
-    return this.getContent(pollContent, url, story.views, story.likes, author);
+    return this.getContent(pollContent, url, story.views, story.likes, author, story.kind);
   }
 
   getPoll = poll =>  {
@@ -679,13 +635,16 @@ export default class PreviewPost extends HTMLElement {
     }
   }
 
-  getContent = (content, url, views, likes, author) => {
+  getContent = (content, url, views, likes, author, kind) => {
+    const preview = this.shadowObj.querySelector('div.preview');
+    if(preview) preview.classList.add(kind);
+
     return /*html*/`
       ${this.getHeader(author)}
       <p>${content}</p>
       ${this.getImages(this._story ? this._story.images : this._reply.images)}
       ${this.getOn(author.time)}
-      ${this.getActions(likes, views, url)}
+      ${this.getActions(likes, views, url, kind)}
     `
   }
 
@@ -707,9 +666,10 @@ export default class PreviewPost extends HTMLElement {
     `
   }
 
-  getActions = (likes, views, url) => {
+  getActions = (likes, views, url, kind) => {
     return /*html*/`
-      <div class="actions">
+      <div class="actions ${kind}">
+        ${this.getArrow(kind)}
         <a href="${url}" class="action view" id="view-action">view</a>
         <span class="action close" id="close-action">close</span>
         <span class="action likes plain">
@@ -720,6 +680,34 @@ export default class PreviewPost extends HTMLElement {
         </span>
       </div>
     `
+  }
+
+  getArrow = kind => {
+    if (kind === 'reply') {
+      return /*html*/`
+        <span class="action arrow">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <defs>
+              <linearGradient id="gradient" gradientTransform="rotate(0)">
+                <stop offset="0%" stop-color="var(--action-linear-start)" />
+                <stop offset="100%" stop-color="var(--action-linear-end)" />
+              </linearGradient>
+            </defs>
+            <path fill="url(#gradient)" d="M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5Zm-1.43-.75a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+      `
+    }
+    else  return '';
+  }
+
+  getReply = (kind, parent) => {
+    if (kind === 'reply') {
+      let url = parent.startsWith('P') ? `/p/${parent.toLowerCase()}/preview` : `/r/${parent.toLowerCase()}/preview`;
+      return /*html*/`
+        <preview-post url="${url}" hash="${parent}" preview="quick"></preview-post>
+      `
+    } else return '';
   }
 
   getEmpty = () => {
@@ -885,11 +873,18 @@ export default class PreviewPost extends HTMLElement {
           position: absolute;
           top: 50%;
           transform: translateY(-50%);
-          left: 4px;
-          width: 1.5px;
+          left: 3px;
+          width: 1.8px;
           height: calc(100% - 10px);
           background: var(--action-linear);
           border-radius: 5px;
+        }
+
+        .preview.reply::before {
+          top: calc(50% - 18px);
+          transform: translateY(-50%);
+          /*transform: translateY(calc(-50% - 30px));*/
+          height: calc(100% - 40px);
         }
 
         .preview p,
@@ -1241,6 +1236,10 @@ export default class PreviewPost extends HTMLElement {
           gap: 15px;
           margin: 5px 0 3px;
         }
+
+        .actions.reply {
+          position: relative;
+        }
         
         .actions > .action {
           border: var(--border-button);
@@ -1284,6 +1283,19 @@ export default class PreviewPost extends HTMLElement {
           display: inline-block;
           padding: 0 0 0 3px;
         }
+
+        .actions > .action.arrow {
+          all: unset;
+          top: 2px;
+          position: absolute;
+          left: -25px;
+        }
+
+        .actions > .action.arrow svg {
+          width: 20px;
+          height: 20px;
+          rotate: 90deg;
+        }
         
         @media screen and ( max-width: 850px ){
           #content {
@@ -1311,11 +1323,18 @@ export default class PreviewPost extends HTMLElement {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            left: 4.5px;
-            width: 1.5px;
+            left: 3px;
+            width: 1.8px;
             height: calc(100% - 10px);
             background: var(--action-linear);
             border-radius: 5px;
+          }
+
+          .preview.reply::before {
+            top: calc(50% - 18px);
+            transform: translateY(-50%);
+            /*transform: translateY(calc(-50% - 30px));*/
+            height: calc(100% - 40px);
           }
 
           button.fetch,

@@ -28,6 +28,14 @@ export default class QuickPost extends HTMLElement {
     this.shadowObj.innerHTML = this.getTemplate();
   }
 
+  setReply = (reply) => {
+    const previews = this.shadowObj.querySelector('div.previews');
+
+    if (previews) {
+      previews.insertAdjacentHTML('beforeend', reply);
+    }
+  }
+
   connectedCallback() {
     this.style.display = 'flex';
 
@@ -409,13 +417,15 @@ export default class QuickPost extends HTMLElement {
   }
 
   getBody() {
-    return `
+    return /* html */`
       ${this.getHeader()}
       ${this.getContent()}
       ${this.getImages()}
       ${this.getOn()}
       ${this.getFooter()}
-      ${this.getReply(this.getAttribute('story'))}
+      <div class="previews">
+        ${this.getReply(this.getAttribute('story'))}
+      </div>
     `;
   }
 
@@ -836,6 +846,15 @@ export default class QuickPost extends HTMLElement {
           margin-block-end: 5px;
           margin-inline-start: 0 !important;
           margin-inline-end: 0 !important;
+        }
+
+        div.previews {
+          width: 100%;
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+          margin: 0;
+          padding: 0;
         }
 
         @media screen and (max-width:660px) {

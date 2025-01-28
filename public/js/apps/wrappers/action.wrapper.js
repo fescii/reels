@@ -506,12 +506,32 @@ export default class ActionWrapper extends HTMLElement {
   getStats = () => {
     return /* html */`
       <div class="actions stats">
+        ${this.getArrow(this.getAttribute('kind'))}
         ${this.getWrite()}
         ${this.getLike(this.getAttribute('liked'))}
         ${this.getViews()}
         ${this.getShare()}
       </div>
 		`
+  }
+
+  getArrow = kind => {
+    if (kind === 'reply') {
+      return /*html*/`
+        <span class="action arrow">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <defs>
+              <linearGradient id="gradient" gradientTransform="rotate(0)">
+                <stop offset="0%" stop-color="var(--action-linear-start)" />
+                <stop offset="100%" stop-color="var(--action-linear-end)" />
+              </linearGradient>
+            </defs>
+            <path fill="url(#gradient)" d="M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5Zm-1.43-.75a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+      `
+    }
+    else  return '';
   }
 
   getWrite = () => {
@@ -796,6 +816,10 @@ export default class ActionWrapper extends HTMLElement {
           -ms-border-radius: 50px;
           -o-border-radius: 50px;
         }
+        .action.arrow {
+          all: unset;
+          margin: 3px 3px 0 -6.5px;
+        }
 
         span:first-of-type {
           margin: 0 0 0 -7px;
@@ -901,6 +925,12 @@ export default class ActionWrapper extends HTMLElement {
           color: inherit;
           width: 16px;
           height: 16px;
+        }
+
+        .action.arrow svg {
+          width: 20px;
+          height: 20px;
+          rotate: 90deg;
         }
 
         span.action.like svg {

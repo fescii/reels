@@ -254,9 +254,10 @@ export default class ImagesWrapper extends HTMLElement {
 					position: relative;
 					cursor: pointer;
 					overflow: hidden;
-					height: 210px;
-					width: 170px;
-					max-width: 170px;
+					height: 240px;
+					min-height: 240px;
+					width: 200px;
+					max-width: 200px;
 					border-radius: 12px;
 				}
 

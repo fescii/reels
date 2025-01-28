@@ -120,6 +120,9 @@ Author URL: https://femar.co.ke
   --modal-border: 1px solid #83858442;
   --modal-overlay: #1d2534b3;
 
+  --action-linear-start: #53595f;
+  --action-linear-end: #627ea0;
+
   --action-linear: linear-gradient(#53595f, #627ea0);
   --light-linear: linear-gradient(90deg, #e3ffe7 0%, #d9e7ff 100%);
   --error-linear: linear-gradient(103.53deg, #fa6436 -6.72%, #ec4b19 109.77%);
@@ -295,6 +298,9 @@ Author URL: https://femar.co.ke
     --modal-shadow: 0 12px 48px #ffffff0a;
     --modal-border: 1px solid rgba(33, 36, 42, 0.4);
     --modal-overlay: #0a0b0db1;
+
+    --action-linear-start: #64758e;
+    --action-linear-end: #6e8cb2;
 
     --action-linear: linear-gradient(#64758e, #6e8cb2);
     --light-linear: linear-gradient(90deg, #1a2e1f 0%, #1e2a3d 100%);

@@ -506,7 +506,7 @@ export default class ActionWrapper extends HTMLElement {
   getStats = () => {
     return /* html */`
       <div class="actions stats">
-        ${this.getArrow(this.getAttribute('kind'), this.getAttribute('preview'))}
+        ${this.getArrow(this.getAttribute('kind'), this.getAttribute('full'))}
         ${this.getWrite()}
         ${this.getLike(this.getAttribute('liked'))}
         ${this.getViews()}
@@ -515,8 +515,8 @@ export default class ActionWrapper extends HTMLElement {
 		`
   }
 
-  getArrow = (kind, preview) => {
-    if (preview === "false") return '';
+  getArrow = (kind, full) => {
+    if (full === "false") return '';
     if (kind === 'reply') {
       return /*html*/`
         <span class="action arrow">

@@ -288,6 +288,7 @@ export default class AppPost extends HTMLElement {
             <div class="previews">
               ${this.getReply(this.getAttribute('story'))}
             </div>
+            ${this.getHeader()}
             ${this.getContent()}
             ${this.getPost(story)}
           </div>
@@ -447,10 +448,10 @@ export default class AppPost extends HTMLElement {
 
   getReply = story => {
     if (story === 'reply') {
-      const parent = this.getAttribute('parent');
+      const parent = this.getAttribute('parent').toUpperCase();
       let url = parent.startsWith('P') ? `/p/${parent.toLowerCase()}/preview` : `/r/${parent.toLowerCase()}/preview`;
       return /*html*/`
-        <preview-post url="${url}" hash="${parent}" preview="full"></preview-post>
+        <preview-post url="${url}" hash="${parent}" preview="full" first="true"></preview-post>
       `
     } else return '';
   }
@@ -558,7 +559,7 @@ export default class AppPost extends HTMLElement {
           position: relative;
           color: var(--text-color);
           align-items: center;
-          font-family: var(--font-text), sans-serif;
+          font-family: var(--font-main), sans-serif;
           gap: 5px;
           font-size: 1rem;
           font-weight: 600;
@@ -566,7 +567,7 @@ export default class AppPost extends HTMLElement {
 
         .top-meta {
           margin: 0;
-          padding: 0;
+          padding: 10px 0 0;
           display: flex;
           position: relative;
           color: var(--text-color);
@@ -599,7 +600,7 @@ export default class AppPost extends HTMLElement {
           line-height: 1.4;
           gap: 0;
           margin: 0;
-          padding: 3px 0 0;
+          padding: 0;
         }
 
         .content h6,

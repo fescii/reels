@@ -10,12 +10,18 @@ export default class PreviewPost extends HTMLElement {
     this.shadowObj = this.attachShadow({mode: 'open'});
     this.app = window.app;
     this.api = this.app.api;
+    this.preview = this.getAttribute('preview');
+    this.first = this.textToBool(this.getAttribute('first'));
     this.parent = this.getRootNode().host;
     this.render();
   }
 
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
+  }
+
+  textToBool = text => {
+    return text === 'true';
   }
 
   connectedCallback() {
@@ -43,19 +49,29 @@ export default class PreviewPost extends HTMLElement {
     }
   }
 
-  activateCloseBtn = contentContainer => {
-    const outerThis = this;
-    const closeBtn = this.shadowObj.querySelector('.action.close');
+  activateStatsBtn = data => {
+    const closeBtn = this.shadowObj.querySelector('.action.stats');
+    if (closeBtn) this.openHighlights(closeBtn, data);
+  }
 
-    if (closeBtn && contentContainer) {
-      closeBtn.addEventListener('click', event => {
-        event.preventDefault();
-        contentContainer.innerHTML = /*html*/`<button class="fetch">Preview</button>`;
-
-        // activate the button
-        outerThis.activateBtn(contentContainer);
+  openHighlights = (btn, data) => {
+    const body = document.body;
+    if (btn) {
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        body.insertAdjacentHTML('beforeend', this.getHighlights(data));
       });
     }
+  }
+
+  getHighlights = data => {
+    return /* html */`
+      <views-popup name="post"
+        liked="${data.liked}" views="${data.views}"
+        likes="${data.likes}" replies="${data.replies}">
+      </views-popup>
+    `
   }
 
   fetchPreview = contentContainer => {
@@ -91,7 +107,7 @@ export default class PreviewPost extends HTMLElement {
       this.setReply('reply', this._reply.story ? this._reply.story : this._reply.reply);
     }
 
-    this.activateCloseBtn(contentContainer);
+    this.activateStatsBtn(this._item);
     this.openStory();
     this.openReadMore();
     this.openUrl();
@@ -106,21 +122,21 @@ export default class PreviewPost extends HTMLElement {
 
     try {
       if (result.story) {
-      this._story = result.story;
-      this._item = this.mapStory(result.story);
-      previewLoader.remove();
-      this.populateContent(result.story, contentContainer);
+        this._story = result.story;
+        this._item = this.mapStory(result.story);
+        previewLoader.remove();
+        this.populateContent(result.story, contentContainer);
       } else if (result.reply) {
-      this._reply = result.reply;
-      this._item = this.mapReply(result.reply);
-      previewLoader.remove();
-      contentContainer.innerHTML = this.populateReply(result.reply);
-      this.activateCloseBtn(contentContainer);
-      this.openStory();
-      this.openReadMore();
-      this.openUrl();
-      this.styleLastBlock();
-      this.setReply('reply', result.reply.story ? result.reply.story : result.reply.reply);
+        this._reply = result.reply;
+        this._item = this.mapReply(result.reply);
+        previewLoader.remove();
+        contentContainer.innerHTML = this.populateReply(result.reply);
+        this.activateStatsBtn(result.reply);
+        this.openStory();
+        this.openReadMore();
+        this.openUrl();
+        this.styleLastBlock();
+        this.setReply('reply', result.reply.story ? result.reply.story : result.reply.reply);
       } else {
       this.displayError(contentContainer, previewLoader);
       }
@@ -142,7 +158,8 @@ export default class PreviewPost extends HTMLElement {
         contentContainer.innerHTML = this.populateStory(story);
         break;
     }
-    this.activateCloseBtn(contentContainer);
+
+    this.activateStatsBtn(story);
     this.openStory();
     this.openReadMore();
     this.openUrl();
@@ -162,7 +179,6 @@ export default class PreviewPost extends HTMLElement {
     const content = this.getEmpty();
     previewLoader.remove();
     contentContainer.innerHTML = content;
-    this.activateCloseBtn(contentContainer);
     this.activateBtn(contentContainer);
   }
 
@@ -389,8 +405,8 @@ export default class PreviewPost extends HTMLElement {
 
   openStory = () => {
     // get current content
-    const content = this.shadowObj.querySelector('.actions > .action#view-action');
-
+    const btn = this.shadowObj.querySelector('.actions > .action#view-action');
+    const content = this.shadowObj.querySelector('.content#content');
     if(content) {
       content.addEventListener('click', event => {
         event.preventDefault();
@@ -399,6 +415,24 @@ export default class PreviewPost extends HTMLElement {
 
         // get url
         let url = content.getAttribute('href');
+
+        // Get full post
+        const post =  this._item;
+  
+        // push the post to the app
+        this.pushApp(url, post);
+      })
+    }
+
+    // get the button
+    if (btn) {
+      btn.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+
+        // get url
+        let url = btn.getAttribute('href');
 
         // Get full post
         const post =  this._item;
@@ -557,13 +591,10 @@ export default class PreviewPost extends HTMLElement {
   }
 
   getTemplate() {
-    const className = this.getClass(this.getAttribute('preview'));
-    // const parent = this.getAttribute('hash');
-    const kind = this.getAttribute('preview');
     // Show HTML Here
     return /*html*/`
       <div class="welcome">
-        <div class="preview ${className}">
+        <div class="preview">
           <button class="fetch">Preview</button>
         </div>
       </div>
@@ -619,11 +650,14 @@ export default class PreviewPost extends HTMLElement {
 
   getContent = (content, url, views, likes, author, kind) => {
     const preview = this.shadowObj.querySelector('div.preview');
-    if(preview) preview.classList.add(kind);
+    if (preview) {
+      preview.classList.add(kind);
+      if(this.preview === 'full') preview.classList.add('full');
+    }
 
     return /*html*/`
       ${this.getHeader(author)}
-      <p>${content}</p>
+      <article class="article">${content}</article>
       ${this.getImages(this._story ? this._story.images : this._reply.images)}
       ${this.getOn(author.time)}
       ${this.getActions(likes, views, url, kind)}
@@ -650,10 +684,10 @@ export default class PreviewPost extends HTMLElement {
 
   getActions = (likes, views, url, kind) => {
     return /*html*/`
-      <div class="actions ${kind}">
-        ${this.getArrow(kind)}
+      <div class="actions ${kind} ${this.preview}">
+        ${this.getArrow(kind, this.first)}
         <a href="${url}" class="action view" id="view-action">view</a>
-        <span class="action close" id="close-action">close</span>
+        <span class="action stats" id="stats-action">stats</span>
         <span class="action likes plain">
           <span class="no">${this.formatNumber(likes)}</span> <span class="text">likes</span>
         </span>
@@ -664,10 +698,10 @@ export default class PreviewPost extends HTMLElement {
     `
   }
 
-  getArrow = kind => {
-    if (kind === 'reply') {
+  getArrow = (kind, first) => {
+    if (kind === 'reply' || this.preview === 'full') {
       return /*html*/`
-        <span class="action arrow">
+        <span class="action arrow ${first ? 'first' : ''}"> 
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
             <defs>
               <linearGradient id="gradient" gradientTransform="rotate(0)">
@@ -687,33 +721,23 @@ export default class PreviewPost extends HTMLElement {
     if (kind === 'reply') {
       let url = parent.startsWith('P') ? `/p/${parent.toLowerCase()}/preview` : `/r/${parent.toLowerCase()}/preview`;
       return /*html*/`
-        <preview-post url="${url}" hash="${parent}" preview="quick"></preview-post>
+        <preview-post url="${url}" hash="${parent}" preview="${this.preview}"></preview-post>
       `
     } else return '';
   }
 
   getEmpty = () => {
+    const preview = this.shadowObj.querySelector('div.preview');
+    if(preview) preview.classList.remove('reply');
     return /* html */`
       <div class="empty">
         <p>An error has occurred.</p>
         <div class="actions">
           <button class="fetch last">Retry</button>
-          <span class="action close" id="close-action">close</span>
+          <span class="action stats" id="stats-action">stats</span>
         </div>
       </div>
     `
-  }
-
-  getFullCss = preview => {
-    if (preview === 'full') {
-      return "padding: 10px 0;"
-    } else {
-      return "padding: 0;"
-    }
-  }
-
-  getClass = preview => {
-    return preview === 'full' ? '' : 'feed';
   }
 
   getLoader() {
@@ -759,7 +783,6 @@ export default class PreviewPost extends HTMLElement {
         :host{
           border: none;
           padding: 0;
-          ${this.getFullCss(this.getAttribute('preview'))}
           justify-self: end;
           display: flex;
           flex-flow: column;
@@ -842,7 +865,7 @@ export default class PreviewPost extends HTMLElement {
           line-height: 1.4;
           gap: 0;
           margin: 0;
-          padding: 0 0 0 16px;
+          padding: 0 0 0 19px;
         }
 
         .preview.feed {
@@ -865,8 +888,23 @@ export default class PreviewPost extends HTMLElement {
         .preview.reply::before {
           top: calc(50% - 18px);
           transform: translateY(-50%);
-          /*transform: translateY(calc(-50% - 30px));*/
           height: calc(100% - 40px);
+        }
+
+        .preview.full::before {
+          top: calc(50% - 16px);
+          transform: translateY(-50%);
+          height: calc(100% - 40px);
+        }
+
+        .preview article.article {
+          width: 100%;
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+          margin: 0;
+          padding: 0;
+          font-family: var(--font-main), sans-serif;
         }
 
         .preview p,
@@ -1033,63 +1071,6 @@ export default class PreviewPost extends HTMLElement {
           margin-inline-end: 0 !important;
         }
 
-        .replying-to {
-          position: relative;
-          text-decoration: none;
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: start;
-          gap: 0;
-          margin: 0 0 3px;
-          padding: 0;
-        }
-        
-        .replying-to > .meta-reply {
-          display: flex;
-          width: max-content;
-          align-items: start;
-          color: var(--gray-color);
-          flex-flow: column;
-          font-size: 1rem;
-          gap: 2px;
-        }
-        
-        .replying-to > .meta-reply > .text {
-          display: flex;
-          align-items: center;
-          justify-content: start;
-          gap: 5px;
-        }
-
-        .replying-to > .meta-reply > .text > .reply {
-          display: flex;
-          font-size: 0.89rem;
-          font-family: var(--font-read), sans-serif;
-          padding: 0;
-          font-weight: 400;
-        }
-        
-        .replying-to > .meta-reply > .text > svg {
-          color: var(--gray-color);
-          width: 16px;
-          height: 16px;
-          display: inline-block;
-          margin: 0 0 0 0;
-        }
-        
-        .replying-to > .meta-reply .parent {
-          background: var(--action-linear);
-          font-family: var(--font-mono), monospace;
-          font-size: 0.8rem;
-          line-height: 1;
-          color: transparent;
-          font-weight: 600;
-          background-clip: text;
-          -webkit-background-clip: text;
-          -moz-background-clip: text;
-        }
-
         .meta {
           height: max-content;
           display: flex;
@@ -1219,7 +1200,8 @@ export default class PreviewPost extends HTMLElement {
           margin: 5px 0 3px;
         }
 
-        .actions.reply {
+        .actions.reply,
+        .actions.full {
           position: relative;
         }
         
@@ -1288,7 +1270,6 @@ export default class PreviewPost extends HTMLElement {
         @media screen and ( max-width: 660px ) {
           :host {
             border: none;
-            ${this.getFullCss(this.getAttribute('preview'))}
             justify-self: end;
             display: flex;
             flex-flow: column;
@@ -1316,6 +1297,12 @@ export default class PreviewPost extends HTMLElement {
             top: calc(50% - 18px);
             transform: translateY(-50%);
             /*transform: translateY(calc(-50% - 30px));*/
+            height: calc(100% - 40px);
+          }
+
+          .preview.full::before {
+            top: calc(50% - 16px);
+            transform: translateY(-50%);
             height: calc(100% - 40px);
           }
 

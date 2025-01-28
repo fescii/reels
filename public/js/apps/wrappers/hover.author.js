@@ -669,7 +669,6 @@ export default class HoverAuthor extends HTMLElement {
         }
 
         :host {
-          /*border: var(--border);*/
           font-size: 16px;
           width: 100%;
           padding: 0;
@@ -683,7 +682,6 @@ export default class HoverAuthor extends HTMLElement {
           width: 100%;
           position: relative;
           padding: 0;
-          height: 30px;
           display: flex;
           flex-flow: column;
           justify-content: center;
@@ -694,7 +692,6 @@ export default class HoverAuthor extends HTMLElement {
           width: max-content;
           height: max-content;
           display: flex;
-          height: 30px;
           align-items: center;
           font-family: var(--font-mono),monospace;
           font-weight: 600;

@@ -414,7 +414,7 @@ export default class PreviewPost extends HTMLElement {
         event.stopImmediatePropagation();
 
         // get url
-        let url = content.getAttribute('href');
+        let url = btn.getAttribute('href');
 
         // Get full post
         const post =  this._item;

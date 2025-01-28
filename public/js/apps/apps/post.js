@@ -761,7 +761,7 @@ export default class AppPost extends HTMLElement {
             position: relative;
             color: var(--text-color);
             align-items: center;
-            font-family: var(--font-text), sans-serif;
+            font-family: var(--font-main), sans-serif;
             font-size: 0.9rem;
             gap: 5px;
             font-weight: 600;

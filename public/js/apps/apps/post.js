@@ -16,6 +16,14 @@ export default class AppPost extends HTMLElement {
     document.title = `Post | by ${this.getAttribute('author-name')}`;
   }
 
+  setReply = (reply) => {
+    const previews = this.shadowObj.querySelector('div.previews');
+
+    if (previews) {
+      previews.insertAdjacentHTML('afterbegin', reply);
+    }
+  }
+
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
   }
@@ -259,13 +267,14 @@ export default class AppPost extends HTMLElement {
   getBody = () => {
     // Get story type
     const story = this.getAttribute('story');
-
     const mql = window.matchMedia('(max-width: 660px)');
     if (mql.matches) {
       return /* html */`
         <div class="content-container">
-          ${this.getReply(this.getAttribute('story'))}
-          ${this.getAuthor()}
+          <div class="previews">
+            ${this.getReply(this.getAttribute('story'))}
+          </div>
+          ${this.getAuthorOption(story)}
           ${this.getContent()}
           ${this.getPost(story)}
         </div>
@@ -276,7 +285,9 @@ export default class AppPost extends HTMLElement {
       return /* html */`
         <div class="feeds">
           <div class="content-container">
-            ${this.getReply(this.getAttribute('story'))}
+            <div class="previews">
+              ${this.getReply(this.getAttribute('story'))}
+            </div>
             ${this.getContent()}
             ${this.getPost(story)}
           </div>
@@ -310,13 +321,13 @@ export default class AppPost extends HTMLElement {
         return /*html */`
           ${this.getPoll()}
           ${this.getMeta()}
-          ${this.getStats()}
+          ${this.getStats(story)}
         `
       default:
         return /* html */`
           ${this.getImages()}
           ${this.getMeta()}
-          ${this.getStats()}
+          ${this.getStats(story)}
         `
     }
   }
@@ -329,6 +340,37 @@ export default class AppPost extends HTMLElement {
         replies-url="${this.getAttribute('replies-url')}" likes-url="${this.getAttribute('likes-url')}">
       </post-section>
     `
+  }
+
+  getAuthorOption = kind => {
+    if(kind === 'reply') {
+      return this.getHeader();
+    } else {
+      return this.getAuthor();
+    }
+  }
+
+  getHeader = () => {
+    return /*html*/`
+      <div class="top-meta">
+        ${this.getAuthorHover()}
+      </div>
+    `
+  }
+
+  getAuthorHover = () => {
+    let url = `/u/${this.getAttribute('author-hash').toLowerCase()}`;
+    let bio = this.getAttribute('author-bio') || 'This author has not provided a bio yet.';
+    // replace all " and ' with &quot; and &apos; to avoid breaking the html
+    bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    return /* html */`
+			<hover-author url="${url}" you="${this.getAttribute('author-you')}" hash="${this.getAttribute('author-hash')}"
+        picture="${this.getAttribute('author-img')}" name="${this.getAttribute('author-name')}" contact='${this.getAttribute("author-contact")}'
+        stories="${this.getAttribute('author-stories')}" replies="${this.getAttribute('author-replies')}"
+        followers="${this.getAttribute('author-followers')}" following="${this.getAttribute('author-following')}" user-follow="${this.getAttribute('author-follow')}"
+        verified="${this.getAttribute('author-verified')}" bio="${bio}">
+      </hover-author>
+		`
   }
 
   getAuthor = () => {
@@ -362,9 +404,9 @@ export default class AppPost extends HTMLElement {
     `
   }
 
-  getStats = () =>  {
+  getStats = story =>  {
     return /*html*/`
-      <action-wrapper full="true" kind="${this.getAttribute('story')}" reload="false" likes="${this.getAttribute('likes')}"
+      <action-wrapper preview="false" full="true" kind="${story}" reload="false" likes="${this.getAttribute('likes')}"
         replies="${this.getAttribute('replies')}" liked="${this.getAttribute('liked')}" wrapper="true" images="${this.getAttribute('images')}"
         hash="${this.getAttribute('hash')}" views="${this.getAttribute('views')}" url="${this.getAttribute('url')}" summary="Post by - ${this.getAttribute('author-name')}"
         preview-title="" time="${this.getAttribute('time')}" author-hash="${this.getAttribute('author-hash')}">
@@ -522,6 +564,19 @@ export default class AppPost extends HTMLElement {
           font-weight: 600;
         }
 
+        .top-meta {
+          margin: 0;
+          padding: 0;
+          display: flex;
+          position: relative;
+          color: var(--text-color);
+          align-items: center;
+          font-family: var(--font-text), sans-serif;
+          gap: 5px;
+          font-size: 1rem;
+          font-weight: 600;
+        }
+
         .meta > .sp {
           font-size: 1rem;
           color: var(--gray-color);
@@ -638,6 +693,15 @@ export default class AppPost extends HTMLElement {
           div.side {
             width: 40%;
           }
+        }
+
+        div.previews {
+          width: 100%;
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+          margin: 0;
+          padding: 0;
         }
 
 				@media screen and (max-width: 660px) {

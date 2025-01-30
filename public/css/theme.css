@@ -229,9 +229,9 @@ Author URL: https://femar.co.ke
     --input-border: 1px solid #bdbdbd5d;
     --input-border-focus: thin solid #159159cc;
     --input-border-error: thin solid #d94317aa;
-    --action-border: thin solid #1e21279a;
-    --border: thin solid #2023297e;
-    --border-button: thin solid #25282d73;
+    --action-border: thin solid #2d33417e;
+    --border: thin solid #2d33417e;
+    --border-button: thin solid #2e333a73;
     --action-border: thin solid #627ea073;  /* Added */
     --topic-border: thin solid rgba(48, 52, 63, 0.4);
     --topic-border-active: thin solid #1cbb26cc;

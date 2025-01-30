@@ -225,7 +225,7 @@ export default class RepliesSection extends HTMLElement {
           }
 
           div.content-container > .feeds {
-            padding: 0 10px;
+            padding: 0;
           }
 
 					a,

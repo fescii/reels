@@ -277,8 +277,8 @@ export default class AppPost extends HTMLElement {
           ${this.getAuthorOption(story)}
           ${this.getContent()}
           ${this.getPost(story)}
+          ${this.repliesSection()}
         </div>
-        ${this.getSection()}
       `;
     }
     else {
@@ -291,13 +291,12 @@ export default class AppPost extends HTMLElement {
             ${this.getHeader()}
             ${this.getContent()}
             ${this.getPost(story)}
+            ${this.repliesSection()}
           </div>
-          ${this.getSection()}
         </div>
         <div class="side">
           ${this.getAuthor()}
-          <people-container url="/users/recommended" type="profile"></people-container>
-          ${this.getInfo()}
+          ${this.peopleSection()}
         </div>
       `;
     }
@@ -333,13 +332,22 @@ export default class AppPost extends HTMLElement {
     }
   }
 
-  getSection = () => {
+  peopleSection = () => {
     return /* html */`
-      <post-section kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" active="${this.getAttribute('tab')}" section-title="Post" 
+      <post-section kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" active="likes"
+        author-hash="${this.getAttribute('author-hash')}" hash="${this.getAttribute('hash')}" likes="${this.getAttribute('likes')}"
+        likes-url="${this.getAttribute('likes-url')}">
+      </post-section>
+    `
+  }
+
+  repliesSection = () => {
+    return /* html */`
+      <replies-section kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" active="${this.getAttribute('tab')}" section-title="Post" 
         author-hash="${this.getAttribute('author-hash')}" hash="${this.getAttribute('hash')}" 
         replies="${this.getAttribute('replies')}" likes="${this.getAttribute('likes')}"
         replies-url="${this.getAttribute('replies-url')}" likes-url="${this.getAttribute('likes-url')}">
-      </post-section>
+      </replies-section>
     `
   }
 
@@ -438,14 +446,6 @@ export default class AppPost extends HTMLElement {
     `
   }
 
-  getInfo = () => {
-    return /*html*/`
-      <info-container docs="/about/docs" new="/about/new"
-       feedback="/about/feedback" request="/about/request" code="/about/code" donate="/about/donate" contact="/about/contact" company="https://github.com/aduki-hub">
-      </info-container>
-    `
-  }
-
   getReply = story => {
     if (story === 'reply') {
       const parent = this.getAttribute('parent').toUpperCase();
@@ -532,11 +532,12 @@ export default class AppPost extends HTMLElement {
         }
 
         div.side {
-          padding: 25px 0;
+          padding: 0;
+          margin: 25px 0;
           width: calc(45% - 10px);
           display: flex;
           flex-flow: column;
-          gap: 20px;
+          gap: 0;
           position: sticky;
           top: 0;
           height: 100vh;

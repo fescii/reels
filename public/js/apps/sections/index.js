@@ -2,6 +2,7 @@
 import PostSection from "./post.js";
 import ProfileSection from "./profile.js";
 import TopicSection from "./topic.js";
+import RepliesSection from "./replies.js";
 
 
 export default function sections() {
@@ -9,4 +10,5 @@ export default function sections() {
   customElements.define("post-section", PostSection);
   customElements.define("profile-section", ProfileSection);
   customElements.define("topic-section", TopicSection);
+  customElements.define("replies-section", RepliesSection);
 }

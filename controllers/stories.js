@@ -1,5 +1,4 @@
 const api = require('./api');
-
 const first = text => {
   const imgRegex = /<img[^>]+src\s*=\s*['"]([^'"]+)['"][^>]*>/i;
   const match = text.match(imgRegex);
@@ -96,51 +95,6 @@ const getStory = async (req, res) => {
 }
 
 /**
- * @controller {get} /p/:slug(:hash) Story
- * @name getStoryLikes
- * @description This route will render the story page for the app.
- * @returns Page: Renders story page
-*/
-const getStoryLikes = async (req, res) => {
-  //get the params from the request
-  let param = req.params.story;
-
-  // get header x-access-token
-  let token = req.cookies['x-access-token'] || req.headers["x-access-token"]
-
-  try {
-    const result = await api.get(`/p/page/${param}`, {
-      "x-access-token": token
-    })
-
-    // if there is no story, render the 404 page
-    if (!result.success) {
-      return res.status(404).render('404')
-    }
-
-    const story = result.story;
-    story.tab = 'likes';
-
-    const { title, image, description } = meta(story);
-    const url = "/p/" + story.hash.toLowerCase();
-
-    const metaData = {
-      title: title,
-      description: description,
-      image: image,
-      keywords: story.tags ? story.tags.join(', ') : '',
-      url: url,
-    }
-
-    res.render('pages/post', {
-      data: story, meta: metaData
-    })
-  } catch (error) {
-    return res.status(500).render('500')
-  }
-}
-
-/**
  * @controller {get} /r/:hash) Reply
  * @name getReply
  * @description - A controller to render the reply page
@@ -185,53 +139,8 @@ const getReply = async (req, res) => {
   }
 }
 
-/**
- * @controller {get} /r/:hash) Reply Likes
- * @name getReplyLikes
- * @description - A controller to render the reply page
- * @returns Page: Renders reply page
-*/
-const getReplyLikes = async (req, res) => {
-  //get the params from the request
-  const { hash } = req.params;
-
-  // get header x-access-token
-  const token = req.cookies['x-access-token'] || req.headers["x-access-token"]
-
-  try {
-    const result = await api.get(`/r/page/${hash}`, {
-      "x-access-token": token
-    });
-
-    // if there is no reply, render the 404 page
-    if (!result.success) {
-      return res.status(404).render('404')
-    }
-
-    const reply = result.reply;
-    reply.tab = 'likes';
-
-    const { title, image, description } = replyMeta(reply);
-
-    const metaData = {
-      title: title,
-      description: description,
-      image: image,
-      keywords: reply.tags ? reply.tags.join(', ') : '',
-      url: "/r/" + reply.hash.toLowerCase(),
-    }
-
-    res.render('pages/reply', {
-      data: reply, meta: metaData
-    })
-
-  } catch (error) {
-    return res.status(500).render('500')
-  }
-}
-
 
 // Export all public content controllers
 module.exports = {
-  getStory, getStoryLikes, getReply, getReplyLikes
+  getStory, getReply
 }

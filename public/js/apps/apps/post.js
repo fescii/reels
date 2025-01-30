@@ -334,10 +334,10 @@ export default class AppPost extends HTMLElement {
 
   peopleSection = () => {
     return /* html */`
-      <post-section kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" active="likes"
+      <likes-section kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" active="likes"
         author-hash="${this.getAttribute('author-hash')}" hash="${this.getAttribute('hash')}" likes="${this.getAttribute('likes')}"
         likes-url="${this.getAttribute('likes-url')}">
-      </post-section>
+      </likes-section>
     `
   }
 
@@ -346,6 +346,7 @@ export default class AppPost extends HTMLElement {
       <replies-section kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" active="${this.getAttribute('tab')}" section-title="Post" 
         author-hash="${this.getAttribute('author-hash')}" hash="${this.getAttribute('hash')}" 
         replies="${this.getAttribute('replies')}" likes="${this.getAttribute('likes')}"
+        liked="${this.getAttribute('liked')}" views="${this.getAttribute('views')}"
         replies-url="${this.getAttribute('replies-url')}" likes-url="${this.getAttribute('likes-url')}">
       </replies-section>
     `

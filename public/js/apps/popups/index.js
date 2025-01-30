@@ -8,7 +8,7 @@ import PreviewPopup from "./preview.js"
 import NotifyPopup from "./notify.js"
 import PostOptions from "./options.js"
 import ImagePopup from "./images.js"
-
+import ActivityPopup from "./activity.js";
 
 export default function popups() {
   // Register popups
@@ -22,4 +22,5 @@ export default function popups() {
   customElements.define("notify-popup", NotifyPopup);
   customElements.define("post-options", PostOptions);
   customElements.define("image-popup", ImagePopup);
+  customElements.define("activity-popup", ActivityPopup);
 }

@@ -540,7 +540,7 @@ export default class StoryPost extends HTMLElement {
 
   getHighlights = () => {
     return /* html */`
-      <views-popup name="post"likes="${this.getAttribute('likes')}" liked="${this.getAttribute('liked')}" views="${this.getAttribute('views')}"
+      <views-popup name="post" likes="${this.getAttribute('likes')}" liked="${this.getAttribute('liked')}" views="${this.getAttribute('views')}"
         replies="${this.getAttribute('replies')}">
       </views-popup>
     `

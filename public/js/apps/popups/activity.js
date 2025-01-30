@@ -1,4 +1,4 @@
-export default class ViewsPopup extends HTMLElement {
+export default class ActivityPopup extends HTMLElement {
   constructor() {
 
     // We are not even going to touch this.
@@ -16,14 +16,12 @@ export default class ViewsPopup extends HTMLElement {
 
   connectedCallback() {
     this.disableScroll();
-    // Select the close button & overlay
-    const overlay = this.shadowObj.querySelector('.overlay');
-    const btns = this.shadowObj.querySelectorAll('.cancel-btn');
+    const btn = this.shadowObj.querySelector('div.header > div.close-btn');
     const contentContainer = this.shadowObj.querySelector('ul.highlights');
 
     // Close the modal
-    if (overlay && btns && contentContainer) {
-      this.closePopup(overlay, btns);
+    if (btn && contentContainer) {
+      this.closePopup(btn);
     }
   }
 
@@ -83,37 +81,55 @@ export default class ViewsPopup extends HTMLElement {
   }
 
   // close the modal
-  closePopup = (overlay, btns) => {
-    overlay.addEventListener('click', e => {
+  closePopup = btn => {
+    btn.addEventListener('click', e => {
       e.preventDefault();
       this.remove();
     });
-
-    btns.forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.preventDefault();
-        this.remove();
-      });
-    })
   }
 
   getTemplate() {
-    // Show HTML Here
     return /* html */`
-      <div class="overlay"></div>
       <section id="content" class="content">
+        ${this.getHeader()}
         ${this.getWelcome()}
+        <div class="likes">
+          ${this.peopleSection()}
+        </div>
       </section>
     ${this.getStyles()}`
+  }
+
+  getHeader = () => {
+    return /* html */`
+      <div class="header">
+        <div class="close-btn">
+          <svg id="Arrow - Left" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5.34994 11.9998L19.7502 11.9998" stroke="currentColor" stroke-width="2.0" stroke-linecap="square"></path>
+            <path d="M10.8 18.0243L4.74999 12.0003L10.8 5.97534" stroke="currentColor" stroke-width="2.0" stroke-linecap="square"></path>
+          </svg>
+        </div>
+        <span class="text">Activity</span>
+      </div>
+    `
   }
 
   getWelcome() {
     return /*html*/`
       <div class="welcome">
 				<ul class="highlights">
-          ${this.getLoader()}
+          ${this.getHighlights()}
         </ul>
 			</div>
+    `
+  }
+
+  peopleSection = () => {
+    return /* html */`
+      <likes-section kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" active="likes"
+        hash="${this.getAttribute('hash')}" likes="${this.getAttribute('likes')}"
+        likes-url="${this.getAttribute('likes-url')}">
+      </likes-section>
     `
   }
 
@@ -173,9 +189,7 @@ export default class ViewsPopup extends HTMLElement {
         </span>
       </li>
       <div class="empty">
-        <p> 
-          Views are simply the number of times the this content has been viewed by others.
-        </p>
+        <p> Views are simply the number of times the this content has been viewed by others.</p>
       </div>
     `
   }
@@ -197,159 +211,142 @@ export default class ViewsPopup extends HTMLElement {
           box-sizing: border-box !important;
         }
 
-        :host{
+        :host {
           border: none;
-          padding: 0;
-          justify-self: end;
+          background-color: var(--background);
+          padding: 0px;
           display: flex;
           flex-flow: column;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          z-index: 100;
-          width: 100%;
-          min-width: 100vw;
+          align-items: start;
+          gap: 0;
+          z-index: 20;
           position: fixed;
           right: 0;
           top: 0;
           bottom: 0;
           left: 0;
-        }
-
-        div.overlay {
-          position: absolute;
-          top: 0;
-          right: 0;
-          bottom: 0;
-          left: 0;
+          max-height: 100%;
           height: 100%;
-          width: 100%;
-          background-color: var(--modal-background);
-          backdrop-filter: blur(3px);
-          -webkit-backdrop-filter: blur(3px);
+          min-height: 100%;
         }
 
-        div.loader-container {
-          position: relative;
-          width: 100%;
-          height: 150px;
-          padding: 20px 0 0 0;
-        }
-
-        #btn-loader {
-          position: absolute;
-          top: 0;
-          left: 0;
-          bottom: 0;
-          right: 0;
-          z-index: 5;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: inherit;
-        }
-
-        #btn-loader > .loader-alt {
-          width: 35px;
-          aspect-ratio: 1;
-          --_g: no-repeat radial-gradient(farthest-side, #18A565 94%, #0000);
-          --_g1: no-repeat radial-gradient(farthest-side, #21D029 94%, #0000);
-          --_g2: no-repeat radial-gradient(farthest-side, #df791a 94%, #0000);
-          --_g3: no-repeat radial-gradient(farthest-side, #f09c4e 94%, #0000);
-          background:    var(--_g) 0 0,    var(--_g1) 100% 0,    var(--_g2) 100% 100%,    var(--_g3) 0 100%;
-          background-size: 30% 30%;
-          animation: l38 .9s infinite ease-in-out;
-          -webkit-animation: l38 .9s infinite ease-in-out;
-        }
-
-        #btn-loader > .loader {
-          width: 20px;
-          aspect-ratio: 1;
-          --_g: no-repeat radial-gradient(farthest-side, #ffffff 94%, #0000);
-          --_g1: no-repeat radial-gradient(farthest-side, #ffffff 94%, #0000);
-          --_g2: no-repeat radial-gradient(farthest-side, #df791a 94%, #0000);
-          --_g3: no-repeat radial-gradient(farthest-side, #f09c4e 94%, #0000);
-          background:    var(--_g) 0 0,    var(--_g1) 100% 0,    var(--_g2) 100% 100%,    var(--_g3) 0 100%;
-          background-size: 30% 30%;
-          animation: l38 .9s infinite ease-in-out;
-          -webkit-animation: l38 .9s infinite ease-in-out;
-        }
-
-        @keyframes l38 {
-          100% {
-            background-position: 100% 0, 100% 100%, 0 100%, 0 0
-          }
+        
+        #content::-webkit-scrollbar {
+          display: none;
+          visibility: hidden;
+          width: 0;
         }
 
         #content {
-          z-index: 1;
-          background-color: var(--background);
-          padding: 20px 10px;
+          box-sizing: border-box !important;
+          padding: 0 10px;
+          margin: 0;
+          width: 100%;
+          max-width: 100%;
+          max-height: 100%;
+          height: 100%;
+          min-height: 100%;
+          border-radius: 0px;
+          border-top: var(--mobile-border);
+          border-top-right-radius: 15px;
+          border-top-left-radius: 15px;
+          overflow-y: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
           display: flex;
           flex-flow: column;
-          align-items: center;
-          justify-content: center;
-          gap: 0;
-          width: 700px;
-          max-height: 90%;
-          height: max-content;
-          border-radius: 25px;
-          position: relative;
         }
-  
+
+        div.likes {
+          padding: 0;
+          min-width: 100%;
+          width: 100%;
+        }
+
+        div.header {
+          border-bottom: var(--border);
+          width: 100%;
+          padding: 10px 0;
+          margin: 0;
+          display: flex;
+          flex-flow: row;
+          align-items: center;
+          justify-content: start;
+          gap: 10px;
+          position: sticky;
+          top: 0;
+          color: var(--text-color);
+          background-color: var(--background);
+          z-index: 10;
+        }
+
+        div.header > div.close-btn {
+          display: flex;
+          align-items: center;
+          gap: 0;
+          padding: 0;
+        }
+
+        div.header > div.close-btn > svg {
+          width: 27px;
+          height: 27px;
+          display: inline-block;
+          margin: 0 0 0 -2px;
+        }
+
+        div.header > span.text {
+          width: calc(100% - 80px);
+          text-align: center;
+          font-size: 1.15rem;
+          font-weight: 500;
+          color: var(--text-color);
+          font-family: var(--font-main), sans-serif;
+          cursor: pointer;
+        }
+
         .welcome {
-          width: 98%;
+          width: 100%;
+          padding: 0;
           display: flex;
           flex-flow: column;
           align-items: center;
           justify-content: center;
-          row-gap: 0;
         }
 
         .welcome > h2 {
           width: 100%;
-          font-size: 1.35rem;
-          font-weight: 600;
+          font-size: 1.2rem;
           margin: 0 0 10px;
           padding: 10px 10px;
           background-color: var(--gray-background);
           text-align: center;
           border-radius: 12px;
-          font-family: var(--font-read), sans-serif;
-          color: var(--text-color);
-          font-weight: 500;
-          position: relative;
         }
 
-        .welcome > h2 > span.control {
-          padding: 0;
-          cursor: pointer;
-          display: flex;
-          flex-flow: column;
-          gap: 0px;
-          justify-content: center;
-          position: absolute;
-          top: 50%;
-          left: 10px;
-          transform: translateY(-50%);
+        .welcome > .actions {
+          width: 100%;
         }
 
-        .welcome > h2 > span.control svg {
-          width: 20px;
-          height: 20px;
-          color: var(--text-color);
-        }
-
-        .welcome > h2 > span.control svg:hover{
-          color: var(--error-color);
+        .welcome > .actions .action {
+          background: var(--stage-no-linear);
+          text-decoration: none;
+          padding: 7px 20px 8px;
+          cursor: default;
+          margin: 10px 0;
+          width: 120px;
+          cursor: default !important;
+          border-radius: 12px;
         }
 
         div.empty {
+          border-bottom: var(--border);
           width: 100%;
-          padding: 0;
+          padding: 0 0 10px;
           margin: 0;
           display: flex;
           flex-flow: column;
+          align-items: center;
+          justify-content: center;
           gap: 8px;
         }
 
@@ -358,18 +355,23 @@ export default class ViewsPopup extends HTMLElement {
           padding: 0;
           margin: 0;
           color: var(--text-color);
-          font-family: var(--font-text), sans-serif;
-          font-size: 1rem;
+          font-family: var(--font-read), sans-serif;
+          font-size: 0.9rem;
           font-weight: 400;
         }
 
         div.empty > p.italics {
           font-style: italic;
         }
+
+        .welcome > h2 > span.control,
+        .welcome > .actions > .action {
+          cursor: default !important;
+        }
         
         ul.highlights {
           width: 100%;
-          padding: 0;
+          padding: 10px 0 0;
           margin: 0;
           list-style-type: none;
           display: flex;
@@ -451,107 +453,6 @@ export default class ViewsPopup extends HTMLElement {
           margin: 5px 0;
           border-radius: 12px;
           -webkit-border-radius: 12px;
-        }
-
-        @media screen and ( max-width: 850px ){
-          #content {
-            width: 90%;
-          }
-        }
-
-        @media screen and ( max-width: 600px ){
-          :host {
-            border: none;
-            background-color: var(--modal-background);
-            padding: 0px;
-            justify-self: end;
-            display: flex;
-            flex-flow: column;
-            align-items: center;
-            justify-content: end;
-            gap: 10px;
-            z-index: 20;
-            position: fixed;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            left: 0;
-          }
-
-          #content {
-            box-sizing: border-box !important;
-            padding: 15px 0 5px;
-            margin: 0;
-            width: 100%;
-            max-width: 100%;
-            max-height: 90%;
-            min-height: max-content;
-            border-radius: 0px;
-            border-top: var(--mobile-border);
-            border-top-right-radius: 15px;
-            border-top-left-radius: 15px;
-          }
-
-          .welcome {
-            width: 100%;
-            padding: 0 15px 20px;
-            display: flex;
-            flex-flow: column;
-            align-items: center;
-            justify-content: center;
-          }
-
-          .welcome > h2 {
-            width: 100%;
-            font-size: 1.2rem;
-            margin: 0 0 10px;
-            padding: 10px 10px;
-            background-color: var(--gray-background);
-            text-align: center;
-            border-radius: 12px;
-          }
-
-          .welcome > .actions {
-            width: 100%;
-          }
-
-          .welcome > .actions .action {
-            background: var(--stage-no-linear);
-            text-decoration: none;
-            padding: 7px 20px 8px;
-            cursor: default;
-            margin: 10px 0;
-            width: 120px;
-            cursor: default !important;
-            border-radius: 12px;
-          }
-
-          div.empty {
-            width: 100%;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-flow: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-          }
-  
-          div.empty > p {
-            width: 100%;
-            padding: 0;
-            margin: 0;
-            text-align: start;
-            color: var(--text-color);
-            font-family: var(--font-text), sans-serif;
-            font-size: 1rem;
-            font-weight: 400;
-          }
-
-          .welcome > h2 > span.control,
-          .welcome > .actions > .action {
-            cursor: default !important;
-          }
         }
       </style>
     `;

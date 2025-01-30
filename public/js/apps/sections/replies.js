@@ -91,19 +91,36 @@ export default class RepliesSection extends HTMLElement {
 
   getBody = () => {
     return /* html */`
-      <div class="activity-container">
-        <h4 class="title">Replies</h4>
+      <div class="activity-content">
+        <div class="activity-container">
+          <h4 class="title">Replies</h4>
+          ${this.getAction(this.mql)}
+        </div>
+        <div class="content-container">
+          ${this.getContent()}
+        </div>
+      </div>
+    `
+  }
+
+  getAction = mql => {
+    let likes = parseInt(this.getAttribute('replies'), 10);
+    if(isNaN(likes)) likes = 0;
+    const text = likes === 1 ? 'Reply' : 'Replies';
+    if (mql.matches) {
+      return /* html */`
         <span class="action">
           <span class="text">View activity</span>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
               <path d="M9.00005 6C9.00005 6 15 10.4189 15 12C15 13.5812 9 18 9 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </span>
-      </div>
-      <div class="content-container">
-        ${this.getContent()}
-      </div>
-    `
+      `
+    } else {
+      return /* html */`
+        <span class="no">${this.formatNumber(this.getAttribute('replies'))} ${text}</span>
+      `
+    }
   }
 
   getHighlights = () => {
@@ -198,6 +215,13 @@ export default class RepliesSection extends HTMLElement {
           gap: 0;
         }
 
+        div.activity-content {
+          width: 100%;
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+        }
+
         div.activity-container {
           border-top: var(--border);
           border-bottom: var(--border);
@@ -236,6 +260,12 @@ export default class RepliesSection extends HTMLElement {
           height: 20px;
         }
 
+        span.no {
+          font-size: 1rem;
+          color: var(--text-color);
+          font-family: var(--font-read), sans-serif;
+        }
+
         @media screen and (max-width: 660px) {
           :host {
             padding: 0 0 30px;
@@ -247,6 +277,10 @@ export default class RepliesSection extends HTMLElement {
 
           div.content-container > .feeds {
             padding: 0;
+          }
+
+          div.activity-content {
+            padding: 0 10px;
           }
 
 					a,

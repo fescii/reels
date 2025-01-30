@@ -183,7 +183,7 @@ export default class ImagesWrapper extends HTMLElement {
 					width: 100%;
 					max-width: 100%;
 					margin: 0;
-				  padding: 10px 0 3px;
+				  padding: 10px 0;
 					display: flex;
 					flex-flow: row;
 					gap: 0;
@@ -290,7 +290,7 @@ export default class ImagesWrapper extends HTMLElement {
 						margin-right: -10px;
 						width: calc(100% + 20px);
 						max-width: calc(100% + 20px);
-						padding: 10px 10px 3px;
+						padding: 10px 10px;
 					}
 
 					::-webkit-scrollbar {

@@ -270,13 +270,15 @@ export default class AppPost extends HTMLElement {
     const mql = window.matchMedia('(max-width: 660px)');
     if (mql.matches) {
       return /* html */`
-        <div class="content-container">
+        <div class="feeds">
           <div class="previews">
             ${this.getReply(this.getAttribute('story'))}
           </div>
-          ${this.getAuthorOption(story)}
-          ${this.getContent()}
-          ${this.getPost(story)}
+          <div class="content-container">
+            ${this.getAuthorOption(story)}
+            ${this.getContent()}
+            ${this.getPost(story)}
+          </div>
           ${this.repliesSection()}
         </div>
       `;
@@ -555,7 +557,7 @@ export default class AppPost extends HTMLElement {
         .meta {
           border-bottom: var(--border);
           border-top: var(--border);
-          margin: 10px 0 0 0;
+          margin: 0;
           padding: 10px 0;
           display: flex;
           position: relative;
@@ -688,7 +690,7 @@ export default class AppPost extends HTMLElement {
           border-radius: 5px;
         }
 
-        @media screen and (max-width:900px) {
+        @media screen and (max-width: 900px) {
           .feeds {
             width: 58%;
           }
@@ -713,6 +715,14 @@ export default class AppPost extends HTMLElement {
             padding: 10px 0;
 					}
 
+          .feeds {
+            display: flex;
+            flex-flow: column;
+            gap: 0;
+            padding: 0;
+            width: 100%;
+          }  
+
           .container {
             display: flex;
             flex-flow: column;
@@ -728,6 +738,10 @@ export default class AppPost extends HTMLElement {
             gap: 0;
             padding: 0 10px;
             width: 100%;
+          }
+
+          div.previews {
+            padding: 0 10px;
           }
 
 					::-webkit-scrollbar {

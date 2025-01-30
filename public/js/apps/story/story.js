@@ -45,8 +45,6 @@ export default class AppStory extends HTMLElement {
   getTopics = () => {
     // get the topics
     let topics = this.getAttribute('topics');
-
-    // 
     return topics ? topics.split(',') : ['story'];
   }
 
@@ -56,21 +54,10 @@ export default class AppStory extends HTMLElement {
 
   connectedCallback() {
     this.enableScroll();
-    // Change style to flex
     this.style.display='flex';
-
-    // open urls
     this.openUrl();
-
-    // get the content
-    const content = this.shadowObj.querySelector('article.article');
-
-    // connect to the WebSocket
     this.checkAndAddHandler();
-
     this.watchMediaQuery(this.mql);
-
-    // view the story
     this.activateView();
   }
 
@@ -334,7 +321,7 @@ export default class AppStory extends HTMLElement {
             ${this.getMeta()}
             ${this.getStats()}
           </div>
-          ${this.getSection()}
+          ${this.repliesSection()}
         </div>
       `;
     }
@@ -347,16 +334,35 @@ export default class AppStory extends HTMLElement {
             ${this.getMeta()}
             ${this.getStats()}
           </div>
-          ${this.getSection()}
+          ${this.repliesSection()}
         </div>
 
         <section class="side">
           ${this.getAuthor()}
-          <trending-stories url="/h/trend" limit="6"></trending-stories>
-          ${this.getInfo()}
+          ${this.peopleSection()}
         </section>
       `;
     }
+  }
+
+  peopleSection = () => {
+    return /* html */`
+      <likes-section kind="story" url="${this.getAttribute('url')}" active="likes"
+        author-hash="${this.getAttribute('author-hash')}" hash="${this.getAttribute('hash')}" likes="${this.getAttribute('likes')}"
+        likes-url="${this.getAttribute('likes-url')}">
+      </likes-section>
+    `
+  }
+
+  repliesSection = () => {
+    return /* html */`
+      <replies-section kind="story" url="${this.getAttribute('url')}" active="${this.getAttribute('tab')}" section-title="Post" 
+        author-hash="${this.getAttribute('author-hash')}" hash="${this.getAttribute('hash')}" 
+        replies="${this.getAttribute('replies')}" likes="${this.getAttribute('likes')}"
+        liked="${this.getAttribute('liked')}" views="${this.getAttribute('views')}"
+        replies-url="${this.getAttribute('replies-url')}" likes-url="${this.getAttribute('likes-url')}">
+      </replies-section>
+    `
   }
 
   getHeader = () => {
@@ -424,14 +430,6 @@ export default class AppStory extends HTMLElement {
         replies="${this.getAttribute('replies')}" likes="${this.getAttribute('likes')}" kind="story"
         replies-url="${this.getAttribute('replies-url')}" likes-url="${this.getAttribute('likes-url')}">
       </post-section>
-    `
-  }
-
-  getInfo = () => {
-    return /*html*/`
-      <info-container docs="/about/docs" new="/about/new"
-       feedback="/about/feedback" request="/about/request" code="/about/code" donate="/about/donate" contact="/about/contact" company="https://github.com/aduki-hub">
-      </info-container>
     `
   }
 
@@ -636,7 +634,7 @@ export default class AppStory extends HTMLElement {
         .meta {
           border-bottom: var(--border);
           border-top: var(--border);
-          margin: 5px 0 0 0;
+          margin: 0;
           padding: 10px 0;
           display: flex;
           position: relative;

@@ -516,11 +516,12 @@ export default class QuickPost extends HTMLElement {
   }
 
   getFooter = () => {
+    const preview = this.noPreview ? 'false' : 'true';
     return /*html*/`
-      <action-wrapper full="false" kind="${this.getAttribute('story')}" reload="false" likes="${this.getAttribute('likes')}" 
+      <action-wrapper preview="${preview}" full="false" kind="${this.getAttribute('story')}" reload="false" likes="${this.getAttribute('likes')}" 
         replies="${this.getAttribute('replies')}" liked="${this.getAttribute('liked')}" wrapper="false" images="${this.getAttribute('images')}"
         hash="${this.getAttribute('hash')}" views="${this.getAttribute('views')}"  url="${this.getAttribute('url')}" summary="Post by - ${this.getAttribute('author-name')}"
-        preview-title="" time="${this.getAttribute('time')}" author-hash="${this.getAttribute('author-hash')}">
+        time="${this.getAttribute('time')}" author-hash="${this.getAttribute('author-hash')}">
         ${this.getHTML()}
       </action-wrapper>
     `

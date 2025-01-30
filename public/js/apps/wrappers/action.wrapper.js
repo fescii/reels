@@ -504,8 +504,11 @@ export default class ActionWrapper extends HTMLElement {
   }
 
   getStats = () => {
+    const preview = this.getAttribute('preview');
+    const kind = this.getAttribute('kind');
+    let className = kind === "reply" && preview === 'true' ? "preview" : '';
     return /* html */`
-      <div class="actions stats">
+      <div class="actions stats ${className}">
         ${this.getArrow(this.getAttribute('kind'), this.getAttribute('preview'))}
         ${this.getWrite()}
         ${this.getLike(this.getAttribute('liked'))}
@@ -516,8 +519,7 @@ export default class ActionWrapper extends HTMLElement {
   }
 
   getArrow = (kind, preview) => {
-    const full = this.getAttribute('full');
-    if (preview === "false" || full === "false") return '';
+    if (preview === "false") return '';
     if (kind === 'reply') {
       return /*html*/`
         <span class="action arrow">
@@ -730,7 +732,7 @@ export default class ActionWrapper extends HTMLElement {
           display: flex;
           flex-flow: column;
           gap: 0;
-          padding: 5px 0 0 0;
+          padding: 5px 0;
         }
 
         .actions.stats {
@@ -818,13 +820,18 @@ export default class ActionWrapper extends HTMLElement {
           -ms-border-radius: 50px;
           -o-border-radius: 50px;
         }
+
         .action.arrow {
           all: unset;
-          margin: 3px 3px 0 -6.5px;
+          margin: 3px 0 0 -6.5px;
         }
 
         span:first-of-type {
           margin: 0 0 0 -7px;
+        }
+
+        .actions.preview > span.action.write {
+          margin: 0 0 0 -4.5px;
         }
 
         span.play:hover,

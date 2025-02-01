@@ -312,8 +312,9 @@ export default class AppPost extends HTMLElement {
   }
 
   getRespone = () => {
+    const url = `${this.getAttribute('url').toLowerCase()}/reply`;
     return /* html */`
-      <div id="response-container" is="response-post" placeholder="What's your reply?" hash="${this.getAttribute('hash')}" author-hash="${this.getAttribute('author-hash')}"></div>
+      <div id="response-container" is="response-post" placeholder="What's your reply?" hash="${this.getAttribute('hash')}" author-hash="${this.getAttribute('author-hash')}" url="${url}" story="${this.getAttribute('story')}"></div>
     `;
   }
 

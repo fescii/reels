@@ -2,6 +2,9 @@ export default class Response extends HTMLDivElement {
   constructor() {
     // We are not even going to touch this.
     super();
+    this.url = this.getAttribute('url');
+    this.app = window.app;
+    this.api = this.app.api;
     this.render();
   }
 
@@ -14,6 +17,7 @@ export default class Response extends HTMLDivElement {
     if (editor) { 
       this.growTextarea(editor);
       this.activateActions(editor);
+      this.submit(editor);
     }
   }
 
@@ -140,6 +144,96 @@ export default class Response extends HTMLDivElement {
     this.addActionListener(video, this.getVideosEditor, editor);
     this.addActionListener(image, this.getImagesEditor, editor);
     this.addActionListener(attachment, this.getAttachmentsEditor, editor);
+  }
+
+  submit = editor => {
+    const submit = editor.querySelector('form.message-form > button.send');
+    if(!submit) return;
+
+    // add event listener to the submit button
+    submit.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      // get the message
+      const reply = editor.querySelector('form.message-form > textarea#message').value;
+
+      // disable the submit button
+      submit.pointerEvents = 'none';
+      submit.innerHTML = this.getButtonLoader();
+
+      if(reply.trim().length < 1) {
+        const message = editor.querySelector('form.message-form > textarea#message');
+        this.app.showToast(false, 'Please enter a reply');
+        // focus on the message
+        message.focus();
+        // enable the submit button
+        submit.innerHTML = this.getSendIcon();
+        submit.pointerEvents = 'auto';
+        return;
+      }
+      // repy to the post
+      this.reply(reply, editor);
+    });
+  }
+
+  reply = (reply, editor) => {
+    const images = this.querySelector('div#upload-images');
+ 
+    const data = {
+      content: reply,
+      kind: 'reply'
+    }
+
+    if(images) {
+      const imageArray = images.getImages();
+      // check if there are images
+      if(imageArray.length > 0) {
+        data.images = imageArray;
+      }
+    }
+
+    // handle the reply
+    this.handleReply(data, editor);
+  }
+
+  handleReply = async (data, editor) => {
+    const submit = editor.querySelector('form.message-form > button.send');
+    try {
+      // send the reply
+      const result = await this.api.put(this.url, { body: data, content: 'json' });
+
+      // handle the response
+      if (!result.success) {
+        this.app.showToast(false, result.message);
+        // enable the submit button
+        submit.innerHTML = this.getSendIcon();
+        submit.pointerEvents = 'auto';
+        return;
+      }
+
+      // show success message
+      this.app.showToast(true, result.message);
+
+      // clear the editor
+      this.clearEditor(editor);
+      // enable the submit button
+      submit.innerHTML = this.getSendIcon();
+      submit.pointerEvents = 'auto';
+    } catch (error) {
+      // console.error('Error handling reply:', error);
+      this.app.showToast(false, 'There was an error posting the reply.');
+      // enable the submit button
+      submit.innerHTML = this.getSendIcon();
+      submit.pointerEvents = 'auto';
+    }
+  }
+
+  clearEditor = editor => {
+    const message = editor.querySelector('form.message-form > textarea#message');
+    const images = editor.querySelector('div#upload-images');
+    if(message) message.value = '';
+    if(images) images.clearImages();
   }
 
   addActionListener = (button, getEditor, editor) => {
@@ -284,21 +378,35 @@ export default class Response extends HTMLDivElement {
           </div>
           <textarea name="message" id="message" cols="30" rows="1" placeholder="${this.getAttribute('placeholder')}" required></textarea>
           <button type="submit" class="send" title="Send">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-              <defs>
-                <linearGradient id="circleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#18a565" />
-                  <stop offset="100%" style="stop-color:#21d029" />
-                </linearGradient>
-              </defs>
-              <path d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z" fill="url(#circleGradient)" />
-              <path d="M16 12L12 16L8 12" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M12 8V16" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
+            ${this.getSendIcon()}
           </button>
         </form>
       </div>
     `;
+  }
+
+  getSendIcon = () => {
+    return /* html */`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+        <defs>
+          <linearGradient id="circleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#18a565" />
+            <stop offset="100%" style="stop-color:#21d029" />
+          </linearGradient>
+        </defs>
+        <path d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z" fill="url(#circleGradient)" />
+        <path d="M16 12L12 16L8 12" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M12 8V16" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    `;
+  }
+
+  getButtonLoader() {
+    return /*html*/`
+      <span id="btn-loader">
+				<span class="loader"></span>
+			</span>
+    `
   }
 
   getActions = () => {
@@ -348,7 +456,7 @@ export default class Response extends HTMLDivElement {
 
   getImagesEditor = () => {
     return /* html */`
-      <div is="post-images" class="images" id="images" url="/i/add"></div>
+      <div is="post-images" class="images" id="upload-images" url="/i/upload"></div>
     `;
   }
 
@@ -383,6 +491,38 @@ export default class Response extends HTMLDivElement {
       <style>
         * {
           box-sizing: border-box !important;
+        }
+
+        #btn-loader {
+          position: absolute;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          right: 0;
+          z-index: 5;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: inherit;
+        }
+
+        #btn-loader > .loader {
+          width: 20px;
+          aspect-ratio: 1;
+          --_g: no-repeat radial-gradient(farthest-side, #18A565 94%, #0000);
+          --_g1: no-repeat radial-gradient(farthest-side, #21D029 94%, #0000);
+          --_g2: no-repeat radial-gradient(farthest-side, #df791a 94%, #0000);
+          --_g3: no-repeat radial-gradient(farthest-side, #f09c4e 94%, #0000);
+          background: var(--_g) 0 0,  var(--_g1) 100% 0, var(--_g2) 100% 100%, var(--_g3) 0 100%;
+          background-size: 30% 30%;
+          animation: l38 .9s infinite ease-in-out;
+          -webkit-animation: l38 .9s infinite ease-in-out;
+        }
+
+        @keyframes l38 {
+          100% {
+            background-position: 100% 0, 100% 100%, 0 100%, 0 0
+          }
         }
 
         /* editor */
@@ -597,6 +737,7 @@ export default class Response extends HTMLDivElement {
           background: var(--background);
           justify-content: center;
           align-items: center;
+          position: relative;
           padding: 0;
           cursor: pointer;
           width: 40px;

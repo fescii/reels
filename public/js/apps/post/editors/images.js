@@ -15,6 +15,27 @@ export default class PostImages extends HTMLDivElement {
     this.innerHTML = this.getTemplate();
     this.setupEventListeners();
     this.initializeImages();
+    this.close();
+  }
+
+  getImages = () => {
+    // get current images as an array
+    return this.getAttribute("images").split(',');
+  }
+
+  clearImages = () => {
+    this.remove();
+  }
+
+  close = () => {
+    const cancel = this.querySelector('.cancel');
+    if(!cancel) return;
+
+    cancel.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.clearImages();
+    });
   }
 
   getImagesLength = images => {
@@ -81,32 +102,10 @@ export default class PostImages extends HTMLDivElement {
     }
   }
 
-  updateAddedImage = url => {
-    try {
-      let images = window.toBeChanged.getAttribute('images');
-      let imagesArray = [];
-
-      if (images && images !== 'null'){
-        imagesArray = images.split(',');
-      }
-
-      // filter out the null values and empty strings
-      imagesArray = imagesArray.filter(image => image.trim() !== '' && image !== 'null' && image.length > 5);
-
-      // Add the urls to the images array if they are not already there
-      if (!imagesArray.includes(url)) {
-        imagesArray.push(url);
-      }
-
-    } catch (error) {
-      console.error('Error updating added image:', error);
-    }
-  }
-
   async handleFileUpload(event) {
     const imagesContainer = this.querySelector('div.images');
     if (this.uploadCount >= this.maxUploads) {
-      imagesContainer.insertAdjacentHTML('beforebegin', this.getServerSuccessMsg(false, 'You have reached the maximum uploads'));
+      this.showMaxUploadsMessage(imagesContainer);
       return;
     }
 
@@ -114,50 +113,67 @@ export default class PostImages extends HTMLDivElement {
     if (!file) return;
 
     const addDiv = this.querySelector('div.add');
-
-    // check file size: uploads more than 1MB to be downsized/downgraded
+    this.showLoader(addDiv);
 
     try {
-      // add loader to the addDiv
-      addDiv.innerHTML = this.getButtonLoader();
-
-      // display pointer-events: none on the addDiv
-      addDiv.style.pointerEvents = 'none';
-
       const webpBlob = await this.processor.convertToWebP(file);
-      const formData = new FormData();
-      formData.append('file', webpBlob, 'image.webp');
-
-      const data = await this.api.post(this.url, {
-        body: formData,
-        content: 'json'
-      });
+      const data = await this.uploadImage(webpBlob);
 
       if (data.success) {
-        this.addImageToGallery(data.url);
-        this.addImageToAttribute(data.url);
-        this.uploadCount++;
-        
-        if (this.uploadCount >= this.maxUploads) {
-          this.hideAddButton();
-        } else {
-          addDiv.innerHTML = this.getSvg();
-          addDiv.style.pointerEvents = 'all';
-        }
+        this.handleSuccessfulUpload(data.url, addDiv);
       } else {
-        // show toast message
-        this.app.showToast(false, data.message);
-        // show add button
-        addDiv.innerHTML = this.getSvg();
-        addDiv.style.pointerEvents = 'all';
+        this.handleFailedUpload(data.message, addDiv);
       }
     } catch (error) {
-      this.app.showToast(false, error.message);
-
-      // remove loader and show add button
-      addDiv.innerHTML = this.getSvg();
-      addDiv.style.pointerEvents = 'all';
+      this.handleUploadError(error.message, addDiv);
     }
+  }
+
+  showMaxUploadsMessage(imagesContainer) {
+    imagesContainer.insertAdjacentHTML('beforebegin', this.getServerSuccessMsg(false, 'You have reached the maximum uploads'));
+  }
+
+  showLoader(addDiv) {
+    addDiv.innerHTML = this.getButtonLoader();
+    addDiv.style.pointerEvents = 'none';
+  }
+
+  async uploadImage(webpBlob) {
+    const formData = new FormData();
+    formData.append('file', webpBlob, 'image.webp');
+    return await this.api.post(this.url, {
+      body: formData,
+      content: 'multipart'
+    });
+  }
+
+  handleSuccessfulUpload(url, addDiv) {
+    this.addImageToGallery(url);
+    this.addImageToAttribute(url);
+    this.uploadCount++;
+
+    if (this.uploadCount >= this.maxUploads) {
+      this.hideAddButton();
+    } else {
+      this.resetAddButton(addDiv);
+    }
+
+    this.app.showToast(true, 'The image was uploaded!');
+  }
+
+  handleFailedUpload(message, addDiv) {
+    this.app.showToast(false, message);
+    this.resetAddButton(addDiv);
+  }
+
+  handleUploadError(message, addDiv) {
+    this.app.showToast(false, message);
+    this.resetAddButton(addDiv);
+  }
+
+  resetAddButton(addDiv) {
+    addDiv.innerHTML = this.getSvg();
+    addDiv.style.pointerEvents = 'all';
   }
 
   addImageToGallery(imageUrl) {
@@ -171,9 +187,6 @@ export default class PostImages extends HTMLDivElement {
 
     // add remove listener to the cancel button
     this.removeFromGallery(imageDiv.querySelector('.cancel-btn'));
-
-    // update the added image
-    this.updateAddedImage(imageUrl);
   }
 
   removeFromGallery = btn => {
@@ -202,7 +215,9 @@ export default class PostImages extends HTMLDivElement {
     // get images attribute: array
     let images = this.getAttribute("images").split(',');
     const index = images.indexOf(imageUrl);
-    images.splice(index, 1);
+    if (index > -1) {
+      images.splice(index, 1);
+    }
 
     // remove empty strings, null, 'null' and whose length is less than 5
     images = images.filter(image => image.trim() !== '' && image !== 'null' && image.length > 5);
@@ -213,7 +228,7 @@ export default class PostImages extends HTMLDivElement {
 
   addImageToAttribute(imageUrl) {
     try {
-      let images = this.getAttribute("images").split(',');
+      let images = this.getAttribute("images")?.split(',') || [];
       images.push(imageUrl);
       
       images = images.filter(image => image.trim() !== '' && image !== 'null' && image.length > 5);
@@ -253,6 +268,11 @@ export default class PostImages extends HTMLDivElement {
     return /* html */`
       <div class="images">
         ${this.getBody()}
+        <span class="cancel" title="Cancel">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
       </div>
       ${this.getStyles()}
     `;
@@ -428,6 +448,24 @@ export default class PostImages extends HTMLDivElement {
         ::-webkit-scrollbar {
           display: none !important;
           visibility: hidden;
+        }
+
+
+        div.images > .cancel {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          position: absolute;
+          cursor: pointer;
+          z-index: 1;
+          top: 2px;
+          right: 5px;
+        }
+
+        div.images > .cancel > svg {
+          width: 16px;
+          height: 16px;
+          color: var(--error-color);
         }
         
         div.images > .image-container {

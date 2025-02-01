@@ -4,7 +4,7 @@ export default class APIManager {
     this.defaultTimeout = defaultTimeout;
     this.pendingRequests = new Map();
     this.cacheName = `api-cache-${cacheVersion}`;
-    
+
     this.contentTypes = {
       json: 'application/json',
       text: 'text/plain',
@@ -12,7 +12,7 @@ export default class APIManager {
       xml: 'application/xml',
       form: 'application/x-www-form-urlencoded',
       multipart: 'multipart/form-data',
-      binary: 'application/octet-stream'
+      binary: 'application/octet-stream',
     };
 
     // Initialize cache
@@ -31,12 +31,12 @@ export default class APIManager {
   #processHeaders(options = {}) {
     const contentType = options?.content;
     const headers = new Headers();
-    
+
     if (contentType) {
       headers.set('Content-Type', this.contentTypes[contentType]);
     }
 
-    // if options.headers is an object, iterate over it and set each header
+    // If options.headers is an object, iterate over it and set each header
     if (options.headers && typeof options.headers === 'object') {
       Object.entries(options.headers).forEach(([key, value]) => {
         headers.set(key, value);
@@ -51,7 +51,7 @@ export default class APIManager {
     delete normalizedOptions.signal;
     return new Request(url, {
       ...normalizedOptions,
-      method: options.method || 'GET'
+      method: options.method || 'GET',
     });
   }
 
@@ -59,7 +59,7 @@ export default class APIManager {
     const metadata = {
       data,
       createdAt: new Date().toISOString(),
-      expiryDate: new Date(Date.now() + (cacheOptions.duration || 300000)).toISOString()
+      expiryDate: new Date(Date.now() + (cacheOptions.duration || 300000)).toISOString(),
     };
 
     // Store metadata in localStorage for quick access
@@ -87,7 +87,7 @@ export default class APIManager {
 
     const cache = await caches.open(this.cacheName);
     const cachedResponse = await cache.match(request);
-    
+
     if (cachedResponse) {
       const metadata = await this.#getCacheMetadata(request);
       if (metadata) {
@@ -108,15 +108,15 @@ export default class APIManager {
     if (!cacheOptions?.allow || !('caches' in window)) return;
 
     const cache = await caches.open(this.cacheName);
-    
+
     // Store the response in the cache
     const response = new Response(JSON.stringify(data), {
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': `max-age=${Math.floor((cacheOptions.duration || 300000) / 1000)}`
-      }
+        'Cache-Control': `max-age=${Math.floor((cacheOptions.duration || 300000) / 1000)}`,
+      },
     });
-    
+
     await cache.put(request, response);
     await this.#storeCacheMetadata(request, data, cacheOptions);
   }
@@ -131,7 +131,7 @@ export default class APIManager {
 
   async #processResponse(response) {
     const contentType = response.headers.get('Content-Type');
-    
+
     if (contentType?.includes('application/json')) {
       return response.json();
     } else if (contentType?.includes('text/')) {
@@ -139,7 +139,7 @@ export default class APIManager {
     } else if (contentType?.includes('application/octet-stream')) {
       return response.blob();
     }
-    
+
     try {
       return await response.json();
     } catch {
@@ -168,19 +168,20 @@ export default class APIManager {
 
     const processedHeaders = this.#processHeaders(options);
 
-    // create body if needed
-    if (options.body && typeof options.body === 'object') {
-      // add procesed Headers
-      options.headers = processedHeaders;
-
+    // Handle FormData (for file uploads)
+    let body = options.body;
+    if (body instanceof FormData) {
+      // Do not set Content-Type header for FormData; the browser will handle it
+      processedHeaders.delete('Content-Type');
+    } else if (body && typeof body === 'object') {
       if (processedHeaders.get('Content-Type') === this.contentTypes.json) {
-        options.body = JSON.stringify(options.body);
+        body = JSON.stringify(body);
       } else if (processedHeaders.get('Content-Type') === this.contentTypes.form) {
         const formData = new URLSearchParams();
-        Object.entries(options.body).forEach(([key, value]) => {
+        Object.entries(body).forEach(([key, value]) => {
           formData.append(key, value);
         });
-        options.body = formData;
+        body = formData;
       }
     }
 
@@ -188,10 +189,10 @@ export default class APIManager {
       try {
         const response = await fetch(request.url, {
           method: options.method,
-          body: options.body,
+          body,
           headers: processedHeaders,
           signal: controller.signal,
-          credentials: 'include'
+          credentials: 'include',
         });
 
         const data = await this.#processResponse(response);
@@ -233,6 +234,18 @@ export default class APIManager {
     return this.#request(url, { ...options, method: 'DELETE' }, cacheOptions);
   }
 
+  // File upload method
+  async uploadFile(url, file, options = {}) {
+    if (!file || !(file instanceof File)) {
+      throw new Error('Invalid file provided');
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.post(url, { ...options, body: formData });
+  }
+
   // Cache management methods
   async clearCache(url = null, options = {}) {
     if ('caches' in window) {
@@ -244,7 +257,7 @@ export default class APIManager {
         await this.initCache();
         // Clear all metadata
         const keys = Object.keys(localStorage);
-        keys.forEach(key => {
+        keys.forEach((key) => {
           if (key.startsWith(`${this.cacheName}-metadata-`)) {
             localStorage.removeItem(key);
           }
@@ -267,17 +280,17 @@ export default class APIManager {
 
     const request = this.#generateCacheKey(this.baseURL + url, options);
     const metadata = await this.#getCacheMetadata(request);
-    
+
     if (!metadata) return null;
-    
+
     const now = new Date();
     const expiryDate = new Date(metadata.expiryDate);
-    
+
     return {
       isValid: now < expiryDate,
       createdAt: new Date(metadata.createdAt),
       expiryDate: expiryDate,
-      timeRemaining: expiryDate.getTime() - now.getTime()
+      timeRemaining: expiryDate.getTime() - now.getTime(),
     };
   }
 

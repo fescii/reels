@@ -274,13 +274,15 @@ export default class AppPost extends HTMLElement {
     if (mql.matches) {
       return /* html */`
         <div class="feeds">
-          <div class="previews">
-            ${this.getReply(this.getAttribute('story'))}
-          </div>
           <div class="content-container">
-            ${this.getAuthorOption(story)}
-            ${this.getContent()}
-            ${this.getPost(story)}
+            <div class="others-container">
+              <div class="previews">
+                ${this.getReply(this.getAttribute('story'))}
+              </div>
+              ${this.getAuthorOption(story)}
+              ${this.getContent()}
+              ${this.getPost(story)}
+            </div>
             ${this.repliesSection()}
           </div>
           ${this.getRespone()}
@@ -776,11 +778,11 @@ export default class AppPost extends HTMLElement {
             display: flex;
             flex-flow: column;
             gap: 0;
-            padding: 0 10px;
+            padding: 0;
             width: 100%;
           }
 
-          div.previews {
+          .content-container > div.others-container {
             padding: 0 10px;
           }
 

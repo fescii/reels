@@ -289,7 +289,7 @@ export default class HomeStories extends HTMLElement {
           align-items: center;
           justify-content: center;
           width: 100%;
-          min-height: 200px;
+          min-height: 150px;
           min-width: 100%;
         }
 

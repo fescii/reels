@@ -68,6 +68,7 @@ const getStory = async (req, res) => {
 
     // if there is no story, render the 404 page
     if (!result.success) {
+      if(result.error) return res.status(500).render('500')
       return res.status(404).render('404')
     }
 
@@ -89,7 +90,6 @@ const getStory = async (req, res) => {
       data: story, meta: metaData
     })
   } catch (error) {
-    console.log(error)
     return res.status(500).render('500')
   }
 }
@@ -114,6 +114,7 @@ const getReply = async (req, res) => {
 
     // if there is no reply, render the 404 page
     if (!result.success) {
+      if(result.error) return res.status(500).render('500')
       return res.status(404).render('404')
     }
 

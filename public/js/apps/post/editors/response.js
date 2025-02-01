@@ -11,7 +11,10 @@ export default class Response extends HTMLDivElement {
 
   connectedCallback() {
     const editor = this.querySelector('div#editor');
-    if(editor) this.growTextarea(editor);
+    if (editor) { 
+      this.growTextarea(editor);
+      this.activateActions(editor);
+    }
   }
 
   growTextarea = editor => {
@@ -22,7 +25,7 @@ export default class Response extends HTMLDivElement {
     const expand = actionsContainer.querySelector('div.expand');
     // select expand icon(svg)
     const icon = expand.querySelector('svg');
-    
+
     const adjustRows = () => {
       const maxRows = 5;
       const style = window.getComputedStyle(input);
@@ -30,7 +33,7 @@ export default class Response extends HTMLDivElement {
 
       // rotate the expand button
       icon.style.transform = 'rotate(0deg)';
-      
+
       // Calculate the height offset (padding + border)
       const paddingHeight = parseInt(style.paddingTop, 10) + parseInt(style.paddingBottom, 10);
       const borderHeight = parseInt(style.borderTopWidth, 10) + parseInt(style.borderBottomWidth, 10);
@@ -124,9 +127,50 @@ export default class Response extends HTMLDivElement {
         return;
       }
     })
-    
+
     // Initial adjustment on page load
     adjustRows();
+  }
+
+  activateActions = editor => {
+    const video = editor.querySelector('div.actions-container > div.actions > button.video');
+    const image = editor.querySelector('div.actions-container > div.actions > button.image');
+    const attachment = editor.querySelector('div.actions-container > div.actions > button.attachment');
+
+    this.addActionListener(video, this.getVideosEditor, editor);
+    this.addActionListener(image, this.getImagesEditor, editor);
+    this.addActionListener(attachment, this.getAttachmentsEditor, editor);
+  }
+
+  addActionListener = (button, getEditor, editor) => {
+    button.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      // show the respective editor
+      editor.insertAdjacentHTML('afterbegin', getEditor());
+      // close the editor
+      this.closeSoon(editor);
+    });
+  }
+
+  closeSoon = editor => {
+    const soon = editor.querySelector('div.coming-soon');
+    if(!soon) return;
+    const cancel = soon.querySelector('.cancel');
+
+    cancel.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      soon.style.animation = 'hide-soon 0.3s forwards';
+    });
+
+    // add timeout to automatically close soon
+    setTimeout(() => {
+      soon.style.animation = 'hide-soon 0.3s forwards';
+      soon.style.display = 'none';
+    }, 5000);
   }
 
   removeHtml = () => {
@@ -136,7 +180,7 @@ export default class Response extends HTMLDivElement {
 
     str = str.trim();
     let filteredTitle = ''
-    if(!title || title === null || title === "null" || title === undefined || title ==="undefined") {
+    if (!title || title === null || title === "null" || title === undefined || title === "undefined") {
       filteredTitle = ''
     } else {
       filteredTitle = `<h3>${title}</h3>`
@@ -163,7 +207,7 @@ export default class Response extends HTMLDivElement {
     const doc = parser.parseFromString(text, 'text/html');
     return doc.body.innerHTML;
   }
-  
+
   formatNumber = n => {
     if (n < 1000) return n.toString();
     if (n < 10000) return `${(n / 1000).toFixed(2)}k`;
@@ -194,14 +238,14 @@ export default class Response extends HTMLDivElement {
     document.body.classList.add("stop-scrolling");
 
     // if any scroll is attempted, set this to the previous value
-    window.onscroll = function() {
+    window.onscroll = function () {
       window.scrollTo(scrollLeft, scrollTop);
     };
   }
 
   enableScroll() {
     document.body.classList.remove("stop-scrolling");
-    window.onscroll = function() {};
+    window.onscroll = function () { };
   }
 
   getTemplate() {
@@ -215,7 +259,7 @@ export default class Response extends HTMLDivElement {
   getBody = () => {
     return /* html */`
       ${this.getEditor()}
-    `;  
+    `;
   }
 
   getEditor = () => {
@@ -223,46 +267,7 @@ export default class Response extends HTMLDivElement {
       <div class="editor" id="editor">
         <form class="form message-form">
           <div class="actions-container">
-            <div class="actions">
-              <button class="action attachment" title="Attachment" type="button">
-                <svg id="small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                  <defs>
-                    <linearGradient id="strokeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style="stop-color:#18a565" />
-                      <stop offset="100%" style="stop-color:#21d029" />
-                    </linearGradient>
-                  </defs>
-                  <path d="M9.14339 10.691L9.35031 10.4841C11.329 8.50532 14.5372 8.50532 16.5159 10.4841C18.4947 12.4628 18.4947 15.671 16.5159 17.6497L13.6497 20.5159C11.671 22.4947 8.46279 22.4947 6.48405 20.5159C4.50532 18.5372 4.50532 15.329 6.48405 13.3503L6.9484 12.886" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-                  <path d="M17.0516 11.114L17.5159 10.6497C19.4947 8.67095 19.4947 5.46279 17.5159 3.48405C15.5372 1.50532 12.329 1.50532 10.3503 3.48405L7.48405 6.35031C5.50532 8.32904 5.50532 11.5372 7.48405 13.5159C9.46279 15.4947 12.671 15.4947 14.6497 13.5159L14.8566 13.309" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-                </svg>
-              </button>
-              <button class="action image" title="Image" type="button">
-                <svg id="small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                  <defs>
-                    <linearGradient id="strokeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style="stop-color:#18a565" />
-                      <stop offset="100%" style="stop-color:#21d029" />
-                    </linearGradient>
-                  </defs>
-                  <circle cx="7.5" cy="7.5" r="1.5" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                  <path d="M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z" stroke="url(#strokeGradient)" stroke-width="1.8" fill="none"/>
-                  <path d="M5 21C9.37246 15.775 14.2741 8.88406 21.4975 13.5424" stroke="url(#strokeGradient)" stroke-width="1.8" fill="none"/>
-                </svg>
-              </button>
-              <button class="action video" title="Video" type="button">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                  <defs>
-                    <linearGradient id="strokeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style="stop-color:#18a565" />
-                      <stop offset="100%" style="stop-color:#21d029" />
-                    </linearGradient>
-                  </defs>
-                  <path d="M11 8L13 8" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-                  <path d="M2 11C2 7.70017 2 6.05025 3.02513 5.02513C4.05025 4 5.70017 4 9 4H10C13.2998 4 14.9497 4 15.9749 5.02513C17 6.05025 17 7.70017 17 11V13C17 16.2998 17 17.9497 15.9749 18.9749C14.9497 20 13.2998 20 10 20H9C5.70017 20 4.05025 20 3.02513 18.9749C2 17.9497 2 16.2998 2 13V11Z" stroke="url(#strokeGradient)" stroke-width="1.8" fill="none"/>
-                  <path d="M17 8.90585L17.1259 8.80196C19.2417 7.05623 20.2996 6.18336 21.1498 6.60482C22 7.02628 22 8.42355 22 11.2181V12.7819C22 15.5765 22 16.9737 21.1498 17.3952C20.2996 17.8166 19.2417 16.9438 17.1259 15.198L17 15.0941" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-                </svg>
-              </button>
-            </div>
+            ${this.getActions()}
             <div class="expand">
               <button class="action expand" title="Expand" type="button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
@@ -296,6 +301,83 @@ export default class Response extends HTMLDivElement {
     `;
   }
 
+  getActions = () => {
+    return /* html */`
+      <div class="actions">
+        <button class="action image" title="Image" type="button">
+          <svg id="small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <defs>
+              <linearGradient id="strokeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#18a565" />
+                <stop offset="100%" style="stop-color:#21d029" />
+              </linearGradient>
+            </defs>
+            <circle cx="7.5" cy="7.5" r="1.5" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z" stroke="url(#strokeGradient)" stroke-width="1.8" fill="none"/>
+            <path d="M5 21C9.37246 15.775 14.2741 8.88406 21.4975 13.5424" stroke="url(#strokeGradient)" stroke-width="1.8" fill="none"/>
+          </svg>
+        </button>
+        <button class="action attachment" title="Attachment" type="button">
+          <svg id="small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <defs>
+              <linearGradient id="strokeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#18a565" />
+                <stop offset="100%" style="stop-color:#21d029" />
+              </linearGradient>
+            </defs>
+            <path d="M9.14339 10.691L9.35031 10.4841C11.329 8.50532 14.5372 8.50532 16.5159 10.4841C18.4947 12.4628 18.4947 15.671 16.5159 17.6497L13.6497 20.5159C11.671 22.4947 8.46279 22.4947 6.48405 20.5159C4.50532 18.5372 4.50532 15.329 6.48405 13.3503L6.9484 12.886" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+            <path d="M17.0516 11.114L17.5159 10.6497C19.4947 8.67095 19.4947 5.46279 17.5159 3.48405C15.5372 1.50532 12.329 1.50532 10.3503 3.48405L7.48405 6.35031C5.50532 8.32904 5.50532 11.5372 7.48405 13.5159C9.46279 15.4947 12.671 15.4947 14.6497 13.5159L14.8566 13.309" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          </svg>
+        </button>
+        <button class="action video" title="Video" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <defs>
+              <linearGradient id="strokeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#18a565" />
+                <stop offset="100%" style="stop-color:#21d029" />
+              </linearGradient>
+            </defs>
+            <path d="M11 8L13 8" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+            <path d="M2 11C2 7.70017 2 6.05025 3.02513 5.02513C4.05025 4 5.70017 4 9 4H10C13.2998 4 14.9497 4 15.9749 5.02513C17 6.05025 17 7.70017 17 11V13C17 16.2998 17 17.9497 15.9749 18.9749C14.9497 20 13.2998 20 10 20H9C5.70017 20 4.05025 20 3.02513 18.9749C2 17.9497 2 16.2998 2 13V11Z" stroke="url(#strokeGradient)" stroke-width="1.8" fill="none"/>
+            <path d="M17 8.90585L17.1259 8.80196C19.2417 7.05623 20.2996 6.18336 21.1498 6.60482C22 7.02628 22 8.42355 22 11.2181V12.7819C22 15.5765 22 16.9737 21.1498 17.3952C20.2996 17.8166 19.2417 16.9438 17.1259 15.198L17 15.0941" stroke="url(#strokeGradient)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          </svg>
+        </button>
+      </div>
+    `;
+  }
+
+  getImagesEditor = () => {
+    return /* html */`
+      <div is="post-images" class="images" id="images" url="/i/add"></div>
+    `;
+  }
+
+  getVideosEditor = () => {
+    return /* html */`
+      <div class="coming-soon">
+        <p class="soon">Soon you'll be able to share videos</p>
+        <span class="cancel" title="Cancel">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+      </div>
+    `;
+  }
+
+  getAttachmentsEditor = () => {
+    return /* html */`
+      <div class="coming-soon">
+        <p class="soon">Soon you'll be able to share files</p>
+        <span class="cancel" title="Cancel">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+            <path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+      </div>
+    `;
+  }
+
   getStyles() {
     return /*css*/`
       <style>
@@ -320,11 +402,11 @@ export default class Response extends HTMLDivElement {
           background: var(--background);
         }
 
-        div.editor#editor > .reply {
+        div.editor#editor > .coming-soon {
           z-index: 0;
           padding: 0;
           border-radius: 15px;
-          margin: 5px 0 0 0;
+          margin: 0;
           width: max-content;
           display: flex;
           max-width: 100%;
@@ -336,7 +418,7 @@ export default class Response extends HTMLDivElement {
           position: relative;
         }
 
-        div.editor#editor > .reply > .cancel {
+        div.editor#editor > .coming-soon > .cancel {
           display: flex;
           justify-content: center;
           align-items: center;
@@ -347,45 +429,20 @@ export default class Response extends HTMLDivElement {
           right: 5px;
         }
 
-        div.editor#editor > .reply > .cancel > svg {
+        div.editor#editor > .coming-soon > .cancel > svg {
           width: 16px;
           height: 16px;
           color: var(--error-color);
         }
 
-        div.editor#editor > .reply > .head {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          opacity: 0.8;
-          color: var(--gray-color);
-          font-family: var(--font-read), sans-serif;
-        }
-
-        div.editor#editor > .reply > .head > svg {
-          width: 16px;
-          height: 16px;
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          justify-content: center;
-        }
-
-        div.editor#editor > .reply > .head > .text {
-          font-size: 0.95rem;
-          font-weight: 400;
-          font-family: inherit;
-        }
-
-        .reply > .summary {
+        div.editor#editor > .coming-soon > .soon {
           font-size: 0.9rem;
           font-weight: 400;
           width: max-content;
           max-width: 100%;
-          background: var(--reply-background);
-          padding: 8px 10px 25px;
+          padding: 8px 0 25px;
           font-family: inherit;
-          color: var(--gray-color);
+          color: var(--text-color);
           border-radius: 15px;
           /* add ellipsis to the text */
           white-space: nowrap;
@@ -625,7 +682,7 @@ export default class Response extends HTMLDivElement {
           /* reset all cursor: pointer to cursor: default */
           a, button, input, label, select, textarea,
           ul.tabs > li.tab, ul.tabs > li.tab.active,
-          div.editor#editor > .reply > .cancel {
+          div.editor#editor > .coming-soon > .cancel {
             cursor: default !important;
           }
         }

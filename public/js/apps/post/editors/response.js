@@ -5,6 +5,7 @@ export default class Response extends HTMLDivElement {
     this.url = this.getAttribute('url');
     this.app = window.app;
     this.api = this.app.api;
+    this.parent = this.getRootNode().host;
     this.render();
   }
 
@@ -220,6 +221,7 @@ export default class Response extends HTMLDivElement {
       // enable the submit button
       submit.innerHTML = this.getSendIcon();
       submit.pointerEvents = 'auto';
+      this.parent.addReply(result.reply);
     } catch (error) {
       // console.error('Error handling reply:', error);
       this.app.showToast(false, 'There was an error posting the reply.');

@@ -25,6 +25,13 @@ export default class AppPost extends HTMLElement {
     }
   }
 
+  addReply = reply => {
+    const repliesSection = this.shadowObj.querySelector('replies-section');
+    if (repliesSection) {
+      repliesSection.addReply(reply);
+    }
+  }
+
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
   }

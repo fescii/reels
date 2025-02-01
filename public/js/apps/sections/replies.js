@@ -18,6 +18,11 @@ export default class RepliesSection extends HTMLElement {
     if (btn) this.activateActivity(btn);
   }
 
+  addReply = reply => {
+    const repliesFeed = this.shadowObj.querySelector('replies-feed');
+    if (repliesFeed) repliesFeed.setReply(reply);
+  }
+
   disableScroll() {
     // Get the current page scroll position
     let scrollTop = window.scrollY || document.documentElement.scrollTop;

@@ -34,6 +34,18 @@ export default class ReplyFeed extends HTMLElement {
     }
   }
 
+  setReply = reply => {
+    try {
+      const repliesContainer = this.shadowObj.querySelector('.replies');
+      if (repliesContainer) {
+      // insert after start
+      repliesContainer.insertAdjacentHTML('afterbegin', this.mapNewReply(reply));
+      }
+    } catch (error) {
+      console.error('Error setting reply:', error);
+    }
+  }
+
   disconnectedCallback() {
     this.removeScrollEvent();
   }
@@ -233,6 +245,25 @@ export default class ReplyFeed extends HTMLElement {
         </quick-post>
       `
     }).join('');
+  }
+
+  mapNewReply = reply => {
+    const author = reply.user;
+    let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
+    // replace all " and ' with &quot; and &apos; to avoid breaking the html
+    bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    const images = reply.images ? reply.images.join(',') : null;
+    const preview = this.section === "post" ? `no-preview="true"` : `preview="false"`;
+    return /*html*/`
+      <quick-post story="reply" feed="true" ${preview} hash="${reply.hash}" url="/r/${reply.hash}" likes="${reply.likes}" replies="${reply.replies}" liked="${reply.liked}"
+        views="${reply.views}" time="${reply.createdAt}" replies-url="/r/${reply.hash}/replies" likes-url="/r/${reply.hash}/likes" images='${images}'
+        author-hash="${author.hash}" author-you="true" author-url="/u/${author.hash.toLowerCase()}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
+        author-stories="${author.stories}" author-replies="${author.replies}" parent="${reply.story ? reply.story : reply.reply}"
+        author-img="${author.picture}" author-verified="${author.verified}" author-name="${author.name}" author-followers="${author.followers}"
+        author-following="${author.following}" author-follow="false" author-bio="${bio}">
+        ${reply.content}
+      </quick-post>
+    `
   }
 
   parseToNumber = num_str => {

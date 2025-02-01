@@ -281,8 +281,8 @@ export default class AppPost extends HTMLElement {
             ${this.getAuthorOption(story)}
             ${this.getContent()}
             ${this.getPost(story)}
+            ${this.repliesSection()}
           </div>
-          ${this.repliesSection()}
           ${this.getRespone()}
         </div>
       `;

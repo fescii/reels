@@ -10,6 +10,123 @@ export default class Response extends HTMLDivElement {
   }
 
   connectedCallback() {
+    const editor = this.querySelector('div#editor');
+    if(editor) this.growTextarea(editor);
+  }
+
+  growTextarea = editor => {
+    const form = editor.querySelector('form');
+    const input = form.querySelector('textarea#message');
+    const actionsContainer = form.querySelector('.actions-container');
+    const actions = actionsContainer.querySelector('div.actions');
+    const expand = actionsContainer.querySelector('div.expand');
+    // select expand icon(svg)
+    const icon = expand.querySelector('svg');
+    
+    const adjustRows = () => {
+      const maxRows = 5;
+      const style = window.getComputedStyle(input);
+      const lineHeight = parseInt(style.lineHeight, 10);
+
+      // rotate the expand button
+      icon.style.transform = 'rotate(0deg)';
+      
+      // Calculate the height offset (padding + border)
+      const paddingHeight = parseInt(style.paddingTop, 10) + parseInt(style.paddingBottom, 10);
+      const borderHeight = parseInt(style.borderTopWidth, 10) + parseInt(style.borderBottomWidth, 10);
+      const offset = paddingHeight + borderHeight;
+
+      // Reset the rows to 1 to calculate the new height
+      input.rows = 1;
+
+      // Calculate the number of rows based on scrollHeight minus the offset
+      let newRows = Math.floor((input.scrollHeight - offset) / lineHeight);
+      input.rows = Math.min(maxRows, Math.max(newRows, 1)); // Ensure at least 1 row
+
+      // Toggle actions visibility based on input
+      if (input.value.trim().length > 0) {
+        // hide actions in animation width
+        actions.style.animation = 'hide-actions 0.3s forwards';
+        actions.style.width = '0';
+
+        // show expand button
+        expand.style.opacity = '0';
+        expand.style.animation = 'show-expand 0.3s forwards';
+        expand.style.display = 'flex';
+        expand.style.opacity = '1';
+
+        // adjust the width of the input
+        input.style.setProperty('width', 'calc(100% - 80px)')
+        // input.style.setProperty('min-width', 'calc(100% - 80px)')
+        // input.style.setProperty('max-width', 'calc(100% - 80px)')
+      } else {
+        // hide expand button
+        expand.style.animation = 'hide-expand 0.3s forwards';
+        expand.style.opacity = '0';
+        expand.style.display = 'none';
+
+        // show actions in animation width
+        actions.style.animation = 'show-actions 0.3s forwards';
+        actions.style.width = '100px';
+        actions.style.display = 'flex';
+        actions.style.opacity = '1';
+
+        // shrink the input
+        input.style.setProperty('width', 'calc(100% - 150px)')
+        // input.style.setProperty('min-width', 'calc(100% - 150px)')
+        // input.style.setProperty('max-width', 'calc(100% - 150px)')
+      }
+    };
+
+    input.addEventListener('input', adjustRows);
+    input.addEventListener('paste', adjustRows);
+
+    // click on expand button
+    expand.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      if (this.expanded) {
+        // hide actions in animation width with expand button
+        actions.style.animation = 'hide-actions 0.3s forwards';
+
+        // remove .one-line class from the input
+        input.classList.remove('one-line');
+
+        // adjust the width of the input
+        input.width = 'calc(100% - 80px)';
+
+        // trigger input event to adjust the rows
+        input.dispatchEvent(new Event('input'));
+
+        // show expand button
+        expand.style.opacity = '1';
+        expand.style.animation = 'show-expand 0.3s forwards';
+
+        // rotate the expand button
+        icon.style.transform = 'rotate(0deg)';
+        this.expanded = false;
+        return;
+      } else {
+        // show actions in animation width with expand button
+        actions.style.animation = 'show-actions 0.3s forwards';
+        actions.style.width = '100px';
+        actions.style.display = 'flex';
+        actions.style.opacity = '1';
+
+        // add .one-line class to the input
+        input.classList.add('one-line');
+        input.rows = 1;
+        input.style.setProperty('width', 'calc(100% - 170px)');
+        // rotate the expand button
+        icon.style.transform = 'rotate(180deg)';
+        this.expanded = true;
+        return;
+      }
+    })
+    
+    // Initial adjustment on page load
+    adjustRows();
   }
 
   removeHtml = () => {

@@ -28,11 +28,15 @@ export default class QuickPost extends HTMLElement {
     this.shadowObj.innerHTML = this.getTemplate();
   }
 
-  setReply = (reply) => {
+  setReply(feed, reply) {
     const previews = this.shadowObj.querySelector('div.previews');
 
     if (previews) {
-      previews.insertAdjacentHTML('beforeend', reply);
+      const threadButton = this.getThreadButton();
+      const content = feed ? threadButton : reply;
+      previews.insertAdjacentHTML('beforeend', content);
+
+      if(feed) this.openThreads();
     }
   }
 
@@ -242,6 +246,30 @@ export default class QuickPost extends HTMLElement {
 
     if(content) {
       content.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+
+        // Get full post
+        const post =  this.getFullPost();
+  
+        // push the post to the app
+        this.pushApp(url, post);
+      })
+    }
+  }
+
+  // Open threads
+  openThreads = () => {
+    // get url
+    let url = this.getAttribute('url');
+
+    url = url.trim().toLowerCase();
+
+    const threadButton = this.shadowObj.querySelector('div.thread > button.thread-button');
+
+    if(threadButton) {
+      threadButton.addEventListener('click', event => {
         event.preventDefault();
         event.stopImmediatePropagation();
         event.stopPropagation();
@@ -504,13 +532,18 @@ export default class QuickPost extends HTMLElement {
     `
   }
 
+  textToBool = text => {
+    return text === 'true';
+  }
+
   getReply = story => {
     if(this.noPreview) return '';
+    const feed = this.textToBool(this.getAttribute('feed'))
     if (story === 'reply') {
       const parent = this.getAttribute('parent');
       let url = parent.startsWith('P') ? `/p/${parent.toLowerCase()}/preview` : `/r/${parent.toLowerCase()}/preview`;
       return /*html*/`
-        <preview-post url="${url}" hash="${parent}" preview="quick"></preview-post>
+        <preview-post feed="${feed}" url="${url}" hash="${parent}" preview="quick"></preview-post>
       `
     } else return '';
   }
@@ -594,6 +627,17 @@ export default class QuickPost extends HTMLElement {
     // return
     return /* html */`
       <images-wrapper images="${images}"></images-wrapper>
+    `
+  }
+
+  getThreadButton = () => {
+    return /* html */`
+      <div class="thread">
+        <span class="thread-arrow"></span>
+        <button class="thread-button">
+          <span class="thread-text">View all</span>
+        </button>
+      </div>
     `
   }
 
@@ -858,6 +902,43 @@ export default class QuickPost extends HTMLElement {
           padding: 0;
         }
 
+        div.thread {
+          width: 100%;
+          display: flex;
+          position: relative;
+          gap: 0;
+          margin: 0;
+          padding: 8px 0 5px 19px;
+        }
+
+        div.thread > button.thread-button {
+          width: max-content;
+          margin: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+          font-size: 0.9rem;
+          background: none;
+          font-family: var(--font-main), sans-serif;
+          font-weight: 500;
+          color: var(--anchor-color);
+          border: none;
+          border-radius: 10px;
+          cursor: pointer
+        }
+
+        div.thread > .thread-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          left: 3px;
+          width: 1.8px;
+          height: calc(100% - 10px);
+          background: var(--action-linear);
+          border-radius: 5px;
+        }
+
         @media screen and (max-width:660px) {
           :host {
             font-size: 16px;
@@ -884,6 +965,7 @@ export default class QuickPost extends HTMLElement {
           .content.extra .read-more,
           .replying-to,
           .content,
+          div.thread > button.thread-button,
           span.action {
             cursor: default !important;
           }

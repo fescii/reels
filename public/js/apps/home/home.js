@@ -120,9 +120,6 @@ export default class AppHome extends HTMLElement {
     mql.addEventListener('change', () => {
       // Re-render the component
       this.render();
-
-      // call onpopstate event
-      this.onPopEvent();
     });
   }
 

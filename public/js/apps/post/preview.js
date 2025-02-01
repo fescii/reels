@@ -11,6 +11,7 @@ export default class PreviewPost extends HTMLElement {
     this.app = window.app;
     this.api = this.app.api;
     this.preview = this.getAttribute('preview');
+    this.feed = this.textToBool(this.getAttribute('feed'))
     this.first = this.textToBool(this.getAttribute('first'));
     this.parent = this.getRootNode().host;
     this.render();
@@ -169,10 +170,8 @@ export default class PreviewPost extends HTMLElement {
   setReply = (kind, parent) => {
     if(!parent) return;
     const reply = this.getReply(kind, parent);
-
     if (!reply || reply === '') return;
-
-    this.parent.setReply(reply);
+    this.parent.setReply(this.feed, reply);
   }
 
   displayError = (contentContainer, previewLoader) => {

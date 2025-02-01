@@ -16,11 +16,11 @@ export default class AppPost extends HTMLElement {
     document.title = `Post | by ${this.getAttribute('author-name')}`;
   }
 
-  setReply = (reply) => {
-    const previews = this.shadowObj.querySelector('div.previews');
+  setReply(feed, reply) {
+    const previewsContainer = this.shadowObj.querySelector('div.previews');
 
-    if (previews) {
-      previews.insertAdjacentHTML('afterbegin', reply);
+    if (previewsContainer) {
+      previewsContainer.insertAdjacentHTML('afterbegin', reply);
     }
   }
 

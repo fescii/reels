@@ -536,7 +536,7 @@ export default class ReplyFeed extends HTMLElement {
         }
 
         div.finish {
-          padding: 10px 0 40px;
+          padding: 10px 0 20px;
           width: 100%;
           min-width: 100%;
           height: auto;

@@ -69,6 +69,18 @@ export default class AppMain extends HTMLElement {
     this.checkNotificationPermission();
   }
 
+  hideNav = () => {
+    const nav = this.shadowObj.querySelector('section.nav.mobile');
+
+    if(nav) nav.style.setProperty('display', 'none'); 
+  }
+
+  showNav = () => {
+    const nav = this.shadowObj.querySelector('section.nav.mobile');
+
+    if(nav) nav.style.setProperty('display', 'flex'); 
+  }
+
   initContent = container => {
     setTimeout(() => {
       // set the content
@@ -263,7 +275,7 @@ export default class AppMain extends HTMLElement {
         <section class="flow">
           ${this.getLoader()}
         </section>
-        <section class="nav">
+        <section class="nav mobile">
           ${this.getMobileNav()}
         </section>
       `;
@@ -987,7 +999,7 @@ export default class AppMain extends HTMLElement {
             font-size: 16px;
 						padding: 0;
             margin: 0;
-            height: max-content;
+            height: 100dvh;
             display: flex;
             flex-flow: column;
             justify-content: space-between;

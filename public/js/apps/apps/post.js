@@ -8,6 +8,7 @@ export default class AppPost extends HTMLElement {
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.boundHandleWsMessage = this.handleWsMessage.bind(this);
     this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
+    this.app = window.app;
     this.render();
   }
 
@@ -31,6 +32,7 @@ export default class AppPost extends HTMLElement {
   connectedCallback() {
     // Change style to flex
     this.style.display='flex';
+    this.app.hideNav();
     this.openUrl();
     // request user to enable notifications
     this.checkNotificationPermission();
@@ -62,6 +64,7 @@ export default class AppPost extends HTMLElement {
 
   disconnectedCallback() {
     this.enableScroll();
+    this.app.showNav();
     if (window.wss) {
       window.wss.removeMessageHandler(this.boundHandleWsMessage);
     }
@@ -280,6 +283,7 @@ export default class AppPost extends HTMLElement {
             ${this.getPost(story)}
           </div>
           ${this.repliesSection()}
+          ${this.getRespone()}
         </div>
       `;
     }
@@ -295,6 +299,7 @@ export default class AppPost extends HTMLElement {
             ${this.getPost(story)}
             ${this.repliesSection()}
           </div>
+          ${this.getRespone()}
         </div>
         <div class="side">
           ${this.getAuthor()}
@@ -302,6 +307,12 @@ export default class AppPost extends HTMLElement {
         </div>
       `;
     }
+  }
+
+  getRespone = () => {
+    return /* html */`
+      <div id="response-container" is="response-post" placeholder="What's your reply?" hash="${this.getAttribute('hash')}" author-hash="${this.getAttribute('author-hash')}"></div>
+    `;
   }
 
   getContent = () => {
@@ -529,9 +540,18 @@ export default class AppPost extends HTMLElement {
         .feeds {
           display: flex;
           flex-flow: column;
+          max-height: max-content;
+          justify-content: space-between;
+          min-height: 100dvh;
           gap: 0;
           padding: 20px 0 0 0;
           width: calc(55% - 10px);
+        }
+
+        .content-container {
+          display: flex;
+          flex-flow: column;
+          gap: 0;
         }
 
         div.side {
@@ -586,13 +606,6 @@ export default class AppPost extends HTMLElement {
           font-size: 1rem;
           color: var(--gray-color);
           font-weight: 400;
-        }
-
-        .content-container {
-          display: flex;
-          flex-flow: column;
-          gap: 0;
-          width: 100%;
         }
 
         .content {
@@ -690,6 +703,23 @@ export default class AppPost extends HTMLElement {
           border-radius: 5px;
         }
 
+        /* response */
+        div#response-container{
+          all: unset;
+          border: none;
+          position: sticky;
+          bottom: 0;
+          padding: 0;
+          justify-self: end;
+          display: flex;
+          flex-flow: column;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          width: 100%;
+          max-width: 100%;
+        }
+
         @media screen and (max-width: 900px) {
           .feeds {
             width: 58%;
@@ -712,14 +742,24 @@ export default class AppPost extends HTMLElement {
 				@media screen and (max-width: 660px) {
 					:host {
             font-size: 16px;
-            padding: 10px 0;
+            height: max-content;
+            padding: 10px 0 0;
 					}
+
+          div.response-container{
+            border: none;
+            position: sticky;
+            bottom: 0;
+            padding: 0;
+          }
 
           .feeds {
             display: flex;
             flex-flow: column;
             gap: 0;
             padding: 0;
+            max-height: max-content;
+            min-height: 100dvh;
             width: 100%;
           }  
 

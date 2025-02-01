@@ -5,6 +5,7 @@ import StoryPost from "./story.js";
 import TrendingStory from "./trending.js";
 import PreviewPost from "./preview.js";
 import ReplyPost from "./reply.js";
+import Response from "./response.js";
 
 // Export all posts
 export default function posts() {
@@ -15,4 +16,5 @@ export default function posts() {
   customElements.define("preview-post", PreviewPost);
   customElements.define("reply-post", ReplyPost);
   customElements.define("trending-story", TrendingStory);
+  customElements.define("response-post", Response, { extends: "div" });
 }

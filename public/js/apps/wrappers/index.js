@@ -10,6 +10,7 @@ import ActionWrapper from "./action.wrapper.js"
 import ImagesWrapper from "./images.wrapper.js"
 import ImagesSmall from "./images.small.js"
 import ImagesUploader from "./images.uploader.js"
+import NewsWrapper from "./news.wrapper.js"
 
 export default function wrappers() {
   // Register wrappers
@@ -25,4 +26,5 @@ export default function wrappers() {
   customElements.define("images-wrapper", ImagesWrapper);
   customElements.define("images-small", ImagesSmall);
   customElements.define("images-uploader", ImagesUploader);
+  customElements.define("news-wrapper", NewsWrapper);
 }

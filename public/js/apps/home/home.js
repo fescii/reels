@@ -214,6 +214,7 @@ export default class AppHome extends HTMLElement {
         trending-api="${this.getAttribute('trending-api')}"
         recent-api="${this.getAttribute('recent-api')}"
         topics-api="${this.getAttribute('topics-api')}"
+        news-api="${this.getAttribute('news-api')}"
         people-api="${this.getAttribute('people-api')}"
         feed-api="${this.getAttribute('feed-api')}">
       </home-all>

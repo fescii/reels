@@ -254,10 +254,10 @@ export default class ImagesWrapper extends HTMLElement {
 					position: relative;
 					cursor: pointer;
 					overflow: hidden;
-					height: 240px;
-					min-height: 240px;
-					width: 200px;
-					max-width: 200px;
+					height: 280px;
+					min-height: 280px;
+					width: 240px;
+					max-width: 240px;
 					border-radius: 12px;
 				}
 
@@ -277,6 +277,14 @@ export default class ImagesWrapper extends HTMLElement {
 					border-radius: 12px;
 					overflow: hidden;
 					transition: transform 0.4s ease-in-out;
+				}
+
+				.image-container.single {
+					width: 100%;
+					max-width: 100%;
+					height: auto;
+					max-height: 400px;
+					border-radius: 12px;
 				}
 
 				.image-container:hover img {

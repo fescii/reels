@@ -85,7 +85,6 @@ export default class HomeNews extends HTMLElement {
     const content = this.mapFields(news);
     newsContainer.insertAdjacentHTML('beforebegin', this.getTitle());
     newsContainer.innerHTML = content;
-    this.setLastItem(newsContainer);
 
     this.all.home = {
       last: false,
@@ -112,17 +111,6 @@ export default class HomeNews extends HTMLElement {
         </news-wrapper>
       `
     }).join('');
-  }
-
-  setLastItem = contentContainer => {
-    // get last element child (topic)
-    const lastItem = contentContainer.lastElementChild;
-
-    // set border-bottom to none
-    if (lastItem) {
-      lastItem.style.setProperty('border-bottom', 'none');
-      lastItem.style.setProperty('padding-bottom', '0');
-    }
   }
 
 	getTemplate = () => {
@@ -362,7 +350,7 @@ export default class HomeNews extends HTMLElement {
 				@media screen and (max-width:660px) {
 					:host {
         		font-size: 16px;
-						padding: 5px 0 10px;
+						padding: 5px 0 0;
 					}
 
 					::-webkit-scrollbar {

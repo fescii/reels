@@ -362,7 +362,7 @@ export default class NewPost extends HTMLDivElement {
       }
 
       try {
-        const result = this.api.put(this._url, { content: 'json', bod: JSON.stringify(body) });
+        const result = await this.api.put(this._url, { content: 'json', bod: JSON.stringify(body) });
 
         // check if request was successful
         if (result.success) {

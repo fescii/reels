@@ -10,7 +10,6 @@ import StatContainer from "./stat.container.js";
 import StoriesContainer from "./stories.container.js";
 import TopicsContainer from "./topics.container.js";
 import UpdateContainer from "./update.container.js";
-import ContentContainer from "./content.container.js";
 
 // Export all containers
 export default function containers() {
@@ -26,5 +25,4 @@ export default function containers() {
   customElements.define("stories-container", StoriesContainer);
   customElements.define("topics-container", TopicsContainer);
   customElements.define("update-container", UpdateContainer);
-  customElements.define("content-container", ContentContainer);
 }

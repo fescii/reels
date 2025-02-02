@@ -11,7 +11,7 @@ export default class StoryPost extends HTMLElement {
     this.user = window.hash;
     this.render();
   }
-  
+
   // observe the attributes
   static get observedAttributes() {
     return ['reload', 'images'];
@@ -527,7 +527,7 @@ export default class StoryPost extends HTMLElement {
     if(user !== author) return this.getMinsRead();
 
     return /*html*/`
-      <span class="action edit" id="edit-action">manage</span>
+      <span class="action edit" id="edit-action">edit</span>
     `
   }
 

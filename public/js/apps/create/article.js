@@ -343,7 +343,7 @@ export default class CreateArticle extends HTMLDivElement {
 
       try {
         const url = '/s/add';
-        const result = this.api.put(url, { content: 'json', body })
+        const result = await this.api.put(url, { content: 'json', body })
 
         // check if request was successful
         if (result.success) {
@@ -388,7 +388,7 @@ export default class CreateArticle extends HTMLDivElement {
     });
 
     try {
-      const result = this.api.post(url, { content: 'json', body });
+      const result = await this.api.post(url, { content: 'json', body });
 
       if (result.success) {
         // activate the next step

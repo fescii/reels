@@ -64,17 +64,15 @@ export default class ActionWrapper extends HTMLElement {
     this.likePost();
     // Check if user has liked the post
     const liked = this.convertToBool(this.getAttribute('liked'))
-
     const body = document.querySelector('body');
-     
     // scroll likes
     this.scrollLikes(liked);
-
     // activate reply button
     this.activateReplyButton();
-
     // open the highlights
     this.openHighlights(body);
+    // activate edit button
+    this.activateEditButton();
   }
 
   updateViews = (element, value) => {
@@ -110,14 +108,7 @@ export default class ActionWrapper extends HTMLElement {
   }
 
   convertToBool = str => {
-    switch (str) {
-      case 'true':
-        return true;
-      case 'false':
-        return false;
-      default:
-        return false;
-    }
+    return str === 'true';
   }
 
   disableScroll() {
@@ -135,6 +126,17 @@ export default class ActionWrapper extends HTMLElement {
   enableScroll() {
     document.body.classList.remove("stop-scrolling");
     window.onscroll = function () { };
+  }
+
+  activateEditButton = () => {
+    const edit = this.shadowObj.querySelector('.actions > .action.edit');
+    if(!edit) return;
+
+    edit.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.parent.edit();
+    });
   }
 
   activateReplyButton = () => {
@@ -489,6 +491,7 @@ export default class ActionWrapper extends HTMLElement {
         ${this.getLike(this.getAttribute('liked'))}
         ${this.getWrite()}
         ${this.getViews()}
+        ${this.getEdit(this.getAttribute('you'))}
         ${this.getShare()}
       </div>
 		`
@@ -542,6 +545,16 @@ export default class ActionWrapper extends HTMLElement {
         <span id="prev">${opinionsFormatted}</span>
       </span>
     `
+  }
+
+  getEdit = you => {
+    if(you === 'true') {
+      return /*html*/`
+        <span class="action edit" id="edit-action">edit</span>
+      `
+    } else {
+      return '';
+    }
   }
 
   getViews = () => {
@@ -951,6 +964,25 @@ export default class ActionWrapper extends HTMLElement {
           color: var(--alt-color);
         }
 
+        .actions > .action.edit {
+          all: unset;
+          border: var(--border-button);
+          text-decoration: none;
+          color: var(--gray-color);
+          font-size: 0.95rem;
+          display: flex;
+          width: max-content;
+          flex-flow: row;
+          align-items: center;
+          cursor: pointer;
+          text-transform: lowercase;
+          justify-content: center;
+          padding: 3px 10px 4px;
+          border-radius: 10px;
+          -webkit-border-radius: 10px;
+          -moz-border-radius: 10px;
+        }
+
         @media screen and (max-width: 660px) {
           ::-webkit-scrollbar {
             -webkit-appearance: none;
@@ -958,6 +990,7 @@ export default class ActionWrapper extends HTMLElement {
 
           a,
           span.stat,
+          .actions > .action.edit,
           span.action {
             cursor: default !important;
           }

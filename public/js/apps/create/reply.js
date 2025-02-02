@@ -173,7 +173,7 @@ export default class CreateReply extends HTMLDivElement {
       body.content = outerThis.processTextAreaInput(body.content)
 
       try {
-        const result = this.api.put(this._url, { content: 'json', body: JSON.stringify(body) });
+        const result = await this.api.put(this._url, { content: 'json', body: JSON.stringify(body) });
 
         // check if request was successful
         if (result.success) {

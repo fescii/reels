@@ -8,8 +8,6 @@ import StoriesStat from './stories.stat.js'
 import UsersStat from "./users.stat.js"
 import MonthStat from "./month.stat.js"
 import UpdateItem from "./update.item.js"
-import ContentStory from "./content.story.js"
-import ContentReply from "./content.reply.js"
 
 export default function stats() {
   // Register stats
@@ -22,6 +20,4 @@ export default function stats() {
   customElements.define("users-stat", UsersStat);
   customElements.define("month-stat", MonthStat);
   customElements.define("update-item", UpdateItem);
-  customElements.define("content-story", ContentStory);
-  customElements.define("content-reply", ContentReply);
 }

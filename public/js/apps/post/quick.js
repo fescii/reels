@@ -17,6 +17,7 @@ export default class QuickPost extends HTMLElement {
     };
     this.app = window.app;
     this.api = this.app.api;
+    this.user = window.hash;
     this.render();
   }
 
@@ -24,8 +25,24 @@ export default class QuickPost extends HTMLElement {
     return value === "true";
   }
 
+  // observe the attributes
+  static get observedAttributes() {
+    return ['reload', 'images'];
+  }
+
+  // listen for changes in the attributes
+  attributeChangedCallback(name, oldValue, newValue) {
+    // check if old value is not equal to new value
+    if (name === 'reload') {
+      this.render();
+    } else if (name === 'images') {
+      this.render();
+    }
+  }
+
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
+    this.setUpEvents();
   }
 
   setReply(feed, reply) {
@@ -42,22 +59,14 @@ export default class QuickPost extends HTMLElement {
 
   connectedCallback() {
     this.style.display = 'flex';
+  }
 
-    // style the last block
+  setUpEvents = () => {
     this.styleLastBlock();
-
-    // Check and add handler
     this.checkAndAddHandler();
-
     this.setupIntersectionObserver();
-
-    // Open read more
     this.openReadMore();
-
-    // Open full post
     this.openQuickPost()
-
-    // Open url
     this.openUrl();
   }
 
@@ -239,6 +248,28 @@ export default class QuickPost extends HTMLElement {
     url = url.trim().toLowerCase();
     const post =  this.getFullPost();
     this.pushApp(url, post);
+  }
+
+  edit = () => {
+    // Get the body element
+    const body = document.querySelector('body');
+
+    // Get the content of the topic page
+    const content = this.getEdit();
+    // set to be deleted:
+    window.toBeChanged = this;
+    // insert the content into the body
+    body.insertAdjacentHTML('beforeend', content);
+  }
+
+  getEdit = () => {
+    // Show Post Page Here
+    return /* html */`
+      <post-options kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" hash="${this.getAttribute('hash')}"
+        drafted="false" story="false" images="${this.getAttribute('images')}">
+        ${this.innerHTML}
+      </post-options>
+    `;
   }
 
   // Open quick post
@@ -539,9 +570,11 @@ export default class QuickPost extends HTMLElement {
   }
 
   getFooter = () => {
+    const author = this.getAttribute('author-hash');
+    const you = author === this.user;
     const preview = this.noPreview ? 'false' : 'true';
     return /*html*/`
-      <action-wrapper preview="${preview}" full="false" kind="${this.getAttribute('story')}" reload="false" likes="${this.getAttribute('likes')}" 
+      <action-wrapper you="${you}" preview="${preview}" full="false" kind="${this.getAttribute('story')}" reload="false" likes="${this.getAttribute('likes')}" 
         replies="${this.getAttribute('replies')}" liked="${this.getAttribute('liked')}" wrapper="false" images="${this.getAttribute('images')}"
         hash="${this.getAttribute('hash')}" views="${this.getAttribute('views')}"  url="${this.getAttribute('url')}" summary="Post by - ${this.getAttribute('author-name')}"
         time="${this.getAttribute('time')}" author-hash="${this.getAttribute('author-hash')}">

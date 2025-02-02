@@ -292,7 +292,7 @@ export default class CreateTopic extends HTMLDivElement {
       try {
         const url = '/t/add';
 
-        const result = this.api.put(url, { content: 'json', body: JSON.stringify({
+        const result = await this.api.put(url, { content: 'json', body: JSON.stringify({
           slug: this.slug,
           name: this.name,
           summary: this.summary
@@ -338,7 +338,7 @@ export default class CreateTopic extends HTMLDivElement {
     const url  = '/t/check/topic';
 
     try {
-      const result = this.api.post(url, { content: 'json', body: JSON.stringify({
+      const result = await this.api.post(url, { content: 'json', body: JSON.stringify({
         slug: this.slug,
         name: this.name
       }) });

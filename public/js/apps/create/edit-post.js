@@ -252,7 +252,7 @@ export default class EditPost extends HTMLDivElement {
 
       // get images-uploader: images attribute
       const imagesUploader = form.querySelector('div.images-editor');
-      let images = imagesUploader.getAttribute('images').split(',');
+      let images = imagesUploader ? imagesUploader.getAttribute('images').split(',') : [];
 
       // filter out empty strings, null, 'null' or whose length is <5
       images = images.filter(img => img && img !== 'null' && img.length > 5);
@@ -263,7 +263,7 @@ export default class EditPost extends HTMLDivElement {
       }
 
       try {
-        const result = this.api.patch(this._url, { content: 'json', body: JSON.stringify(body) });
+        const result = await this.api.patch(this._url, { content: 'json', body: JSON.stringify(body) });
 
         // check if request was successful
         if (result.success) {

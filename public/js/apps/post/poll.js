@@ -18,28 +18,39 @@ export default class PollPost extends HTMLElement {
     };
     this.app = window.app;
     this.api = this.app.api;
+    this.user = window.hash;
     this.render();
   }
 
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
+    this.setUpEvents();
+  }
+
+  // observe the attributes
+  static get observedAttributes() {
+    return ['reload', 'images'];
+  }
+
+  // listen for changes in the attributes
+  attributeChangedCallback(name, oldValue, newValue) {
+    // check if old value is not equal to new value
+    if (name === 'reload') {
+      this.render();
+    } else if (name === 'images') {
+      this.render();
+    }
   }
 
   connectedCallback() {
     this.style.display = 'flex';
+  }
 
-    // style the last block
+  setUpEvents = () => {
     this.styleLastBlock();
-
-    // Check and add handler
     this.checkAndAddHandler();
-
     this.setupIntersectionObserver();
-
-    // Open poll post
     this.openPollPost();
-
-    // Open url
     this.openUrl();
   }
 
@@ -205,12 +216,9 @@ export default class PollPost extends HTMLElement {
   openPollPost = () => {
     // get url
     let url = this.getAttribute('url');
-
     url = url.trim().toLowerCase();
-
     // get current content
     const content = this.shadowObj.querySelector('#content')
-
     if(content) {
       content.addEventListener('click', event => {
         event.preventDefault();
@@ -254,6 +262,28 @@ export default class PollPost extends HTMLElement {
     window.onscroll = function () { };
   }
 
+  edit = () => {
+    // Get the body element
+    const body = document.querySelector('body');
+
+    // Get the content of the topic page
+    const content = this.getEdit();
+    // set to be deleted:
+    window.toBeChanged = this;
+    // insert the content into the body
+    body.insertAdjacentHTML('beforeend', content);
+  }
+
+  getEdit = () => {
+    // Show Post Page Here
+    return /* html */`
+      <post-options kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" hash="${this.getAttribute('hash')}"
+        drafted="false" story="false" images="${this.getAttribute('images')}">
+        ${this.innerHTML}
+      </post-options>
+    `;
+  }
+
   // style the last paragraph or the last block element in content
   styleLastBlock = () => {
     const content = this.shadowObj.querySelector('.content#content');
@@ -268,32 +298,14 @@ export default class PollPost extends HTMLElement {
   }
 
   formatNumber = n => {
-    if (n >= 0 && n <= 999) {
-      return n.toString();
-    } else if (n >= 1000 && n <= 9999) {
-      const value = (n / 1000).toFixed(2);
-      return `${value}k`;
-    } else if (n >= 10000 && n <= 99999) {
-      const value = (n / 1000).toFixed(1);
-      return `${value}k`;
-    } else if (n >= 100000 && n <= 999999) {
-      const value = (n / 1000).toFixed(0);
-      return `${value}k`;
-    } else if (n >= 1000000 && n <= 9999999) {
-      const value = (n / 1000000).toFixed(2);
-      return `${value}M`;
-    } else if (n >= 10000000 && n <= 99999999) {
-      const value = (n / 1000000).toFixed(1);
-      return `${value}M`;
-    } else if (n >= 100000000 && n <= 999999999) {
-      const value = (n / 1000000).toFixed(0);
-      return `${value}M`;
-    } else if (n >= 1000000000) {
-      return "1B+";
-    }
-    else {
-      return 0;
-    }
+    if (n < 1000) return n.toString();
+    if (n < 10000) return `${(n / 1000).toFixed(2)}k`;
+    if (n < 100000) return `${(n / 1000).toFixed(1)}k`;
+    if (n < 1000000) return `${(n / 1000).toFixed(0)}k`;
+    if (n < 10000000) return `${(n / 1000000).toFixed(2)}M`;
+    if (n < 100000000) return `${(n / 1000000).toFixed(1)}M`;
+    if (n < 1000000000) return `${(n / 1000000).toFixed(0)}M`;
+    return "1B+";
   }
 
   parseToNumber = str => {
@@ -438,8 +450,10 @@ export default class PollPost extends HTMLElement {
   }
 
   getFooter = () => {
+    const author = this.getAttribute('author-hash');
+    const you = author === this.user;
     return /*html*/`
-      <action-wrapper full="false" kind="story" reload="false" likes="${this.getAttribute('likes')}" 
+      <action-wrapper you="${you}" full="false" kind="story" reload="false" likes="${this.getAttribute('likes')}" 
         replies="${this.getAttribute('replies')}" liked="${this.getAttribute('liked')}" wrapper="false"
         hash="${this.getAttribute('hash')}" views="${this.getAttribute('views')}" url="${this.getAttribute('url')}" summary="Post by - ${this.getAttribute('author-name')}"
         preview-title="" time="${this.getAttribute('time')}" images="${this.getAttribute('images')}" 

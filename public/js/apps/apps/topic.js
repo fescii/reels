@@ -23,6 +23,7 @@ export default class AppTopic extends HTMLElement {
   connectedCallback() {
     this.enableScroll();
     this.style.display = 'flex';
+    this.app.showNav();
     this.checkAndAddHandler();
     this.checkNotificationPermission();
     this.performActions();
@@ -435,7 +436,6 @@ export default class AppTopic extends HTMLElement {
           ${this.getHeader()}
           ${this.getSection()}
         </section>
-
         <section class="side">
           ${this.getAuthor()}
           <topics-container url="/q/trending/topics"></topics-container>
@@ -443,14 +443,6 @@ export default class AppTopic extends HTMLElement {
         </section>
       `;
     }
-  }
-
-  getTop = () => {
-    return /* html */`
-      <header-wrapper section="topic" name="${this.getAttribute('name')}" followers="${this.getAttribute('followers')}"
-        stories="${this.getAttribute('stories')}">
-      </header-wrapper>
-    `;
   }
 
   getStories = () => {

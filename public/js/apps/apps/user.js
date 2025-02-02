@@ -35,9 +35,9 @@ export default class AppUser extends HTMLElement {
 
   connectedCallback() {
     this.enableScroll();
+    this.app.showNav();
     // Add this component handler to the window wss object
     this.checkAndAddHandler();
-
     // Check if the display is greater than 600px using mql
     const mql = window.matchMedia('(max-width: 660px)');
 

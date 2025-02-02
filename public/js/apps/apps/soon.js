@@ -22,6 +22,7 @@ export default class AppSoon extends HTMLElement {
 
   connectedCallback() {
     this.enableScroll();
+    this.app.showNav();
     this.watchMql();
   }
 

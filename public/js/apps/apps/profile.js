@@ -3,16 +3,13 @@ export default class AppProfile extends HTMLElement {
     // We are not even going to touch this.
     super();
     this.setTitle();
-
     // Check if you is true and convert to boolean
     this._you = this.getAttribute('you') === 'true';
-
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.boundHandleWsMessage = this.handleWsMessage.bind(this);
     this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
-
+    this.app = window.app;
     this.render();
   }
 
@@ -35,9 +32,8 @@ export default class AppProfile extends HTMLElement {
 
   connectedCallback() {
     this.enableScroll();
-    // Scroll to the top of the page
+    this.app.showNav();
     window.scrollTo(0, 0);
-
     // request user to enable notifications
     this.checkNotificationPermission();
 

@@ -9,7 +9,6 @@ export default class AppHome extends HTMLElement {
     this.mql = window.matchMedia('(max-width: 700px)');
     this.active_tab = null;
     this.render();
-    // Add popstate event listener
     window.addEventListener('popstate', this.handlePopState);
   }
 
@@ -24,10 +23,10 @@ export default class AppHome extends HTMLElement {
 
   connectedCallback() {
     // fetch content
+    this.app.showNav();
     const container = this.shadowObj.querySelector('div.feeds > div.content-container');
     const tabs = this.shadowObj.querySelector('ul.tabs');
     if(tabs && container) this.activateTabController(tabs, container);
-
     this.watchMediaQuery(this.mql);
   }
 

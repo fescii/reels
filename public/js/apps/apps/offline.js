@@ -6,7 +6,7 @@ export default class AppOffline extends HTMLElement {
 
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
+    this,app = window.app;
     this.render();
   }
 
@@ -20,8 +20,8 @@ export default class AppOffline extends HTMLElement {
   }
 
   connectedCallback() {
-    //Scroll the window to the top
     window.scrollTo(0, 0);
+    this.app.showNav();
 
     // request user to enable notifications
     this.checkNotificationPermission();

@@ -2,7 +2,6 @@ export default class AppSearch extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-
     // Get default tab
     this.active_tab = null;
     // get query
@@ -67,6 +66,7 @@ export default class AppSearch extends HTMLElement {
 
   connectedCallback() {
     this.enableScroll();
+    this.app.showNav();
 
     // Activate tab
     const contentContainer = this.shadowObj.querySelector('div.content-container');

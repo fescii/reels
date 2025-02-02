@@ -62,16 +62,11 @@ export default class ActionWrapper extends HTMLElement {
   connectedCallback() {
     // like post
     this.likePost();
-    // Check if user has liked the post
     const liked = this.convertToBool(this.getAttribute('liked'))
     const body = document.querySelector('body');
-    // scroll likes
     this.scrollLikes(liked);
-    // activate reply button
     this.activateReplyButton();
-    // open the highlights
     this.openHighlights(body);
-    // activate edit button
     this.activateEditButton();
   }
 
@@ -140,9 +135,7 @@ export default class ActionWrapper extends HTMLElement {
   }
 
   activateReplyButton = () => {
-    // Get the article button
     const replyButton = this.shadowObj.querySelector('span.action.write');
-    // Add an event listener to the article button
     replyButton.addEventListener('click', e => {
       e.preventDefault();
       this.parent.open();
@@ -150,13 +143,8 @@ export default class ActionWrapper extends HTMLElement {
   }
   
   performActions = async (likeBtn, liked) => {
-    // get url to 
     let baseUrl = this.getAttribute('url');
-
-    // base api
     const url = `${baseUrl}/like`;
-
-    // Follow the topic
     await this.like(url, likeBtn, liked);
   }
 
@@ -501,7 +489,7 @@ export default class ActionWrapper extends HTMLElement {
     if (preview === "false") return '';
     if (kind === 'reply') {
       return /*html*/`
-        <span class="action arrow">
+        <span class="reply arrow">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
             <defs>
               <linearGradient id="gradient" gradientTransform="rotate(0)">
@@ -531,15 +519,9 @@ export default class ActionWrapper extends HTMLElement {
   }
 
   getReplies = () => {
-    // Get total replies and parse to integer
     const replies = this.getAttribute('replies') || 0;
-
-    // Convert the replies to a number
     const totalReplies = this.parseToNumber(replies);
-
-    //  format the number
     const opinionsFormatted = this.formatNumber(totalReplies);
-
     return /*html*/`
       <span class="numbers">
         <span id="prev">${opinionsFormatted}</span>
@@ -560,11 +542,7 @@ export default class ActionWrapper extends HTMLElement {
   getViews = () => {
     // Get total views and parse to integer
     const views = this.getAttribute('views') || 0;
-
-    // Convert the views to a number
     const totalViews = this.parseToNumber(views);
-
-    // Format the number
     const viewsFormatted = this.formatNumber(totalViews);
 
     return /*html*/`
@@ -610,14 +588,8 @@ export default class ActionWrapper extends HTMLElement {
     // Get total likes and parse to integer
     const likes = this.getAttribute('likes') || 0;
     const totalLikes = this.parseToNumber(likes);
-
-    // Format the number
     const likesFormatted = this.formatNumber(totalLikes);
-
-    // Check if user has liked the post
     const liked = this.getAttribute('liked') || 'false';
-
-    // Check if the user has liked the post
     if (liked === 'true') {
       // next value is the current value
       const nextValue = likesFormatted;
@@ -816,8 +788,9 @@ export default class ActionWrapper extends HTMLElement {
           -o-border-radius: 50px;
         }
 
-        .action.arrow {
+        .reply.arrow {
           all: unset;
+          z-index: 4;
           margin: 3px 0 0 -6.5px;
         }
 
@@ -931,7 +904,7 @@ export default class ActionWrapper extends HTMLElement {
           height: 16px;
         }
 
-        .action.arrow svg {
+        .reply.arrow > svg {
           width: 20px;
           height: 20px;
           rotate: 90deg;

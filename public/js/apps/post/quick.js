@@ -50,11 +50,23 @@ export default class QuickPost extends HTMLElement {
 
     if (previews) {
       const threadButton = this.getThreadButton();
-      const content = feed ? threadButton : reply;
-      previews.insertAdjacentHTML('beforeend', content);
-
-      if(feed) this.openThreads();
+      if(feed) {
+        this.setThreads(previews, threadButton);
+        this.openThreads();
+      } else {
+        const content = this.getReply(reply);
+        previews.insertAdjacentHTML('beforeend', content);
+      }
     }
+  }
+  
+  setThreads = (previews, content) => {
+    // check if threads exist
+    const thread = previews.querySelector('div.thread');
+    if(thread) return;
+
+    // insert the thread
+    previews.insertAdjacentHTML('beforeend', content);
   }
 
   connectedCallback() {

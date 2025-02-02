@@ -316,6 +316,7 @@ export default class AppUser extends HTMLElement {
 
     const tabItems = tabContainer.querySelectorAll('li.tab-item');
     let activeTab = tabContainer.querySelector('li.tab-item.active');
+    if(!activeTab) activeTab = tabContainer.querySelector('li.tab-item.stats');
 
     tabItems.forEach(tab => {
       tab.addEventListener('click', e => {

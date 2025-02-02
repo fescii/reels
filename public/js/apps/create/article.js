@@ -586,6 +586,21 @@ export default class CreateArticle extends HTMLDivElement {
     // Preserve <br> tags in the middle of content
     cleanedText = cleanedText.replace(/>(\s*<br>\s*)+</g, '><br><');
 
+    // Step 4: Remove empty <p> tags
+    cleanedText = cleanedText.replace(/<p><\/p>/g, '');
+    cleanedText = this.removeEmptyFigures(cleanedText);
+
+    return cleanedText;
+  }
+
+  removeEmptyFigures = text => {
+    // remove empty figures
+    // <figure class="image"><img></figure>
+    // <figure class="image"><img><figcaption></figcaption></figure>
+
+    // remove empty figures
+    let cleanedText = text.replace(/<figure class="image"><img><\/figure>/g, '');
+    cleanedText = re.replace(/<figure class="image"><img><figcaption><\/figcaption><\/figure>/g, '');
     return cleanedText;
   }
 

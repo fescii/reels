@@ -8,7 +8,7 @@ export default class ActionWrapper extends HTMLElement {
     this.app = window.app;
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
+    this.noWrite = this.textToBool(this.getAttribute('no-write'));
     this.parent = this.getRootNode().host;
     this.app = window.app;
     this.api = this.app.api;
@@ -34,6 +34,10 @@ export default class ActionWrapper extends HTMLElement {
 
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
+  }
+
+  textToBool = text => {
+    return text === 'true' ? true : false;
   }
 
   reRender = () => {
@@ -139,38 +143,10 @@ export default class ActionWrapper extends HTMLElement {
     // Add an event listener to the article button
     replyButton.addEventListener('click', e => {
       e.preventDefault();
-
-      // Get the body element
-      const body = document.querySelector('body');
-
-      // Get the content
-      const content = this.getReply();
-
-      // insert the content into the body
-      body.insertAdjacentHTML('beforeend', content);
+      this.parent.open();
     });
   }
-
-  getReply = () => {
-    // get kind from the attribute
-    const kind = this.getAttribute('kind');
-    const hash = this.getAttribute('hash').toLowerCase();
-    let url = `/s/${hash}/reply`;
-
-    // if kind is reply, change the url
-    if (kind === 'reply') {
-      url = `/r/${hash}/reply`;
-    }
-
-    return /* html */`
-      <div is="create-reply" api="${url}" method="PUT" kind="${kind}"
-        hash="${this.getAttribute('hash')}" preview-title="${this.getAttribute('preview-title')}" time="${this.getAttribute('time')}"
-        author-hash="${this.getAttribute('author-hash')}">
-        ${this.innerHTML}
-      </div>
-    `;
-  }
-
+  
   performActions = async (likeBtn, liked) => {
     // get url to 
     let baseUrl = this.getAttribute('url');
@@ -510,8 +486,8 @@ export default class ActionWrapper extends HTMLElement {
     return /* html */`
       <div class="actions stats ${className}">
         ${this.getArrow(this.getAttribute('kind'), this.getAttribute('preview'))}
-        ${this.getWrite()}
         ${this.getLike(this.getAttribute('liked'))}
+        ${this.getWrite()}
         ${this.getViews()}
         ${this.getShare()}
       </div>
@@ -539,12 +515,12 @@ export default class ActionWrapper extends HTMLElement {
   }
 
   getWrite = () => {
+    let write = this.noWrite ? 'no-write' : 'write';
     return /*html*/`
-      <span class="action write">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8.00016 1.83337C3.3755 1.83337 1.8335 3.37537 1.8335 8.00004C1.8335 12.6247 3.3755 14.1667 8.00016 14.1667C12.6248 14.1667 14.1668 12.6247 14.1668 8.00004" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M13.0189 2.86915V2.86915C12.3569 2.28315 11.3456 2.34449 10.7596 3.00649C10.7596 3.00649 7.84694 6.29649 6.83694 7.43849C5.8256 8.57982 6.56694 10.1565 6.56694 10.1565C6.56694 10.1565 8.23627 10.6852 9.23227 9.55982C10.2289 8.43449 13.1563 5.12849 13.1563 5.12849C13.7423 4.46649 13.6803 3.45515 13.0189 2.86915Z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M10.0061 3.86719L12.4028 5.98919" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      <span class="action ${write}">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
+          <path d="M8.5 14.5H15.5M8.5 9.5H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M14.1706 20.8905C18.3536 20.6125 21.6856 17.2332 21.9598 12.9909C22.0134 12.1607 22.0134 11.3009 21.9598 10.4707C21.6856 6.22838 18.3536 2.84913 14.1706 2.57107C12.7435 2.47621 11.2536 2.47641 9.8294 2.57107C5.64639 2.84913 2.31441 6.22838 2.04024 10.4707C1.98659 11.3009 1.98659 12.1607 2.04024 12.9909C2.1401 14.536 2.82343 15.9666 3.62791 17.1746C4.09501 18.0203 3.78674 19.0758 3.30021 19.9978C2.94941 20.6626 2.77401 20.995 2.91484 21.2351C3.05568 21.4752 3.37026 21.4829 3.99943 21.4982C5.24367 21.5285 6.08268 21.1757 6.74868 20.6846C7.1264 20.4061 7.31527 20.2668 7.44544 20.2508C7.5756 20.2348 7.83177 20.3403 8.34401 20.5513C8.8044 20.7409 9.33896 20.8579 9.8294 20.8905C11.2536 20.9852 12.7435 20.9854 14.1706 20.8905Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
         </svg>
         ${this.getReplies()}
       </span>
@@ -744,7 +720,8 @@ export default class ActionWrapper extends HTMLElement {
           gap: 0;
         }
 
-        span.write.action {
+        span.write.action,
+        span.no-write.action {
           cursor: pointer;
           position: relative;
           display: flex;
@@ -753,7 +730,7 @@ export default class ActionWrapper extends HTMLElement {
           font-size: 0.95rem;
           justify-content: start;
           gap: 5px;
-          padding: 5px 10px 5px 7px;
+          padding: 5px 10px;
           height: 30px;
           border-radius: 50px;
           font-weight: 500;
@@ -765,13 +742,15 @@ export default class ActionWrapper extends HTMLElement {
           -o-border-radius: 50px;
         }
 
-        span.write.action > svg {
-          width: 19px;
-          height: 19px;
-          margin: -1px 0 0 0;
+        span.write.action > svg,
+        span.no-write.action > svg {
+          width: 17px;
+          height: 17px;
+          margin: -1px 0 0;
         }
 
-        span.write.action span.line {
+        span.write.action span.line,
+        span.no-write.action span.line {
           background: var(--accent-linear);
           position: absolute;
           top: 30px;
@@ -782,15 +761,18 @@ export default class ActionWrapper extends HTMLElement {
           border-radius: 5px;
         }
 
-        span.write.action.open span.line {
+        span.write.action.open span.line,
+        span.no-write.action.open span.line {
           display: inline-block;
         }
 
-        span.write.action.open {
+        span.write.action.open,
+        span.no-write.action.open {
           color: var(--accent-color);
         }
 
-        span.write.action.open > span.numbers {
+        span.write.action.open > span.numbers,
+        span.no-write.action.open > span.numbers {
           color: transparent;
           background: var(--accent-linear);
           font-weight: 500;

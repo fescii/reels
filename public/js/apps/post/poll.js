@@ -342,7 +342,7 @@ export default class PollPost extends HTMLElement {
     // check if seconds is less than 604800: Friday, 11:30 AM
     if (seconds <= 604800) {
       return `
-        ${date.toLocaleDateString('en-US', { weekday: 'long' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        ${date.toLocaleDateString('en-US', { weekday: 'short' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
       `
     }
 

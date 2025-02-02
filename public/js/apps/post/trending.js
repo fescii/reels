@@ -289,22 +289,22 @@ export default class TrendingStory extends HTMLElement {
     // check if seconds is less than 604800: Friday, 11:30 AM
     if (seconds <= 604800) {
       return `
-        <span class="name">${date.toLocaleDateString('en-US', { weekday: 'long' })},</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        <span class="name">${date.toLocaleDateString('en-US', { weekday: 'short' })},</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
       `
     }
 
     // Check if the date is in the current year and seconds is less than 31536000: Dec 12, 11:30 AM
     if (seconds < 31536000 && date.getFullYear() === currentTime.getFullYear()) {
       return `
-        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })},</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        <span class="name">${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })},</span> ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
       `
     } else if(seconds < 31536000 && date.getFullYear() !== currentTime.getFullYear()) {
       return `
-        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+        <span class="name">${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
       `
     } else {
       return `
-        <span class="name">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+        <span class="name">${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
       `
     }
   }

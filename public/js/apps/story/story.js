@@ -543,7 +543,7 @@ export default class AppStory extends HTMLElement {
           height: max-content;
           display: flex;
           flex-flow: column;
-          gap: 20px;
+          gap: 0;
           position: sticky;
           top: 0;
           height: 100vh;

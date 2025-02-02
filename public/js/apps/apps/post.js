@@ -439,7 +439,7 @@ export default class AppPost extends HTMLElement {
 
   getStats = story =>  {
     return /*html*/`
-      <action-wrapper preview="false" full="true" kind="${story}" reload="false" likes="${this.getAttribute('likes')}"
+      <action-wrapper no-write="true" preview="false" full="true" kind="${story}" reload="false" likes="${this.getAttribute('likes')}"
         replies="${this.getAttribute('replies')}" liked="${this.getAttribute('liked')}" wrapper="true" images="${this.getAttribute('images')}"
         hash="${this.getAttribute('hash')}" views="${this.getAttribute('views')}" url="${this.getAttribute('url')}" summary="Post by - ${this.getAttribute('author-name')}"
         preview-title="" time="${this.getAttribute('time')}" author-hash="${this.getAttribute('author-hash')}">
@@ -601,7 +601,7 @@ export default class AppPost extends HTMLElement {
 
         .top-meta {
           margin: 0;
-          padding: 10px 0 0;
+          padding: 0;
           display: flex;
           position: relative;
           color: var(--text-color);
@@ -730,6 +730,15 @@ export default class AppPost extends HTMLElement {
           max-width: 100%;
         }
 
+        div.previews {
+          width: 100%;
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+          margin: 0;
+          padding: 0 0 5px;
+        }
+
         @media screen and (max-width: 900px) {
           .feeds {
             width: 58%;
@@ -738,15 +747,6 @@ export default class AppPost extends HTMLElement {
           div.side {
             width: 40%;
           }
-        }
-
-        div.previews {
-          width: 100%;
-          display: flex;
-          flex-flow: column;
-          gap: 0;
-          margin: 0;
-          padding: 0;
         }
 
 				@media screen and (max-width: 660px) {

@@ -234,13 +234,15 @@ export default class QuickPost extends HTMLElement {
     window.onscroll = function () { };
   }
 
+  open = () => {
+    let url = this.getAttribute('url');
+    url = url.trim().toLowerCase();
+    const post =  this.getFullPost();
+    this.pushApp(url, post);
+  }
+
   // Open quick post
   openQuickPost = () => {
-    // get url
-    let url = this.getAttribute('url');
-
-    url = url.trim().toLowerCase();
-
     // get current content
     const content = this.shadowObj.querySelector('#content')
 
@@ -250,35 +252,23 @@ export default class QuickPost extends HTMLElement {
         event.stopImmediatePropagation();
         event.stopPropagation();
 
-        // Get full post
-        const post =  this.getFullPost();
-  
-        // push the post to the app
-        this.pushApp(url, post);
+        // Open the post
+        this.open();
       })
     }
   }
 
   // Open threads
   openThreads = () => {
-    // get url
-    let url = this.getAttribute('url');
-
-    url = url.trim().toLowerCase();
-
     const threadButton = this.shadowObj.querySelector('div.thread > button.thread-button');
-
     if(threadButton) {
       threadButton.addEventListener('click', event => {
         event.preventDefault();
         event.stopImmediatePropagation();
         event.stopPropagation();
 
-        // Get full post
-        const post =  this.getFullPost();
-  
-        // push the post to the app
-        this.pushApp(url, post);
+        // Open the post
+        this.open();
       })
     }
   }
@@ -325,7 +315,7 @@ export default class QuickPost extends HTMLElement {
     // check if seconds is less than 604800: Friday, 11:30 AM
     if (seconds <= 604800) {
       return `
-        ${date.toLocaleDateString('en-US', { weekday: 'long' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        ${date.toLocaleDateString('en-US', { weekday: 'short' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
       `
     }
 

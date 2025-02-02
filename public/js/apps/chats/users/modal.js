@@ -768,7 +768,7 @@ export default class UsersModal extends HTMLElement {
             max-height: calc(100dvh - 50px);
             min-height: calc(100dvh - 50px);
             border-radius: 0px;
-            border-top: var(--mobile-border);
+            border-top: var(--border);
             border-top-right-radius: 15px;
             border-top-left-radius: 15px;
           }

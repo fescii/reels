@@ -820,7 +820,7 @@ export default class PostOptions extends HTMLElement {
             max-height: 90%;
             min-height: max-content;
             border-radius: 0px;
-            border-top: var(--mobile-border);
+            border-top: var(--border);
             border-top-right-radius: 15px;
             border-top-left-radius: 15px;
           }

@@ -247,7 +247,7 @@ export default class ActivityPopup extends HTMLElement {
           height: 100%;
           min-height: 100%;
           border-radius: 0px;
-          border-top: var(--mobile-border);
+          border-top: var(--border);
           border-top-right-radius: 15px;
           border-top-left-radius: 15px;
           overflow-y: auto;

@@ -12,7 +12,33 @@ export default class NewsWrapper extends HTMLElement {
   }
 
   connectedCallback() {
-    
+    this.activateActions();
+  }
+
+  activateActions = () => {
+    const viewAction = this.shadowObj.querySelector('#view-action');
+    const sourceAction = this.shadowObj.querySelector('#source-action');
+
+    if(!viewAction || !sourceAction) return;
+
+    viewAction.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.openUrl(viewAction.getAttribute('href'));
+    });
+
+    sourceAction.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.openUrl(sourceAction.getAttribute('href'));
+    });
+  }
+
+  openUrl = url => {
+    let linkPopUp = `<url-popup url="${url}"></url-popup>`
+
+    // open the popup
+    document.body.insertAdjacentHTML('beforeend', linkPopUp);
   }
 
   disconnectedCallback() {
@@ -36,28 +62,17 @@ export default class NewsWrapper extends HTMLElement {
     // Get the seconds
     const seconds = timeDifference / 1000;
 
-    // check if seconds is less than 86400 and dates are equal: Today, 11:30 AM
-    if (seconds < 86400 && date.getDate() === currentTime.getDate()) {
-      return `
-        Today • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
-      `
-    } else if (seconds < 86400 && date.getDate() !== currentTime.getDate()) {
-      return `
-        Yesterday • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
-      `
-    }
-
     // check if seconds is less than 604800: Friday, 11:30 AM
     if (seconds <= 604800) {
       return `
-        ${date.toLocaleDateString('en-US', { weekday: 'short' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        ${date.toLocaleDateString('en-US', { weekday: 'short' })}, ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
       `
     }
 
     // Check if the date is in the current year and seconds is less than 31536000: Dec 12, 11:30 AM
     if (seconds < 31536000 && date.getFullYear() === currentTime.getFullYear()) {
       return `
-        ${date.toLocaleDateString('en-US', { weekday: 'short' })} • ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
+        ${date.toLocaleDateString('en-US', { weekday: 'short' })}, ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
       `
     } else {
       return `
@@ -89,9 +104,12 @@ export default class NewsWrapper extends HTMLElement {
           <h4 class="name">
             <span class="name">${formattedName}</span>
           </h4>
-          <p class="top-desc">${this.getAttribute('description')}</p>
+          <p class="top-desc">${this.getAttribute('description') ? this.getAttribute('description') : this.getContent()}</p>
         </div>
-        ${this.getContent()}
+        <!--<div class="content">
+          <div class="image"><img src="${this.getAttribute('image')}" alt="${this.getAttribute('news-title')}"></div>
+          <p class="description">${this.getContent()}</p>
+        </div>-->
         ${this.getOn()}
         <div class="actions">
           ${this.getActions()}
@@ -102,19 +120,15 @@ export default class NewsWrapper extends HTMLElement {
 
   getContent = () => {
     // get innerHTML
-    const innerHTML = this.innerHTML;
-
+    const innerHTML = this.getAttribute('content');
+    innerHTML.trim();
+    if (!innerHTML || innerHTML.length <= 0 || innerHTML === null || innerHTML === "null") return '';
     // remove tags and &gt; and &lt;
     let description = innerHTML.replace(/<[^>]*>/g, '').replace(/&gt;/g, '>').replace(/&lt;/g, '<');
-
     // Check if the description is greater than 100 characters: replace the rest with ...
     let displayDescription = description.length > 120 ? `${description.substring(0, 120)}...` : description;
 
-    return /* html */ `
-      <div class="content">
-        <p class="description">${displayDescription}</p>
-      </div>
-    `
+    return displayDescription;
   }
 
   getActions = () => {
@@ -130,6 +144,8 @@ export default class NewsWrapper extends HTMLElement {
   getOn = () => {
     return /*html*/`
       <div class="meta bottom-meta">
+        <span class="source">${this.getAttribute('source')}</span>
+        <span class="sp">•</span>
         <time class="time" datetime="${this.getAttribute('time')}">
           ${this.getLapseTime(this.getAttribute('time'))}
         </time>
@@ -209,8 +225,16 @@ export default class NewsWrapper extends HTMLElement {
           flex-flow: column;
           gap: 0;
         }
+
+        .topic > .header {
+          display: flex;
+          width: 100%;
+          flex-flow: column;
+          gap: 0;
+          padding: 0;
+        }
         
-        .topic > h4.name {
+        .topic > .header > h4.name {
           margin: 0;
           display: flex;
           align-items: center;
@@ -223,19 +247,52 @@ export default class NewsWrapper extends HTMLElement {
           word-wrap: break-word;
         }
         
-        .topic > .hori > a.hash {
+        .topic > .header > p.top-desc {
           color: var(--gray-color);
-          font-family: var(--font-mono), monospace;
-          font-size: 0.9rem;
-          font-weight: 500;
+          font-family: var(--font-read), sans-serif;
+          font-size: 0.85rem;
+          font-weight: 400;
           text-decoration: none;
           display: flex;
           gap: 2px;
-          padding: 8px 0 0 0;
+          padding: 2px 0 0 0;
           align-items: center;
         }
 
-        p.description {
+        div.content {
+          display: flex;
+          width: 100%;
+          flex-flow: row;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 8px 0 0;
+        }
+
+        div.content > .image {
+          display: none;
+          width: 100%;
+          align-items: center;
+          justify-content: center;
+          width: 70px;
+          min-width: 70px;
+          height: 70px;
+          gap: 0;
+          padding: 0;
+        }
+
+        div.content > .image > img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 10px;
+          -webkit-border-radius: 10px;
+          -moz-border-radius: 10px;
+        }
+
+        div.content > p.description {
+          width: calc(100% - 80px);
+          width: 100%;
           color: var(--text-color);
           font-family: var(--font-main), sans-serif;
           font-size: 0.93rem;
@@ -244,6 +301,25 @@ export default class NewsWrapper extends HTMLElement {
           line-height: 1.3;
           padding: 0;
           margin: 5px 0;
+        }
+
+        .meta.bottom-meta {
+          margin:  0;
+          padding: 5px 0 0;
+          display: flex;
+          position: relative;
+          color: var(--gray-color);
+          align-items: center;
+          font-family: var(--font-read), sans-serif;
+          gap: 8px;
+          font-size: 0.9rem;
+          font-weight: 500;
+        }
+
+        .meta.bottom-meta > .sp {
+          font-size: 1.25rem;
+          color: var(--gray-color);
+          font-weight: 400;
         }
 
         div.actions {
@@ -280,7 +356,7 @@ export default class NewsWrapper extends HTMLElement {
         
         div.actions > .action.contribute,
         div.actions > .action.view,
-        div.actions > .action.following {
+        div.actions > .action.source {
           padding: 4px 10px;
           background: none;
           border: var(--border-button);

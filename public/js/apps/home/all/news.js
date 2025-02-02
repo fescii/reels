@@ -58,9 +58,10 @@ export default class HomeNews extends HTMLElement {
         return;
       }
 
-      console.log(result)
+      const all = result.news;
 
-      const news = result.news;
+      // get only top 10 news
+      const news = all.slice(0, 10);
 
       if (news.length === 0) {
         newsContainer.innerHTML = outerThis.getEmptyMsg();
@@ -88,7 +89,7 @@ export default class HomeNews extends HTMLElement {
 
     this.all.home = {
       last: false,
-      next: 3,
+      next: 2,
       loaded: true
     };
   }
@@ -106,8 +107,8 @@ export default class HomeNews extends HTMLElement {
     return data.map(article => {
       return /*html*/`
         <news-wrapper news-title="${article.title}" url="${article.url}" image="${article.urlToImage}" time="${article.publishedAt}"
-          description="${article.description}" author="${article.author}" source="${article.source.name}">
-          ${article.content}
+          description="${article.description}" author="${article.author}" source="${article.source.name}"
+          content='${article.content}'>
         </news-wrapper>
       `
     }).join('');

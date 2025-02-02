@@ -501,14 +501,14 @@ export default class ContactPopup extends HTMLElement {
 
           #content {
             box-sizing: border-box !important;
-            padding: 15px 0 10px;
+            padding: 10px 0 10px;
             margin: 0;
             width: 100%;
             max-width: 100%;
             max-height: 90%;
             min-height: max-content;
             border-radius: 0px;
-            border-top: var(--mobile-border);
+            border-top: var(--border);
             border-top-right-radius: 15px;
             border-top-left-radius: 15px;
           }

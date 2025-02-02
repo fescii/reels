@@ -327,7 +327,7 @@ export default class JoinPopup extends HTMLElement {
             max-height: 90%;
             min-height: max-content;
             border-radius: 0px;
-            border-top: var(--mobile-border);
+            border-top: var(--border);
             border-top-right-radius: 10px;
             border-top-left-radius: 10px;
           }

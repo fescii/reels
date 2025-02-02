@@ -77,20 +77,11 @@ export default class HomeStories extends HTMLElement {
       // set the last item border-bottom to none
       outerThis.setLastItem(contentContainer);
 
-      if (this.mql.matches) {
-        // set next
-        this.all.home = {
-          last: false,
-          next: 2,
-          loaded: true
-        }
-      } else {
-        // set next
-        this.all.home = {
-          last: false,
-          next: 3,
-          loaded: true
-        }
+      // set next
+      this.all.home = {
+        last: false,
+        next: 3,
+        loaded: true
       }
     } catch (error) {
       console.log(error)

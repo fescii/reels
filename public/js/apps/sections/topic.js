@@ -23,9 +23,11 @@ export default class TopicSection extends HTMLElement {
 
     if(contentContainer && tabContainer) {
       // if content container and tab container exists
-      if (contentContainer && tabContainer) {
-        this.activateTabController(tabContainer, contentContainer)
-      }
+      setTimeout(() => {
+        if (contentContainer && tabContainer) {
+          this.activateTabController(tabContainer, contentContainer)
+        }
+      }, 100);
     }
 
     // Open url
@@ -69,6 +71,9 @@ export default class TopicSection extends HTMLElement {
         this.active_tab.classList.add("active");
         const url = tab.getAttribute('url');
 
+        // update bar underline
+        this.updateBarUnderline(tab);
+
         // update the content based on the tab
         this.updateContent(contentContainer, tab.getAttribute('data-name'), url);
       });
@@ -87,6 +92,9 @@ export default class TopicSection extends HTMLElement {
 
     activeTab.classList.add("active");
     this.active_tab = activeTab;
+
+    // update bar underline
+    this.updateBarUnderline(activeTab);
   }
 
   updateContent = (contentContainer, tabName, url) => {
@@ -111,22 +119,41 @@ export default class TopicSection extends HTMLElement {
   updateHistory = (tabName, content) => {
     const contentContainer = this.shadowObj.querySelector('div.feeds');
     const tabs = this.shadowObj.querySelector('ul.tabs');
-
     try {
       this.active_tab.classList.remove('active');
       const activeTab = tabs.querySelector(`li.${tabName}`);
       activeTab.classList.add('active');
       this.active_tab = activeTab;
-
+      // update bar underline
+      this.updateBarUnderline(activeTab);
       contentContainer.innerHTML = content;
     } catch (error) {
-      console.log(error)
       const activeTab = tabs.querySelector('li.article');
       activeTab.classList.add('active');
       this.active_tab = activeTab;
       contentContainer.innerHTML = this.getArticle()
+
+      // update bar underline
+      this.updateBarUnderline(activeTab);
     }
     this.openUrl();
+  }
+
+  updateBarUnderline = activeTab => {
+    // select the bar
+    const bar = this.shadowObj.querySelector("ul.tabs > span.bar");
+    if (!bar) return;
+
+    // get offset width of the active tab
+    // const offsetWidth = activeTab.offsetWidth;
+    const width = activeTab.getBoundingClientRect().width;
+    const left = activeTab.offsetLeft;
+
+    // console.log('offsetWidth', offsetWidth, 'width', width, 'left', left);
+
+    // style the bar based on the active tab and should be centered and 80% of the width of the tab
+    bar.style.width = `${width * 0.8}px`;
+    bar.style.left = `${left + (width * 0.1)}px`;
   }
 
   openUrl = () => {
@@ -185,7 +212,6 @@ export default class TopicSection extends HTMLElement {
             <path d="M7 16H15" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
           <span class="text">Article</span>
-          <span class="bar"></span>
         </li>
         <li class="tab stories ${tab === "stories" ? "active" : ''}" data-name="stories" url="${url}/stories">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
@@ -194,21 +220,18 @@ export default class TopicSection extends HTMLElement {
             <path d="M16 3.5H11C10.07 3.5 9.60504 3.5 9.22354 3.60222C8.18827 3.87962 7.37962 4.68827 7.10222 5.72354C7 6.10504 7 6.57003 7 7.5V18C7 19.3807 5.88071 20.5 4.5 20.5H16C18.8284 20.5 20.2426 20.5 21.1213 19.6213C22 18.7426 22 17.3284 22 14.5V9.5C22 6.67157 22 5.25736 21.1213 4.37868C20.2426 3.5 18.8284 3.5 16 3.5Z" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
           <span class="text">Stories</span>
-          <span class="bar"></span>
         </li>
+        <span class="bar"></span>
       </ul>
     `;
   }
 
   getContent = active => {
-    switch (active) {
-      case "article":
-        return this.getArticle();
-      case "stories":
-        return this.getStories();
-      default:
-        return this.getArticle();
-    }
+    const contentMap = {
+      'article': this.getArticle(),
+      'stories': this.getStories()
+    };
+    return contentMap[active] || this.getArticle();
   }
 
   getArticle = () => {
@@ -302,7 +325,6 @@ export default class TopicSection extends HTMLElement {
 
         ul.tabs {
           border-bottom: var(--border);
-          /* border-top: var(--border);*/
           display: flex;
           flex-flow: row nowrap;
           gap: 15px;
@@ -318,6 +340,18 @@ export default class TopicSection extends HTMLElement {
         ul.tabs::-webkit-scrollbar {
           display: none;
           visibility: hidden;
+        }
+
+        ul.tabs > span.bar {
+          display: flex;
+          width: 30px;
+          height: 4px;
+          background: var(--accent-color);
+          position: absolute;
+          bottom: -1px;
+          left: 0;
+          border-radius: 5px;
+          transition: all 0.3s;
         }
 
         ul.tabs > li.tab {
@@ -340,17 +374,6 @@ export default class TopicSection extends HTMLElement {
           display: none;
         }
 
-        ul.tabs > li.tab > span.bar {
-          display: none;
-          width: 100%;
-          height: 2px;
-          background: var(--accent-color);
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          border-radius: 5px;
-        }
-
         ul.tabs > li.tab.active {
           color: var(--text-color);
           padding: 10px 4px;
@@ -359,8 +382,6 @@ export default class TopicSection extends HTMLElement {
         }
 
         ul.tabs > li.tab.active > svg,
-        ul.tabs > li.tab.active > span.bar,
-        ul.tabs > li.tab:not(.active):hover > span.bar,
         ul.tabs > li.tab:not(.active):hover > svg {
           display: flex;
         }

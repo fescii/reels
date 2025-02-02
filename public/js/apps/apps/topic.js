@@ -1,13 +1,10 @@
 export default class AppTopic extends HTMLElement {
   constructor() {
     super();
-
     this.setTitle(this.getAttribute('name'));
     this.app = window.app;
     this._authenticated = window.hash ? true : false;
-
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.boundHandleWsMessage = this.handleWsMessage.bind(this);
     this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
     this.app = window.app;
@@ -446,6 +443,14 @@ export default class AppTopic extends HTMLElement {
         </section>
       `;
     }
+  }
+
+  getTop = () => {
+    return /* html */`
+      <header-wrapper section="topic" name="${this.getAttribute('name')}" followers="${this.getAttribute('followers')}"
+        stories="${this.getAttribute('stories')}">
+      </header-wrapper>
+    `;
   }
 
   getStories = () => {

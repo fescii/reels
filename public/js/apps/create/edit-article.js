@@ -453,7 +453,7 @@ export default class EditArticle extends HTMLDivElement {
       }
 
       try {
-        const result = this.api.patch(url, { content: 'json', body: JSON.stringify(body) })
+        const result = await this.api.patch(url, { content: 'json', body: JSON.stringify(body) })
 
         // check if request was successful
         if (result.success) {

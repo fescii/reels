@@ -41,10 +41,6 @@ export default class NewsWrapper extends HTMLElement {
     document.body.insertAdjacentHTML('beforeend', linkPopUp);
   }
 
-  disconnectedCallback() {
-    this.enableScroll();
-  }
-
   // Get lapse time
   getLapseTime = isoDateStr => {
     const dateIso = new Date(isoDateStr); // ISO strings with timezone are automatically handled

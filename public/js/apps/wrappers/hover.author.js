@@ -947,7 +947,7 @@ export default class HoverAuthor extends HTMLElement {
         }
         
         .actions > .action {
-          border: var(--action-border);
+          border: var(--border);
           text-decoration: none;
           color: var(--text-color);
           font-size: 0.9rem;
@@ -1034,6 +1034,7 @@ export default class HoverAuthor extends HTMLElement {
         
           .content-container > .overlay {
             position: absolute;
+            border-top: var(--border);
             background-color: var(--background);
             bottom: 0;
             width: 100%;
@@ -1044,7 +1045,7 @@ export default class HoverAuthor extends HTMLElement {
             border-top-right-radius: 15px;
           }
         
-          .content-container  span.pointer {
+          .content-container span.pointer {
             border: none;
             position: absolute;
             top: 0;

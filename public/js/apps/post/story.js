@@ -8,29 +8,42 @@ export default class StoryPost extends HTMLElement {
     this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
     this.app = window.app;
     this.api = this.app.api;
+    this.user = window.hash;
     this.render();
+  }
+  
+  // observe the attributes
+  static get observedAttributes() {
+    return ['reload', 'images'];
+  }
+
+  // listen for changes in the attributes
+  attributeChangedCallback(name, oldValue, newValue) {
+    // check if old value is not equal to new value
+    if (name === 'reload') {
+      this.render();
+    } else if (name === 'images') {
+      this.render();
+    }
   }
 
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
+    this.setUpEvents();
   }
 
   connectedCallback() {
     this.style.display = 'flex';
+  }
 
+  setUpEvents = () => {
     // Check and add handler
     this.checkAndAddHandler();
-
-    // get url
     let url = this.getAttribute('url');
-
     url = url.trim().toLowerCase();
-    // Open Full post
     this.openFullPost(url);
-
     this.openHighlights(document.body)
-
-    // Open Url
+    this.activateEditButton();
     this.openUrl();
   }
 
@@ -136,6 +149,35 @@ export default class StoryPost extends HTMLElement {
       summary: `${summary}...`,
       words: content.split(' ').length
     };
+  }
+
+  activateEditButton = () => {
+    // Get the body element
+    const body = document.querySelector('body');
+    // Get the edit button
+    const editButton = this.shadowObj.querySelector('.actions > .action.edit');
+    if(!editButton) return;
+    // Add an event listener to the post button
+    editButton.addEventListener('click', e => {
+      e.preventDefault();
+      // Get the content of the topic page
+      const content = this.getEditBody();
+      // set to be deleted:
+      window.toBeChanged = this;
+
+      // insert the content into the body
+      body.insertAdjacentHTML('beforeend', content);
+    });
+  }
+
+  getEditBody = () => {
+    // Show Post Page Here
+    return /* html */`
+      <post-options kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" hash="${this.getAttribute('hash')}" images="${this.getAttribute('images')}" published="true"
+        drafted="false" story="true" story-title="${this.getAttribute('story-title')}" slug="${this.getAttribute('slug')}">
+        ${this.innerHTML}
+      </post-options>
+    `;
   }
 
   openFullPost = url => {
@@ -458,23 +500,42 @@ export default class StoryPost extends HTMLElement {
       ${this.getContent()}
       ${this.getImages()}
       ${this.getOn()}
-      ${this.getActions()}
+      ${this.getActions(this.user)}
     `;
   }
 
-  getActions = () => {
+  getActions = user => {
     const views = this.parseToNumber(this.getAttribute('views'))
     return /*html*/`
       <div class="actions">
         <a href="${this.getAttribute('url')}" class="action view" id="view-action">view</a>
         <span class="action stats" id="close-stats">stats</span>
-        <span class="action read plain">
-          <span class="no">${this.calculateReadTime()}</span> <span class="text">min read</span>
-        </span>
+        ${this.getEdit(user)}
         <span class="action views plain">
           <span class="no">${this.formatNumber(views)}</span> <span class="text">views</span>
         </span>
       </div>
+    `
+  }
+
+  getEdit = user => {
+    let author = this.getAttribute('author-hash');
+    if(!user || !author) return this.getMinsRead();
+    user = user.toUpperCase();
+    author = author.toUpperCase();
+
+    if(user !== author) return this.getMinsRead();
+
+    return /*html*/`
+      <span class="action edit" id="edit-action">manage</span>
+    `
+  }
+
+  getMinsRead = () => {
+    return /*html*/`
+      <span class="action read plain">
+        <span class="no">${this.calculateReadTime()}</span> <span class="text">min read</span>
+      </span>
     `
   }
 
@@ -778,13 +839,15 @@ export default class StoryPost extends HTMLElement {
           align-items: center;
           text-transform: lowercase;
           justify-content: center;
-          padding: 2.5px 10px 2.5px;
+          padding: 3px 10px 4px;
           border-radius: 10px;
           -webkit-border-radius: 10px;
           -moz-border-radius: 10px;
         }
 
-        .actions > .action.stats {
+        .actions > .action.stats,
+        .actions > .action.view,
+        .actions > .action.edit {
           cursor: pointer;
         }
 
@@ -843,6 +906,9 @@ export default class StoryPost extends HTMLElement {
           }
 
           .actions > .action,
+          .actions > .action.stats,
+          .actions > .action.view,
+          .actions > .action.edit,
           a {
             cursor: default !important;
           }

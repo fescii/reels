@@ -251,7 +251,7 @@ export default class StoryFeed extends HTMLElement {
           <story-post story="story" hash="${story.hash}" url="${url}" 
             topics="${story.topics.length === 0 ? 'story' : story.topics }" story-title="${story.title}" time="${story.createdAt}" replies-url="${url}/replies" 
             likes-url="${url}/likes" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" likes="${story.likes}" 
-            views="${story.views}" images='${images}'
+            views="${story.views}" images='${images}' slug="${story.slug}"
             author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
             author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
             author-img="${author.picture}" author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" 

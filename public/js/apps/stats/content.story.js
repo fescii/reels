@@ -119,7 +119,6 @@ export default class ContentStory extends HTMLElement {
       e.preventDefault();
       // Get the content of the topic page
       const content = this.getEdit();
-
       // set to be deleted:
       window.toBeChanged = this;
 

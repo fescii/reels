@@ -39,20 +39,15 @@ export default class ContentFeed extends HTMLElement {
         // unblock the fetching
         outerThis._block = false;
         outerThis._empty = false;
-        
         // re fetch the content
         const feedContainer = outerThis.shadowObj.querySelector('.activities');
-
         // select finish
         const finishContainer =  feedContainer.querySelector('div.finish');
-
         if (finishContainer) {
           finishContainer.remove()
         }
-
         // set the loader
         feedContainer.insertAdjacentHTML('beforeend', outerThis.getLoader())
-
         setTimeout(() => {
           outerThis.fetchFeeds(feedContainer)
         }, 1000);
@@ -62,7 +57,6 @@ export default class ContentFeed extends HTMLElement {
 
   fetching = async (url, feedContainer) => {
     const outerThis = this;
-
     try {
       const data = await this.api.get(url, { content: 'json' })
 
@@ -73,7 +67,6 @@ export default class ContentFeed extends HTMLElement {
         outerThis.activateRefresh();
         return;
       }
-
       if (data.stories) {
         if (data.stories.length === 0 && outerThis._page === 1) {
           outerThis._empty = true;

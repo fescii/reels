@@ -4,18 +4,12 @@ export default class PostOptions extends HTMLElement {
     super();
 
     this.editor = null;
-
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this._option = this.capitalizeFirstLetter(this.getAttribute('kind'));
-
     this.hash = this.getAttribute('hash').toLowerCase();
-
     this.kind = this.getAttribute('kind');
-
     this.drafted = this.convertToBool(this.getAttribute('drafted'));
-
     this.removeApi  = this.getAttribute('kind') === 'reply' ? `/r/${this.hash}/remove` : `/s/${this.hash}/remove`;
     this.app = window.app;
     this.api = this.app.api;
@@ -168,7 +162,7 @@ export default class PostOptions extends HTMLElement {
     const url = `/s/${this.hash}/publish`;
 
     try {
-      const data = this.api.patch(url, { content: 'json' })
+      const data = await this.api.patch(url, { content: 'json' })
       if (data.success) {
         // select fields container
         const fields = this.shadowObj.querySelector('div.fields')
@@ -253,7 +247,7 @@ export default class PostOptions extends HTMLElement {
     button.innerHTML = this.getButtonLoader();
 
     try {
-      const data = this.api.delete(this.removeApi, { content: 'json', body })
+      const data = await this.api.delete(this.removeApi, { content: 'json', body })
       if (data.success) {
         // replace the fields with the finish message
         section.innerHTML = this.getFinish('delete');

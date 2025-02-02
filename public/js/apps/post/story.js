@@ -2,12 +2,8 @@ export default class StoryPost extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-
     this._data = this.getSummaryAndWords();
-
-    // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.boundHandleWsMessage = this.handleWsMessage.bind(this);
     this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
     this.app = window.app;
@@ -129,10 +125,10 @@ export default class StoryPost extends HTMLElement {
     // remove all html tags and classes and extra spaces and tabs
     content = content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 
-    let summary = content.substring(0, 200);
+    let summary = content.substring(0, 250);
 
     if (mql.matches) {
-      summary = content.substring(0, 150);
+      summary = content.substring(0, 200);
     }
 
     // return the summary: first 200 characters
@@ -480,21 +476,6 @@ export default class StoryPost extends HTMLElement {
         </span>
       </div>
     `
-  }
-
-  getCover = () => {
-    const images = this.getAttribute('images');
-    if (images && images !== 'null') {
-      return images.split(',')[0];
-    } else {
-      return this.findFirstImageSrc(this.innerHTML)
-    }
-  }
-
-  findFirstImageSrc = text => {
-    const imgRegex = /<img[^>]+src\s*=\s*['"]([^'"]+)['"][^>]*>/i;
-    const match = text.match(imgRegex);
-    return match ? match[1] : null;
   }
 
   getAuthorHover = () => {

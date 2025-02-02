@@ -52,9 +52,17 @@ export default class AppStory extends HTMLElement {
     this.shadowObj.innerHTML = this.getTemplate();
   }
 
+  addReply = reply => {
+    const repliesSection = this.shadowObj.querySelector('replies-section');
+    if (repliesSection) {
+      repliesSection.addReply(reply);
+    }
+  }
+
   connectedCallback() {
     this.enableScroll();
     this.style.display='flex';
+    this.app.hideNav();
     this.openUrl();
     this.checkAndAddHandler();
     this.watchMediaQuery(this.mql);
@@ -314,35 +322,47 @@ export default class AppStory extends HTMLElement {
     if (this.mql.matches) {
       return /* html */`
         <div class="content" id="content-container">
-          <div class="content-wrapper">
-            ${this.getAuthor()}
-            ${this.getHeader()}
-            ${this.getContent()}
-            ${this.getMeta()}
-            ${this.getStats()}
+          <div class="feeds">
+            <div class="content-wrapper">
+              ${this.getAuthor()}
+              ${this.getHeader()}
+              ${this.getContent()}
+              ${this.getMeta()}
+              ${this.getStats()}
+            </div>
+            ${this.repliesSection()}
           </div>
-          ${this.repliesSection()}
+          ${this.getRespone()}
         </div>
       `;
     }
     else {
       return /* html */`
         <div class="content" id="content-container">
-          <div class="content-wrapper">
-            ${this.getHeader()}
-            ${this.getContent()}
-            ${this.getMeta()}
-            ${this.getStats()}
+          <div class="feeds">
+            <div class="content-wrapper">
+              ${this.getHeader()}
+              ${this.getContent()}
+              ${this.getMeta()}
+              ${this.getStats()}
+            </div>
+            ${this.repliesSection()}
           </div>
-          ${this.repliesSection()}
+          ${this.getRespone()}
         </div>
-
         <section class="side">
           ${this.getAuthor()}
           ${this.peopleSection()}
         </section>
       `;
     }
+  }
+
+  getRespone = () => {
+    const url = `${this.getAttribute('url').toLowerCase()}/reply`;
+    return /* html */`
+      <div id="response-container" is="response-post" placeholder="What's your reply?" hash="${this.getAttribute('hash')}" author-hash="${this.getAttribute('author-hash')}" url="${url}" story="${this.getAttribute('story')}"></div>
+    `;
   }
 
   peopleSection = () => {
@@ -523,6 +543,15 @@ export default class AppStory extends HTMLElement {
         div.content {
           padding: 10px 0 0 0;
           width: calc(55% - 10px);
+          display: flex;
+          flex-flow: column;
+          max-height: max-content;
+          justify-content: space-between;
+          min-height: 100dvh;
+          gap: 0;
+        }
+
+        div.feeds {
           display: flex;
           flex-flow: column;
           gap: 0;
@@ -828,6 +857,24 @@ export default class AppStory extends HTMLElement {
           margin-block-end: 5px;
           margin-inline-start: 0 !important;
           margin-inline-end: 0 !important;
+        }
+
+
+        /* response */
+        div#response-container{
+          all: unset;
+          border: none;
+          position: sticky;
+          bottom: 0;
+          padding: 0;
+          justify-self: end;
+          display: flex;
+          flex-flow: column;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          width: 100%;
+          max-width: 100%;
         }
 
         @media screen and (max-width:900px) {

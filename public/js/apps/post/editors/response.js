@@ -182,7 +182,7 @@ export default class Response extends HTMLDivElement {
     const images = this.querySelector('div#upload-images');
  
     const data = {
-      content: reply,
+      content: this.processText(reply),
       kind: 'reply'
     }
 
@@ -236,6 +236,22 @@ export default class Response extends HTMLDivElement {
     const images = editor.querySelector('div#upload-images');
     if(message) message.value = '';
     if(images) images.clearImages();
+
+    // add input trigger to adjust the rows
+    message.dispatchEvent(new Event('input'));
+  }
+
+  processText = text => {
+    // separate the text into paragraphs with new lines \n or <br> adding eact to a p tag
+    const paragraphs = text.split(/\n|<br>/g);
+    let processed = '';
+    paragraphs.forEach(p => {
+      if(p.trim().length > 0) {
+        processed += `<p>${p}</p>`;
+      }
+    });
+
+    return processed;
   }
 
   addActionListener = (button, getEditor, editor) => {

@@ -298,10 +298,10 @@ export default class PreviewPost extends HTMLElement {
     // Check if its a mobile view
     if (mql.matches) {
       // return text substring: 150 characters + ...
-      return text.substring(0, 120) + '...';
+      return text.substring(0, 180) + '...';
     } else {
       // trim the text to 250 characters
-      return text.substring(0, 150) + '...';
+      return text.substring(0, 200) + '...';
     }
   }
 
@@ -604,20 +604,11 @@ export default class PreviewPost extends HTMLElement {
   getLapseTime = isoDateStr => {
     const dateIso = new Date(isoDateStr); // ISO strings with timezone are automatically handled
     let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    // Convert posted time to the current timezone
     const date = new Date(dateIso.toLocaleString('en-US', { timeZone: userTimezone }));
-
-    // Get the current time
     const currentTime = new Date();
-
-    // Get the difference in time
     const timeDifference = currentTime - date;
-
-    // Get the seconds
     const seconds = timeDifference / 1000;
 
-    // check if seconds is less than 86400 and dates are equal: Today, 11:30 AM
     if (seconds < 86400 && date.getDate() === currentTime.getDate()) {
       return `
         Today • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
@@ -653,11 +644,12 @@ export default class PreviewPost extends HTMLElement {
       preview.classList.add(kind);
       if(this.preview === 'full') preview.classList.add('full');
     }
+    const images = this._story ? this._story.images : this._reply.images;
 
     return /*html*/`
       ${this.getHeader(author)}
       <article class="article">${content}</article>
-      ${this.getImages(this._story ? this._story.images : this._reply.images)}
+      ${this.getImages(kind, images)}
       ${this.getOn(author.time)}
       ${this.getActions(likes, views, url, kind)}
     `
@@ -762,7 +754,8 @@ export default class PreviewPost extends HTMLElement {
 		`
   }
 
-  getImages = imageArray => {
+  getImages = (kind, imageArray) => {
+    if(kind === 'story') return this.getStoryImages(this._story.content);
     // if length is greater is less than 1
     if(!imageArray || imageArray.length < 1) return '';
 
@@ -770,6 +763,42 @@ export default class PreviewPost extends HTMLElement {
     return /* html */`
       <images-wrapper images="${imageArray.join(',')}"></images-wrapper>
     `
+  }
+
+  getStoryImages = text => {
+    const images = this.allImages(text);
+
+    // if length is greater is less than 1
+    if(images.length < 1) return '';
+
+    // return
+    return /* html */`
+      <images-wrapper images="${images}"></images-wrapper>
+    `
+  }
+
+  allImages = text => {
+    // find images in the text
+    const textImages = this.findImages(text);
+
+    // if images is null return images; else concat the images
+    if (!textImages) return [];
+    return textImages.join(','); 
+  }
+
+  findImages = text => {
+    // Updated regex to handle various attributes and nested tags
+    const imgRegex = /<img\s+(?:[^>]*?\s+)?src\s*=\s*(["'])(.*?)\1/gi;
+    const matches = [];
+    let match;
+  
+    // Loop through all matches
+    while ((match = imgRegex.exec(text)) !== null) {
+      matches.push(match[2]);  // match[2] contains the URL
+    }
+  
+    // Return array of src values or null if no matches found
+    return matches.length > 0 ? matches : null;
   }
 
   getStyles() {

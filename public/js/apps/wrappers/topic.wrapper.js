@@ -259,32 +259,14 @@ export default class TopicWrapper extends HTMLElement {
   }
 
   formatNumber = n => {
-    if (n >= 0 && n <= 999) {
-      return n.toString();
-    } else if (n >= 1000 && n <= 9999) {
-      const value = (n / 1000).toFixed(2);
-      return `${value}k`;
-    } else if (n >= 10000 && n <= 99999) {
-      const value = (n / 1000).toFixed(1);
-      return `${value}k`;
-    } else if (n >= 100000 && n <= 999999) {
-      const value = (n / 1000).toFixed(0);
-      return `${value}k`;
-    } else if (n >= 1000000 && n <= 9999999) {
-      const value = (n / 1000000).toFixed(2);
-      return `${value}M`;
-    } else if (n >= 10000000 && n <= 99999999) {
-      const value = (n / 1000000).toFixed(1);
-      return `${value}M`;
-    } else if (n >= 100000000 && n <= 999999999) {
-      const value = (n / 1000000).toFixed(0);
-      return `${value}M`;
-    } else if (n >= 1000000000) {
-      return "1B+";
-    }
-    else {
-      return 0;
-    }
+    if (n < 1000) return n.toString();
+    if (n < 10000) return `${(n / 1000).toFixed(2)}k`;
+    if (n < 100000) return `${(n / 1000).toFixed(1)}k`;
+    if (n < 1000000) return `${(n / 1000).toFixed(0)}k`;
+    if (n < 10000000) return `${(n / 1000000).toFixed(2)}M`;
+    if (n < 100000000) return `${(n / 1000000).toFixed(1)}M`;
+    if (n < 1000000000) return `${(n / 1000000).toFixed(0)}M`;
+    return "1B+";
   }
 
   parseToNumber = num_str => {
@@ -551,7 +533,7 @@ export default class TopicWrapper extends HTMLElement {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 2.5px 10px;
+          padding: 4px 10px;
           height: max-content;
           width: max-content;
           border-radius: 10px;
@@ -573,7 +555,7 @@ export default class TopicWrapper extends HTMLElement {
         div.actions > .action.contribute,
         div.actions > .action.view,
         div.actions > .action.following {
-          padding: 2px 10px;
+          padding: 4px 10px;
           background: none;
           border: var(--border-button);
           color: var(--gray-color);
@@ -623,7 +605,6 @@ export default class TopicWrapper extends HTMLElement {
         @media screen and (max-width:660px) {
           :host {
             font-size: 16px;
-            border-bottom: none;
           }
 
           button.action,

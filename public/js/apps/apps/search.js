@@ -115,7 +115,7 @@ export default class AppSearch extends HTMLElement {
     });
   }
 
-   disableScroll() {
+  disableScroll() {
     // Get the current page scroll position
     let scrollTop = window.scrollY || document.documentElement.scrollTop;
     let scrollLeft = window.scrollX || document.documentElement.scrollLeft;
@@ -169,18 +169,13 @@ export default class AppSearch extends HTMLElement {
       } else {
         tab = 'stories';
       }
-
-      // update tab attribute
       outerThis.setAttribute('tab', 'stories');
-
-      // remove active tab
       outerThis.removeActiveTab(tabContainer, tab);
-
-      // update url attribute
       this.setAttribute('url', outerThis._url);
-
-      // update content
       contentContainer.innerHTML = outerThis.getContainer(tab);
+
+      // update tab underline
+      outerThis.updateBarUnderline(tabContainer.querySelector(`li.tab.${tab}`));
     });
   }
 
@@ -215,6 +210,9 @@ export default class AppSearch extends HTMLElement {
         this.active_tab.classList.add("active");
         const url = tab.getAttribute('url');
 
+        // update bar underline
+        this.updateBarUnderline(tab);
+
         // update the content based on the tab
         this.updateContent(contentContainer, tab.getAttribute('data-name'), url);
       });
@@ -233,6 +231,9 @@ export default class AppSearch extends HTMLElement {
 
     activeTab.classList.add("active");
     this.active_tab = activeTab;
+
+    // update bar underline
+    this.updateBarUnderline(activeTab);
   }
 
   updateContent = (contentContainer, tabName, url) => {
@@ -277,10 +278,30 @@ export default class AppSearch extends HTMLElement {
         this.active_tab = tab;
         this.active_tab.classList.add('active');
 
+        // update bar underline
+        this.updateBarUnderline(tab);
+
         // Update content based on the new active tab
         this.updateContent(contentContainer, name, tab.getAttribute('url'));
       }
     }
+  }
+
+  updateBarUnderline = activeTab => {
+    // select the bar
+    const bar = this.shadowObj.querySelector("ul.tabs > span.bar");
+    if (!bar) return;
+
+    // get offset width of the active tab
+    // const offsetWidth = activeTab.offsetWidth;
+    const width = activeTab.getBoundingClientRect().width;
+    const left = activeTab.offsetLeft;
+
+    // console.log('offsetWidth', offsetWidth, 'width', width, 'left', left);
+
+    // style the bar based on the active tab and should be centered and 80% of the width of the tab
+    bar.style.width = `${width * 0.8}px`;
+    bar.style.left = `${left + (width * 0.1)}px`;
   }
 
   getTemplate = () => {
@@ -403,19 +424,14 @@ export default class AppSearch extends HTMLElement {
   }
 
   getContainer = active => {
-    // Switch active tab
-    switch (active) {
-      case "stories":
-        return this.getStories();
-      case "replies":
-        return this.getReplies();
-      case "people":
-        return this.getPeople();
-      case "topics":
-        return this.getTopics();
-      default:
-        return this.getStories();
-    }
+    const contentMap = {
+      'stories': this.getStories,
+      'replies': this.getReplies,
+      'people': this.getPeople,
+      'topics': this.getTopics
+    };
+
+    return (contentMap[active] || this.getStories).call(this);
   }
 
   getTopics = () => {
@@ -504,6 +520,7 @@ export default class AppSearch extends HTMLElement {
           </svg>
           <span class="text">People</span>
         </li>
+        <span class="bar"></span>
       </ul>
     `;
   }
@@ -732,7 +749,7 @@ export default class AppSearch extends HTMLElement {
           display: flex;
           flex-flow: row nowrap;
           gap: 15px;
-          padding: 10px 0;
+          padding: 0;
           margin: 0;
           width: 100%;
           list-style: none;
@@ -746,20 +763,31 @@ export default class AppSearch extends HTMLElement {
           visibility: hidden;
         }
 
+        ul.tabs > span.bar {
+          display: flex;
+          width: 30px;
+          height: 4px;
+          background: var(--accent-color);
+          position: absolute;
+          bottom: -1px;
+          left: 0;
+          border-radius: 5px;
+          transition: all 0.3s;
+        }
+
         ul.tabs > li.tab {
           display: flex;
           flex-flow: row;
           align-items: center;
           gap: 5px;
-          padding: 5px 0;
-          border-radius: 12px;
-          /*background: var(--gray-background);*/
-          color: var(--text-color);
+          padding: 10px 0;
+          color: var(--gray-color);
           font-family: var(--font-main), sans-serif;
           font-size: 0.95rem;
           font-weight: 500;
           cursor: pointer;
-          transition: 0.3s;
+          transition: all 0.3s;
+          position: relative;
         }
 
         ul.tabs > li.tab > span.count,
@@ -768,49 +796,52 @@ export default class AppSearch extends HTMLElement {
         }
 
         ul.tabs > li.tab.active {
-          background: var(--tab-background);
-          padding: 5px 10px;
+          color: var(--text-color);
+          padding: 10px 4px;
           display: flex;
           text-align: center;
-          color: var(--text-color);
         }
 
-        ul.tabs > li.tab.active > span.count,
         ul.tabs > li.tab.active > svg,
-        ul.tabs > li.tab:not(.active):hover > span.count,
         ul.tabs > li.tab:not(.active):hover > svg {
           display: flex;
         }
 
         /* style hover tab: but don't touch tab with active class */
         ul.tabs > li.tab:not(.active):hover {
-          background: var(--tab-background);
-          padding: 5px 10px;
+          padding: 10px 2px;
           color: var(--text-color);
         }
 
         ul.tabs > li.tab > svg {
-          width: 19px;
-          height: 19px;
+          display: none;
+          margin-bottom: -2px;
+          width: 17px;
+          height: 17px;
         }
 
         ul.tabs > li.tab > .text {
-          font-size: 1rem;
-          padding: 0 5px 0 0;
+          font-size: 0.95rem;
+          font-family: var(--font-text), sans-serif;
+          padding: 0 2px 0 0;
           font-weight: 500;
         }
 
         ul.tabs > li.tab > .count {
-          font-size: 0.85rem;
+          font-size: 0.95rem;
           display: none;
+          margin-bottom: -2px;
           align-items: center;
           justify-content: center;
           text-align: center;
           font-weight: 500;
-          background: var(--accent-linear);
+          background: var(--text-color);
           font-family: var(--font-text), sans-serif;
-          color: var(--white-color);
-          padding: 1px 7px 2.5px;
+          color: transparent;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          padding: 0;
           border-radius: 10px;
         }
 
@@ -879,7 +910,7 @@ export default class AppSearch extends HTMLElement {
             /* border: 1px solid red; */
             background: var(--background);
             padding: 0;
-            padding: 20px 10px 0;
+            padding: 12px 10px 0;
             display: flex;
             flex-flow: column;
             align-items: start;
@@ -940,7 +971,7 @@ export default class AppSearch extends HTMLElement {
             width: 100%;
             z-index: 5;
             position: sticky;
-            top: 55px;
+            top: 50px;
             background: var(--background);
           }
 

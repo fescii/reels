@@ -958,7 +958,7 @@ export default class HoverAuthor extends HTMLElement {
           align-items: center;
           text-transform: lowercase;
           justify-content: center;
-          padding: 2px 12px 3px;
+          padding: 4px 12px;
           border-radius: 10px;
           -webkit-border-radius: 10px;
           -moz-border-radius: 10px;
@@ -966,7 +966,7 @@ export default class HoverAuthor extends HTMLElement {
 
         .actions > .action.you {
           text-transform: capitalize;
-          padding: 3px 12px 3px;
+          padding: 4px 12px;
           cursor: default;
           pointer-events: none;
           border: none;
@@ -975,7 +975,7 @@ export default class HoverAuthor extends HTMLElement {
         
         .actions > .action.follow {
           border: none;
-          padding: 3px 12px 3px;
+          padding: 4px 12px;
           font-weight: 500;
           background: var(--accent-linear);
           color: var(--white-color);

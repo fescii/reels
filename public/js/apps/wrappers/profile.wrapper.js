@@ -811,7 +811,7 @@ export default class ProfileWrapper extends HTMLElement {
 
         .actions > .action {
           text-decoration: none;
-          padding: 3px 12px 4px;
+          padding: 4px 12px;
           font-weight: 500;
           background: var(--accent-linear);
           color: var(--white-color);
@@ -833,7 +833,7 @@ export default class ProfileWrapper extends HTMLElement {
 
         .actions > .action.you {
           text-transform: capitalize;
-          padding: 3px 12px 4px;
+          padding: 5px 12px;
           cursor: default;
           pointer-events: none;
           border: none;
@@ -845,7 +845,7 @@ export default class ProfileWrapper extends HTMLElement {
         .actions > .action.socials,
         .actions > .action.following,
         .actions > .action.settings {
-          padding: 4px 12px 5px;
+          padding: 5px 12px;
           background: unset;
           border: var(--action-border);
           color: var(--gray-color);
@@ -854,7 +854,7 @@ export default class ProfileWrapper extends HTMLElement {
         .actions > .action.highlights {
           background: var(--gray-background);
           color: var(--gray-color);
-          padding: 5px 12px 6px;
+          padding: 5px 12px;
         }
 
         @media screen and (max-width: 660px) {

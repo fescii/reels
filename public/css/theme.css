@@ -210,7 +210,7 @@ Author URL: https://femar.co.ke
   --stage-no-linear: linear-gradient(0deg, #18a565 0%, #21d029 100%);
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: none) {
   :root {
     --background: #000000;
     --tab-background: #78ffc428;  /* Updated to match light mode's accent tint */

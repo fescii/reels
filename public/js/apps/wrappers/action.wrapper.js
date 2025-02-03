@@ -463,8 +463,9 @@ export default class ActionWrapper extends HTMLElement {
 
   getTemplate = () => {
     // Show HTML Here
-    return `
+    return /* html */`
       ${this.getStats()}
+      <link rel="stylesheet" href="/static/css/theme.css">
       ${this.getStyles()}
     `;
   }
@@ -693,7 +694,7 @@ export default class ActionWrapper extends HTMLElement {
           display: flex;
           flex-flow: column;
           gap: 0;
-          padding: 5px 0;
+          padding: 0;
         }
 
         .actions.stats {
@@ -942,7 +943,7 @@ export default class ActionWrapper extends HTMLElement {
           border: var(--border-button);
           text-decoration: none;
           color: var(--gray-color);
-          font-size: 0.95rem;
+          font-size: 0.9rem;
           display: flex;
           width: max-content;
           flex-flow: row;
@@ -950,7 +951,7 @@ export default class ActionWrapper extends HTMLElement {
           cursor: pointer;
           text-transform: lowercase;
           justify-content: center;
-          padding: 3px 10px 4px;
+          padding: 3px 8px 3px;
           border-radius: 10px;
           -webkit-border-radius: 10px;
           -moz-border-radius: 10px;
@@ -959,6 +960,10 @@ export default class ActionWrapper extends HTMLElement {
         @media screen and (max-width: 660px) {
           ::-webkit-scrollbar {
             -webkit-appearance: none;
+          }
+
+          :host {
+            padding: 0;
           }
 
           a,

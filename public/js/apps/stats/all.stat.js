@@ -183,9 +183,7 @@ export default class AllStat extends HTMLElement {
     let icon = '';
     const lastStory = this.parseToNumber(this.getAttribute('stories-last'));
     const currentStory = this.parseToNumber(this.getAttribute('stories'));
-
     const percentageChange = this.calculatePercentageChange(lastStory, currentStory);
-
     // if percentageChange is negative, we need to make it positive
     const percentage = Math.abs(percentageChange);
 

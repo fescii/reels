@@ -313,14 +313,14 @@ export default class StoriesStat extends HTMLElement {
           color: var(--text-color);
           font-size: 1.2rem;
           font-weight: 500;
-          font-family: var(--font-main), sans-serif;
+          font-family: var(--font-text), sans-serif;
           margin: 0;
         }
 
         .title > span.desc {
           color: var(--gray-color);
           font-size: 0.85rem;
-          font-family: var(--font-main), sans-serif;
+          font-family: var(--font-read), sans-serif;
         }
 
         .cards {

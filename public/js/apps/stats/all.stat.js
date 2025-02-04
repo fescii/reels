@@ -25,45 +25,30 @@ export default class AllStat extends HTMLElement {
     this.shadowObj.innerHTML = this.getTemplate();
   }
 
-  connectedCallback() {
-    
-  }
-
   formatNumber = n => {
-    if (n >= 0 && n <= 999) {
+    if (n < 1000) {
       return n.toString();
-    } else if (n >= 1000 && n <= 9999) {
-      const value = (n / 1000).toFixed(2);
-      return `${value}k`;
-    } else if (n >= 10000 && n <= 99999) {
-      const value = (n / 1000).toFixed(1);
-      return `${value}k`;
-    } else if (n >= 100000 && n <= 999999) {
-      const value = (n / 1000).toFixed(0);
-      return `${value}k`;
-    } else if (n >= 1000000 && n <= 9999999) {
-      const value = (n / 1000000).toFixed(2);
-      return `${value}M`;
-    } else if (n >= 10000000 && n <= 99999999) {
-      const value = (n / 1000000).toFixed(1);
-      return `${value}M`;
-    } else if (n >= 100000000 && n <= 999999999) {
-      const value = (n / 1000000).toFixed(0);
-      return `${value}M`;
-    } else if (n >= 1000000000) {
+    } else if (n < 10000) {
+      return `${(n / 1000).toFixed(2)}k`;
+    } else if (n < 100000) {
+      return `${(n / 1000).toFixed(1)}k`;
+    } else if (n < 1000000) {
+      return `${(n / 1000).toFixed(0)}k`;
+    } else if (n < 10000000) {
+      return `${(n / 1000000).toFixed(2)}M`;
+    } else if (n < 100000000) {
+      return `${(n / 1000000).toFixed(1)}M`;
+    } else if (n < 1000000000) {
+      return `${(n / 1000000).toFixed(0)}M`;
+    } else {
       return "1B+";
-    }
-    else {
-      return 0;
     }
   }
 
   calculatePercentageChange = (last, current) => {
     // Calculate the difference between the new and old values
     const difference = current - last;
-
     let percentageChange  = 0;
-
     // check if last is zero
     if (last === 0 && current > 0) {
       percentageChange = 100
@@ -100,7 +85,7 @@ export default class AllStat extends HTMLElement {
     }
   }
 
-   disableScroll() {
+  disableScroll() {
     // Get the current page scroll position
     let scrollTop = window.scrollY || document.documentElement.scrollTop;
     let scrollLeft = window.scrollX || document.documentElement.scrollLeft;
@@ -156,7 +141,7 @@ export default class AllStat extends HTMLElement {
     const percentage = Math.abs(percentageChange);
 
     if (percentageChange > 0) {
-      icon = `
+      icon = /* html */`
         <span class="change up">
           ${this._up}
           <span class="percentage">${this.formatNumber(percentage)}%</span>
@@ -165,7 +150,7 @@ export default class AllStat extends HTMLElement {
 
     }
     else {
-      icon = `
+      icon = /* html */`
         <span class="change down">
           ${this._down}
           <span class="percentage">${this.formatNumber(percentage)}%</span>
@@ -205,7 +190,7 @@ export default class AllStat extends HTMLElement {
     const percentage = Math.abs(percentageChange);
 
     if (percentageChange > 0) {
-      icon = `
+      icon = /* html */`
         <span class="change up">
           ${this._up}
           <span class="percentage">${this.formatNumber(percentage)}%</span>
@@ -214,7 +199,7 @@ export default class AllStat extends HTMLElement {
 
     }
     else {
-      icon = `
+      icon = /* html */`
         <span class="change down">
           ${this._down}
           <span class="percentage">${this.formatNumber(percentage)}%</span>
@@ -256,7 +241,7 @@ export default class AllStat extends HTMLElement {
     // if percentageChange is more than 1k
 
     if (percentageChange > 0) {
-      icon = `
+      icon = /* html */`
         <span class="change up">
           ${this._up}
           <span class="percentage">${this.formatNumber(percentage)}%</span>
@@ -265,7 +250,7 @@ export default class AllStat extends HTMLElement {
 
     }
     else {
-      icon = `
+      icon = /* html */`
         <span class="change down">
           ${this._down}
           <span class="percentage">${this.formatNumber(percentage)}%</span>
@@ -434,7 +419,7 @@ export default class AllStat extends HTMLElement {
         .content > .main .views .desc {
           color: var(--gray-color);
           font-size: 0.9rem;
-          font-family: var(--font-main), sans-serif;
+          font-family: var(--font-read), sans-serif;
         }
 
         .content > .main .compared {
@@ -474,6 +459,7 @@ export default class AllStat extends HTMLElement {
           font-size: 1.05rem;
           font-weight: 500;
           font-family: var(--font-text), sans-serif;
+          text-transform: uppercase;
           margin: 0;
         }
 
@@ -496,8 +482,19 @@ export default class AllStat extends HTMLElement {
 
           :host {
             gap: 0;
-            padding: 10px 0;
+            padding: 0 0 10px;
           }
+
+          .title {
+            display: flex;
+            position: relative;
+            flex-flow: column;
+            padding: 0 0 6px;
+            gap: 0;
+            justify-content: center;
+            color: var(--text-color);
+          }
+
         }
       </style>
     `;

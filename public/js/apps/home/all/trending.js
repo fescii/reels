@@ -2,14 +2,11 @@ export default class HomeRecent extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-
     this.url = this.getAttribute('url');
     this.app = window.app;
     this.api = this.app.api;
     this.all = this.getRootNode().host;
-    // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.render();
   }
 

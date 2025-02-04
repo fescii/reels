@@ -30,31 +30,22 @@ export default class RepliesStat extends HTMLElement {
   }
 
   formatNumber = n => {
-    if (n >= 0 && n <= 999) {
+    if (n < 1000) {
       return n.toString();
-    } else if (n >= 1000 && n <= 9999) {
-      const value = (n / 1000).toFixed(2);
-      return `${value}k`;
-    } else if (n >= 10000 && n <= 99999) {
-      const value = (n / 1000).toFixed(1);
-      return `${value}k`;
-    } else if (n >= 100000 && n <= 999999) {
-      const value = (n / 1000).toFixed(0);
-      return `${value}k`;
-    } else if (n >= 1000000 && n <= 9999999) {
-      const value = (n / 1000000).toFixed(2);
-      return `${value}M`;
-    } else if (n >= 10000000 && n <= 99999999) {
-      const value = (n / 1000000).toFixed(1);
-      return `${value}M`;
-    } else if (n >= 100000000 && n <= 999999999) {
-      const value = (n / 1000000).toFixed(0);
-      return `${value}M`;
-    } else if (n >= 1000000000) {
+    } else if (n < 10000) {
+      return `${(n / 1000).toFixed(2)}k`;
+    } else if (n < 100000) {
+      return `${(n / 1000).toFixed(1)}k`;
+    } else if (n < 1000000) {
+      return `${(n / 1000).toFixed(0)}k`;
+    } else if (n < 10000000) {
+      return `${(n / 1000000).toFixed(2)}M`;
+    } else if (n < 100000000) {
+      return `${(n / 1000000).toFixed(1)}M`;
+    } else if (n < 1000000000) {
+      return `${(n / 1000000).toFixed(0)}M`;
+    } else {
       return "1B+";
-    }
-    else {
-      return 0;
     }
   }
 
@@ -287,7 +278,7 @@ export default class RepliesStat extends HTMLElement {
 
         :host {
           font-size: 16px;
-          border-bottom: var(--border-mobile);
+          border-bottom: var(--border);
           margin: 0;
           width: 100%;
           display: flex;
@@ -428,8 +419,42 @@ export default class RepliesStat extends HTMLElement {
           }
 
           :host {
-            padding-bottom: 25px;
+            border: none;
+            padding: 10px 0;
+            border-bottom: var(--border);
             gap: 0;
+          }
+
+          .title {
+            display: flex;
+            position: relative;
+            flex-flow: column;
+            padding: 0 0 6px;
+            gap: 0;
+            justify-content: center;
+            color: var(--text-color);
+          }
+
+          .cards {
+            display: flex;
+            flex-flow: row;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 8px 0;
+            width: 100%;
+            max-width: 100%;
+          }
+
+          .cards > .card {
+            display: flex;
+            flex-flow: column;
+            gap: 10px;
+            padding: 7px 10px;
+            min-width: calc(33.33% - 5px);
+            width: calc(33.33% - 5px);
+            background-color: var(--stat-background);
+            justify-content: center;
+            border-radius: 12px;
           }
         }
       </style>

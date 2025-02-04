@@ -159,7 +159,7 @@ export default class MonthStat extends HTMLElement {
 
   getBody = () => {
     // language=HTML
-    return `
+    return /*html*/`
 			<div class="stats">
 				${this.getLoader()}
 			</div>
@@ -328,7 +328,7 @@ export default class MonthStat extends HTMLElement {
 				}
 
 				.title h4 {
-				  color: #1f2937;
+				  color: var(--title-color);
 				  font-size: 1.3rem;
 				  font-weight: 500;
 					padding: 0;
@@ -425,7 +425,7 @@ export default class MonthStat extends HTMLElement {
 
 					.title {
 						padding: 2px 0 10px 8px;
-						margin: 20px 0;
+						margin: 10px 0;
 						display: flex;
 						flex-flow: column;
 						gap: 0;

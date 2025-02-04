@@ -675,6 +675,7 @@ export default class HoverAuthor extends HTMLElement {
           display: flex;
           flex-flow: column;
           gap: 0;
+          padding: 0;
           margin: 0 0 -1px 0;
         }
 

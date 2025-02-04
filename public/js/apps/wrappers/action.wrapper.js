@@ -44,18 +44,10 @@ export default class ActionWrapper extends HTMLElement {
     this.render();
     // like post
     this.likePost();
-    // Check if user has liked the post
     const liked = this.convertToBool(this.getAttribute('liked'))
-
     const body = document.querySelector('body');
-     
-    // scroll likes
     this.scrollLikes(liked);
-
-    // activate reply button
     this.activateReplyButton();
-
-    // open the highlights
     this.openHighlights(body);
   }
 
@@ -67,7 +59,6 @@ export default class ActionWrapper extends HTMLElement {
     this.scrollLikes(liked);
     this.activateReplyButton();
     this.openHighlights(body);
-    this.activateEditButton();
   }
 
   updateViews = (element, value) => {
@@ -123,19 +114,13 @@ export default class ActionWrapper extends HTMLElement {
     window.onscroll = function () { };
   }
 
-  activateEditButton = () => {
-    const edit = this.shadowObj.querySelector('.actions > .action.edit');
-    if(!edit) return;
-
-    edit.addEventListener('click', e => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.parent.edit();
-    });
+  edit = () => {
+    this.parent.edit();
   }
 
   activateReplyButton = () => {
     const replyButton = this.shadowObj.querySelector('span.action.write');
+    if(!replyButton) return;
     replyButton.addEventListener('click', e => {
       e.preventDefault();
       this.parent.open();
@@ -480,7 +465,6 @@ export default class ActionWrapper extends HTMLElement {
         ${this.getLike(this.getAttribute('liked'))}
         ${this.getWrite()}
         ${this.getViews()}
-        ${this.getEdit(this.getAttribute('you'))}
         ${this.getShare()}
       </div>
 		`
@@ -528,16 +512,6 @@ export default class ActionWrapper extends HTMLElement {
         <span id="prev">${opinionsFormatted}</span>
       </span>
     `
-  }
-
-  getEdit = you => {
-    if(you === 'true') {
-      return /*html*/`
-        <span class="action edit" id="edit-action">edit</span>
-      `
-    } else {
-      return '';
-    }
   }
 
   getViews = () => {
@@ -623,19 +597,11 @@ export default class ActionWrapper extends HTMLElement {
   getShare = () => {
     // Get url to share
     const url = this.getAttribute('url');
-
-    // Get window host url including https/http part
     let host = window.location.protocol + '//' + window.location.host;
-
-    // combine the url with the host
     const shareUrl = `${host}${url}`;
-
-    // Get the title of the story
     const title = this.getAttribute('summary');
-
-
     return /* html */`
-      <share-wrapper url="${shareUrl.toLowerCase()}" summary="${title}"></share-wrapper>
+      <share-wrapper url="${shareUrl.toLowerCase()}" summary="${title}" you="${this.getAttribute('you')}"></share-wrapper>
     `
   }
 
@@ -938,25 +904,6 @@ export default class ActionWrapper extends HTMLElement {
           color: var(--alt-color);
         }
 
-        .actions > .action.edit {
-          all: unset;
-          border: var(--border-button);
-          text-decoration: none;
-          color: var(--gray-color);
-          font-size: 0.9rem;
-          display: flex;
-          width: max-content;
-          flex-flow: row;
-          align-items: center;
-          cursor: pointer;
-          text-transform: lowercase;
-          justify-content: center;
-          padding: 3px 8px 3px;
-          border-radius: 10px;
-          -webkit-border-radius: 10px;
-          -moz-border-radius: 10px;
-        }
-
         @media screen and (max-width: 660px) {
           ::-webkit-scrollbar {
             -webkit-appearance: none;
@@ -968,7 +915,6 @@ export default class ActionWrapper extends HTMLElement {
 
           a,
           span.stat,
-          .actions > .action.edit,
           span.action {
             cursor: default !important;
           }

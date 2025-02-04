@@ -8,8 +8,25 @@ export default class AppPost extends HTMLElement {
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.boundHandleWsMessage = this.handleWsMessage.bind(this);
     this.checkAndAddHandler = this.checkAndAddHandler.bind(this);
+    this.mql = window.matchMedia('(max-width: 660px)');
     this.app = window.app;
+    this.user = window.hash;
     this.render();
+  }
+  
+  // observe the attributes
+  static get observedAttributes() {
+    return ['reload', 'images'];
+  }
+
+  // listen for changes in the attributes
+  attributeChangedCallback(name, oldValue, newValue) {
+    // check if old value is not equal to new value
+    if (name === 'reload') {
+      this.render();
+    } else if (name === 'images') {
+      this.render();
+    }
   }
 
   setTitle = () => {
@@ -34,28 +51,38 @@ export default class AppPost extends HTMLElement {
 
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
+    this.setUpEvents();
   }
 
   connectedCallback() {
     // Change style to flex
     this.style.display='flex';
+  }
+
+  setUpEvents = () => {
     this.app.hideNav();
     this.openUrl();
-    // request user to enable notifications
-    this.checkNotificationPermission();
-    // connect to the WebSocket
     this.checkAndAddHandler();
-    // mql query at: 660px
-    const mql = window.matchMedia('(max-width: 660px)');
-    this.watchMediaQuery(mql);
-    // scroll the window to the top and set height to 100vh
+    this.watchMediaQuery(this.mql);
     window.scrollTo(0, 0);
   }
 
-  checkNotificationPermission = async () => {
-    if(window.notify && !window.notify.permission) {
-      await window.notify.requestPermission();
-    }
+  edit = () => {
+    // Get the body element
+    const body = document.querySelector('body');
+    const content = this.getEdit();
+    window.toBeChanged = this;
+    body.insertAdjacentHTML('beforeend', content);
+  }
+
+  getEdit = () => {
+    // Show Post Page Here
+    return /* html */`
+      <post-options kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" hash="${this.getAttribute('hash')}"
+        drafted="false" story="false" images="${this.getAttribute('images')}">
+        ${this.innerHTML}
+      </post-options>
+    `;
   }
 
   checkAndAddHandler() {
@@ -438,8 +465,10 @@ export default class AppPost extends HTMLElement {
   }
 
   getStats = story =>  {
+    const author = this.getAttribute('author-hash');
+    const you = author === this.user;
     return /*html*/`
-      <action-wrapper no-write="true" preview="false" full="true" kind="${story}" reload="false" likes="${this.getAttribute('likes')}"
+      <action-wrapper you="${you}" no-write="true" preview="false" full="true" kind="${story}" reload="false" likes="${this.getAttribute('likes')}"
         replies="${this.getAttribute('replies')}" liked="${this.getAttribute('liked')}" wrapper="true" images="${this.getAttribute('images')}"
         hash="${this.getAttribute('hash')}" views="${this.getAttribute('views')}" url="${this.getAttribute('url')}" summary="Post by - ${this.getAttribute('author-name')}"
         preview-title="" time="${this.getAttribute('time')}" author-hash="${this.getAttribute('author-hash')}">

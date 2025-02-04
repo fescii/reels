@@ -2,16 +2,17 @@ export default class ShareWrapper extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-
-    // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
     this.app = window.app;
+    this.parent = this.getRootNode().host;
     this.render();
   }
 
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
   }
+
+  convertToBoolean = text => text === 'true';
 
   connectedCallback() {
     // Copy link
@@ -20,6 +21,21 @@ export default class ShareWrapper extends HTMLElement {
     // Watch for media query changes
     const mql = window.matchMedia('(max-width: 660px)');
     this.openShare(mql.matches);
+    this.editContent();
+  }
+
+  editContent = () => {
+    const share = this.shadowObj.querySelector('.share.overlay');
+    const edit = this.shadowObj.querySelector('.option.edit');
+    if(!edit) return;
+
+    edit.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      if(share) share.classList.remove('active');
+      this.parent.edit();
+    });
   }
 
   // fn to open the share overlay
@@ -31,11 +47,8 @@ export default class ShareWrapper extends HTMLElement {
     if (shareButton) {
       // Get overlay
       const overlay = shareButton.querySelector('.share.overlay');
-
       const content = shareButton.querySelector('.share > .content');
-
       const close = shareButton.querySelector('span.close')
-
       // Add event listener to the share button
       shareButton.addEventListener('click', e => {
         // prevent the default action
@@ -125,7 +138,7 @@ export default class ShareWrapper extends HTMLElement {
     };
   }
 
-    enableScroll() {
+  enableScroll() {
     document.body.classList.remove("stop-scrolling");
     window.onscroll = function () { };
   }
@@ -149,7 +162,8 @@ export default class ShareWrapper extends HTMLElement {
           <span class="close"></span>
           <div class="content">
             <span class="pointer"></span>
-            <p class="title">Share</p>
+            ${this.getEditContent(this.convertToBoolean(this.getAttribute('you')))}
+            <p class="title">Share on</p>
             ${this.getShareOptions()}
           </div>
         </div>
@@ -157,11 +171,24 @@ export default class ShareWrapper extends HTMLElement {
 		`
   }
 
+  getEditContent = you => {
+    if(!you) return '';
+
+    return /* html */`
+      <span class="option edit">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8.00016 1.83337C3.3755 1.83337 1.8335 3.37537 1.8335 8.00004C1.8335 12.6247 3.3755 14.1667 8.00016 14.1667C12.6248 14.1667 14.1668 12.6247 14.1668 8.00004" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M13.0189 2.86915V2.86915C12.3569 2.28315 11.3456 2.34449 10.7596 3.00649C10.7596 3.00649 7.84694 6.29649 6.83694 7.43849C5.8256 8.57982 6.56694 10.1565 6.56694 10.1565C6.56694 10.1565 8.23627 10.6852 9.23227 9.55982C10.2289 8.43449 13.1563 5.12849 13.1563 5.12849C13.7423 4.46649 13.6803 3.45515 13.0189 2.86915Z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10.0061 3.86719L12.4028 5.98919" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="text">Edit</span>
+      </span>
+    `;
+  }
+
   getShareOptions = () => {
     // Get summary text of the post
     const summary = this.getAttribute('summary');
-
-    // Get url of the post
     const url = this.getAttribute('url');
 
     return /* html */`
@@ -351,16 +378,42 @@ export default class ShareWrapper extends HTMLElement {
           display: flex;
         }
 
-        .title {
+        .content > .option.edit {
+          margin: 5px 0 0;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 5px 10px;
+          width: 100%;
           color: var(--text-color);
-          width: 95%;
-          font-size: 1.35rem;
-          font-weight: 600;
-          margin: 0 0 5px;
-          padding: 0 10px;
-          text-align: center;
+          background: var(--gray-background);
           border-radius: 12px;
-          font-family: var(--font-read), sans-serif;
+        }
+
+        .content > .option.edit > svg  {
+          height: 18px;
+          width: 18px;
+        }
+
+        .content > .option.edit > span.text {
+          font-size: 1rem;
+          font-weight: 500;
+          font-family: var(--font-main), sans-serif;
+          color: var(--text-color);
+        }
+
+        .title {
+          border-top: var(--border);
+          border-bottom: var(--border);
+          color: var(--text-color);
+          width: 100%;
+          font-size: 1rem;
+          font-weight: 600;
+          margin: 7px 0; 
+          padding: 5px 0;
+          text-align: center;
+          border-radius: 0;
+          font-family: var(--font-text), sans-serif;
           color: var(--text-color);
           font-weight: 500;
         }
@@ -462,7 +515,7 @@ export default class ShareWrapper extends HTMLElement {
 
           .share {
             position: fixed;
-            z-index: 100;
+            z-index: 80;
             background: transparent;
             background: var(--modal-overlay);
             padding: 0;
@@ -522,17 +575,42 @@ export default class ShareWrapper extends HTMLElement {
             border-top-right-radius: 15px;
           }
 
-          .title {
-            color: var(--text-color);
-            width: 95%;
-            font-size: 1.35rem;
-            font-weight: 600;
-            margin: 0 0 10px;
+          .content > .option.edit {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             padding: 10px 10px;
-            background-color: var(--gray-background);
-            text-align: center;
+            width: 100%;
+            color: var(--text-color);
+            background: var(--gray-background);
             border-radius: 12px;
-            font-family: var(--font-read), sans-serif;
+          }
+  
+          .content > .option.edit > svg  {
+            height: 22px;
+            width: 22px;
+          }
+  
+          .content > .option.edit > span.text {
+            font-size: 1rem;
+            font-weight: 500;
+            font-family: var(--font-main), sans-serif;
+            color: var(--text-color);
+          }
+  
+          .title {
+            border-top: var(--border);
+            border-bottom: var(--border);
+            color: var(--text-color);
+            width: 100%;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 10px 0; 
+            padding: 10px 0;
+            text-align: center;
+            border-radius: 0;
+            font-family: var(--font-text), sans-serif;
             color: var(--text-color);
             font-weight: 500;
           }

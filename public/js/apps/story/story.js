@@ -13,7 +13,23 @@ export default class AppStory extends HTMLElement {
     this.app = window.app;
     this.topics = this.getTopics();
     this._content = this.innerHTML
+    this.user = window.hash;
     this.render();
+  }
+
+  // observe the attributes
+  static get observedAttributes() {
+    return ['reload', 'images'];
+  }
+
+  // listen for changes in the attributes
+  attributeChangedCallback(name, oldValue, newValue) {
+    // check if old value is not equal to new value
+    if (name === 'reload') {
+      this.render();
+    } else if (name === 'images') {
+      this.render();
+    }
   }
 
   setTitle = title => {
@@ -310,6 +326,27 @@ export default class AppStory extends HTMLElement {
     `
   }
 
+  edit = () => {
+    // Get the body element
+    const body = document.querySelector('body');
+    // Get the content of the topic page
+    const content = this.getEditBody();
+    // set to be deleted:
+    window.toBeChanged = this;
+    // insert the content into the body
+    body.insertAdjacentHTML('beforeend', content);
+  }
+
+  getEditBody = () => {
+    // Show Post Page Here
+    return /* html */`
+      <post-options kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" hash="${this.getAttribute('hash')}" images="${this.getAttribute('images')}" published="true"
+        drafted="false" story="true" story-title="${this.getAttribute('story-title')}" slug="${this.getAttribute('slug')}">
+        ${this.innerHTML}
+      </post-options>
+    `;
+  }
+
   getTemplate = () => {
     // Show HTML Here
     return `
@@ -462,8 +499,10 @@ export default class AppStory extends HTMLElement {
   }
 
   getStats = () => {
+    const author = this.getAttribute('author-hash');
+    const you = author === this.user;
     return /*html*/`
-      <action-wrapper full="true" kind="story" reload="false" likes="${this.getAttribute('likes')}" images="${this.getAttribute('images')}"
+      <action-wrapper you="${you}" full="true" kind="story" reload="false" likes="${this.getAttribute('likes')}" images="${this.getAttribute('images')}"
         replies="${this.getAttribute('replies')}" liked="${this.getAttribute('liked')}" wrapper="true"
         hash="${this.getAttribute('hash')}" views="${this.getAttribute('views')}"  url="${this.getAttribute('url')}" summary="${this.getAttribute('story-title')}"
         preview-title="${this.getAttribute('story-title')}" time="${this.getAttribute('time')}"

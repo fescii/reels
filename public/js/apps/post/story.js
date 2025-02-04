@@ -562,7 +562,7 @@ export default class StoryPost extends HTMLElement {
         story-title="${this.getAttribute('story-title')}" time="${this.getAttribute('time')}" images='${images}'
         replies-url="${this.getAttribute('replies-url')}" likes-url="${this.getAttribute('likes-url')}"
         likes="${this.getAttribute('likes')}" replies="${this.getAttribute('replies')}" liked="${this.getAttribute('liked')}" views="${this.getAttribute('views')}"
-        author-you="${this.getAttribute('author-you')}"
+        author-you="${this.getAttribute('author-you')}" slug="${this.getAttribute('slug')}"
         author-stories="${this.getAttribute('author-stories')}" author-replies="${this.getAttribute('author-replies')}"
         author-hash="${this.getAttribute('author-hash')}" author-url="${this.getAttribute('author-url')}" author-contact='${this.getAttribute("author-contact")}'
         author-img="${this.getAttribute('author-img')}" author-verified="${this.getAttribute('author-verified')}" author-name="${this.getAttribute('author-name')}"

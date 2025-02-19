@@ -88,7 +88,7 @@ export default class UpdateContainer extends HTMLElement {
         <h4 class="title">Your updates</h4>
         <p class="desc">
           Your updates contains summary of all actions performed by other users on your content or profile.
-          You can filter by stories, replies, people, and topics.<br>
+          You can filter by stories, replies, people, and articles.<br>
           <span>Note that a button label <b>user</b> will preview the user who has perform the action/update.
         </p>
       </div>
@@ -110,9 +110,6 @@ export default class UpdateContainer extends HTMLElement {
           </li>
           <li data-element="people" class="tab-item people" url="${this.getAttribute('api-users')}">
             <span class="text">People</span>
-          </li>
-          <li data-element="topics" class="tab-item topics" url="${this.getAttribute('api-topics')}">
-            <span class="text">Topics</span>
           </li>
           <span class="line"></span>
         </ul>

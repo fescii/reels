@@ -108,9 +108,6 @@ export default class ActivityContainer extends HTMLElement {
           <li data-element="people" class="tab-item people" url="${this.getAttribute('api-users')}">
             <span class="text">People</span>
           </li>
-          <li data-element="topics" class="tab-item topics" url="${this.getAttribute('api-topics')}">
-            <span class="text">Topics</span>
-          </li>
           <span class="line"></span>
         </ul>
       </div>

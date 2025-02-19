@@ -148,16 +148,15 @@ export default class PreviewPost extends HTMLElement {
   }
 
   populateContent = (story, contentContainer) => {
-    switch (story.kind) {
-      case 'post':
-        contentContainer.innerHTML = this.populatePost(story);
-        break;
-      case 'poll':
-        contentContainer.innerHTML = this.populatePoll(story);
-        break;
-      case 'story':
-        contentContainer.innerHTML = this.populateStory(story);
-        break;
+    const contentMap = {
+      post: this.populatePost,
+      poll: this.populatePoll,
+      story: this.populateStory
+    };
+
+    const populateFunction = contentMap[story.kind];
+    if (populateFunction) {
+      contentContainer.innerHTML = populateFunction.call(this, story);
     }
 
     this.activateStatsBtn(story);

@@ -22,10 +22,10 @@ export default class AppPost extends HTMLElement {
   // listen for changes in the attributes
   attributeChangedCallback(name, oldValue, newValue) {
     // check if old value is not equal to new value
-    if (name === 'reload') {
-      this.render();
-    } else if (name === 'images') {
-      this.render();
+    if (name === 'reload' || name === 'images') {
+      if (oldValue !== newValue && oldValue !== null) {
+        this.render();
+      }
     }
   }
 

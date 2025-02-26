@@ -1,6 +1,8 @@
-<app-home tab="<%= data.tab %>" url="/home" recent-api="/h/recent" feed-api="/h/feeds"
-  people-api="/q/trending/people" trending-api="/h/trending"
-  topics-api="/q/trending/topics" news-api="/news/all"
-  stories="/h/stories" replies="/h/replies"
-  users="/h/users">
+<app-home tab="<%= data.tab %>" url="/home"
+  all="/feed/all" trending="/feed/trending" following="/feed/following"
+  stories-trending="/feed/stories/trending" stories-following="/feed/stories/following"
+  stories-recent="/feed/stories/recent"
+  replies-trending="/feed/replies/trending" replies-following="/feed/replies/following"
+  replies-recent="/feed/replies/recent" news="/news/all"
+  authors-top="/feed/authors/top" authors-recent="/feed/authors/recent">
 </app-home>

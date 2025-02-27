@@ -7,9 +7,9 @@
 */
 const themes = async (req, res) => {
   const meta = {
-    title: 'Themes | Custumize your Zoanai experience',
-    description: 'Explore themes and custumize your Zoanai experience',
-    keywords: 'themes, custumize, explore, experience, Zoanai',
+    title: 'Themes | Custumize your Pau experience',
+    description: 'Explore themes and custumize your Pau experience',
+    keywords: 'themes, custumize, explore, experience, Pau',
     image: '/static/img/favi.png',
     url: '/themes',
   }

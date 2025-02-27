@@ -6,8 +6,8 @@
 */
 const index = async (req, res) => {
   const meta = {
-    title: 'Welcome to Zoanai',
-    description: 'Explore and create content on Zoanai',
+    title: 'Welcome to Pau',
+    description: 'Explore and create content on Pau',
     keywords: 'blog, post, create, explore',
     image: '/static/img/favi.png',
     url: '/',
@@ -28,9 +28,9 @@ const index = async (req, res) => {
 */
 const about = async (req, res) => {
   const meta = {
-    title: 'About | Zoanai',
-    description: 'Learn more about Zoanai',
-    keywords: 'about, zoanai, blog, post',
+    title: 'About | Pau',
+    description: 'Learn more about Pau',
+    keywords: 'about, Pau, blog, post',
     image: '/static/img/favi.png',
     url: '/about',
   }
@@ -49,9 +49,9 @@ const about = async (req, res) => {
 */
 const soon = async (req, res) => {
   const meta = {
-    title: 'Coming Soon | Zoanai',
-    description: 'Get ready for Zoanai',
-    keywords: 'coming soon, zoanai, blog, post',
+    title: 'Coming Soon | Pau',
+    description: 'Get ready for Pau',
+    keywords: 'coming soon, Pau, blog, post',
     image: '/static/img/favi.png',
     url:  '/soon',
   }

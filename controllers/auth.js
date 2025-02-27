@@ -7,8 +7,8 @@
 */
 const join = async (req, res) => {
   const meta = {
-    title: 'Join Zoanai Today',
-    description: 'Create and expore content with Zoanai',
+    title: 'Join Pau Today',
+    description: 'Create and expore content with Pau',
     keywords: 'join, register, login, recover',
     image: '/static/img/favi.png',
     url: '/join',
@@ -32,8 +32,8 @@ const login = async (req, res) => {
   const nextUrl = req.query.next || '/home';
 
   const meta = {
-    title: 'Login to Zoanai',
-    description: 'Login to Zoanai to access your account',
+    title: 'Login to Pau',
+    description: 'Login to Pau to access your account',
     keywords: 'login, register, recover',
     image: '/static/img/favi.png',
     url: '/join/login',
@@ -57,8 +57,8 @@ const register = async (req, res) => {
   const nextUrl = req.query.next || '/home';
 
   const meta = {
-    title: 'Register for Zoanai',
-    description: 'Register for Zoanai to create and explore content',
+    title: 'Register for Pau',
+    description: 'Register for Pau to create and explore content',
     keywords: 'register, login, recover',
     image: '/static/img/favi.png',
     url: '/join/register',
@@ -84,8 +84,8 @@ const recover = async (req, res) => {
   const nextUrl = req.query.next || '/home';
 
   const meta = {
-    title: 'Recover your Zoanai account',
-    description: 'Recover your Zoanai account by resetting your password',
+    title: 'Recover your Pau account',
+    description: 'Recover your Pau account by resetting your password',
     keywords: 'recover, login, register',
     image: '/static/img/favi.png',
     url: '/join/recover',

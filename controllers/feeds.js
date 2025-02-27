@@ -6,8 +6,8 @@
 */
 const home = async (req, res) => {
   const meta = {
-    title: 'Zoanai',
-    description: 'Create and expore content with Zoanai',
+    title: 'Pau',
+    description: 'Create and expore content with Pau',
     keywords: 'articles, news, blog, content. create, explore',
     image: '/static/img/favi.png',
     url: '/',
@@ -28,8 +28,8 @@ const home = async (req, res) => {
 */
 const all = async (req, res) => {
   const meta = {
-    title: 'Zoanai',
-    description: 'Create and expore content with Zoanai',
+    title: 'Pau',
+    description: 'Create and expore content with Pau',
     keywords: 'articles, news, blog, content. create, explore',
     image: '/static/img/favi.png',
     url: '/',
@@ -50,8 +50,8 @@ const all = async (req, res) => {
 */
 const stories = async (req, res) => {
   const meta = {
-    title: 'Zoanai',
-    description: 'Create and expore content with Zoanai',
+    title: 'Pau',
+    description: 'Create and expore content with Pau',
     keywords: 'articles, news, blog, content. create, explore',
     image: '/static/img/favi.png',
     url: '/',
@@ -72,8 +72,8 @@ const stories = async (req, res) => {
 */
 const replies = async (req, res) => {
   const meta = {
-    title: 'Zoanai',
-    description: 'Create and expore content with Zoanai',
+    title: 'Pau',
+    description: 'Create and expore content with Pau',
     keywords: 'articles, news, blog, content. create, explore',
     image: '/static/img/favi.png',
     url: '/',
@@ -94,8 +94,8 @@ const replies = async (req, res) => {
 */
 const users = async (req, res) => {
   const meta = {
-    title: 'Zoanai',
-    description: 'Create and expore content with Zoanai',
+    title: 'Pau',
+    description: 'Create and expore content with Pau',
     keywords: 'articles, news, blog, content. create, explore',
     image: '/static/img/favi.png',
     url: '/',

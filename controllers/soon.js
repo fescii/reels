@@ -8,7 +8,7 @@ const topics = async (req, res) => {
   const meta = {
     title: 'Soon | This feature is coming soon',
     description: 'Stay tuned, this feature is coming soon',
-    keywords: 'videos, articles, explore, experience, Zoanai',
+    keywords: 'videos, articles, explore, experience, Pau',
     image: '/static/img/favi.png',
     url: '/topics',
   }
@@ -29,7 +29,7 @@ const apis = async (req, res) => {
   const meta = {
     title: 'Soon | This feature is coming soon',
     description: 'Stay tuned, this feature is coming soon',
-    keywords: 'videos, articles, explore, experience, Zoanai',
+    keywords: 'videos, articles, explore, experience, Pau',
     image: '/static/img/favi.png',
     url: '/themes',
   }
@@ -50,7 +50,7 @@ const comics = async (req, res) => {
   const meta = {
     title: 'Soon | This feature is coming soon',
     description: 'Stay tuned, this feature is coming soon',
-    keywords: 'videos, articles, explore, experience, Zoanai',
+    keywords: 'videos, articles, explore, experience, Pau',
     image: '/static/img/favi.png',
     url: '/comics',
   }

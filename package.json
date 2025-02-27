@@ -1,7 +1,7 @@
 {
-  "name": "zoanai-ui",
+  "name": "Pau-ui",
   "version": "0.2.0",
-  "description": "The UI Renderer for zoanai",
+  "description": "The UI Renderer for Pau",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",

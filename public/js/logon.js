@@ -37,7 +37,7 @@ export default class AppLogon extends HTMLElement {
   }
 
   setTitle = () => {
-    document.title = 'Zoanai - Join, Login, Recover, and Explore';
+    document.title = 'Pau - Join, Login, Recover, and Explore';
   }
 
   render() {
@@ -1525,7 +1525,7 @@ export default class AppLogon extends HTMLElement {
       <div class="head">
 				<div class="logo">
 					<h2 class="main">
-						<span class="action">Join</span> - Zoanai</h2>
+						<span class="action">Join</span> - Pau</h2>
 					<span class="slogan">Create and contribute to ideas that can change the world.</span>
 				</div>
 			</div>

@@ -141,7 +141,7 @@ export default class HeaderContainer extends HTMLElement {
 
   getLogo = () => {
     return `
-			<h2 class="site-name">Zoanai</h2>
+			<h2 class="site-name">Pau</h2>
 		`
   }
 

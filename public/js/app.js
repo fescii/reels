@@ -308,7 +308,7 @@ export default class AppMain extends HTMLElement {
           </a>
           <span class="tooltip">
             <span class="arrow"></span>
-            <span class="text">Zoanai</span>
+            <span class="text">Pau</span>
           </span>
         </li>
       </ul>

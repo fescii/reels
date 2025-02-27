@@ -210,14 +210,13 @@ export default class AppHome extends HTMLElement {
 
   getAll = () => {
     return /* html */`
-      <home-all stories="recent" 
+      <home-all stories="recent" recent="${this.getAttribute('recent')}" trending="${this.getAttribute('trending')}" following="${this.getAttribute('following')}"
         stories-trending="${this.getAttribute('stories-trending')}" stories-recent="${this.getAttribute('stories-recent')}"
         stories-following="${this.getAttribute('stories-following')}"
         replies-trending="${this.getAttribute('replies-trending')}" replies-recent="${this.getAttribute('replies-recent')}"
         replies-following="${this.getAttribute('replies-following')}"
         news="${this.getAttribute('news')}"
-        people="${this.getAttribute('authors-top')}" people-recent="${this.getAttribute('authors-recent')}"
-        feed="${this.getAttribute('all')}">
+        people="${this.getAttribute('authors-trending')}" people-recent="${this.getAttribute('authors-recent')}">
       </home-all>
     `
   }

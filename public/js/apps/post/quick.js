@@ -574,7 +574,7 @@ export default class QuickPost extends HTMLElement {
     const feed = this.textToBool(this.getAttribute('feed'))
     if (story === 'reply') {
       const parent = this.getAttribute('parent');
-      let url = parent.startsWith('P') ? `/p/${parent.toLowerCase()}/preview` : `/r/${parent.toLowerCase()}/preview`;
+      let url = parent.startsWith('P') ? `/post/${parent.toLowerCase()}` : `/reply/${parent.toLowerCase()}`;
       return /*html*/`
         <preview-post feed="${feed}" url="${url}" hash="${parent}" preview="quick"></preview-post>
       `

@@ -502,7 +502,7 @@ export default class AppPost extends HTMLElement {
   getReply = story => {
     if (story === 'reply') {
       const parent = this.getAttribute('parent').toUpperCase();
-      let url = parent.startsWith('P') ? `/p/${parent.toLowerCase()}/preview` : `/r/${parent.toLowerCase()}/preview`;
+      let url = parent.startsWith('P') ? `/post/${parent.toLowerCase()}` : `/reply/${parent.toLowerCase()}`;
       return /*html*/`
         <preview-post url="${url}" hash="${parent}" preview="full" first="true"></preview-post>
       `

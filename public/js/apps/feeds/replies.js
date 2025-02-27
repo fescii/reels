@@ -228,7 +228,7 @@ export default class ReplyFeed extends HTMLElement {
 
   mapFields = data => {
     return data.map(reply => {
-      const author = reply.reply_author;
+      const author = reply.author;
       let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
       // replace all " and ' with &quot; and &apos; to avoid breaking the html
       bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');

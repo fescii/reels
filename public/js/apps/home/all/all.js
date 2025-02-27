@@ -75,11 +75,11 @@ export default class HomeAll extends HTMLElement {
   getStepContent = step => {
     if (step === 1) {
       return /* html */`
-        <home-news url="${this.getAttribute('news-api')}"></home-news>
+        <home-news url="${this.getAttribute('news')}"></home-news>
       `
     } else if (step === 2) {
       return /* html */`
-        <home-stories stories="recent" url="${this.getAttribute('recent-api')}"></home-stories>
+        <home-stories url="${this.getAttribute('trending')}"></home-stories>
       `
     } else if (step === 3) {
       return /* html */`
@@ -95,7 +95,7 @@ export default class HomeAll extends HTMLElement {
   getBody = () => {
     return /* html */`
       <div class="feeds">
-        <home-recent url="${this.getAttribute('stories-recent')}"></home-recent>
+        <home-recent url="${this.getAttribute('recent')}"></home-recent>
       <div>
     `;
   }

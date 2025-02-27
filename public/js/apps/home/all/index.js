@@ -3,7 +3,7 @@ import HomeStories from "./stories.js";
 import HomeTopics from "./topics.js";
 import HomePeople from "./people.js";
 import HomeFeed from "./feed.js"
-import HomeRecent from "./trending.js";
+import HomeRecent from "./recent.js";
 import HomeNews from "./news.js";
 
 // registaer all

@@ -2,7 +2,7 @@ export default class HomeRecent extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-    this.url = this.getAttribute('url');
+    this.url = `${this.getAttribute('url')}?page=1&limit=6`;
     this.app = window.app;
     this.api = this.app.api;
     this.all = this.getRootNode().host;
@@ -76,11 +76,11 @@ export default class HomeRecent extends HTMLElement {
 
   handleFetchResult = (result, feedContainer) => {
     if (result.success) {
-      const data = result.data;
-      if (data.last && this._page === 1 && data.stories.length === 0 && data.replies.length === 0) {
+      const feed = result.feed;
+      if (this._page === 1 && feed.length === 0) {
         this.populateFeeds(this.getEmptyMsg(), feedContainer);
       } else {
-        const content = this.mapFeeds(data.stories, data.replies);
+        const content = this.mapFeeds(feed);
         this.populateFeeds(content, feedContainer);
         this.setLastItem(feedContainer);
       }
@@ -125,127 +125,102 @@ export default class HomeRecent extends HTMLElement {
     feedContainer.insertAdjacentHTML('beforeend', content);
   }
 
-  mapFeeds = (stories, replies) => {
-    const outerThis = this;
-    let content = '';
-    
-    // Check if the stories is empty and replies is not empty
-    if (stories.length === 0 && replies.length > 0) {
-      content = replies.map(reply => outerThis.mapReply(reply)).join('');
-    }
-    else if (stories.length > 0 && replies.length === 0) {
-      content = stories.map(story => outerThis.mapStory(story)).join('');
-    }
-    else {
-      // for each story follow by a reply, if there is any(i.e): append ine story and one reply if either is available else append the other
-      // check the longest array
-      if (stories.length >= replies.length) {
-        for (let i = 0; i < stories.length; i++) {
-          content += outerThis.mapStory(stories[i]);
-          if (replies[i]) {
-            content += outerThis.mapReply(replies[i]);
-          }
-        }
-      }
-      else {
-        for (let i = 0; i < replies.length; i++) {
-          if (stories[i]) {
-            content += outerThis.mapStory(stories[i]);
-          }
-          content += outerThis.mapReply(replies[i]);
-        }
-      }
-    }
+  mapFeeds = feed => feed.map(item => 
+    item.type === "reply" ? this.mapReply(item) : this.mapStory(item)
+  ).join('');
 
-    return content;
-  }
+  #sanitizeBio = bio => (bio || 'This user has not added a bio yet.')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+
+  #authorAttributes = author => ({
+    "author-url": `/u/${author.hash}`,
+    "author-stories": author.stories,
+    "author-replies": author.replies,
+    "author-hash": author.hash,
+    "author-you": author.you,
+    "author-img": author.picture,
+    "author-verified": author.verified,
+    "author-name": author.name,
+    "author-followers": author.followers,
+    "author-following": author.following,
+    "author-follow": author.is_following,
+    "author-contact": author.contact ? JSON.stringify(author.contact) : null,
+    "author-bio": this.#sanitizeBio(author.bio)
+  });
+
+  #storyAttributes = (story, url) => ({
+    url,
+    hash: story.hash,
+    likes: story.likes,
+    replies: story.replies,
+    liked: story.liked,
+    views: story.views,
+    time: story.createdAt,
+    "replies-url": `${url}/replies`,
+    "likes-url": `${url}/likes`,
+    images: story.images?.join(',') || ''
+  });
 
   mapStory = story => {
-    const author = story.story_author;
-    let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
-    // replace all " and ' with &quot; and &apos; to avoid breaking the html
-    bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-    const url = `/p/${story.hash.toLowerCase()}`;
-    const images = story.images ? story.images.join(',') : '';
-    if (story.kind === "post") {
-      return /*html*/`
-        <quick-post story="quick" url="${url}" hash="${story.hash}" likes="${story.likes}" 
-          replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
-          replies-url="${url}/replies" likes-url="${url}/likes" images="${images}"
-          author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
-          author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
-          author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
-          author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-          author-bio="${bio}">
+    const author = this.#authorAttributes(story.author);
+    const url = `/post/${story.hash.toLowerCase()}`;
+    const baseAttrs = { ...this.#storyAttributes(story, url), ...author };
+
+    const templates = {
+      post: /*html*/`
+        <quick-post story="quick" ${this.#attrsToString(baseAttrs)}>
           ${story.content}
         </quick-post>
-      `
-    }
-    else if (story.kind === "poll") {
-      return /*html*/`
-        <poll-post story="poll" url="${url}" hash="${story.hash}" likes="${story.likes}" 
-          replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
-          voted="${story.option ? 'true' : 'false'}" selected="${story.option}" end-time="${story.end}" replies-url="${url}/replies" 
-          likes-url="${url}/likes" options='${story.poll}' votes="${story.votes}" 
-          author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
-          author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
-          author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
-          author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-          author-bio="${bio}">
+      `,
+      poll: /*html*/`
+        <poll-post story="poll" 
+          ${this.#attrsToString({
+            ...baseAttrs,
+            voted: story.option ? 'true' : 'false',
+            selected: story.option,
+            endTime: story.end,
+            options: story.poll,
+            votes: story.votes
+          })}>
           ${story.content}
         </poll-post>
-      `
-    }
-    else if (story.kind === "story") {
-      return /*html*/`
-        <story-post story="story" hash="${story.hash}" url="${url}" 
-          topics="${story.topics.length === 0 ? 'story' : story.topics}" story-title="${story.title}" time="${story.createdAt}" replies-url="${url}/replies" 
-          likes-url="${url}/likes" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" likes="${story.likes}" 
-          views="${story.views}" images="${images}" slug="${story.slug}"
-          author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
-          author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-          author-img="${author.picture}" author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" 
-          author-followers="${author.followers}" author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" 
-          author-bio="${bio}">
+      `,
+      story: /*html*/`
+        <story-post story="story" 
+          ${this.#attrsToString({
+            ...baseAttrs,
+            topics: story.topics,
+            storyTitle: story.title,
+            slug: story.slug
+          })}>
           ${story.content}
         </story-post>
       `
-    }
-  }
+    };
+
+    return templates[story.kind] || '';
+  };
 
   mapReply = reply => {
-    const author = reply.reply_author;
-    let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
-    // replace all " and ' with &quot; and &apos; to avoid breaking the html
-    bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-    const images = reply.images ? reply.images.join(',') : '';
+    const author = this.#authorAttributes(reply.author);
+    const baseAttrs = {
+      ...this.#storyAttributes(reply, `/reply/${reply.hash.toLowerCase()}`),
+      ...author,
+      feed: "true",
+      parent: reply.story || reply.reply
+    };
+
     return /*html*/`
-      <quick-post story="reply" feed="true" hash="${reply.hash}" url="/r/${reply.hash.toLowerCase()}" likes="${reply.likes}" replies="${reply.replies}" liked="${reply.liked}"
-        views="${reply.views}" time="${reply.createdAt}" replies-url="/r/${reply.hash}/replies" likes-url="/r/${reply.hash}/likes" images="${images}"
-        author-hash="${author.hash}" author-you="${reply.you}" author-url="/u/${author.hash}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-        author-stories="${author.stories}" author-replies="${author.replies}" parent="${reply.story ? reply.story : reply.reply}"
-        author-img="${author.picture}" author-verified="${author.verified}" author-name="${author.name}" author-followers="${author.followers}"
-        author-following="${author.following}" author-follow="${author.is_following}" author-bio="${bio}">
+      <quick-post story="reply" ${this.#attrsToString(baseAttrs)}>
         ${reply.content}
       </quick-post>
-    `
-  }
+    `;
+  };
 
-  getOfflineData = async url => {
-    const cacheName = "user-cache";
-
-    const cache = await caches.open(cacheName);
-    const cachedResponse = await cache.match(url);
-
-    if (cachedResponse) {
-      const cachedData = await cachedResponse.json();
-      // return the data
-      return cachedData.data;
-    } else {
-      // throw an error
-      throw new Error('No data available');
-    }
-  }
+  #attrsToString = attrs => Object.entries(attrs)
+    .map(([key, value]) => `${key}="${value}"`)
+    .join(' ');
 
   parseToNumber = num_str => {
     // Try parsing the string to an integer

@@ -186,7 +186,7 @@ export default class PreviewPost extends HTMLElement {
   }
 
   populateStory = story => {
-    const author = story.story_author
+    const author = story.author
     author.you = story.you
     author.time = story.createdAt
     const url = `/p/${story.hash.toLowerCase()}`
@@ -195,7 +195,7 @@ export default class PreviewPost extends HTMLElement {
   }
 
   populateReply = reply => {
-    const author = reply.reply_author;
+    const author = reply.author;
     author.you = reply.you;
     author.time = reply.createdAt;
     const url = `/r/${reply.hash.toLowerCase()}`;
@@ -204,7 +204,7 @@ export default class PreviewPost extends HTMLElement {
   }
 
   populatePost = story => {
-    const author = story.story_author
+    const author = story.author
     author.you = story.you
     author.time = story.createdAt
     const url = `/p/${story.hash.toLowerCase()}`
@@ -213,7 +213,7 @@ export default class PreviewPost extends HTMLElement {
   }
 
   populatePoll = story => {
-    const author =story.story_author;
+    const author =story.author;
     author.you = story.you;
     author.time = story.createdAt;
     const poll = { 
@@ -453,7 +453,7 @@ export default class PreviewPost extends HTMLElement {
   }
 
   mapStory = story => {
-    const author = story.story_author;
+    const author = story.author;
     const url = `/p/${story.hash.toLowerCase()}`;
     const images = story.images ? story.images.join(',') : null;
     if (story.kind === "post") {
@@ -502,7 +502,7 @@ export default class PreviewPost extends HTMLElement {
   }
 
   mapReply = reply => {
-    const author = reply.reply_author;
+    const author = reply.author;
     const images = reply.images ? reply.images.join(',') : null;
     return /*html*/`
       <app-post story="reply" tab="replies" hash="${reply.hash}" url="/r/${reply.hash.toLowerCase()}" likes="${reply.likes}" liked="${reply.liked}"
@@ -709,7 +709,7 @@ export default class PreviewPost extends HTMLElement {
 
   getReply = (kind, parent) => {
     if (kind === 'reply') {
-      let url = parent.startsWith('P') ? `/p/${parent.toLowerCase()}/preview` : `/r/${parent.toLowerCase()}/preview`;
+      let url = parent.startsWith('P') ? `/post/${parent.toLowerCase()}` : `/reply/${parent.toLowerCase()}`;
       return /*html*/`
         <preview-post url="${url}" hash="${parent}" preview="${this.preview}"></preview-post>
       `

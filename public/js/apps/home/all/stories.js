@@ -95,7 +95,7 @@ export default class HomeStories extends HTMLElement {
 
   mapFields = data => {
     return data.map(story => {
-      const author = story.story_author;
+      const author = story.author;
       let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
       // replace all " and ' with &quot; and &apos; to avoid breaking the html
       bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');

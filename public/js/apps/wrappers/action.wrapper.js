@@ -462,8 +462,8 @@ export default class ActionWrapper extends HTMLElement {
     return /* html */`
       <div class="actions stats ${className}">
         ${this.getArrow(this.getAttribute('kind'), this.getAttribute('preview'))}
-        ${this.getLike(this.getAttribute('liked'))}
         ${this.getWrite()}
+        ${this.getLike(this.getAttribute('liked'))}
         ${this.getViews()}
         ${this.getShare()}
       </div>
@@ -682,7 +682,7 @@ export default class ActionWrapper extends HTMLElement {
           font-size: 0.95rem;
           justify-content: start;
           gap: 5px;
-          padding: 5px 10px;
+          padding: 5px 7px;
           height: 30px;
           border-radius: 50px;
           font-weight: 500;
@@ -762,7 +762,7 @@ export default class ActionWrapper extends HTMLElement {
         }
 
         span:first-of-type {
-          margin: 0 0 0 -7px;
+          margin: 0 0 0 -8px;
         }
 
         .actions.preview > span.action.write {

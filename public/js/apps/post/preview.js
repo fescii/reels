@@ -3,9 +3,8 @@ export default class PreviewPost extends HTMLElement {
     // We are not even going to touch this.
     super();
     this._url = this.getAttribute('url');
-    this._story = null;
-    this._reply = null;
-    this._item = '';
+    this.post = null;
+    this.item = '';
     // let's create our shadow root
     this.shadowObj = this.attachShadow({mode: 'open'});
     this.app = window.app;
@@ -80,8 +79,8 @@ export default class PreviewPost extends HTMLElement {
     contentContainer.innerHTML = this.getLoader();
     const previewLoader = this.shadowObj.querySelector('#loader-container');
 
-    // Check if reply or story is already fetched
-    if (this._story || this._reply) {
+    // Check if post is set
+    if (this.post) {
       this.handleFetchedContent(contentContainer, previewLoader);
       return;
     }
@@ -98,17 +97,11 @@ export default class PreviewPost extends HTMLElement {
 
   handleFetchedContent = (contentContainer, previewLoader) => {
     previewLoader.remove();
+    this.item = this.mapReply(this.post);
+    contentContainer.innerHTML = this.populateReply(this.post);
+    if(this.post.kind === 'reply') this.setReply('reply', this.post);
 
-    if (this._story) {
-      this._item = this.mapStory(this._story);
-      this.populateContent(this._story, contentContainer);
-    } else {
-      this._item = this.mapReply(this._reply);
-      contentContainer.innerHTML = this.populateReply(this._reply);
-      this.setReply('reply', this._reply.story ? this._reply.story : this._reply.reply);
-    }
-
-    this.activateStatsBtn(this._item);
+    this.activateStatsBtn(this.item);
     this.openStory();
     this.openReadMore();
     this.openUrl();
@@ -122,25 +115,16 @@ export default class PreviewPost extends HTMLElement {
     }
 
     try {
-      if (result.story) {
-        this._story = result.story;
-        this._item = this.mapStory(result.story);
-        previewLoader.remove();
-        this.populateContent(result.story, contentContainer);
-      } else if (result.reply) {
-        this._reply = result.reply;
-        this._item = this.mapReply(result.reply);
-        previewLoader.remove();
-        contentContainer.innerHTML = this.populateReply(result.reply);
-        this.activateStatsBtn(result.reply);
-        this.openStory();
-        this.openReadMore();
-        this.openUrl();
-        this.styleLastBlock();
-        this.setReply('reply', result.reply.story ? result.reply.story : result.reply.reply);
-      } else {
-      this.displayError(contentContainer, previewLoader);
-      }
+      this.post = result.post;
+      this.item = this.getPost(result.post);
+      previewLoader.remove();
+      contentContainer.innerHTML = this.populatePost(result.post);
+      this.activateStatsBtn(result.post);
+      this.openStory();
+      this.openReadMore();
+      this.openUrl();
+      this.styleLastBlock();
+      if(result.post.kind === 'reply') this.setReply('reply', result.post);
     } catch (error) {
       console.error(error)
       this.handleError(contentContainer, previewLoader, error);
@@ -154,7 +138,7 @@ export default class PreviewPost extends HTMLElement {
       story: this.populateStory
     };
 
-    const populateFunction = contentMap[story.kind];
+    const populateFunction = contentMap[post.kind];
     if (populateFunction) {
       contentContainer.innerHTML = populateFunction.call(this, story);
     }
@@ -185,69 +169,28 @@ export default class PreviewPost extends HTMLElement {
     this.displayError(contentContainer, previewLoader);
   }
 
-  populateStory = story => {
-    const author = story.author
-    author.you = story.you
-    author.time = story.createdAt
-    const url = `/p/${story.hash.toLowerCase()}`
-    const itemContent = this.removeHtml(story.content, story.title)
-    return this.getContent(itemContent, url, story.views, story.likes, author, story.kind)
+  populatePost = post => {
+    const author = post.author;
+    author.you = post.you;
+    author.time = post.createdAt;
+    const postContent = this.getPost(post);
+    const url =`/post/${post.hash.toLowerCase()}`;
+    return this.getContent(postContent, url, post.views, post.likes, author, post.kind);
   }
 
-  populateReply = reply => {
-    const author = reply.author;
-    author.you = reply.you;
-    author.time = reply.createdAt;
-    const url = `/r/${reply.hash.toLowerCase()}`;
-    const itemContent = this.getPost(reply.content);
-    return this.getContent(itemContent, url, reply.views, reply.likes, author, 'reply');
-  }
-
-  populatePost = story => {
-    const author = story.author
-    author.you = story.you
-    author.time = story.createdAt
-    const url = `/p/${story.hash.toLowerCase()}`
-    const itemContent = this.getPost(story.content);
-    return this.getContent(itemContent, url, story.views, story.likes, author, story.kind);
-  }
-
-  populatePoll = story => {
-    const author =story.author;
-    author.you = story.you;
-    author.time = story.createdAt;
-    const poll = { 
-      hash: story.hash,
-      votes: story.votes,
-      selected: story.option,
-      end: story.end,
-      voted: story.option ? 'true' : 'false',
-      options: story.poll,
-      content: story.content
-    }
-    const pollContent = this.getPoll(poll);
-    const url =`/p/${story.hash.toLowerCase()}`;
-    return this.getContent(pollContent, url, story.views, story.likes, author, story.kind);
-  }
-
-  getPoll = poll =>  {
+  getPost = post =>  {
     const mql = window.matchMedia('(max-width: 660px)');
-    // Remove html tags
-    const contentStr = poll.content.replace(/<[^>]*>/g, '');
+    const contentStr = post.content.replace(/<[^>]*>/g, '');
     const contentLength = contentStr.length;
-
     let chars = 150;
-
     // Check if its a mobile view
-    if (mql.matches) {
-      chars = 120;
-    }
+    if (mql.matches) chars = 120;
 
     // Check if content length is greater than :chars
     if (contentLength > chars) {
       return /*html*/`
         <div class="content extra ${chars <= 200 ? 'mobile' : ''}" id="content">
-          ${poll.content}
+          ${post.content}
           <div class="read-more">
             <span class="action">view more</span>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
@@ -255,23 +198,28 @@ export default class PreviewPost extends HTMLElement {
             </svg>
           </div>
         </div>
-        <votes-wrapper reload="false" votes="${poll.votes}" selected="${poll.selected}"
-          hash="${poll.hash}"
-          end-time="${poll.end}" voted="${poll.voted}" options="${poll.options}">
-        </votes-wrapper>
+        ${this.getPoll(post)}
       `
     }
     else {
       return /*html*/`
         <div class="content" id="content">
-          ${poll.content}
+          ${post.content}
         </div>
-        <votes-wrapper reload="false" votes="${poll.votes}" selected="${poll.selected}"
-          hash="${poll.hash}"
-          end-time="${poll.end}" voted="${poll.voted}" options="${poll.options}">
-        </votes-wrapper>
+        ${this.getPoll(post)}
       `
     }
+  }
+
+  getPoll = post => {
+    if(post.kind === 'poll') {
+      return /*html*/`
+        <votes-wrapper reload="false" votes="${post.votes}" selected="${post.option}" 
+          end-time="${post.end}" voted="${post.option ? 'true' : 'false'}" options='${post.poll}'
+          hash="${post.hash}" kind="poll" url="/post/${post.hash.toLowerCase()}">
+        </votes-wrapper>
+      `;
+    } else return '';
   }
 
   removeHtml = (text, title)=> {
@@ -301,42 +249,6 @@ export default class PreviewPost extends HTMLElement {
     } else {
       // trim the text to 250 characters
       return text.substring(0, 200) + '...';
-    }
-  }
-
-  getPost = content => {
-    const mql = window.matchMedia('(max-width: 660px)');
-    // Remove html tags
-    const contentStr = content.replace(/<[^>]*>/g, '');
-    const contentLength = contentStr.length;
-
-    let chars = 250;
-
-    // Check if its a mobile view
-    if (mql.matches) {
-      chars = 200;
-    }
-
-    // Check if content length is greater than: chars
-    if (contentLength > chars) {
-      return /*html*/`
-        <div class="content extra ${chars <= 200 ? 'feed' : ''}" id="content">
-          ${content}
-          <div class="read-more">
-            <span class="action">view more</span>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-              <path d="M12.78 5.22a.749.749 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.06 0L3.22 6.28a.749.749 0 1 1 1.06-1.06L8 8.939l3.72-3.719a.749.749 0 0 1 1.06 0Z"></path>
-            </svg>
-          </div>
-        </div>
-      `
-    }
-    else {
-      return /*html*/`
-        <div class="content" id="content">
-          ${content}
-        </div>
-      `
     }
   }
 
@@ -376,26 +288,16 @@ export default class PreviewPost extends HTMLElement {
   }
 
   openUrl = () => {
-    // get all the links
     const links = this.shadowObj.querySelectorAll('div#content a');
     const body = document.querySelector('body');
-
-    // loop through the links
     if (!links) return;
-
     links.forEach(link => {
-      // add event listener to the link
       link.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        // get the url
         const url = link.getAttribute('href');
-
-        // link pop up
         let linkPopUp = `<url-popup url="${url}"></url-popup>`
-
-        // open the popup
         body.insertAdjacentHTML('beforeend', linkPopUp);
       });
     });
@@ -410,14 +312,8 @@ export default class PreviewPost extends HTMLElement {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-
-        // get url
         let url = btn.getAttribute('href');
-
-        // Get full post
-        const post =  this._item;
-  
-        // push the post to the app
+        const post =  this.item;
         this.pushApp(url, post);
       })
     }
@@ -428,14 +324,8 @@ export default class PreviewPost extends HTMLElement {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-
-        // get url
         let url = btn.getAttribute('href');
-
-        // Get full post
-        const post =  this._item;
-  
-        // push the post to the app
+        const post =  this.item;
         this.pushApp(url, post);
       })
     }
@@ -452,110 +342,51 @@ export default class PreviewPost extends HTMLElement {
     this.app.navigate(content);
   }
 
-  mapStory = story => {
-    const author = story.author;
-    const url = `/p/${story.hash.toLowerCase()}`;
-    const images = story.images ? story.images.join(',') : null;
-    if (story.kind === "post") {
-      return /*html*/`
-        <app-post story="quick" tab="replies" url="${url}" hash="${story.hash}" likes="${story.likes}" replies="${story.replies}" 
-          replies-url="${url}/replies" likes-url="${url}/likes" images='${images}'
-          views="${story.views}"  time="${story.createdAt}" liked="${story.liked ? 'true' : 'false'}" 
-          author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
-          author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
-          author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
-          author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-          author-bio="${author.bio === null ? 'This user has not added a bio yet.' : author.bio}">
-          ${story.content}
-        </app-post>
-      `
-    }
-    else if (story.kind === "poll") {
-      return /*html*/`
-        <app-post story="poll" tab="replies" url="${url}" hash="${story.hash}" likes="${story.likes}"
-          replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}"
-          replies-url="${url}/replies" likes-url="${url}/likes" options='${story.poll}' voted="${story.option ? 'true' : 'false'}" 
-          selected="${story.option}" end-time="${story.end}" votes="${story.votes}" 
-          author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
-          author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
-          author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
-          author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}' 
-          author-bio="${author.bio === null ? 'This user has not added a bio yet.' : author.bio}">
-          ${story.content}
-        </app-post>
-      `
-    }
-    else if (story.kind === "story") {
-      return /*html*/`
-        <app-story story="story" hash="${story.hash}" url="${url}" tab="replies" topics="${story.topics.length === 0 ? 'story' : story.topics}" 
-          story-title="${story.title}" time="${story.createdAt}" replies-url="${url}/replies" images='${images}'
-          likes-url="${url}/likes" likes="${story.likes}" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" 
-          author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}" slug="${story.slug}"
-          author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}' 
-          author-img="${author.picture}" author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" 
-          author-followers="${author.followers}" author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" 
-          author-bio="${author.bio === null ? 'This user has not added a bio yet.' : author.bio}">
-          ${story.content}
-        </app-story>
-      `
-    }
-  }
-
-  mapReply = reply => {
-    const author = reply.author;
-    const images = reply.images ? reply.images.join(',') : null;
+  mapStory = post => {
+    const author = post.author;
+    const url = `/post/${post.hash.toLowerCase()}`;
+    const images = post.images ? post.images.join(',') : null;
     return /*html*/`
-      <app-post story="reply" tab="replies" hash="${reply.hash}" url="/r/${reply.hash.toLowerCase()}" likes="${reply.likes}" liked="${reply.liked}"
-        replies="${reply.replies}" views="${reply.views}" time="${reply.createdAt}" replies-url="/r/${reply.hash}/replies" 
-        parent="${reply.story ? reply.story : reply.reply}" preview="full" likes-url="/r/${reply.hash}/likes" images='${images}'
-        author-url="/u/${author.hash}" author-hash="${author.hash}" author-you="${reply.you}" author-stories="${author.stories}" 
-        author-replies="${author.replies}" author-img="${author.picture}" author-verified="${author.verified}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-        author-name="${author.name}" author-followers="${author.followers}" author-following="${author.following}" 
-        author-follow="${author.is_following}" author-bio="${author.bio === null ? 'The author has no bio yet!' : author.bio}">
-        ${reply.content}
+      <app-post story="quick" tab="replies" url="${url}" hash="${post.hash}" likes="${post.likes}" replies="${post.replies}" 
+        replies-url="${url}/replies" likes-url="${url}/likes" images='${images}'
+        views="${post.views}"  time="${post.createdAt}" liked="${post.liked ? 'true' : 'false'}" 
+        author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
+        author-hash="${author.hash}" author-you="${post.you ? 'true' : 'false'}" author-img="${author.picture}" 
+        author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
+        author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
+        author-bio="${author.bio === null ? 'This user has not added a bio yet.' : author.bio}" ${this.getPollOptions(post)}>
+        ${post.content}
       </app-post>
     `
   }
 
-  formatNumber = n => {
-    if (n >= 0 && n <= 999) {
-      return n.toString();
-    } else if (n >= 1000 && n <= 9999) {
-      const value = (n / 1000).toFixed(2);
-      return `${value}k`;
-    } else if (n >= 10000 && n <= 99999) {
-      const value = (n / 1000).toFixed(1);
-      return `${value}k`;
-    } else if (n >= 100000 && n <= 999999) {
-      const value = (n / 1000).toFixed(0);
-      return `${value}k`;
-    } else if (n >= 1000000 && n <= 9999999) {
-      const value = (n / 1000000).toFixed(2);
-      return `${value}M`;
-    } else if (n >= 10000000 && n <= 99999999) {
-      const value = (n / 1000000).toFixed(1);
-      return `${value}M`;
-    } else if (n >= 100000000 && n <= 999999999) {
-      const value = (n / 1000000).toFixed(0);
-      return `${value}M`;
-    } else if (n >= 1000000000) {
-      return "1B+";
-    }
-    else {
-      return 0;
-    }
+  getPollOptions = post => {
+    if(post.kind === 'poll') {
+      return /*html*/`  options='${post.poll}' voted="${post.option ? 'true' : 'false'}" 
+      selected="${post.option}" end-time="${post.end}" votes="${post.votes}" `;
+    } else return '';
   }
 
-  parseToNumber = str => {
-    // Try parsing the string to an integer
-    const num = parseInt(str);
+  formatNumber = n => {
+    n = this.parseToNumber(n);
+    const ranges = [
+      { divider: 1e9, suffix: 'B+' },
+      { divider: 1e6, suffix: 'M', thresholds: [1e6, 1e7, 1e8] },
+      { divider: 1e3, suffix: 'k', thresholds: [1e3, 1e4, 1e5] }
+    ];
 
-    // Check if parsing was successful
-    if (!isNaN(num)) {
-      return num;
-    } else {
-      return 0;
-    }
+    const { divider, suffix, thresholds } = ranges.find(({ divider }) => n >= divider) || {};
+    if (!divider) return n.toString();
+
+    const value = n / divider;
+    const precision = thresholds ? 
+      (n >= thresholds[2] ? 0 : n >= thresholds[1] ? 1 : 2) : 2;
+
+    return `${value.toFixed(precision)}${suffix}`;
+  }
+
+  parseToNumber(str) {
+    return parseInt(str, 10) || 0;
   }
 
   disableScroll() {
@@ -601,13 +432,11 @@ export default class PreviewPost extends HTMLElement {
   }
 
   getLapseTime = isoDateStr => {
-    const dateIso = new Date(isoDateStr); // ISO strings with timezone are automatically handled
-    let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const date = new Date(dateIso.toLocaleString('en-US', { timeZone: userTimezone }));
+    const date = new Date(isoDateStr);
     const currentTime = new Date();
-    const timeDifference = currentTime - date;
-    const seconds = timeDifference / 1000;
+    const seconds = (currentTime - date) / 1000;
 
+    // check if seconds is less than 86400 and dates are equal: Today, 11:30 AM
     if (seconds < 86400 && date.getDate() === currentTime.getDate()) {
       return `
         Today • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
@@ -643,7 +472,7 @@ export default class PreviewPost extends HTMLElement {
       preview.classList.add(kind);
       if(this.preview === 'full') preview.classList.add('full');
     }
-    const images = this._story ? this._story.images : this._reply.images;
+    const images = this.post.images ? this.post.images : null;
 
     return /*html*/`
       ${this.getHeader(author)}
@@ -709,7 +538,7 @@ export default class PreviewPost extends HTMLElement {
 
   getReply = (kind, parent) => {
     if (kind === 'reply') {
-      let url = parent.startsWith('P') ? `/post/${parent.toLowerCase()}` : `/reply/${parent.toLowerCase()}`;
+      let url = `/post/${parent.hash.toLowerCase()}`;
       return /*html*/`
         <preview-post url="${url}" hash="${parent}" preview="${this.preview}"></preview-post>
       `
@@ -754,7 +583,7 @@ export default class PreviewPost extends HTMLElement {
   }
 
   getImages = (kind, imageArray) => {
-    if(kind === 'story') return this.getStoryImages(this._story.content);
+    if(kind === 'story') return this.getStoryImages(this._post.content);
     // if length is greater is less than 1
     if(!imageArray || imageArray.length < 1) return '';
 
@@ -790,8 +619,6 @@ export default class PreviewPost extends HTMLElement {
     const imgRegex = /<img\s+(?:[^>]*?\s+)?src\s*=\s*(["'])(.*?)\1/gi;
     const matches = [];
     let match;
-  
-    // Loop through all matches
     while ((match = imgRegex.exec(text)) !== null) {
       matches.push(match[2]);  // match[2] contains the URL
     }
@@ -892,10 +719,6 @@ export default class PreviewPost extends HTMLElement {
           line-height: 1.4;
           gap: 0;
           margin: 0;
-          padding: 0 0 0 19px;
-        }
-
-        .preview.feed {
           padding: 0 0 0 19px;
         }
 

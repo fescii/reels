@@ -87,7 +87,7 @@ export default class HomeAll extends HTMLElement {
       `
     } else if (step === 4) {
       return /* html */`
-        <home-feed url="${this.getAttribute('feed-api')}" page="1"></home-feed>
+        <home-feed url="${this.getAttribute('feed')}" page="1"></home-feed>
       `
     } else return '';
   }
@@ -95,7 +95,7 @@ export default class HomeAll extends HTMLElement {
   getBody = () => {
     return /* html */`
       <div class="feeds">
-        <home-recent url="${this.getAttribute('recent')}"></home-recent>
+        <home-recent url="${this.getAttribute('trending')}"></home-recent>
       <div>
     `;
   }

@@ -2,7 +2,7 @@ export default class HomeRecent extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-    this.url = `${this.getAttribute('url')}?page=1&limit=6`;
+    this.url = `${this.getAttribute('url')}?page=1&limit=10`;
     this.app = window.app;
     this.api = this.app.api;
     this.all = this.getRootNode().host;
@@ -76,11 +76,10 @@ export default class HomeRecent extends HTMLElement {
 
   handleFetchResult = (result, feedContainer) => {
     if (result.success) {
-      const feed = result.feed;
-      if (this._page === 1 && feed.length === 0) {
+      if (this._page === 1 && result.posts.length === 0) {
         this.populateFeeds(this.getEmptyMsg(), feedContainer);
       } else {
-        const content = this.mapFeeds(feed);
+        const content = this.#feeds(result.posts);
         this.populateFeeds(content, feedContainer);
         this.setLastItem(feedContainer);
       }
@@ -125,102 +124,29 @@ export default class HomeRecent extends HTMLElement {
     feedContainer.insertAdjacentHTML('beforeend', content);
   }
 
-  mapFeeds = feed => feed.map(item => 
-    item.type === "reply" ? this.mapReply(item) : this.mapStory(item)
-  ).join('');
-
-  #sanitizeBio = bio => (bio || 'This user has not added a bio yet.')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-
-  #authorAttributes = author => ({
-    "author-url": `/u/${author.hash}`,
-    "author-stories": author.stories,
-    "author-replies": author.replies,
-    "author-hash": author.hash,
-    "author-you": author.you,
-    "author-img": author.picture,
-    "author-verified": author.verified,
-    "author-name": author.name,
-    "author-followers": author.followers,
-    "author-following": author.following,
-    "author-follow": author.is_following,
-    "author-contact": author.contact ? JSON.stringify(author.contact) : null,
-    "author-bio": this.#sanitizeBio(author.bio)
-  });
-
-  #storyAttributes = (story, url) => ({
-    url,
-    hash: story.hash,
-    likes: story.likes,
-    replies: story.replies,
-    liked: story.liked,
-    views: story.views,
-    time: story.createdAt,
-    "replies-url": `${url}/replies`,
-    "likes-url": `${url}/likes`,
-    images: story.images?.join(',') || ''
-  });
-
-  mapStory = story => {
-    const author = this.#authorAttributes(story.author);
-    const url = `/post/${story.hash.toLowerCase()}`;
-    const baseAttrs = { ...this.#storyAttributes(story, url), ...author };
-
-    const templates = {
-      post: /*html*/`
-        <quick-post story="quick" ${this.#attrsToString(baseAttrs)}>
-          ${story.content}
+  #feeds = feed => {
+    return feed.map(post => {
+      const author = post.author;
+      let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
+      // replace all " and ' with &quot; and &apos; to avoid breaking the html
+      bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+      const images = post.images ? post.images.join(',') : null;
+      const preview = this.section === "post" ? `no-preview="true"` : `preview="false"`;
+      return /*html*/`
+        <quick-post kind="${post.kind}" feed="true" ${preview} hash="${post.hash}" url="/r/${post.hash}" 
+          likes="${post.likes}" replies="${post.replies}" liked="${post.liked}" views="${post.views}" 
+          replies-url="/post/${post.hash}/replies" likes-url="/post/${post.hash}/likes" images='${images}'
+          time="${post.createdAt}" options='${post.poll}' votes="${post.votes}"
+          author-hash="${author.hash}" author-you="${post.you}" author-url="/u/${author.hash}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
+          author-stories="${author.stories}" author-replies="${author.replies}" parent="${post.parent}"
+          author-img="${author.picture}" author-verified="${author.verified}" author-name="${author.name}" author-followers="${author.followers}"
+          author-following="${author.following}" author-follow="${author.is_following}" author-bio="${bio}">
+          ${post.content}
         </quick-post>
-      `,
-      poll: /*html*/`
-        <poll-post story="poll" 
-          ${this.#attrsToString({
-            ...baseAttrs,
-            voted: story.option ? 'true' : 'false',
-            selected: story.option,
-            endTime: story.end,
-            options: story.poll,
-            votes: story.votes
-          })}>
-          ${story.content}
-        </poll-post>
-      `,
-      story: /*html*/`
-        <story-post story="story" 
-          ${this.#attrsToString({
-            ...baseAttrs,
-            topics: story.topics,
-            storyTitle: story.title,
-            slug: story.slug
-          })}>
-          ${story.content}
-        </story-post>
       `
-    };
+    }).join('');
+  }
 
-    return templates[story.kind] || '';
-  };
-
-  mapReply = reply => {
-    const author = this.#authorAttributes(reply.author);
-    const baseAttrs = {
-      ...this.#storyAttributes(reply, `/reply/${reply.hash.toLowerCase()}`),
-      ...author,
-      feed: "true",
-      parent: reply.story || reply.reply
-    };
-
-    return /*html*/`
-      <quick-post story="reply" ${this.#attrsToString(baseAttrs)}>
-        ${reply.content}
-      </quick-post>
-    `;
-  };
-
-  #attrsToString = attrs => Object.entries(attrs)
-    .map(([key, value]) => `${key}="${value}"`)
-    .join(' ');
 
   parseToNumber = num_str => {
     // Try parsing the string to an integer

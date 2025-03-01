@@ -18,6 +18,7 @@ Author URL: https://femar.co.ke
 @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap');
 
 /*
 
@@ -31,7 +32,7 @@ Author URL: https://femar.co.ke
   --stat-background: #f1f1f1;
   --attachement-background: var(var(--tab-background));
   --font-main: "Inter";
-  --font-text: "Lexend";
+  --font-text: "Instrument Sans";
   --font-mono: "Jetbrains Mono";
   --font-read: "Work Sans";
 

@@ -263,19 +263,13 @@ export default class QuickPost extends HTMLElement {
   }
 
   edit = () => {
-    // Get the body element
     const body = document.querySelector('body');
-
-    // Get the content of the topic page
     const content = this.getEdit();
-    // set to be deleted:
     window.toBeChanged = this;
-    // insert the content into the body
     body.insertAdjacentHTML('beforeend', content);
   }
 
   getEdit = () => {
-    // Show Post Page Here
     return /* html */`
       <post-options kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" hash="${this.getAttribute('hash')}"
         drafted="false" story="false" images="${this.getAttribute('images')}">
@@ -485,7 +479,7 @@ export default class QuickPost extends HTMLElement {
       ${this.getOn()}
       ${this.getFooter()}
       <div class="previews">
-        ${this.getReply(this.getAttribute('story'))}
+        ${this.getReply(this.getAttribute('kind'))}
       </div>
     `;
   }
@@ -569,12 +563,12 @@ export default class QuickPost extends HTMLElement {
     return text === 'true';
   }
 
-  getReply = story => {
+  getReply = kind => {
     if(this.noPreview) return '';
     const feed = this.textToBool(this.getAttribute('feed'))
-    if (story === 'reply') {
+    if (kind === 'reply') {
       const parent = this.getAttribute('parent');
-      let url = parent.startsWith('P') ? `/post/${parent.toLowerCase()}` : `/reply/${parent.toLowerCase()}`;
+      let url = `/post/${parent}`;
       return /*html*/`
         <preview-post feed="${feed}" url="${url}" hash="${parent}" preview="quick"></preview-post>
       `
@@ -915,7 +909,49 @@ export default class QuickPost extends HTMLElement {
           color: inherit;
         }
 
-        figure {
+        .content blockquote p {
+          margin: 0;
+        }
+
+        .content blockquote * {
+          margin: 0;
+        }
+
+        .content hr {
+          border: none;
+          background-color: var(--gray-color);
+          height: 1px;
+          margin: 10px 0;
+        }
+
+        .content ul,
+        .content ol {
+          margin: 5px 0 15px 20px;
+          padding: 0 0 0 15px;
+          color: inherit;
+        }
+
+        .content ul li,
+        .content ol li {
+          padding: 5px 0;
+        }
+
+        .content code {
+          background: var(--gray-background);
+          padding: 0 5px;
+          font-family: var(--font-mono);
+          font-size: 0.9rem;
+          border-radius: 5px;
+        }
+
+        .content img {
+          max-width: 100%;
+          height: auto;
+          object-fit: contain;
+          border-radius: 5px;
+        }
+
+        .content figure {
           max-width: 100% !important;
           height: auto;
           width: max-content;

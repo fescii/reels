@@ -249,9 +249,9 @@ export default class ProfileSection extends HTMLElement {
 
   getReplies = () => {
     return /* html */`
-      <replies-feed hash="${this.getAttribute('hash')}" replies="${this.getAttribute('replies')}" page="1"
+      <posts-feed hash="${this.getAttribute('hash')}" replies="${this.getAttribute('replies')}" page="1"
         url="${this.getAttribute('replies-url')}" kind="user">
-      </replies-feed>
+      </posts-feed>
     `
   }
 
@@ -373,9 +373,9 @@ export default class ProfileSection extends HTMLElement {
           display: flex;
           width: 30px;
           height: 4px;
-          background: var(--accent-color);
+          background: var(--accent-linear);
           position: absolute;
-          bottom: -1px;
+          bottom: -1.5px;
           left: 0;
           border-radius: 5px;
           transition: all 0.3s;

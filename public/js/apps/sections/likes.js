@@ -85,9 +85,9 @@ export default class LikesSection extends HTMLElement {
 
   getLikes = () => {
     return /*html*/`
-      <users-feed hash="${this.getAttribute('hash')}" total="${this.getAttribute('likes')}" page="1"
+      <people-feed hash="${this.getAttribute('hash')}" total="${this.getAttribute('likes')}" page="1"
         url="${this.getAttribute('likes-url')}" kind="likes">
-      </users-feed>
+      </people-feed>
     `
   }
 

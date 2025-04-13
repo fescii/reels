@@ -1,11 +1,9 @@
 // Import necessary modules, middlewares, and controllers
-const {
-  getStory, getReply
-} = require('../controllers').stories;
+const { posts: { post } } = require('../controllers');
 
 /**
  * @function topicRoutes
- * @description a modular function that registers all the story routes(public) to the app
+ * @description a modular function that registers all the post routes(public) to the app
  * @param {Object} app - The express app
  * @returns {void} - No return
 */
@@ -20,9 +18,6 @@ module.exports = app => {
   });
 
 
-  // Route for handling story page
-  app.get('/p/:story', getStory);
-
-  // Route to get a reply: handles reply page
-  app.get('/r/:hash', getReply);
+  // Route for handling post page
+  app.get('/p/:hash', post);
 }

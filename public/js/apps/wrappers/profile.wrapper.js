@@ -778,10 +778,10 @@ export default class ProfileWrapper extends HTMLElement {
         div.bio {
           margin: 8px 0;
           color: var(--gray-color);
-          font-family: var(--font-main), sans-serif;
-          font-size: 0.9rem;
+          font-family: var(--font-read), sans-serif;
+          font-size: 1rem;
           font-weight: 400;
-          line-height: 1.4;
+          line-height: 1.5;
           width: 100%;
           text-align: start;
         }

@@ -212,9 +212,9 @@ export default class PostSection extends HTMLElement {
 
   getLikes = () => {
     return /*html*/`
-      <users-feed hash="${this.getAttribute('hash')}" total="${this.getAttribute('likes')}" page="1"
+      <people-feed hash="${this.getAttribute('hash')}" total="${this.getAttribute('likes')}" page="1"
         url="${this.getAttribute('likes-url')}" kind="likes">
-      </users-feed>
+      </people-feed>
     `
   }
 
@@ -318,9 +318,9 @@ export default class PostSection extends HTMLElement {
           display: flex;
           width: 30px;
           height: 4px;
-          background: var(--accent-color);
+          background: var(--accent-linear);
           position: absolute;
-          bottom: -1px;
+          bottom: -1.5px;
           left: 0;
           border-radius: 5px;
           transition: all 0.3s;

@@ -42,12 +42,12 @@ export default class ActivityItem extends HTMLElement {
   }
 
   getPreviewUrl = (kind, hash) => {
-    if (kind === 'story') {
+    if (kind === 'post') {
       return `/p/${hash}/preview`;
     }
 
     if (kind === 'reply') {
-      return `/r/${hash}/preview`;
+      return `/p/${hash}/preview`;
     }
 
     if (kind === 'user') {
@@ -166,12 +166,12 @@ export default class ActivityItem extends HTMLElement {
 
   getUrl = (kind, hash) => {
     hash = hash.toLowerCase();
-    if (kind === 'story') {
+    if (kind === 'post') {
       return `/p/${hash}`;
     }
 
     if (kind === 'reply') {
-      return `/r/${hash}`;
+      return `/p/${hash}`;
     }
 
     if (kind === 'user') {

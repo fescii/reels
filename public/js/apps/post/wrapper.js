@@ -466,7 +466,7 @@ export default class PostWrapper extends HTMLElement {
   getTemplate() {
     // Show HTML Here
     return `
-      <link rel="stylesheet" href="/static/css/app/post/wrapper.css">
+      ${this.getStyles()}
       ${this.getBody()}
     `;
   }
@@ -568,7 +568,7 @@ export default class PostWrapper extends HTMLElement {
     const feed = this.textToBool(this.getAttribute('feed'))
     if (kind === 'reply') {
       const parent = this.getAttribute('parent');
-      let url = `/post/${parent}`;
+      let url = `/p/${parent}`;
       return /*html*/`
         <preview-post feed="${feed}" url="${url}" hash="${parent}" preview="quick"></preview-post>
       `
@@ -600,14 +600,15 @@ export default class PostWrapper extends HTMLElement {
     let url = this.getAttribute('author-url');
     url = url.trim().toLowerCase();
     let bio = this.getAttribute('author-bio') || 'This author has not provided a bio yet.';
-    // replace all " and ' with &quot; and &apos; to avoid breaking the html
-    bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    // create a paragraph with the \n replaced with <br> if there are more than one \n back to back replace them with one <br>
+    if (bio.includes('\n')) bio = bio.replace(/\n+/g, '<br>');
     return /* html */`
 			<hover-author url="${url}" you="${this.getAttribute('author-you')}" hash="${this.getAttribute('author-hash')}"
         picture="${this.getAttribute('author-img')}" name="${this.getAttribute('author-name')}" contact='${this.getAttribute("author-contact")}'
-        stories="${this.getAttribute('author-stories')}" replies="${this.getAttribute('author-replies')}"
+        posts="${this.getAttribute('author-posts')}" replies="${this.getAttribute('author-replies')}"
         followers="${this.getAttribute('author-followers')}" following="${this.getAttribute('author-following')}" user-follow="${this.getAttribute('author-follow')}"
-        verified="${this.getAttribute('author-verified')}" bio="${bio}">
+        verified="${this.getAttribute('author-verified')}">
+        ${bio}
       </hover-author>
 		`
   }
@@ -622,7 +623,7 @@ export default class PostWrapper extends HTMLElement {
         likes="${this.getAttribute('likes')}" replies="${this.getAttribute('replies')}" ${text} preview="full"
         replies-url="${this.getAttribute('replies-url')}" likes-url="${this.getAttribute('likes-url')}" images='${images}'
         liked="${this.getAttribute('liked')}" views="${this.getAttribute('views')}" time="${this.getAttribute('time')}"
-        author-stories="${this.getAttribute('author-stories')}" author-replies="${this.getAttribute('author-replies')}" author-contact='${this.getAttribute("author-contact")}'
+        author-posts="${this.getAttribute('author-posts')}" author-replies="${this.getAttribute('author-replies')}" author-contact='${this.getAttribute("author-contact")}'
         author-you="${this.getAttribute('author-you')}" author-hash="${this.getAttribute('author-hash')}" author-url="${this.getAttribute('author-url')}"
         author-img="${this.getAttribute('author-img')}" author-verified="${this.getAttribute('author-verified')}" author-name="${this.getAttribute('author-name')}"
         author-followers="${this.getAttribute('author-followers')}" author-following="${this.getAttribute('author-following')}" author-follow="${this.getAttribute('author-follow')}"
@@ -656,5 +657,392 @@ export default class PostWrapper extends HTMLElement {
         </button>
       </div>
     `
+  }
+
+  getFullCss = () => {
+    if(this.noPreview) {
+      return "padding: 7px 0 5px;"
+    } else {
+      if(this.getAttribute('story') === 'reply') {
+        return "padding: 7px 0 15px;"
+      } else {
+        return "padding: 7px 0 5px;"
+      }
+    }
+  }
+
+  getStyles() {
+    return /* css */`
+      <style>
+
+        *,
+        *:after,
+        *:before {
+          box-sizing: border-box !important;
+          font-family: inherit;
+          -webkit-box-sizing: border-box !important;
+        }
+
+        *:focus {
+          outline: inherit !important;
+        }
+
+        *::-webkit-scrollbar {
+          -webkit-appearance: none;
+        }
+
+        a {
+          text-decoration: none;
+        }
+
+
+        :host {
+          font-size: 16px;
+          border-bottom: var(--border);
+          font-family: var(--font-main), sans-serif;
+          ${this.getFullCss()}
+          margin: 0;
+          width: 100%;
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+        }
+
+        .meta {
+          width: 100%;
+          height: max-content;
+          display: flex;
+          position: relative;
+          color: var(--gray-color);
+          align-items: center;
+          font-family: var(--font-mono),monospace;
+          gap: 5px;
+          font-size: 0.9rem;
+          line-height: 1.5;
+        }
+
+        .meta > span.sp {
+          margin: 1px 0 0 0;
+        }
+
+        .meta > span.by {
+          font-weight: 500;
+          font-size: 0.93rem;
+          margin: 0 0 1px 1px;
+        }
+
+        .meta > time.time {
+          font-family: var(--font-read), sans-serif;
+          font-size: 0.8rem;
+          font-weight: 500;
+          margin: 1px 0 0 0;
+        }
+
+        .meta a.link {
+          text-decoration: none;
+          color: transparent;
+          background-image: var(--action-linear);
+          background-clip: text;
+          -webkit-background-clip: text;
+        }
+
+        .meta  a.author-link {
+          text-decoration: none;
+          color: transparent;
+          background: var(--accent-linear);
+          background-clip: text;
+          -webkit-background-clip: text;
+        }
+
+        .meta.top-meta {
+          width: 100%;
+        }
+
+        .meta.bottom-meta {
+          margin:  0;
+          padding: 5px 0 0;
+          display: flex;
+          position: relative;
+          color: var(--gray-color);
+          align-items: center;
+          font-family: var(--font-text), sans-serif;
+          gap: 8px;
+          font-size: 1rem;
+          font-weight: 600;
+        }
+
+        .meta.bottom-meta > .sp {
+          font-size: 1.25rem;
+          color: var(--gray-color);
+          font-weight: 400;
+        }
+
+        .content {
+          width: 100%;
+          display: flex;
+          cursor: pointer;
+          flex-flow: column;
+          color: var(--text-color);
+          font-family: var(--font-main), sans-serif;
+          line-height: 1.4;
+          gap: 0;
+          margin: 0;
+          padding: 0;
+        }
+
+        .content.extra {
+          max-height: 200px;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .content.extra.feed {
+          max-height: 150px;
+        }
+
+        .content.extra .read-more {
+          position: absolute;
+          bottom: -5px;
+          right: 0;
+          left: 0;
+          width: 100%;
+          padding: 5px 0;
+          display: flex;
+          align-items: end;
+          justify-content: center;
+          min-height: 80px;
+          gap: 3px;
+          cursor: pointer;
+          font-weight: 500;
+          font-family: var(--font-main), sans-serif;
+          color: var(--gray-color);
+          background: var(--fade-linear-gradient);
+        }
+
+        .content.extra .read-more svg {
+          display: inline-block;
+          width: 16px;
+          height: 16px;
+          margin: 0 0 2px 0;
+        }
+
+        .content h6,
+        .content h5,
+        .content h4,
+        .content h3,
+        .content h1 {
+          padding: 0;
+          font-size: 1.3rem !important;
+          color: var(--title-color);
+          font-weight: 500;
+          line-height: 1.5;
+          margin: 5px 0;
+        }
+
+        .content p {
+          font-size: 1rem;
+          margin: 0 0 5px;
+          line-height: 1.4;
+        }
+
+        .content a {
+          text-decoration: none;
+          cursor: pointer;
+          color: var(--anchor-color) !important;
+        }
+
+        .content a:hover {
+          text-decoration: underline;
+        }
+
+        .content blockquote {
+          margin: 2px 0;
+          padding: 5px 0;
+          font-style: italic;
+          background: var(--background);
+          color: var(--text-color);
+          font-weight: 400;
+          line-height: 1.4;
+        }
+
+        .content blockquote p {
+          margin: 0;
+        }
+
+        .content blockquote * {
+          margin: 0;
+        }
+
+        .content hr {
+          border: none;
+          background-color: var(--text-color);
+          height: 1px;
+          margin: 10px 0;
+        }
+
+        .content code {
+          background: var(--gray-background);
+          padding: 0 5px;
+          font-family: var(--font-mono);
+          font-size: 0.9rem;
+          border-radius: 5px;
+        }
+
+        .content b,
+        .content strong {
+          font-weight: 700;
+          line-height: 1.4;
+
+        }
+
+        .content ul,
+        .content ol {
+          margin: 5px 0 15px 20px;
+          padding: 0 0 0 15px;
+          color: inherit;
+          line-height: 1.4;
+        }
+
+        .content ul li,
+        .content ol li {
+          margin: 6px 0;
+          padding: 0;
+          color: inherit;
+        }
+
+        .content blockquote p {
+          margin: 0;
+        }
+
+        .content blockquote * {
+          margin: 0;
+        }
+
+        .content hr {
+          border: none;
+          background-color: var(--gray-color);
+          height: 1px;
+          margin: 10px 0;
+        }
+
+        .content ul,
+        .content ol {
+          margin: 5px 0 15px 20px;
+          padding: 0 0 0 15px;
+          color: inherit;
+        }
+
+        .content ul li,
+        .content ol li {
+          padding: 5px 0;
+        }
+
+        .content code {
+          background: var(--gray-background);
+          padding: 0 5px;
+          font-family: var(--font-mono);
+          font-size: 0.9rem;
+          border-radius: 5px;
+        }
+
+        .content img {
+          max-width: 100%;
+          height: auto;
+          object-fit: contain;
+          border-radius: 5px;
+        }
+
+        .content figure {
+          max-width: 100% !important;
+          height: auto;
+          width: max-content;
+          padding: 0;
+          max-width: 100%;
+          display: block;
+          margin-block-start: 5px;
+          margin-block-end: 5px;
+          margin-inline-start: 0 !important;
+          margin-inline-end: 0 !important;
+        }
+
+        div.previews {
+          width: 100%;
+          display: flex;
+          flex-flow: column;
+          gap: 0;
+          margin: 0;
+          padding: 0;
+        }
+
+        div.thread {
+          width: 100%;
+          display: flex;
+          position: relative;
+          gap: 0;
+          margin: 0;
+          padding: 8px 0 5px 19px;
+        }
+
+        div.thread > button.thread-button {
+          width: max-content;
+          margin: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+          font-size: 0.9rem;
+          background: none;
+          font-family: var(--font-main), sans-serif;
+          font-weight: 500;
+          color: var(--anchor-color);
+          border: none;
+          border-radius: 10px;
+          cursor: pointer
+        }
+
+        div.thread > .thread-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          left: 3px;
+          width: 1.8px;
+          height: calc(100% - 10px);
+          background: var(--action-linear);
+          border-radius: 5px;
+        }
+
+        @media screen and (max-width:660px) {
+          :host {
+            font-size: 16px;
+            width: 100%;
+            border-bottom: var(--border);
+          }
+
+          ::-webkit-scrollbar {
+            -webkit-appearance: none;
+          }
+
+          .meta a.reply-link,
+          .meta div.author-name > a,
+          a,
+          .stats > .stat {
+            cursor: default !important;
+          }
+
+          .content a {
+            cursor: default !important;
+          }
+
+          a,
+          .content.extra .read-more,
+          .replying-to,
+          .content,
+          div.thread > button.thread-button,
+          span.action {
+            cursor: default !important;
+          }
+        }
+      </style>
+    `;
   }
 }

@@ -2,7 +2,7 @@
 module.exports = (app) => {
   require('./auth')(app);
   require('./topics')(app);
-  require('./stories')(app);
+  require('./posts')(app);
   require('./users')(app);
   require('./search')(app);
   require('./themes')(app);

@@ -767,9 +767,9 @@ export default class AppSearch extends HTMLElement {
           display: flex;
           width: 30px;
           height: 4px;
-          background: var(--accent-color);
+          background: var(--accent-linear);
           position: absolute;
-          bottom: -1px;
+          bottom: -1.5px;
           left: 0;
           border-radius: 5px;
           transition: all 0.3s;

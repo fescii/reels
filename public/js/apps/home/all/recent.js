@@ -131,9 +131,9 @@ export default class HomeRecent extends HTMLElement {
       const images = post.images ? post.images.join(',') : null;
       const preview = this.section === "post" ? `no-preview="true"` : `preview="false"`;
       return /*html*/`
-        <post-wrapper kind="${post.kind}" feed="true" ${preview} hash="${post.hash}" url="/r/${post.hash}" 
+        <post-wrapper kind="${post.kind}" feed="true" ${preview} hash="${post.hash}" url="/p/${post.hash}" 
           likes="${post.likes}" replies="${post.replies}" liked="${post.liked}" views="${post.views}" 
-          replies-url="/post/${post.hash}/replies" likes-url="/post/${post.hash}/likes" images='${images}'
+          replies-url="/p/${post.hash}/replies" likes-url="/p/${post.hash}/likes" images='${images}'
           time="${post.createdAt}" options='${post.poll}' votes="${post.votes}"
           author-hash="${author.hash}" author-you="${post.you}" author-url="/u/${author.hash}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
           author-stories="${author.stories}" author-replies="${author.replies}" parent="${post.parent}"

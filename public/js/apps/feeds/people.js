@@ -86,7 +86,7 @@ export default class PeopleFeed extends HTMLElement {
         return;
       }
   
-      const people = result.users;
+      const people = result.people;
       if (outerThis._page === 1 && people.length === 0) {
         outerThis.handleEmptyResult(peopleContainer);
       } else if (people.length < 10) {
@@ -96,6 +96,7 @@ export default class PeopleFeed extends HTMLElement {
       }
   
     } catch (error) {
+      console.error('Error fetching people:', error);
       outerThis.handleFetchError(peopleContainer);
     }
   }
@@ -119,7 +120,7 @@ export default class PeopleFeed extends HTMLElement {
     // Block future fetches since we're at the end
     this._empty = true;
     this._block = true;
-    const content = this.mapFields(people);
+    const content = this.#feeds(people);
     this.populatePeople(content, peopleContainer);
     this.populatePeople(this.getLastMessage(this._kind), peopleContainer);
   }
@@ -128,7 +129,7 @@ export default class PeopleFeed extends HTMLElement {
     // Unblock for next fetch since we have a full page
     this._block = false;
     this._empty = false;
-    const content = this.mapFields(people);
+    const content = this.#feeds(people);
     this.populatePeople(content, peopleContainer);
     this.scrollEvent(peopleContainer);
   }
@@ -205,14 +206,14 @@ export default class PeopleFeed extends HTMLElement {
     }
   }
 
-  mapFields = data => {
-    return data.map(user => {
+  #feeds = users => {
+    return users.map(user => {
       let bio = user.bio === null ? 'This user has not added a bio yet.' : user.bio;
       
       // create a paragraph with the \n replaced with <br> if there are more than one \n back to back replace them with one <br>
       if (bio.includes('\n')) bio = bio.replace(/\n+/g, '<br>');
       return /*html*/`
-        <user-wrapper hash="${user.hash}" you="${user.you}" url="/u/${user.hash}" posts="${user.posts}" replies="${user.replies}"
+        <user-wrapper hash="${user.hash}" you="${user.you}" url="/u/${user.hash}" posts="${user.posts}" replies="${user.replies}" posts="${user.posts}"
           picture="${user.picture}" verified="${user.verified}" name="${user.name}" followers="${user.followers}" contact='${user.contact ? JSON.stringify(user.contact) : null}'
           following="${user.following}" user-follow="${user.is_following}">
           ${bio}

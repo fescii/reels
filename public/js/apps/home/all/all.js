@@ -31,7 +31,7 @@ export default class HomeAll extends HTMLElement {
       { component: 'home-recent', url: trending },
       { component: 'home-people', url: people },
       { component: 'home-recent', url: recent },
-      { component: 'home-feed', url: feed, page: "2" }
+      { component: 'posts-feed', url: feed, page: "2" }
     ];
     
     // Start loading the first component immediately

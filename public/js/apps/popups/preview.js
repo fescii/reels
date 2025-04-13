@@ -161,7 +161,7 @@ export default class PreviewPopup extends HTMLElement {
     const author = reply.author;
     author.you = reply.you;
     author.time = reply.createdAt;
-    const url = `/r/${reply.hash.toLowerCase()}`;
+    const url = `/p/${reply.hash.toLowerCase()}`;
     const itemContent = this.getPost(reply.content, reply.images);
     return this.getContent(itemContent, url, reply.author, reply.views, reply.likes);
   }
@@ -470,9 +470,9 @@ export default class PreviewPopup extends HTMLElement {
   mapReply = reply => {
     const author = reply.author;
     return /*html*/`
-      <app-post story="reply" tab="replies" hash="${reply.hash}" url="/r/${reply.hash.toLowerCase()}" likes="${reply.likes}" liked="${reply.liked}"
-        replies="${reply.replies}" views="${reply.views}" time="${reply.createdAt}" replies-url="/r/${reply.hash}/replies" 
-        parent="${reply.story ? reply.story : reply.reply}" preview="full" likes-url="/r/${reply.hash}/likes" 
+      <app-post story="reply" tab="replies" hash="${reply.hash}" url="/p/${reply.hash.toLowerCase()}" likes="${reply.likes}" liked="${reply.liked}"
+        replies="${reply.replies}" views="${reply.views}" time="${reply.createdAt}" replies-url="/p/${reply.hash}/replies" 
+        parent="${reply.story ? reply.story : reply.reply}" preview="full" likes-url="/p/${reply.hash}/likes" 
         author-url="/u/${author.hash}" author-hash="${author.hash}" author-you="${reply.you}" author-stories="${author.stories}" 
         author-replies="${author.replies}" author-img="${author.picture}" author-verified="${author.verified}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
         author-name="${author.name}" author-followers="${author.followers}" author-following="${author.following}" 

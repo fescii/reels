@@ -380,7 +380,7 @@ export default class HoverAuthor extends HTMLElement {
       <div class="overlay">
         ${this.getHeader()}
         ${this.getStats()}
-        ${this.getBio()}
+        ${this.getBio(this.innerHTML)}
         ${this.getActions()}
       </div>
 		`
@@ -511,31 +511,14 @@ export default class HoverAuthor extends HTMLElement {
 		`
   }
 
-  getBio = () => {
-    //mql
-    const mql = window.matchMedia('(max-width: 660px)');
-
-  
-    // Get bio content
-    let bio = this.getAttribute('bio') || 'The user has not added their bio yet.';
-
-    // trim white spaces
-    bio = bio.trim();
-
-    if(mql.matches) {
-      let bioArray = bio.split('\n');
-      // Check if bio is greater than 100 characters: replace the rest with ...
-      let html = bioArray.map(line => `<p>${line}</p>`).join('');
-      return /*html*/`
-        <div class="bio">${html}</div>
-      `
+  getBio = bio => {
+    // check if bio is empty
+    if (bio === '' || bio === null || bio === 'null') {
+      return 'The user has no bio';
     }
     else {
-      // Check if bio is greater than 100 characters: replace the rest with ...
-      let html = bio.length > 85 ? `<p>${bio.substring(0, 90)}...</p>` : `<p>${bio}</p>`;
-
       return /*html*/`
-        <div class="bio">${html}</div>
+        <div class="bio">${bio}</div>
       `
     }
   }
@@ -602,12 +585,13 @@ export default class HoverAuthor extends HTMLElement {
     url = url.trim().toLowerCase();
 
     return /* html */`
-      <app-profile you="${this.getAttribute('you')}" url="${url}" tab="stories"
-        stories-url="${url}/stories" replies-url="${url}/replies" stories="${this.getAttribute('stories')}" replies="${this.getAttribute('replies')}"
+      <app-profile you="${this.getAttribute('you')}" url="${url}" tab="posts"
+        posts-url="${url}/posts" replies-url="${url}/replies" posts="${this.getAttribute('posts')}" replies="${this.getAttribute('replies')}"
         followers-url="${url}/followers" following-url="${url}/following"
         hash="${this.getAttribute('hash')}" picture="${this.getAttribute('picture')}" verified="${this.getAttribute('verified')}"
         name="${this.getAttribute('name')}" followers="${this.getAttribute('followers')}" contact='${this.getAttribute("contact")}'
-        following="${this.getAttribute('following')}" user-follow="${this.getAttribute('user-follow')}" bio="${this.getAttribute('bio')}">
+        following="${this.getAttribute('following')}" user-follow="${this.getAttribute('user-follow')}">
+        ${this.innerHTML}
       </app-profile>
     `
   }
@@ -622,7 +606,7 @@ export default class HoverAuthor extends HTMLElement {
     return /* html */`
       <stats-popup url="${formattedUrl}/stats" name="${this.getAttribute('name')}"
         followers="${this.getAttribute('followers')}" following="${this.getAttribute('following')}" 
-        stories="${this.getAttribute('stories')}" replies="${this.getAttribute('replies')}">
+        posts="${this.getAttribute('posts')}" replies="${this.getAttribute('replies')}">
       </stats-popup>
     `
   }
@@ -922,19 +906,14 @@ export default class HoverAuthor extends HTMLElement {
           margin: 0 0 -2px 0;
         }
         
-        .bio {
-          display: flex;
-          flex-flow: column;
-          gap: 5px;
-          color: var(--text-color);
-          font-family: var(--font-text), sans-serif;
-        }
-        
-        .bio > p {
-          margin: 0;
-          font-size: 1rem;
+        div.bio {
+          color: var(--gray-color);
+          font-family: var(--font-main), sans-serif;
+          font-size: 0.9rem;
           font-weight: 400;
           line-height: 1.4;
+          width: 100%;
+          text-align: start;
         }
         
         .actions {
@@ -960,9 +939,9 @@ export default class HoverAuthor extends HTMLElement {
           text-transform: lowercase;
           justify-content: center;
           padding: 4px 12px;
-          border-radius: 10px;
-          -webkit-border-radius: 10px;
-          -moz-border-radius: 10px;
+          border-radius: 12px;
+          -webkit-border-radius: 12px;
+          -moz-border-radius: 12px;
         }
 
         .actions > .action.you {

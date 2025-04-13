@@ -354,7 +354,7 @@ export default class AuthorWrapper extends HTMLElement {
       ${this.getSvg()}
 		  ${this.getHeader()}
       ${this.getStats()}
-      ${this.getBio()}
+      ${this.getBio(this.innerHTML)}
       ${this.getActions()}
 		`
   }
@@ -474,26 +474,16 @@ export default class AuthorWrapper extends HTMLElement {
 		`
   }
 
-  getBio = () => {
-    // Get bio content
-    let bio = this.getAttribute('bio') || 'The user has not added their bio yet.'
-
-    // trim white spaces
-    bio = bio.trim();
-
-    // let bioLines = bio.length > 150 ? `<p>${bio.substring(0, 150)}..</p>` : `<p>${bio}</p>`;
-
-    // separate by new lines
-    const bioArray = bio.split('\n');
-
-    // trim each line and ignore empty lines
-    const bioLines = bioArray.map(line => line.trim()).filter(line => line !== '').map(line => `<p>${line}</p>`).join('');
-
-    return /*html*/`
-      <div class="bio">
-        ${bioLines}
-      </div>
-    `
+  getBio = bio => {
+    // check if bio is empty
+    if (bio === '' || bio === null || bio === 'null') {
+      return 'The user has no bio';
+    }
+    else {
+      return /*html*/`
+        <div class="bio">${bio}</div>
+      `
+    }
   }
 
   getActions() {
@@ -553,7 +543,8 @@ export default class AuthorWrapper extends HTMLElement {
         followers-url="${url}/followers" following-url="${url}/following"
         hash="${this.getAttribute('hash')}" picture="${this.getAttribute('picture')}" verified="${this.getAttribute('verified')}"
         name="${this.getAttribute('name')}" followers="${this.getAttribute('followers')}" contact='${this.getAttribute("contact")}'
-        following="${this.getAttribute('following')}" user-follow="${this.getAttribute('user-follow')}" bio="${this.getAttribute('bio')}">
+        following="${this.getAttribute('following')}" user-follow="${this.getAttribute('user-follow')}">
+        ${this.innerHTML}
       </app-profile>
     `
   }
@@ -793,19 +784,14 @@ export default class AuthorWrapper extends HTMLElement {
           font-weight: 500;
         }
 
-        .bio {
-          display: flex;
-          flex-flow: column;
-          gap: 5px;
-          color: var(--text-color);
-          font-family: var(--font-text), sans-serif;
-          font-size: 1rem;
-          line-height: 1.4;
+        div.bio {
+          color: var(--gray-color);
+          font-family: var(--font-main), sans-serif;
+          font-size: 0.9rem;
           font-weight: 400;
-        }
-
-        .bio > p {
-          all: inherit;
+          line-height: 1.4;
+          width: 100%;
+          text-align: start;
         }
 
         .actions {

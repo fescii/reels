@@ -174,7 +174,7 @@ export default class PreviewPost extends HTMLElement {
     author.you = post.you;
     author.time = post.createdAt;
     const postContent = this.getPost(post);
-    const url =`/post/${post.hash.toLowerCase()}`;
+    const url =`/p/${post.hash.toLowerCase()}`;
     return this.getContent(postContent, url, post.views, post.likes, author, post.kind);
   }
 
@@ -216,7 +216,7 @@ export default class PreviewPost extends HTMLElement {
       return /*html*/`
         <votes-wrapper reload="false" votes="${post.votes}" selected="${post.option}" 
           end-time="${post.end}" voted="${post.option ? 'true' : 'false'}" options='${post.poll}'
-          hash="${post.hash}" kind="poll" url="/post/${post.hash.toLowerCase()}">
+          hash="${post.hash}" kind="poll" url="/p/${post.hash.toLowerCase()}">
         </votes-wrapper>
       `;
     } else return '';
@@ -344,7 +344,7 @@ export default class PreviewPost extends HTMLElement {
 
   mapStory = post => {
     const author = post.author;
-    const url = `/post/${post.hash.toLowerCase()}`;
+    const url = `/p/${post.hash.toLowerCase()}`;
     const images = post.images ? post.images.join(',') : null;
     return /*html*/`
       <app-post story="quick" tab="replies" url="${url}" hash="${post.hash}" likes="${post.likes}" replies="${post.replies}" 
@@ -536,9 +536,9 @@ export default class PreviewPost extends HTMLElement {
     else  return '';
   }
 
-  getReply = (kind, parent) => {
+  getReply = (kind, post) => {
     if (kind === 'reply') {
-      let url = `/post/${parent.hash.toLowerCase()}`;
+      let url = `/p/${post.parent.toLowerCase()}`;
       return /*html*/`
         <preview-post url="${url}" hash="${parent}" preview="${this.preview}"></preview-post>
       `

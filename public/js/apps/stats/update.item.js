@@ -71,12 +71,12 @@ export default class UpdateItem extends HTMLElement {
   }
 
   getPreviewUrl = (kind, hash, author) => {
-    if (kind === 'story') {
+    if (kind === 'post') {
       return `/p/${hash}/preview`;
     }
 
     if (kind === 'reply') {
-      return `/r/${hash}/preview`;
+      return `/p/${hash}/preview`;
     }
 
     if (kind === 'user') {
@@ -226,12 +226,12 @@ export default class UpdateItem extends HTMLElement {
 
   getUrl = (kind, hash) => {
     hash = hash.toLowerCase();
-    if (kind === 'story') {
+    if (kind === 'post') {
       return `/p/${hash}`;
     }
 
     if (kind === 'reply') {
-      return `/r/${hash}`;
+      return `/p/${hash}`;
     }
 
     if (kind === 'user') {

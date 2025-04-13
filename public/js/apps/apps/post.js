@@ -78,8 +78,8 @@ export default class AppPost extends HTMLElement {
   getEdit = () => {
     // Show Post Page Here
     return /* html */`
-      <post-options kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" hash="${this.getAttribute('hash')}"
-        drafted="false" story="false" images="${this.getAttribute('images')}">
+      <post-options kind="${this.getAttribute('kind')}" url="${this.getAttribute('url')}" hash="${this.getAttribute('hash')}"
+        drafted="false" post="false" images="${this.getAttribute('images')}">
         ${this.innerHTML}
       </post-options>
     `;
@@ -302,8 +302,8 @@ export default class AppPost extends HTMLElement {
   }
 
   getBody = () => {
-    // Get story type
-    const story = this.getAttribute('story');
+    // Get post type
+    const kind = this.getAttribute('kind');
     const mql = window.matchMedia('(max-width: 660px)');
     if (mql.matches) {
       return /* html */`
@@ -311,11 +311,11 @@ export default class AppPost extends HTMLElement {
           <div class="content-container">
             <div class="others-container">
               <div class="previews">
-                ${this.getReply(this.getAttribute('story'))}
+                ${this.getReply(this.getAttribute('kind'))}
               </div>
-              ${this.getAuthorOption(story)}
+              ${this.getAuthorOption(kind)}
               ${this.getContent()}
-              ${this.getPost(story)}
+              ${this.getPost(kind)}
             </div>
             ${this.repliesSection()}
           </div>
@@ -328,11 +328,11 @@ export default class AppPost extends HTMLElement {
         <div class="feeds">
           <div class="content-container">
             <div class="previews">
-              ${this.getReply(this.getAttribute('story'))}
+              ${this.getReply(this.getAttribute('kind'))}
             </div>
             ${this.getHeader()}
             ${this.getContent()}
-            ${this.getPost(story)}
+            ${this.getPost(kind)}
             ${this.repliesSection()}
           </div>
           ${this.getRespone()}
@@ -348,7 +348,7 @@ export default class AppPost extends HTMLElement {
   getRespone = () => {
     const url = `${this.getAttribute('url').toLowerCase()}/reply`;
     return /* html */`
-      <div id="response-container" is="response-post" placeholder="What's your reply?" hash="${this.getAttribute('hash')}" author-hash="${this.getAttribute('author-hash')}" url="${url}" story="${this.getAttribute('story')}"></div>
+      <div id="response-container" is="response-post" placeholder="What's your reply?" hash="${this.getAttribute('hash')}" author-hash="${this.getAttribute('author-hash')}" url="${url}" kind="${this.getAttribute('kind')}"></div>
     `;
   }
 
@@ -365,26 +365,26 @@ export default class AppPost extends HTMLElement {
     `;
   }
 
-  getPost = story => {
-    switch (story) {
+  getPost = kind => {
+    switch (kind) {
       case 'poll':
         return /*html */`
           ${this.getPoll()}
           ${this.getMeta()}
-          ${this.getStats(story)}
+          ${this.getStats(kind)}
         `
       default:
         return /* html */`
           ${this.getImages()}
           ${this.getMeta()}
-          ${this.getStats(story)}
+          ${this.getStats(kind)}
         `
     }
   }
 
   peopleSection = () => {
     return /* html */`
-      <likes-section kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" active="likes"
+      <likes-section kind="${this.getAttribute('kind')}" url="${this.getAttribute('url')}" active="likes"
         author-hash="${this.getAttribute('author-hash')}" hash="${this.getAttribute('hash')}" likes="${this.getAttribute('likes')}"
         likes-url="${this.getAttribute('likes-url')}">
       </likes-section>
@@ -393,7 +393,7 @@ export default class AppPost extends HTMLElement {
 
   repliesSection = () => {
     return /* html */`
-      <replies-section kind="${this.getAttribute('story')}" url="${this.getAttribute('url')}" active="${this.getAttribute('tab')}" section-title="Post" 
+      <replies-section kind="${this.getAttribute('kind')}" url="${this.getAttribute('url')}" active="${this.getAttribute('tab')}" section-title="Post" 
         author-hash="${this.getAttribute('author-hash')}" hash="${this.getAttribute('hash')}" 
         replies="${this.getAttribute('replies')}" likes="${this.getAttribute('likes')}"
         liked="${this.getAttribute('liked')}" views="${this.getAttribute('views')}"
@@ -421,28 +421,30 @@ export default class AppPost extends HTMLElement {
   getAuthorHover = () => {
     let url = `/u/${this.getAttribute('author-hash').toLowerCase()}`;
     let bio = this.getAttribute('author-bio') || 'This author has not provided a bio yet.';
-    // replace all " and ' with &quot; and &apos; to avoid breaking the html
-    bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+      
+    // create a paragraph with the \n replaced with <br> if there are more than one \n back to back replace them with one <br>
+    if (bio.includes('\n')) bio = bio.replace(/\n+/g, '<br>');
     return /* html */`
 			<hover-author url="${url}" you="${this.getAttribute('author-you')}" hash="${this.getAttribute('author-hash')}"
         picture="${this.getAttribute('author-img')}" name="${this.getAttribute('author-name')}" contact='${this.getAttribute("author-contact")}'
         posts="${this.getAttribute('author-posts')}" replies="${this.getAttribute('author-replies')}"
         followers="${this.getAttribute('author-followers')}" following="${this.getAttribute('author-following')}" user-follow="${this.getAttribute('author-follow')}"
-        verified="${this.getAttribute('author-verified')}" bio="${bio}">
+        verified="${this.getAttribute('author-verified')}">
+        ${bio}
       </hover-author>
 		`
   }
 
   getAuthor = () => {
     let bio = this.getAttribute('author-bio') || 'This author has not provided a bio yet.';
-    // replace all " and ' with &quot; and &apos; to avoid breaking the html
-    bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    // create a paragraph with the \n replaced with <br> if there are more than one \n back to back replace them with one <br>
+    if (bio.includes('\n')) bio = bio.replace(/\n+/g, '<br>');
     return /* html */`
 			<author-wrapper you="${this.getAttribute('author-you')}" hash="${this.getAttribute('author-hash')}" picture="${this.getAttribute('author-img')}" name="${this.getAttribute('author-name')}"
         posts="${this.getAttribute('author-posts')}" replies="${this.getAttribute('author-replies')}"
         followers="${this.getAttribute('author-followers')}" following="${this.getAttribute('author-following')}" user-follow="${this.getAttribute('author-follow')}" contact='${this.getAttribute("author-contact")}'
-        verified="${this.getAttribute('author-verified')}" url="/u/${this.getAttribute('author-hash').toLowerCase()}"
-        bio="${bio}">
+        verified="${this.getAttribute('author-verified')}" url="/u/${this.getAttribute('author-hash').toLowerCase()}">
+        ${bio}
       </author-wrapper>
 		`
   }
@@ -464,11 +466,11 @@ export default class AppPost extends HTMLElement {
     `
   }
 
-  getStats = story =>  {
+  getStats = kind =>  {
     const author = this.getAttribute('author-hash');
     const you = author === this.user;
     return /*html*/`
-      <action-wrapper you="${you}" no-write="true" preview="false" full="true" kind="${story}" reload="false" likes="${this.getAttribute('likes')}"
+      <action-wrapper you="${you}" no-write="true" preview="false" full="true" kind="${kind}" reload="false" likes="${this.getAttribute('likes')}"
         replies="${this.getAttribute('replies')}" liked="${this.getAttribute('liked')}" wrapper="true" images="${this.getAttribute('images')}"
         hash="${this.getAttribute('hash')}" views="${this.getAttribute('views')}" url="${this.getAttribute('url')}" summary="Post by - ${this.getAttribute('author-name')}"
         preview-title="" time="${this.getAttribute('time')}" author-hash="${this.getAttribute('author-hash')}">
@@ -499,10 +501,10 @@ export default class AppPost extends HTMLElement {
     `
   }
 
-  getReply = story => {
-    if (story === 'reply') {
+  getReply = kind => {
+    if (kind === 'reply') {
       const parent = this.getAttribute('parent').toUpperCase();
-      let url = parent.startsWith('P') ? `/post/${parent.toLowerCase()}` : `/reply/${parent.toLowerCase()}`;
+      let url = `/p/${parent.toLowerCase()}`;
       return /*html*/`
         <preview-post url="${url}" hash="${parent}" preview="full" first="true"></preview-post>
       `

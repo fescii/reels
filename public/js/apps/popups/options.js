@@ -10,7 +10,7 @@ export default class PostOptions extends HTMLElement {
     this.hash = this.getAttribute('hash').toLowerCase();
     this.kind = this.getAttribute('kind');
     this.drafted = this.convertToBool(this.getAttribute('drafted'));
-    this.removeApi  = this.getAttribute('kind') === 'reply' ? `/r/${this.hash}/remove` : `/s/${this.hash}/remove`;
+    this.removeApi  = `/p/${this.hash}/remove`;
     this.app = window.app;
     this.api = this.app.api;
     this.render();
@@ -108,7 +108,7 @@ export default class PostOptions extends HTMLElement {
 
   getEdit = () => {
     const hash = this.getAttribute('hash').toLowerCase();
-    const api = this.getAttribute('kind') === 'reply' ? `/r/${hash}/edit` : `/s/${hash}/edit/content`;
+    const api = `/p/${hash}/edit/content`;
     // Show Post Page Here
     return /* html */`
       <div is="edit-post" api="${api}" method="PUT" kind="${this.getAttribute('kind')}" images="${this.getAttribute('images')}"

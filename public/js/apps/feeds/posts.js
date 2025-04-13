@@ -1,35 +1,35 @@
-export default class TopicFeed extends HTMLElement {
+export default class PostFeed extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
-
+    this._isFirstLoad = true;
     this._block = false;
     this._empty = false;
     this._page = this.parseToNumber(this.getAttribute('page'));
     this._url = this.getAttribute('url');
-    this._kind = this.getAttribute('kind');
-    this._query = this.setQuery(this.getAttribute('query'));
+    this.all = this.getRootNode().host;
     this.app = window.app;
     this.api = this.app.api;
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-
     this.render();
   }
-
-  setQuery = query => !(!query || query === "" || query !== "true");
 
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
   }
 
   connectedCallback() {
-    const topicsContainer = this.shadowObj.querySelector('.topics');
+    const feedContainer = this.shadowObj.querySelector('.stories');
 
     // check if the total
-    if (topicsContainer) {
-      this.fetchTopics(topicsContainer);
+    if (feedContainer) {
+      this.fetchFeeds(feedContainer);
     }
+  }
+
+  disconnectedCallback() {
+    this.removeScrollEvent();
   }
 
   activateRefresh = () => {
@@ -42,16 +42,16 @@ export default class TopicFeed extends HTMLElement {
         this._empty = false;
         
         // re fetch the content
-        const topicsContainer = this.shadowObj.querySelector('.topics');
+        const feedContainer = this.shadowObj.querySelector('div.stories');
 
         // remove the finish message
         finish.remove();
 
         // set the loader
-        topicsContainer.insertAdjacentHTML('beforeend', this.getLoader());
+        feedContainer.insertAdjacentHTML('beforeend', this.getLoader());
 
         setTimeout(() => {
-          this.fetchTopics(topicsContainer)
+          this.fetchFeeds(feedContainer);
         }, 1000);
       });
     }
@@ -74,124 +74,166 @@ export default class TopicFeed extends HTMLElement {
     window.onscroll = function () { };
   }
 
-  fetching = async (url, topicsContainer) => {
-    const outerThis = this;
+  dispatchComponentLoaded = () => {
+    // Dispatch a custom event that parent components can listen for
+    const event = new CustomEvent('component-loaded', {
+      bubbles: true,
+      composed: true
+    });
+    this.dispatchEvent(event);
+  }
+
+  fetching = async (url, feedContainer) => {
+    // Remove the scroll event
+    this.removeScrollEvent();
     try {
-      const result = await this.api.get(url, { content: 'json' })
-      console.log(result)
-      if (!result.success) {
-        outerThis._empty = true;
-        outerThis._block = true;
-        outerThis.populateTopics(outerThis.getWrongMessage(), topicsContainer);
-        outerThis.activateRefresh();
-        return;
-      }
-
-      const topics = result.topics;
-      if (outerThis._page === 1 && topics.length === 0) {
-        outerThis._empty = true;
-        outerThis._block = true;
-        outerThis.populateTopics(outerThis.getEmptyMsg(outerThis._kind), topicsContainer);
-      }
-      else if (topics.length < 10) {
-        outerThis._empty = true;
-        outerThis._block = true;
-        const content = outerThis.mapFields(topics);
-        outerThis.populateTopics(content, topicsContainer);
-        outerThis.populateTopics(outerThis.getLastMessage(outerThis._kind), topicsContainer);
-      }
-      else {
-        outerThis._empty = false;
-        outerThis._block = false;
-
-        const content = outerThis.mapFields(topics);
-        outerThis.populateTopics(content, topicsContainer);
-        outerThis.scrollEvent(topicsContainer);
+      const result = await this.api.get(url, { content: 'json' });
+      if (result.success) {
+        this.handleFetchSuccess(result.posts, feedContainer);
+      } else {
+        this.handleFetchFailure(feedContainer);
       }
     } catch (error) {
-      // console.log(error)
-      outerThis._empty = true;
-      outerThis._block = true;
-      outerThis.populateTopics(outerThis.getWrongMessage(), topicsContainer);
-      this.activateRefresh();
+      console.log(error);
+      this.handleFetchFailure(feedContainer);
     }
   }
 
-  fetchTopics = topicsContainer => {
-    const outerThis = this;
-    const url = this._query ? `${this._url}&page=${this._page}` : `${this._url}?page=${this._page}`;
-
-    if(!this._block && !this._empty) {
-      outerThis._empty = true;
-      outerThis._block = true;
-      setTimeout(() => {
-        // fetch the topics
-        outerThis.fetching(url, topicsContainer)
-      }, 1000);
+  handleFetchSuccess = (posts, feedContainer) => {
+    // First page with no content
+    if (this._page === 1 && posts.length === 0) {
+      this._empty = true;
+      this._block = true;
+      this.populateFeeds(this.getEmptyMsg(), feedContainer);
+    } 
+    // Last page with some content
+    else if (posts.length < 10) {
+      this._empty = true;
+      this._block = true;
+      const content = this.#feeds(posts);
+      this.populateFeeds(content, feedContainer);
+      this.populateFeeds(this.getLastMessage(), feedContainer);
+    } 
+    // Normal page with content, more might be available
+    else {
+      this._block = false;  // Unblock for next fetch
+      this._empty = false;  // More content might be available
+      const content = this.#feeds(posts);
+      this.populateFeeds(content, feedContainer);
     }
+    
+    // Re-add scroll event after content is loaded
+    this.scrollEvent(feedContainer);
+    
+    // Mark as successfully loaded
+    this.setAttribute('data-loaded', 'true');
   }
 
-  populateTopics = (content, topicsContainer) => {
+  handleFetchFailure = feedContainer => {
+    this._empty = true;
+    this._block = true;
+    this.populateFeeds(this.getWrongMessage(), feedContainer);
+    // activate the refresh button
+    this.activateRefresh();
+    
+    // Don't mark as loaded on error - parent will continue polling
+  }
+
+  fetchFeeds = feedContainer => {
+    if (!this._block && !this._empty) {
+      // Set blocks before fetching
+      this._block = true;  // Block further fetches while this one is in progress
+      
+      const url = `${this._url}?page=${this._page}`;
+      
+      setTimeout(async () => {
+        await this.fetching(url, feedContainer);
+      }, 2000);
+    }
+    // Don't need to mark as loaded if already blocked - parent will continue polling
+  }
+
+  populateFeeds = (content, feedContainer) => {
     // get the loader and remove it
-    const loader = topicsContainer.querySelector('.loader-container');
-    if (loader){
+    const loader = feedContainer.querySelector('.loader-container');
+    if (loader) {
       loader.remove();
     }
 
     // insert the content
-    topicsContainer.insertAdjacentHTML('beforeend', content);
+    feedContainer.insertAdjacentHTML('beforeend', content);
   }
-  
-  scrollEvent = topicsContainer => {
+
+  scrollEvent = feedContainer => {
     const outerThis = this;
-    window.addEventListener('scroll', function () {
-      let margin = document.body.clientHeight - window.innerHeight - 150;
-      if (window.scrollY > margin && !outerThis._empty && !outerThis._block) {
-        outerThis._page += 1;
-        outerThis.populateTopics(outerThis.getLoader(), topicsContainer);
-        outerThis.fetchTopics(topicsContainer);
-      }
-    });
+    if (!this._scrollEventAdded) {
+      this._scrollEventAdded = true;
+      
+      const onScroll = () => {
+        // Get scroll position and page height
+        const scrollPosition = window.scrollY + window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        // Calculate threshold (e.g., 150px from bottom)
+        const threshold = 150;
+        
+        // Only fetch if:
+        // 1. We're near the bottom
+        // 2. Not already fetching (_empty is false)
+        // 3. Not blocked from fetching (_block is false)
+        // 4. Not at the last page
+        if (
+          documentHeight - scrollPosition <= threshold && 
+          !outerThis._empty && 
+          !outerThis._block
+        ) {
+          outerThis._page += 1;
+          outerThis.populateFeeds(outerThis.getLoader(), feedContainer);
+          outerThis.fetchFeeds(feedContainer);
+        }
+      };
 
-    // Launch scroll event
-    const scrollEvent = new Event('scroll');
-    window.dispatchEvent(scrollEvent);
+      // Store the function reference for cleanup
+      this.onScroll = onScroll;
+      window.addEventListener('scroll', onScroll);
+      
+      // Don't automatically trigger the scroll event on first load
+      if (!this._isFirstLoad) {
+        const scrollEvent = new Event('scroll');
+        window.dispatchEvent(scrollEvent);
+      }
+      this._isFirstLoad = false;
+    }
   }
 
-  mapFields = data => {
-    return data.map(topic => {
-      const author = topic.topic_author;
+  removeScrollEvent = () => {
+    if (this.onScroll) {
+      window.removeEventListener('scroll', this.onScroll);
+      this._scrollEventAdded = false;
+    }
+  }
+
+  #feeds = posts => {
+    return posts.map(post => {
+      const author = post.author;
       let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
       // replace all " and ' with &quot; and &apos; to avoid breaking the html
       bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-      const url = `/t/${topic.hash.toLowerCase()}`;
+      const images = post.images ? post.images.join(',') : null;
+      const preview = this.getAttribute('no-preview');
       return /*html*/`
-        <topic-wrapper hash="${topic.hash}" name="${topic.name}" slug="${topic.slug}"
-          topic-follow="${topic.is_following}" subscribed="${topic.is_subscribed}" url="${url}" views="${topic.views}"
-          subscribers="${topic.subscribers}" followers="${topic.followers}" stories="${topic.stories}"
-          author-hash="${author.hash}" author-you="${topic.you}" author-url="/u/${author.hash}"
+        <post-wrapper kind="${post.kind}" feed="true" no-preview="${preview}" hash="${post.hash}" url="/p/${post.hash}" 
+          likes="${post.likes}" replies="${post.replies}" liked="${post.liked}" views="${post.views}" 
+          replies-url="/p/${post.hash}/replies" likes-url="/p/${post.hash}/likes" images='${images}'
+          time="${post.createdAt}" options='${post.poll}' votes="${post.votes}"
+          author-hash="${author.hash}" author-you="${post.you}" author-url="/u/${author.hash}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
+          author-stories="${author.stories}" author-replies="${author.replies}" parent="${post.parent}"
           author-img="${author.picture}" author-verified="${author.verified}" author-name="${author.name}" author-followers="${author.followers}"
-          author-following="${author.following}" author-follow="${author.is_following}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-          author-bio="${bio}">
-          ${this.topicContent(topic.summary)}
-        </topic-wrapper>
+          author-following="${author.following}" author-follow="${author.is_following}" author-bio="${bio}">
+          ${post.content}
+        </post-wrapper>
       `
     }).join('');
-  }
-
-  topicContent = data => {
-    if (data.length <= 0 || !data) {
-      return /*html*/`
-        <div class="finish">
-          <p>The topic has no information yet.
-            More information will be available once the author(s) adds more content.
-          </p>
-        </div>
-      `;
-    }
-    else {
-      return data
-    }
   }
 
   parseToNumber = num_str => {
@@ -214,133 +256,59 @@ export default class TopicFeed extends HTMLElement {
     `;
   }
 
-  getLoader() {
+  getLoader = () => {
     return /* html */`
       <div class="loader-container">
-        <div class="loader"></div>
+        <div id="loader" class="loader"></div>
       </div>
-    `
+    `;
   }
 
   getBody = () => {
     // language=HTML
     return `
-			<div class="topics">
+			<div class="stories">
 				${this.getLoader()}
       </div>
     `;
   }
 
-  getEmptyMsg = text => {
+  getEmptyMsg = () => {
     // get the next attribute
-   if (text === "feed") {
-    return `
+    return /*html*/`
       <div class="finish">
-        <h2 class="finish__title">No topics</h2>
+        <h2 class="finish__title">Feed is not available!</h2>
         <p class="desc">
-          There are no topics/posts yet. You can come back later, once available they'll appear here.
+          There are no posts available for this feed at the moment. You can always check back later or refresh the page to see if new posts are available.
         </p>
       </div>
     `
-   } 
-   else if(text === "search") {
-    return `
-      <div class="finish">
-        <h2 class="finish__title">No topics found!</h2>
-        <p class="desc">
-          No topics found for this search. You can try searching with a different keyword.
-        </p>
-      </div>
-    `
-   }
-   else if(text === "topic") {
-    return `
-      <div class="finish">
-        <h2 class="finish__title">No topics found!</h2>
-        <p class="desc">
-          No topics found for this topic. You can come back later, once available they'll appear here.
-        </p>
-      </div>
-    `
-   }
-   else {
-    return `
-      <div class="finish">
-        <h2 class="finish__title"> No topics found!</h2>
-        <p class="desc">
-          No topics found. You can come back later, once available they'll appear here.
-        </p>
-      </div>
-    `
-   }
   }
 
-  getLastMessage = text => {
+  getLastMessage = () => {
     // get the next attribute
-    if (text === "feed") {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">That's all for now!</h2>
-          <p class="desc">
-            You have reached the end of the topics. You can always come back later to check for new topics.
-          </p>
-        </div>
-      `
-    }
-    else if(text === "user") {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">That's all for now!</h2>
-          <p class="desc">
-            You have exhausted all of the user's topics. You can always come back later to check for new topics.
-          </p>
-        </div>
-      `
-    }
-    else if(text === "search") {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">That's all the results!</h2>
-          <p class="desc">
-            You have reached the end of the search results. You can try searching with a different keyword.
-          </p>
-        </div>
-      `
-    }
-    else if(text === "topic") {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">That's all for now!</h2>
-          <p class="desc">
-            You have reached the end of the related topics. You can always come back later or refresh the page to check for new topics.
-          </p>
-        </div>
-      `
-    }
-    else {
-      return `
-        <div class="finish">
-          <h2 class="finish__title">That's all!</h2>
-          <p class="desc">
-            You have reached the end of the topics. You can always come back later or refresh the page to check for new topics.
-          </p>
-        </div>
-      `
-    }
-   
+    return /*html*/`
+      <div class="finish">
+        <h2 class="finish__title">That's all for now!</h2>
+        <p class="desc">
+         That's it, you have exhausted all the posts for this feed. You can always come back later or refresh the page to check for new posts.
+        </p>
+      </div>
+    `
   }
 
   getWrongMessage = () => {
     return /* html */`
       <div class="finish">
-        <h2 class="finish__title">Something went wrong!</h2>
+        <h2 class="finish__title">Oops!</h2>
         <p class="desc">
-          An error occurred while retrieving topics. Please check your connection and try again.
+          An error occurred while retrieving the posts. Please check your connection and try again.
         </p>
         <button class="finish">Retry</button>
       </div>
     `;
   }
+
 
   getStyles() {
     return /* css */`
@@ -352,25 +320,25 @@ export default class TopicFeed extends HTMLElement {
           font-family: inherit;
           -webkit-box-sizing: border-box !important;
         }
-
+        
         *:focus {
           outline: inherit !important;
         }
-
+        
         *::-webkit-scrollbar {
           width: 3px;
         }
-
+        
         *::-webkit-scrollbar-track {
           background: var(--scroll-bar-background);
         }
-
+        
         *::-webkit-scrollbar-thumb {
           width: 3px;
           background: var(--scroll-bar-linear);
           border-radius: 50px;
         }
-
+        
         h1,
         h2,
         h3,
@@ -381,24 +349,24 @@ export default class TopicFeed extends HTMLElement {
           margin: 0;
           font-family: inherit;
         }
-
+        
         p,
         ul,
         ol {
           padding: 0;
           margin: 0;
         }
-
+        
         a {
           text-decoration: none;
         }
-
+        
         :host {
           font-size: 16px;
           width: 100%;
           padding: 0;
         }
-
+        
         div.loader-container {
           display: flex;
           align-items: center;
@@ -407,7 +375,7 @@ export default class TopicFeed extends HTMLElement {
           min-height: 150px;
           min-width: 100%;
         }
-
+        
         div.loader-container > .loader {
           width: 20px;
           aspect-ratio: 1;
@@ -416,7 +384,7 @@ export default class TopicFeed extends HTMLElement {
           display: grid;
           animation: l22-0 2s infinite linear;
         }
-
+        
         div.loader-container > .loader:before {
           content: "";
           grid-area: 1/1;
@@ -426,7 +394,7 @@ export default class TopicFeed extends HTMLElement {
           transform: rotate(0deg) translate(150%);
           animation: l22 1s infinite;
         }
-
+        
         div.loader-container > .loader:after {
           content: "";
           grid-area: 1/1;
@@ -436,27 +404,27 @@ export default class TopicFeed extends HTMLElement {
           transform: rotate(0deg) translate(150%);
           animation: l22 1s infinite;
         }
-
+        
         div.loader-container > .loader:after {
           animation-delay: -.5s
         }
-
+        
         @keyframes l22-0 {
           100% {transform: rotate(1turn)}
         }
-
+        
         @keyframes l22 {
           100% {transform: rotate(1turn) translate(150%)}
         }
-
-        div.topics {
+        
+        div.stories {
           padding: 0;
           width: 100%;
           display: flex;
           flex-flow: column;
           gap: 0;
         }
-
+        
         div.finish {
           padding: 10px 0 40px;
           width: 100%;
@@ -468,7 +436,7 @@ export default class TopicFeed extends HTMLElement {
           align-items: center;
           gap: 5px;
         }
-
+        
         div.finish > h2.finish__title {
           margin: 10px 0 0 0;
           font-size: 1rem;
@@ -476,7 +444,7 @@ export default class TopicFeed extends HTMLElement {
           font-family: var(--font-read), sans-serif;
           color: var(--text-color);
         }
-
+        
         div.finish > p.desc {
           margin: 0;
           font-size: 0.85rem;
@@ -485,7 +453,7 @@ export default class TopicFeed extends HTMLElement {
           line-height: 1.4;
           text-align: center;
         }
-
+        
         div.finish > button.finish {
           border: none;
           background: var(--accent-linear);
@@ -507,7 +475,7 @@ export default class TopicFeed extends HTMLElement {
           -webkit-border-radius: 50px;
           -moz-border-radius: 50px;
         }
-
+        
         @media screen and (max-width:660px) {
           a,
           div.finish > button.finish {

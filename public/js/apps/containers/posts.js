@@ -1,4 +1,4 @@
-export default class HomeRecent extends HTMLElement {
+export default class PostsContainer extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();

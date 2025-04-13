@@ -1,4 +1,4 @@
-export default class HomePeople extends HTMLElement {
+export default class DiscoverPeople extends HTMLElement {
   constructor() {
     // We are not even going to touch this.
     super();
@@ -62,7 +62,7 @@ export default class HomePeople extends HTMLElement {
 
     try {
       const result = await this.api.get(this.url, { content: 'json' }, { allow: true, duration: 7200 });
-      const people = result.users;
+      const people = result.people;
 
       if (result.success) {
         if (people.length === 0) {

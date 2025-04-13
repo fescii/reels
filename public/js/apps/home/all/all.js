@@ -28,9 +28,9 @@ export default class HomeAll extends HTMLElement {
     const feed = this.getAttribute('feed');
 
     this.componentUrls = [
-      { component: 'home-recent', url: trending },
-      { component: 'home-people', url: people },
-      { component: 'home-recent', url: recent },
+      { component: 'posts-container', url: trending },
+      { component: 'discover-people', url: people },
+      { component: 'posts-container', url: recent },
       { component: 'posts-feed', url: feed, page: "2" }
     ];
     

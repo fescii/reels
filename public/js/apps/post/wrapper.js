@@ -614,13 +614,11 @@ export default class PostWrapper extends HTMLElement {
   }
 
   getFullPost = () => {
-    const parent = this.getAttribute('parent');
-    let text = parent ? `parent="${parent}"` : '';
-    const story = this.getAttribute('story') === 'quick' ? 'quick' : 'reply';
+    const kind = this.getAttribute('kind');
     const images = this.getAttribute('images');
     return /* html */`
-      <app-post story="${story}" tab="replies" url="${this.getAttribute('url')}" hash="${this.getAttribute('hash')}"
-        likes="${this.getAttribute('likes')}" replies="${this.getAttribute('replies')}" ${text} preview="full"
+      <app-post kind="${kind}" tab="replies" url="${this.getAttribute('url')}" hash="${this.getAttribute('hash')}" parent="${this.getAttribute('parent')}"
+        likes="${this.getAttribute('likes')}" replies="${this.getAttribute('replies')}" preview="full"
         replies-url="${this.getAttribute('replies-url')}" likes-url="${this.getAttribute('likes-url')}" images='${images}'
         liked="${this.getAttribute('liked')}" views="${this.getAttribute('views')}" time="${this.getAttribute('time')}"
         author-posts="${this.getAttribute('author-posts')}" author-replies="${this.getAttribute('author-replies')}" author-contact='${this.getAttribute("author-contact")}'

@@ -1,13 +1,13 @@
+import ActivityContainer from "./activity.container.js";
 // Import all containers
 import AddContainer from "./add.container.js";
-import ActivityContainer from "./activity.container.js";
+import DiscoverPeople from "./discover.js";
 import FormContainer from "./form.container.js";
 import HighlightsContainer from "./highlights.container.js";
 import InfoContainer from "./info.container.js";
 import PeopleContainer from "./people.container.js";
-import DiscoverPeople from "./people.discover.js";
+import PostsContainer from "./posts.js";
 import StatContainer from "./stat.container.js";
-import StoriesContainer from "./stories.container.js";
 import TopicsContainer from "./topics.container.js";
 import UpdateContainer from "./update.container.js";
 
@@ -22,7 +22,7 @@ export default function containers() {
   customElements.define("people-container", PeopleContainer);
   customElements.define("discover-people", DiscoverPeople);
   customElements.define("stat-container", StatContainer);
-  customElements.define("stories-container", StoriesContainer);
+  customElements.define("posts-container", PostsContainer);
   customElements.define("topics-container", TopicsContainer);
   customElements.define("update-container", UpdateContainer);
 }

@@ -1,526 +1,469 @@
 export default class PreviewPost extends HTMLElement {
   constructor() {
-    // We are not even going to touch this.
     super();
     this._url = this.getAttribute('url');
     this.post = null;
-    this.item = '';
-    // let's create our shadow root
-    this.shadowObj = this.attachShadow({mode: 'open'});
+    this.item = ''; // Consider renaming for clarity if possible (e.g., postDataForApp)
+    this.shadowObj = this.attachShadow({ mode: 'open' });
     this.app = window.app;
     this.api = this.app.api;
-    this.preview = this.getAttribute('preview');
-    this.feed = this.textToBool(this.getAttribute('feed'))
-    this.first = this.textToBool(this.getAttribute('first'));
-    this.parent = this.getRootNode().host;
+    this.preview = this.getAttribute('preview'); // e.g., 'full'
+    this.feed = this.getAttribute('feed') === 'true';
+    this.first = this.getAttribute('first') === 'true';
+    this.parent = this.getRootNode().host; // Assumes it's always hosted within another component
+
+    // Cache frequently accessed elements
+    this._contentContainer = null;
+    this._fetchButton = null;
+
     this.render();
   }
 
   render() {
     this.shadowObj.innerHTML = this.getTemplate();
+    // Cache elements after rendering
+    this._contentContainer = this.shadowObj.querySelector('div.preview');
+    this._fetchButton = this.shadowObj.querySelector('button.fetch');
   }
 
-  textToBool = text => {
-    return text === 'true';
-  }
+  // Removed textToBool, using direct comparison in constructor
 
   connectedCallback() {
-    const contentContainer = this.shadowObj.querySelector('div.preview');
-
-    // Close the modal
-    if (contentContainer) {
-      this.activateBtn(contentContainer);
-      this.activateFetchPreview(contentContainer);
+    if (this._contentContainer) {
+      this._activateFetchButton();
+      this._fetchPreview(); // Initial fetch
     }
   }
 
-  activateFetchPreview = contentContainer => {
-    this.fetchPreview(contentContainer);
-  }
-
-  activateBtn = contentContainer => {
-    const btn = this.shadowObj.querySelector('button.fetch');
-
-    if (btn && contentContainer) {
-      btn.addEventListener('click', event => {
-        event.preventDefault();
-        this.fetchPreview(contentContainer);
-      })
+  // Consolidated activation logic
+  _activateFetchButton = () => {
+    if (this._fetchButton && this._contentContainer) {
+      this._fetchButton.addEventListener('click', this._handleFetchClick);
     }
   }
 
-  activateStatsBtn = data => {
-    const closeBtn = this.shadowObj.querySelector('.action.stats');
-    if (closeBtn) this.openHighlights(closeBtn, data);
+  _handleFetchClick = (event) => {
+    this._stopEvent(event);
+    this._fetchPreview();
   }
 
-  openHighlights = (btn, data) => {
-    const body = document.body;
-    if (btn) {
-      btn.addEventListener('click', e => {
-        e.preventDefault();
-        e.stopPropagation();
-        body.insertAdjacentHTML('beforeend', this.getHighlights(data));
-      });
+  _activateStatsButton = (data) => {
+    const statsBtn = this.shadowObj.querySelector('.action.stats');
+    if (statsBtn) {
+      statsBtn.addEventListener('click', (e) => this._handleStatsClick(e, data));
     }
   }
 
-  getHighlights = data => {
+  _handleStatsClick = (e, data) => {
+    this._stopEvent(e);
+    document.body.insertAdjacentHTML('beforeend', this._getHighlightsPopup(data));
+  }
+
+  _getHighlightsPopup = (data) => {
+    // Ensure attributes are properly escaped if they contain special characters
+    // For simplicity, assuming basic data types here.
     return /* html */`
       <views-popup name="post"
         liked="${data.liked}" views="${data.views}"
         likes="${data.likes}" replies="${data.replies}">
       </views-popup>
-    `
+    `;
   }
 
-  fetchPreview = contentContainer => {
-    // Add the loader
-    contentContainer.innerHTML = this.getLoader();
-    const previewLoader = this.shadowObj.querySelector('#loader-container');
+  _fetchPreview = async () => {
+    if (!this._contentContainer) return;
 
-    // Check if post is set
+    // Show loader
+    this._contentContainer.innerHTML = this.getLoader();
+    const previewLoader = this.shadowObj.querySelector('#loader-container'); // Needs to be queried after setting innerHTML
+
+    // Check if post data is already available (e.g., from parent or previous fetch)
     if (this.post) {
-      this.handleFetchedContent(contentContainer, previewLoader);
-      return;
-    }
-
-    setTimeout(async () => {
-      try {
-        const result = await this.api.get(this._url, { content: 'json' }, { allow: true, duration: 7200 });
-        this.handleApiResponse(result, contentContainer, previewLoader);
-      } catch (error) {
-        this.handleError(contentContainer, previewLoader, error);
-      }
-    }, 100);
-  }
-
-  handleFetchedContent = (contentContainer, previewLoader) => {
-    previewLoader.remove();
-    this.item = this.mapReply(this.post);
-    contentContainer.innerHTML = this.populateReply(this.post);
-    if(this.post.kind === 'reply') this.setReply('reply', this.post);
-
-    this.activateStatsBtn(this.item);
-    this.openStory();
-    this.openReadMore();
-    this.openUrl();
-    this.styleLastBlock();
-  }
-
-  handleApiResponse = (result, contentContainer, previewLoader) => {
-    if (!result.success) {
-      this.displayError(contentContainer, previewLoader);
+      this._handleFetchedContent(previewLoader);
       return;
     }
 
     try {
-      this.post = result.post;
-      this.item = this.getPost(result.post);
-      previewLoader.remove();
-      contentContainer.innerHTML = this.populatePost(result.post);
-      this.activateStatsBtn(result.post);
-      this.openStory();
-      this.openReadMore();
-      this.openUrl();
-      this.styleLastBlock();
-      if(result.post.kind === 'reply') this.setReply('reply', result.post);
+      // Removed arbitrary setTimeout
+      const result = await this.api.get(this._url, { content: 'json' }, { allow: true, duration: 7200 });
+      this._handleApiResponse(result, previewLoader);
     } catch (error) {
-      console.error(error)
-      this.handleError(contentContainer, previewLoader, error);
+      this._handleError(previewLoader, error);
     }
   }
 
-  populateContent = (story, contentContainer) => {
-    const contentMap = {
-      post: this.populatePost,
-      poll: this.populatePoll,
-      story: this.populateStory
-    };
+  // Consolidated common logic after fetching/having data
+  _setupPostDisplay = (postData, previewLoader) => {
+    if (previewLoader) previewLoader.remove();
+    if (!this._contentContainer) return;
 
-    const populateFunction = contentMap[post.kind];
-    if (populateFunction) {
-      contentContainer.innerHTML = populateFunction.call(this, story);
+    this.item = postData; // Assuming getPost or mapReply returns the necessary structure
+    this._contentContainer.innerHTML = this._populatePost(postData); // Use a consistent population method
+
+    this._activateStatsButton(postData);
+    this._activateContentInteractions(postData); // Consolidate interaction setup
+
+    if (postData.kind === 'reply') {
+      this._setReply(postData);
+    }
+  }
+
+  _handleFetchedContent = (previewLoader) => {
+    // Assuming this.post is already structured correctly
+    // If mapReply was necessary, call it here: this.item = this._mapReply(this.post);
+    this._setupPostDisplay(this.post, previewLoader);
+  }
+
+  _handleApiResponse = (result, previewLoader) => {
+    if (!result || !result.success || !result.post) {
+      this._displayError(previewLoader);
+      return;
     }
 
-    this.activateStatsBtn(story);
-    this.openStory();
-    this.openReadMore();
-    this.openUrl();
-    this.styleLastBlock();
+    try {
+      this.post = result.post; // Store the fetched post
+      // Assuming getPost structures the data correctly for display
+      // this.item = this._getPostForDisplay(result.post); // If transformation needed
+      this._setupPostDisplay(result.post, previewLoader);
+    } catch (error) {
+      console.error('Error processing API response:', error);
+      this._handleError(previewLoader, error);
+    }
   }
 
-  setReply = (kind, parent) => {
-    if(!parent) return;
-    const reply = this.getReply(kind, parent);
-    if (!reply || reply === '') return;
-    this.parent.setReply(this.feed, reply);
+  // Renamed for clarity
+  _populatePost = (post) => {
+    const author = { ...post.author, you: post.you, time: post.createdAt }; // Avoid modifying original post.author
+    const postContentHtml = this._getPostContentHtml(post);
+    const url = `/p/${post.hash.toLowerCase()}`;
+    const images = post.images || (post.kind === 'story' ? this._findImagesInContent(post.content) : null);
+
+    // Add kind class to preview container
+    if (this._contentContainer) {
+        this._contentContainer.className = 'preview'; // Reset classes
+        this._contentContainer.classList.add(post.kind);
+        if (this.preview === 'full') {
+            this._contentContainer.classList.add('full');
+        }
+    }
+
+
+    return /*html*/`
+      ${this._getHeader(author)}
+      <article class="article">${postContentHtml}</article>
+      ${this._getImagesHtml(images)}
+      ${this._getTimestampHtml(author.time)}
+      ${this._getActionsHtml(post.likes, post.views, url, post.kind)}
+    `;
   }
 
-  displayError = (contentContainer, previewLoader) => {
-    const content = this.getEmpty();
-    previewLoader.remove();
-    contentContainer.innerHTML = content;
-    this.activateBtn(contentContainer);
-  }
-
-  handleError = (contentContainer, previewLoader, error) => {
-    console.error('Error fetching preview:', error);
-    this.displayError(contentContainer, previewLoader);
-  }
-
-  populatePost = post => {
-    const author = post.author;
-    author.you = post.you;
-    author.time = post.createdAt;
-    const postContent = this.getPost(post);
-    const url =`/p/${post.hash.toLowerCase()}`;
-    return this.getContent(postContent, url, post.views, post.likes, author, post.kind);
-  }
-
-  getPost = post =>  {
-    const mql = window.matchMedia('(max-width: 660px)');
-    const contentStr = post.content.replace(/<[^>]*>/g, '');
+   // Renamed for clarity
+  _getPostContentHtml = (post) => {
+    const contentStr = post.content.replace(/<[^>]*>/g, ''); // Simple text version for length check
     const contentLength = contentStr.length;
-    let chars = 150;
-    // Check if its a mobile view
-    if (mql.matches) chars = 120;
+    const mql = window.matchMedia('(max-width: 660px)');
+    const chars = mql.matches ? 120 : 150; // Simplified char limit logic
 
-    // Check if content length is greater than :chars
-    if (contentLength > chars) {
-      return /*html*/`
-        <div class="content extra ${chars <= 200 ? 'mobile' : ''}" id="content">
-          ${post.content}
+    const needsReadMore = contentLength > chars;
+    const readMoreClass = needsReadMore ? `extra ${chars <= 120 ? 'mobile' : ''}` : ''; // Use 120 for mobile check
+
+    return /*html*/`
+      <div class="content ${readMoreClass}" id="content">
+        ${post.content}
+        ${needsReadMore ? `
           <div class="read-more">
             <span class="action">view more</span>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
               <path d="M12.78 5.22a.749.749 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.06 0L3.22 6.28a.749.749 0 1 1 1.06-1.06L8 8.939l3.72-3.719a.749.749 0 0 1 1.06 0Z"></path>
             </svg>
-          </div>
-        </div>
-        ${this.getPoll(post)}
-      `
-    }
-    else {
-      return /*html*/`
-        <div class="content" id="content">
-          ${post.content}
-        </div>
-        ${this.getPoll(post)}
-      `
-    }
+          </div>` : ''}
+      </div>
+      ${this._getPollHtml(post)}
+    `;
   }
 
-  getPoll = post => {
-    if(post.kind === 'poll') {
+  _getPollHtml = (post) => {
+    if (post.kind === 'poll') {
+      // Ensure attributes are properly handled/escaped if they contain complex data
+      const optionsAttr = JSON.stringify(post.poll || []).replace(/'/g, '&apos;');
       return /*html*/`
-        <votes-wrapper reload="false" votes="${post.votes}" selected="${post.option}" 
-          end-time="${post.end}" voted="${post.option ? 'true' : 'false'}" options='${post.poll}'
+        <votes-wrapper reload="false" votes="${post.votes || 0}" selected="${post.option || ''}"
+          end-time="${post.end || ''}" voted="${post.option ? 'true' : 'false'}" options='${optionsAttr}'
           hash="${post.hash}" kind="poll" url="/p/${post.hash.toLowerCase()}">
         </votes-wrapper>
       `;
-    } else return '';
+    }
+    return '';
   }
 
-  removeHtml = (text, title)=> {
-    let str = text.replace(/<[^>]*>/g, '');
-
-    str = str.trim();
-    const filteredTitle = title ? `<h3>${title}</h3>` : '';
-    const content = `<p>${this.trimContent(str)}</p>`;
-
-    return `
-      ${filteredTitle}
-      ${content}
-    `
-  }
-
-  trimContent = text => {
-    // if text is less than 150 characters
-    if (text.length <= 150) return text;
-
-    // check for mobile view
-    const mql = window.matchMedia('(max-width: 660px)');
-
-    // Check if its a mobile view
-    if (mql.matches) {
-      // return text substring: 150 characters + ...
-      return text.substring(0, 180) + '...';
+  _setReply = (parentPost) => {
+    if (!parentPost || !parentPost.parent) return;
+    const replyHtml = this._getReplyHtml(parentPost);
+    if (!replyHtml) return;
+    // Ensure parent has the setReply method
+    if (this.parent && typeof this.parent.setReply === 'function') {
+      this.parent.setReply(this.feed, replyHtml);
     } else {
-      // trim the text to 250 characters
-      return text.substring(0, 200) + '...';
+      console.warn('Parent component does not have setReply method or parent is not set.');
     }
   }
 
-  getHTML = () => {
-    const text = this.innerHTML;
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(text, 'text/html');
-    return doc.body.innerHTML;
+  _getReplyHtml = (post) => {
+      if (post.kind === 'reply' && post.parent) {
+          let url = `/p/${post.parent.toLowerCase()}`;
+          // Pass necessary attributes, ensure hash is correct if needed by preview-post
+          return /*html*/`
+              <preview-post url="${url}" hash="${post.parent}" preview="${this.preview}" feed="${this.feed}" first="false"></preview-post>
+          `;
+      }
+      return '';
   }
 
-  openReadMore = () => {
-    // Get the read more button
+
+  _displayError = (previewLoader) => {
+    if (previewLoader) previewLoader.remove();
+    if (!this._contentContainer) return;
+
+    const content = this.getEmpty();
+    this._contentContainer.innerHTML = content;
+    // Re-select the button inside the error message and activate it
+    this._fetchButton = this.shadowObj.querySelector('button.fetch');
+    this._activateFetchButton();
+    // Activate stats button if present in error template
+    const statsBtn = this.shadowObj.querySelector('.action.stats');
+     if (statsBtn) {
+        // Decide what data to pass for stats in error case, maybe null or empty object
+        statsBtn.addEventListener('click', (e) => this._handleStatsClick(e, {}));
+     }
+  }
+
+  _handleError = (previewLoader, error) => {
+    console.error('Error fetching or processing preview:', error);
+    this._displayError(previewLoader);
+  }
+
+  // --- Event Handling Helpers ---
+
+  _stopEvent = (event) => {
+    if (!event) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }
+
+  // Consolidate activation of interactive elements within the post content
+  _activateContentInteractions = (postData) => {
+    this._activateReadMore();
+    this._activateContentLinks();
+    this._activateViewAction(postData);
+    this._styleLastBlock(); // Style after content is set
+  }
+
+
+  _activateReadMore = () => {
     const readMore = this.shadowObj.querySelector('.content .read-more');
+    const content = this.shadowObj.querySelector('.content'); // Use cached element if possible
 
-    // Get the content
-    const content = this.shadowObj.querySelector('.content');
-
-    // Check if the read more button exists
     if (readMore && content) {
-      readMore.addEventListener('click', e => {
-        // prevent the default action
-        e.preventDefault()
-
-        // prevent the propagation of the event
-        e.stopPropagation();
-
-        // Prevent event from reaching any immediate nodes.
-        e.stopImmediatePropagation()
-
-        // Toggle the active class
+      readMore.addEventListener('click', (e) => {
+        this._stopEvent(e);
         content.classList.remove('extra');
-
-        // remove the read more button
-        readMore.remove();
+        readMore.remove(); // Remove the button after expanding
       });
     }
   }
 
-  openUrl = () => {
+  _activateContentLinks = () => {
     const links = this.shadowObj.querySelectorAll('div#content a');
-    const body = document.querySelector('body');
-    if (!links) return;
+    const body = document.body; // Cache if used frequently elsewhere
+    if (!links || links.length === 0) return;
+
     links.forEach(link => {
-      link.addEventListener('click', event => {
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
+      link.addEventListener('click', (event) => {
+        this._stopEvent(event);
         const url = link.getAttribute('href');
-        let linkPopUp = `<url-popup url="${url}"></url-popup>`
-        body.insertAdjacentHTML('beforeend', linkPopUp);
+        // Consider security implications of inserting arbitrary HTML/components
+        if (url) {
+          let linkPopUp = `<url-popup url="${encodeURIComponent(url)}"></url-popup>`; // Basic encoding
+          body.insertAdjacentHTML('beforeend', linkPopUp);
+        }
       });
     });
   }
 
-  openStory = () => {
-    // get current content
-    const btn = this.shadowObj.querySelector('.actions > .action#view-action');
-    const content = this.shadowObj.querySelector('.content#content');
-    if(content) {
-      content.addEventListener('click', event => {
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        let url = btn.getAttribute('href');
-        const post =  this.item;
-        this.pushApp(url, post);
-      })
+  _activateViewAction = (postData) => {
+    const viewButton = this.shadowObj.querySelector('.actions > .action#view-action');
+    const contentArea = this.shadowObj.querySelector('.content#content');
+
+    const handleViewClick = (event) => {
+        this._stopEvent(event);
+        const url = viewButton?.getAttribute('href'); // Use optional chaining
+        if (url) {
+            // Assuming this.item should be the postData passed to this function
+            this._pushAppState(url, postData);
+        } else {
+            console.warn('View action button or URL not found.');
+        }
+    };
+
+    if (contentArea) {
+        contentArea.addEventListener('click', handleViewClick);
     }
 
-    // get the button
-    if (btn) {
-      btn.addEventListener('click', event => {
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        let url = btn.getAttribute('href');
-        const post =  this.item;
-        this.pushApp(url, post);
-      })
+    if (viewButton) {
+        viewButton.addEventListener('click', handleViewClick);
+    }
+}
+
+
+  _pushAppState = (url, postData) => {
+    // Ensure app and push method exist
+    if (this.app && typeof this.app.push === 'function') {
+      // Pass structured data if needed by the 'story' view
+      this.app.push(url, { kind: "app", name: 'story', data: postData }, url);
+      this._navigateToAppView(postData); // Pass data if needed by navigate
+    } else {
+      console.warn('App or app.push method not available.');
     }
   }
 
-  pushApp = (url, content) => {
-    this.app.push(url, { kind: "app", name: 'story', html: content }, url);
-    // navigate to the content
-    this.navigateTo(content);
+  _navigateToAppView = (postData) => {
+    // Ensure app and navigate method exist
+    if (this.app && typeof this.app.navigate === 'function') {
+      this.app.navigate(postData); // Pass data if needed
+    } else {
+      console.warn('App or app.navigate method not available.');
+    }
   }
 
-  navigateTo = content => {
-    // navigate to the content
-    this.app.navigate(content);
-  }
+  // --- Formatting Helpers ---
 
-  mapStory = post => {
-    const author = post.author;
-    const url = `/p/${post.hash.toLowerCase()}`;
-    const images = post.images ? post.images.join(',') : null;
-    return /*html*/`
-      <app-post story="quick" tab="replies" url="${url}" hash="${post.hash}" likes="${post.likes}" replies="${post.replies}" 
-        replies-url="${url}/replies" likes-url="${url}/likes" images='${images}'
-        views="${post.views}"  time="${post.createdAt}" liked="${post.liked ? 'true' : 'false'}" 
-        author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
-        author-hash="${author.hash}" author-you="${post.you ? 'true' : 'false'}" author-img="${author.picture}" 
-        author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
-        author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-        author-bio="${author.bio === null ? 'This user has not added a bio yet.' : author.bio}" ${this.getPollOptions(post)}>
-        ${post.content}
-      </app-post>
-    `
-  }
+  _formatNumber = (n) => {
+    const num = parseInt(n, 10);
+    if (isNaN(num)) return '0'; // Handle non-numeric input
 
-  getPollOptions = post => {
-    if(post.kind === 'poll') {
-      return /*html*/`  options='${post.poll}' voted="${post.option ? 'true' : 'false'}" 
-      selected="${post.option}" end-time="${post.end}" votes="${post.votes}" `;
-    } else return '';
-  }
-
-  formatNumber = n => {
-    n = this.parseToNumber(n);
     const ranges = [
-      { divider: 1e9, suffix: 'B+' },
-      { divider: 1e6, suffix: 'M', thresholds: [1e6, 1e7, 1e8] },
-      { divider: 1e3, suffix: 'k', thresholds: [1e3, 1e4, 1e5] }
+      { divider: 1e9, suffix: 'B' }, // Simplified suffix
+      { divider: 1e6, suffix: 'M' },
+      { divider: 1e3, suffix: 'k' }
     ];
 
-    const { divider, suffix, thresholds } = ranges.find(({ divider }) => n >= divider) || {};
-    if (!divider) return n.toString();
-
-    const value = n / divider;
-    const precision = thresholds ? 
-      (n >= thresholds[2] ? 0 : n >= thresholds[1] ? 1 : 2) : 2;
-
-    return `${value.toFixed(precision)}${suffix}`;
+    for (const range of ranges) {
+      if (num >= range.divider) {
+        // Basic formatting, adjust precision as needed
+        const value = num / range.divider;
+        // Simple precision: 1 decimal place if value < 10, else integer
+        const precision = (value < 10 && value !== Math.floor(value)) ? 1 : 0;
+        return `${value.toFixed(precision)}${range.suffix}`;
+      }
+    }
+    return num.toString();
   }
 
-  parseToNumber(str) {
-    return parseInt(str, 10) || 0;
-  }
+  // --- Styling Helpers ---
 
-  disableScroll() {
-    // Get the current page scroll position
-    let scrollTop = window.scrollY || document.documentElement.scrollTop;
-    let scrollLeft = window.scrollX || document.documentElement.scrollLeft;
-    document.body.classList.add("stop-scrolling");
-
-    // if any scroll is attempted, set this to the previous value
-    window.onscroll = function() {
-      window.scrollTo(scrollLeft, scrollTop);
-    };
-  }
-
-  enableScroll() {
-    document.body.classList.remove("stop-scrolling");
-    window.onscroll = function() {};
-  }
-
-  // style the last paragraph or the last block element in content
-  styleLastBlock = () => {
+  _styleLastBlock = () => {
     const content = this.shadowObj.querySelector('.content#content');
     if (!content) return;
 
-    const lastBlock = content.lastElementChild;
-    if (!lastBlock) return;
+    // More robustly find the last significant block element, ignoring potential empty text nodes
+    const lastBlock = Array.from(content.children).reverse().find(el => el.nodeType === 1); // Find last Element node
 
-    // style the last block
-    lastBlock.style.setProperty('padding', '0 0 0');
-    lastBlock.style.setProperty('margin', '0 0 0');
+    if (lastBlock) {
+      // Use CSS classes for styling if possible, otherwise direct styles
+      lastBlock.style.setProperty('padding-bottom', '0', 'important'); // Use important if necessary
+      lastBlock.style.setProperty('margin-bottom', '0', 'important');
+    }
   }
 
+  // --- HTML Template Generators ---
+
   getTemplate() {
-    // Show HTML Here
+    // Initial structure, content added dynamically
     return /*html*/`
       <div class="welcome">
         <div class="preview">
-          <button class="fetch">Preview</button>
+          ${this.getLoader()} <!-- Start with loader -->
         </div>
       </div>
       ${this.getStyles()}
-    `
+    `;
   }
 
-  getLapseTime = isoDateStr => {
-    const date = new Date(isoDateStr);
-    const currentTime = new Date();
-    const seconds = (currentTime - date) / 1000;
+   _getLapseTime = (isoDateStr) => {
+    try {
+        const date = new Date(isoDateStr);
+        if (isNaN(date.getTime())) {
+            return 'Invalid date'; // Handle invalid date strings
+        }
+        const now = new Date();
+        const diffSeconds = Math.round((now - date) / 1000);
+        const diffDays = Math.round(diffSeconds / (60 * 60 * 24));
 
-    // check if seconds is less than 86400 and dates are equal: Today, 11:30 AM
-    if (seconds < 86400 && date.getDate() === currentTime.getDate()) {
-      return `
-        Today • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
-      `
-    } else if (seconds < 86400 && date.getDate() !== currentTime.getDate()) {
-      return `
-        Yesterday • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
-      `
+        const timeFormat = { hour: 'numeric', minute: 'numeric', hour12: true };
+        const dateFormatShort = { month: 'short', day: 'numeric' };
+        const dateFormatLong = { month: 'short', day: 'numeric', year: 'numeric' };
+        const weekdayFormat = { weekday: 'short' };
+
+        const timeStr = date.toLocaleTimeString('en-US', timeFormat);
+
+        if (diffSeconds < 60) return 'Just now';
+        if (diffSeconds < 3600) return `${Math.round(diffSeconds / 60)}m ago`;
+        if (diffSeconds < 86400 && date.getDate() === now.getDate()) return `Today • ${timeStr}`;
+        if (diffSeconds < 172800 && date.getDate() === now.getDate() - 1) return `Yesterday • ${timeStr}`;
+        if (diffSeconds < 604800) return `${date.toLocaleDateString('en-US', weekdayFormat)} • ${timeStr}`; // Within a week
+        if (date.getFullYear() === now.getFullYear()) return `${date.toLocaleDateString('en-US', dateFormatShort)} • ${timeStr}`; // This year
+
+        return `${date.toLocaleDateString('en-US', dateFormatLong)} • ${timeStr}`; // Older
+    } catch (e) {
+        console.error("Error formatting date:", isoDateStr, e);
+        return 'Date unavailable';
     }
+}
 
-    // check if seconds is less than 604800: Friday, 11:30 AM
-    if (seconds <= 604800) {
-      return `
-        ${date.toLocaleDateString('en-US', { weekday: 'short' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
-      `
-    }
 
-    // Check if the date is in the current year and seconds is less than 31536000: Dec 12, 11:30 AM
-    if (seconds < 31536000 && date.getFullYear() === currentTime.getFullYear()) {
-      return `
-        ${date.toLocaleDateString('en-US', { weekday: 'short' })} • ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
-      `
-    } else {
-      return `
-        ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}
-      `
-    }
-  }
-
-  getContent = (content, url, views, likes, author, kind) => {
-    const preview = this.shadowObj.querySelector('div.preview');
-    if (preview) {
-      preview.classList.add(kind);
-      if(this.preview === 'full') preview.classList.add('full');
-    }
-    const images = this.post.images ? this.post.images : null;
-
-    return /*html*/`
-      ${this.getHeader(author)}
-      <article class="article">${content}</article>
-      ${this.getImages(kind, images)}
-      ${this.getOn(author.time)}
-      ${this.getActions(likes, views, url, kind)}
-    `
-  }
-
-  getHeader = author => {
+  // Renamed for clarity
+  _getHeader = (author) => {
     return /*html*/`
       <div class="meta top-meta">
-        ${this.getAuthorHover(author)}
+        ${this._getAuthorHover(author)}
       </div>
-    `
+    `;
   }
 
-  getOn = time => {
+  // Renamed for clarity
+  _getTimestampHtml = (time) => {
     return /*html*/`
       <div class="meta bottom-meta">
         <time class="time" datetime="${time}">
-          ${this.getLapseTime(time)}
+          ${this._getLapseTime(time)}
         </time>
       </div>
-    `
+    `;
   }
 
-  getActions = (likes, views, url, kind) => {
+  // Renamed for clarity
+  _getActionsHtml = (likes, views, url, kind) => {
     return /*html*/`
-      <div class="actions ${kind} ${this.preview}">
-        ${this.getArrow(kind, this.first)}
+      <div class="actions ${kind} ${this.preview || ''}">
+        ${this._getArrowHtml(kind, this.first)}
         <a href="${url}" class="action view" id="view-action">view</a>
         <span class="action stats" id="stats-action">stats</span>
         <span class="action likes plain">
-          <span class="no">${this.formatNumber(likes)}</span> <span class="text">likes</span>
+          <span class="no">${this._formatNumber(likes)}</span> <span class="text">likes</span>
         </span>
         <span class="action views plain">
-          <span class="no">${this.formatNumber(views)}</span> <span class="text">views</span>
+          <span class="no">${this._formatNumber(views)}</span> <span class="text">views</span>
         </span>
       </div>
-    `
+    `;
   }
 
-  getArrow = (kind, first) => {
+  // Renamed for clarity
+  _getArrowHtml = (kind, first) => {
     if (kind === 'reply' || this.preview === 'full') {
       return /*html*/`
-        <span class="action arrow ${first ? 'first' : ''}"> 
+        <span class="action arrow ${first ? 'first' : ''}">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
             <defs>
               <linearGradient id="gradient" gradientTransform="rotate(0)">
@@ -531,101 +474,78 @@ export default class PreviewPost extends HTMLElement {
             <path fill="url(#gradient)" d="M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5Zm-1.43-.75a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </span>
-      `
+      `;
     }
-    else  return '';
+    return '';
   }
 
-  getReply = (kind, post) => {
-    if (kind === 'reply') {
-      let url = `/p/${post.parent.toLowerCase()}`;
-      return /*html*/`
-        <preview-post url="${url}" hash="${parent}" preview="${this.preview}"></preview-post>
-      `
-    } else return '';
-  }
 
   getEmpty = () => {
-    const preview = this.shadowObj.querySelector('div.preview');
-    if(preview) preview.classList.remove('reply');
+    // Reset classes on the container if it exists
+    if (this._contentContainer) {
+        this._contentContainer.className = 'preview empty-state'; // Use specific class
+    }
     return /* html */`
       <div class="empty">
-        <p>An error has occurred.</p>
+        <p>Could not load preview.</p>
         <div class="actions">
           <button class="fetch last">Retry</button>
-          <span class="action stats" id="stats-action">stats</span>
+          <span class="action stats" id="stats-action">stats</span> <!-- Keep stats? -->
         </div>
       </div>
-    `
+    `;
   }
 
   getLoader() {
     return /* html */`
       <div class="loader-container" id="loader-container">
-				<div class="loader"></div>
-			</div>
-    `
+                <div class="loader"></div>
+            </div>
+    `;
   }
 
-  getAuthorHover = author => {
-    const url = `/u/${author.hash.toLowerCase()}`;
-    let bio = author.bio ? author.bio : 'This user has not added a bio yet.';
-    // replace all " and ' with &quot; and &apos; to avoid breaking the html
-    bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+  _getAuthorHover = (author) => {
+    const url = `/u/${author.hash?.toLowerCase()}`; // Optional chaining for safety
+    let bio = author.bio ? author.bio.replace(/(\r\n|\n|\r)/gm, '<br>') : 'No bio available.'; // Sanitize line breaks
+    // Ensure contact is stringified safely
+    const contactJson = author.contact ? JSON.stringify(author.contact).replace(/'/g, '&apos;') : 'null';
+
     return /* html */`
-			<hover-author url="${url}" you="${author.you ? 'true' : 'false'}" hash="${author.hash}"
-        picture="${author.picture}" name="${author.name}" contact="${author.contact ? JSON.stringify(author.contact) : null}"
-        stories="${author.stories}" replies="${author.replies}"
-        followers="${author.followers}" following="${author.following}" user-follow="${author.is_following ? 'true' : 'false'}"
-        verified="${author.verified ? 'true' : 'false'}" bio="${bio}">
+            <hover-author url="${url}" you="${author.you ? 'true' : 'false'}" hash="${author.hash || ''}"
+        picture="${author.picture || ''}" name="${author.name || 'Unknown User'}" contact='${contactJson}'
+        posts="${author.posts || 0}" replies="${author.replies || 0}"
+        followers="${author.followers || 0}" following="${author.following || 0}" user-follow="${author.is_following ? 'true' : 'false'}"
+        verified="${author.verified ? 'true' : 'false'}">
+        ${bio}
       </hover-author>
-		`
+        `;
   }
 
-  getImages = (kind, imageArray) => {
-    if(kind === 'story') return this.getStoryImages(this._post.content);
-    // if length is greater is less than 1
-    if(!imageArray || imageArray.length < 1) return '';
+  // Renamed and combined image logic
+  _getImagesHtml = (imageArray) => {
+    if (!imageArray || imageArray.length === 0) return '';
+    // Ensure imageArray is actually an array and join safely
+    const imagesAttr = Array.isArray(imageArray) ? imageArray.join(',') : '';
+    if (!imagesAttr) return '';
 
-    // return
     return /* html */`
-      <images-wrapper images="${imageArray.join(',')}"></images-wrapper>
-    `
+      <images-wrapper images="${imagesAttr}"></images-wrapper>
+    `;
   }
 
-  getStoryImages = text => {
-    const images = this.allImages(text);
-
-    // if length is greater is less than 1
-    if(images.length < 1) return '';
-
-    // return
-    return /* html */`
-      <images-wrapper images="${images}"></images-wrapper>
-    `
-  }
-
-  allImages = text => {
-    // find images in the text
-    const textImages = this.findImages(text);
-
-    // if images is null return images; else concat the images
-    if (!textImages) return [];
-    return textImages.join(','); 
-  }
-
-  findImages = text => {
-    // Updated regex to handle various attributes and nested tags
-    const imgRegex = /<img\s+(?:[^>]*?\s+)?src\s*=\s*(["'])(.*?)\1/gi;
+  // Renamed for clarity
+  _findImagesInContent = (text) => {
+    if (!text) return [];
+    // Regex to find src attribute in img tags
+    const imgRegex = /<img\s+[^>]*?src\s*=\s*(["'])(.*?)\1/gi;
     const matches = [];
     let match;
     while ((match = imgRegex.exec(text)) !== null) {
-      matches.push(match[2]);  // match[2] contains the URL
+      matches.push(match[2]); // match[2] contains the URL
     }
-  
-    // Return array of src values or null if no matches found
-    return matches.length > 0 ? matches : null;
+    return matches;
   }
+
 
   getStyles() {
     return /*css*/`

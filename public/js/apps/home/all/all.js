@@ -4,9 +4,16 @@ export default class HomeAll extends HTMLElement {
     super();
     // let's create our shadow root
     this.shadowObj = this.attachShadow({ mode: "open" });
-    this.home = null;
     this.app = window.app;
     this.api = this.app.api;
+    this.loadedComponents = 0;
+    this.componentUrls = [];
+    // Add a home object property that child components can access
+    this.home = {
+      last: false,
+      next: 1,
+      loaded: false
+    };
     this.render();
   }
 
@@ -15,14 +22,78 @@ export default class HomeAll extends HTMLElement {
   }
 
   connectedCallback() {
-    // fetch content
-    const container = this.shadowObj.querySelector('.feeds');
-    this.fetchContent(container);
+    const trending = this.getAttribute('trending');
+    const people = this.getAttribute('people');
+    const recent = this.getAttribute('recent');
+    const feed = this.getAttribute('feed');
+
+    this.componentUrls = [
+      { component: 'home-recent', url: trending },
+      { component: 'home-people', url: people },
+      { component: 'home-recent', url: recent },
+      { component: 'home-feed', url: feed, page: "2" }
+    ];
+    
+    // Start loading the first component immediately
+    this.loadNextComponent();
+    
+    // Set up polling to check for loaded components
+    this.checkComponentsInterval = setInterval(() => this.checkLoadedComponents(), 500);
   }
 
   disconnectedCallback() {
     this.enableScroll();
     window.onscroll = null;
+    if (this.checkComponentsInterval) {
+      clearInterval(this.checkComponentsInterval);
+    }
+  }
+  
+  checkLoadedComponents() {
+    // Check if the current component has been loaded successfully
+    if (this.loadedComponents < this.componentUrls.length) {
+      const container = this.shadowObj.querySelector('.feeds');
+      const currentComponentInfo = this.componentUrls[this.loadedComponents];
+      const currentComponent = container.querySelector(`${currentComponentInfo.component}[data-loaded="true"]`);
+      
+      if (currentComponent) {
+        console.log(`Component loaded successfully: ${currentComponentInfo.component}`);
+        this.loadedComponents++;
+        
+        // Load the next component if there are more
+        if (this.loadedComponents < this.componentUrls.length) {
+          this.loadNextComponent();
+        } else {
+          // All components loaded, clear the interval
+          clearInterval(this.checkComponentsInterval);
+        }
+      }
+    } else {
+      // All components loaded, clear the interval
+      clearInterval(this.checkComponentsInterval);
+    }
+  }
+
+  loadNextComponent() {
+    if (this.loadedComponents >= this.componentUrls.length) return;
+    
+    const container = this.shadowObj.querySelector('.feeds');
+    const currentComponent = this.componentUrls[this.loadedComponents];
+    
+    console.log(`Loading component ${this.loadedComponents + 1}/${this.componentUrls.length}: ${currentComponent.component}`);
+    console.log(`URL for component: ${currentComponent.url}`);
+    
+    // Create the component HTML with a data-loaded attribute initialized to false
+    const component = /* html */`
+      <${currentComponent.component} 
+        url="${currentComponent.url}" 
+        page="${currentComponent.page || ''}"
+        data-loaded="false"
+      ></${currentComponent.component}>
+    `;
+    
+    // Add component to the DOM
+    container.insertAdjacentHTML('beforeend', component);
   }
 
   disableScroll() {
@@ -44,141 +115,17 @@ export default class HomeAll extends HTMLElement {
 
   getTemplate = () => {
     // Show HTML Here
-    return `
+    return /* html */`
       ${this.getBody()}
-      ${this.getStyles()}
+      <link rel="stylesheet" href="/static/css/app/home/all.css">
     `;
-  }
-  
-  fetchContent = container => {
-    let intervalId;
-  
-    const fetchLogic = (getContentFunction) => {
-      if (!this.home) return;
-      
-      if (this.home.last === true) {
-        clearInterval(intervalId);
-        return;
-      }
-      
-      if (this.home.loaded) {
-        container.insertAdjacentHTML('beforeend', getContentFunction(this.home.next));
-      }
-
-      // set loaded to false
-      this.home.loaded = false;
-    };
-  
-    intervalId = setInterval(() => fetchLogic(this.getStepContent), 500);
-  };
-
-  getStepContent = step => {
-    if (step === 1) {
-      return /* html */`
-        <home-news url="${this.getAttribute('news')}"></home-news>
-      `
-    } else if (step === 2) {
-      return /* html */`
-        <home-stories url="${this.getAttribute('trending')}"></home-stories>
-      `
-    } else if (step === 3) {
-      return /* html */`
-        <home-people url="${this.getAttribute('people-api')}"></home-people>
-      `
-    } else if (step === 4) {
-      return /* html */`
-        <home-feed url="${this.getAttribute('feed')}" page="1"></home-feed>
-      `
-    } else return '';
   }
 
   getBody = () => {
     return /* html */`
       <div class="feeds">
-        <home-recent url="${this.getAttribute('trending')}"></home-recent>
-      <div>
-    `;
-  }
-
-  getStyles() {
-    return /* css */`
-	    <style>
-	      *,
-	      *:after,
-	      *:before {
-	        box-sizing: border-box !important;
-	        font-family: inherit;
-	        -webkit-box-sizing: border-box !important;
-	      }
-
-	      *:focus {
-	        outline: inherit !important;
-	      }
-
-	      *::-webkit-scrollbar {
-	        width: 3px;
-	      }
-
-	      *::-webkit-scrollbar-track {
-	        background: var(--scroll-bar-background);
-	      }
-
-	      *::-webkit-scrollbar-thumb {
-	        width: 3px;
-	        background: var(--scroll-bar-linear);
-	        border-radius: 50px;
-	      }
-
-	      h1,
-	      h2,
-	      h3,
-	      h4,
-	      h5,
-	      h6 {
-	        padding: 0;
-	        margin: 0;
-	        font-family: inherit;
-	      }
-
-	      p,
-	      ul,
-	      ol {
-	        padding: 0;
-	        margin: 0;
-	      }
-
-	      a {
-	        text-decoration: none;
-	      }
-
-	      :host {
-          font-size: 16px;
-          padding: 0;
-          margin: 0;
-          display: flex;
-          flex-flow: column;
-          justify-content: space-between;
-          gap: 0;
-        }
-
-        .feeds {
-          display: flex;
-          flex-flow: column;
-          gap: 0;
-          padding: 0;
-          width: 100%;
-        }
-
-				@media screen and (max-width:660px) {
-					::-webkit-scrollbar {
-						-webkit-appearance: none;
-					}
-
-					a {
-						cursor: default !important;
-          }
-				}
-	    </style>
+        <!-- Components will be loaded sequentially here -->
+      </div>
     `;
   }
 }

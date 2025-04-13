@@ -48,6 +48,15 @@ export default class HomeTopics extends HTMLElement {
     }
   }
 
+  dispatchComponentLoaded = () => {
+    // Dispatch a custom event that parent components can listen for
+    const event = new CustomEvent('component-loaded', {
+      bubbles: true,
+      composed: true
+    });
+    this.dispatchEvent(event);
+  }
+
   fetching = (url, topicsContainer) => {
     const outerThis = this;
 
@@ -64,6 +73,8 @@ export default class HomeTopics extends HTMLElement {
 
       if (topics.length === 0) {
         topicsContainer.innerHTML = outerThis.getEmptyMsg();
+        // Signal component loaded even when empty
+        this.dispatchComponentLoaded();
         return;
       }
 
@@ -78,6 +89,9 @@ export default class HomeTopics extends HTMLElement {
   handleFetchError = (topicsContainer) => {
     topicsContainer.innerHTML = this.getWrongMessage();
     this.activateRefresh();
+    
+    // Signal component loaded even on error
+    this.dispatchComponentLoaded();
   }
 
   handleFetchSuccess = (topics, topicsContainer) => {
@@ -91,6 +105,9 @@ export default class HomeTopics extends HTMLElement {
       next: 3,
       loaded: true
     };
+    
+    // Signal component loaded on successful load
+    this.dispatchComponentLoaded();
   }
 
   fetchTopics = topicsContainer => {
@@ -99,6 +116,9 @@ export default class HomeTopics extends HTMLElement {
 
     if(!this._block && !this._empty) {
       outerThis.fetching(url, topicsContainer);
+    } else {
+      // If already loaded or blocked, still notify parent
+      this.dispatchComponentLoaded();
     }
   }
 

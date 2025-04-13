@@ -20,7 +20,6 @@ export default class HomeRecent extends HTMLElement {
 
   connectedCallback() {
     const feedContainer = this.shadowObj.querySelector('.stories');
-
     this.fetchFeeds(feedContainer);
   }
 
@@ -83,13 +82,9 @@ export default class HomeRecent extends HTMLElement {
         this.populateFeeds(content, feedContainer);
         this.setLastItem(feedContainer);
       }
-
-      // set next
-      this.all.home = {
-        last: false,
-        next: 1,
-        loaded: true
-      }
+      
+      // Mark the component as successfully loaded
+      this.setAttribute('data-loaded', 'true');
     } else {
       this.handleFetchError(feedContainer);
     }
@@ -99,6 +94,8 @@ export default class HomeRecent extends HTMLElement {
     this.populateFeeds(this.getWrongMessage(), feedContainer);
     // activate the refresh button
     this.activateRefresh();
+    
+    // Don't mark as loaded on error - parent will check for data-loaded="true"
   }
 
   fetchFeeds = feedContainer => {
@@ -111,6 +108,7 @@ export default class HomeRecent extends HTMLElement {
       // fetch the stories
       outerThis.fetching(url, feedContainer);
     }
+    // No need to mark as loaded if already blocked - parent component will continue to poll
   }
 
   populateFeeds = (content, feedContainer) => {
@@ -133,7 +131,7 @@ export default class HomeRecent extends HTMLElement {
       const images = post.images ? post.images.join(',') : null;
       const preview = this.section === "post" ? `no-preview="true"` : `preview="false"`;
       return /*html*/`
-        <quick-post kind="${post.kind}" feed="true" ${preview} hash="${post.hash}" url="/r/${post.hash}" 
+        <post-wrapper kind="${post.kind}" feed="true" ${preview} hash="${post.hash}" url="/r/${post.hash}" 
           likes="${post.likes}" replies="${post.replies}" liked="${post.liked}" views="${post.views}" 
           replies-url="/post/${post.hash}/replies" likes-url="/post/${post.hash}/likes" images='${images}'
           time="${post.createdAt}" options='${post.poll}' votes="${post.votes}"
@@ -142,7 +140,7 @@ export default class HomeRecent extends HTMLElement {
           author-img="${author.picture}" author-verified="${author.verified}" author-name="${author.name}" author-followers="${author.followers}"
           author-following="${author.following}" author-follow="${author.is_following}" author-bio="${bio}">
           ${post.content}
-        </quick-post>
+        </post-wrapper>
       `
     }).join('');
   }
@@ -174,7 +172,7 @@ export default class HomeRecent extends HTMLElement {
     // Show HTML Here
     return `
       ${this.getBody()}
-      ${this.getStyles()}
+      <link rel="stylesheet" href="/static/css/app/home/recent.css">
     `;
   }
 
@@ -228,262 +226,6 @@ export default class HomeRecent extends HTMLElement {
         </p>
         <button class="finish">Retry</button>
       </div>
-    `;
-  }
-
-  getStyles() {
-    return /* css */`
-      <style>
-        *,
-        *:after,
-        *:before {
-          box-sizing: border-box !important;
-          font-family: inherit;
-          -webkit-box-sizing: border-box !important;
-        }
-
-        *:focus {
-          outline: inherit !important;
-        }
-
-        *::-webkit-scrollbar {
-          width: 3px;
-        }
-
-        *::-webkit-scrollbar-track {
-          background: var(--scroll-bar-background);
-        }
-
-        *::-webkit-scrollbar-thumb {
-          width: 3px;
-          background: var(--scroll-bar-linear);
-          border-radius: 50px;
-        }
-
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-          padding: 0;
-          margin: 0;
-          font-family: inherit;
-        }
-
-        p,
-        ul,
-        ol {
-          padding: 0;
-          margin: 0;
-        }
-
-        a {
-          text-decoration: none;
-        }
-
-        :host {
-          font-size: 16px;
-          width: 100%;
-          min-height: 300px;
-          padding: 0;
-        }
-
-        div.loader-container {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 100%;
-          height: 100%;
-          min-height: 300px;
-          min-width: 100%;
-        }
-
-        div.loader-container > .loader {
-          width: 20px;
-          aspect-ratio: 1;
-          border-radius: 50%;
-          background: var(--accent-linear);
-          display: grid;
-          animation: l22-0 2s infinite linear;
-        }
-
-        div.loader-container > .loader:before {
-          content: "";
-          grid-area: 1/1;
-          margin: 15%;
-          border-radius: 50%;
-          background: var(--second-linear);
-          transform: rotate(0deg) translate(150%);
-          animation: l22 1s infinite;
-        }
-
-        div.loader-container > .loader:after {
-          content: "";
-          grid-area: 1/1;
-          margin: 15%;
-          border-radius: 50%;
-          background: var(--accent-linear);
-          transform: rotate(0deg) translate(150%);
-          animation: l22 1s infinite;
-        }
-
-        div.loader-container > .loader:after {
-          animation-delay: -.5s
-        }
-
-        @keyframes l22-0 {
-          100% {transform: rotate(1turn)}
-        }
-
-        @keyframes l22 {
-          100% {transform: rotate(1turn) translate(150%)}
-        }
-
-        .empty {
-          width: 100%;
-          padding: 10px 0 30px;
-          display: flex;
-          flex-flow: column;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .last {
-          width: 100%;
-          padding: 10px 0 30px;
-          display: flex;
-          flex-flow: column;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .last > h2,
-        .empty > h2 {
-          width: 100%;
-          margin: 5px 0;
-          text-align: start;
-          font-family: var(--font-text), sans-serif;
-          color: var(--text-color);
-          line-height: 1.4;
-          font-size: 1.2rem;
-        }
-
-        .last p,
-        .empty p {
-          width: 100%;
-          margin: 0;
-          text-align: start;
-          font-family: var(--font-read), sans-serif;
-          color: var(--gray-color);
-          line-height: 1.4;
-          font-size: 0.95rem;
-        }
-
-        .last p.next > .url,
-        .empty  p.next > .url {
-          background: var(--gray-background);
-          color: var(--gray-color);
-          padding: 2px 5px;
-          font-size: 0.95rem;
-          font-weight: 400;
-          border-radius: 5px;
-        }
-
-        .last p.next > .warn,
-        .empty  p.next .warn {
-          color: var(--error-color);
-          font-weight: 500;
-          font-size: 0.9rem;
-          background: var(--gray-background);
-          padding: 2px 5px;
-          border-radius: 5px;
-        }
-
-        div.stories {
-          padding: 0;
-          width: 100%;
-          display: flex;
-          flex-flow: column;
-          gap: 0;
-        }
-
-        div.finish {
-          padding: 50px 0 20px;
-          width: 100%;
-          min-width: 100%;
-          height: auto;
-          display: flex;
-          flex-flow: column;
-          justify-content: center;
-          align-items: center;
-          gap: 12px;
-        }
-
-        div.finish > h2.title {
-          margin: 10px 0 0 0;
-          font-size: 1.15rem;
-          font-weight: 500;
-          font-family: var(--font-read), sans-serif;
-          color: var(--text-color);
-        }
-
-        div.finish > p.desc {
-          margin: 0;
-          font-size: 0.85rem;
-          font-family: var(--font-read), sans-serif;
-          color: var(--text-color);
-          line-height: 1.4;
-          text-align: center;
-        }
-
-        div.finish > button.finish {
-          border: none;
-          background: var(--accent-linear);
-          font-family: var(--font-main), sans-serif;
-          text-decoration: none;
-          color: var(--white-color);
-          margin: 3px 0 0;
-          font-size: 1rem;
-          font-weight: 500;
-          cursor: pointer;
-          display: flex;
-          width: max-content;
-          flex-flow: row;
-          align-items: center;
-          text-transform: capitalize;
-          justify-content: center;
-          padding: 5px 15px 6px;
-          border-radius: 12px;
-          -webkit-border-radius: 12px;
-          -moz-border-radius: 12px;
-        }
-
-        @media screen and (max-width:660px) {
-          .last {
-            width: 100%;
-            padding: 15px 0;
-            border-bottom: var(--border);
-            display: flex;
-            flex-flow: column;
-            align-items: center;
-            justify-content: center;
-          }
-
-          .empty {
-            width: 100%;
-            padding: 20px 0;
-            display: flex;
-            flex-flow: column;
-            align-items: center;
-            justify-content: center;
-          }
-
-          div.finish > button.finish {
-            cursor: default !important;
-          }
-        }
-      </style>
     `;
   }
 }

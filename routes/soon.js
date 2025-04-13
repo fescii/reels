@@ -1,5 +1,5 @@
 const {
-  apis, comics, topics
+  apis, comics, shots
 } = require('../controllers').soon;
 
 /**
@@ -22,7 +22,7 @@ module.exports = app => {
   app.get('/comics', comics);
   
   // Route for handling topics
-  app.get('/topics', topics);
+  app.get('/shots', shots);
 
   // Route for handling apis
   app.get('/apis', apis);

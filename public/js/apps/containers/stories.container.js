@@ -121,7 +121,7 @@ export default class StoriesContainer extends HTMLElement {
       const images = story.images ? story.images.join(',') : ''; 
       if (story.kind === "post") {
         return /*html*/`
-          <quick-post story="quick" url="${url}" hash="${story.hash}" likes="${story.likes}" 
+          <post-wrapper story="quick" url="${url}" hash="${story.hash}" likes="${story.likes}" 
             replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
             replies-url="${url}/replies" likes-url="${url}/likes" images="${images}"
             author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
@@ -130,7 +130,7 @@ export default class StoriesContainer extends HTMLElement {
             author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}' 
             author-bio="${bio}">
             ${story.content}
-          </quick-post>
+          </post-wrapper>
         `
       }
       else if(story.kind === "poll") {

@@ -20,12 +20,6 @@ export default class HomeFeed extends HTMLElement {
   }
 
   connectedCallback() {
-    // set next
-    this.all.home = {
-      last: true,
-      next: 5,
-      loaded: true
-    }
     const feedContainer = this.shadowObj.querySelector('.stories');
 
     // check if the total
@@ -80,33 +74,43 @@ export default class HomeFeed extends HTMLElement {
     window.onscroll = function () { };
   }
 
+  dispatchComponentLoaded = () => {
+    // Dispatch a custom event that parent components can listen for
+    const event = new CustomEvent('component-loaded', {
+      bubbles: true,
+      composed: true
+    });
+    this.dispatchEvent(event);
+  }
+
   fetching = async (url, feedContainer) => {
     // Remove the scroll event
     this.removeScrollEvent();
     try {
       const result = await this.api.get(url, { content: 'json' });
       if (result.success) {
-        this.handleFetchSuccess(result.data, feedContainer);
+        this.handleFetchSuccess(result.posts, feedContainer);
       } else {
         this.handleFetchFailure(feedContainer);
       }
     } catch (error) {
+      console.log(error);
       this.handleFetchFailure(feedContainer);
     }
   }
 
-  handleFetchSuccess = (data, feedContainer) => {
+  handleFetchSuccess = (posts, feedContainer) => {
     // First page with no content
-    if (data.last && this._page === 1 && data.stories.length === 0 && data.replies.length === 0) {
+    if (this._page === 1 && posts.length === 0) {
       this._empty = true;
       this._block = true;
       this.populateFeeds(this.getEmptyMsg(), feedContainer);
     } 
     // Last page with some content
-    else if (data.stories.length < 6 && data.replies.length < 6) {
+    else if (posts.length < 10) {
       this._empty = true;
       this._block = true;
-      const content = this.mapFeeds(data.stories, data.replies);
+      const content = this.#feeds(posts);
       this.populateFeeds(content, feedContainer);
       this.populateFeeds(this.getLastMessage(), feedContainer);
     } 
@@ -114,12 +118,15 @@ export default class HomeFeed extends HTMLElement {
     else {
       this._block = false;  // Unblock for next fetch
       this._empty = false;  // More content might be available
-      const content = this.mapFeeds(data.stories, data.replies);
+      const content = this.#feeds(posts);
       this.populateFeeds(content, feedContainer);
     }
     
     // Re-add scroll event after content is loaded
     this.scrollEvent(feedContainer);
+    
+    // Mark as successfully loaded
+    this.setAttribute('data-loaded', 'true');
   }
 
   handleFetchFailure = feedContainer => {
@@ -128,6 +135,8 @@ export default class HomeFeed extends HTMLElement {
     this.populateFeeds(this.getWrongMessage(), feedContainer);
     // activate the refresh button
     this.activateRefresh();
+    
+    // Don't mark as loaded on error - parent will continue polling
   }
 
   fetchFeeds = feedContainer => {
@@ -141,6 +150,7 @@ export default class HomeFeed extends HTMLElement {
         await this.fetching(url, feedContainer);
       }, 2000);
     }
+    // Don't need to mark as loaded if already blocked - parent will continue polling
   }
 
   populateFeeds = (content, feedContainer) => {
@@ -203,110 +213,27 @@ export default class HomeFeed extends HTMLElement {
     }
   }
 
-  mapFeeds = (stories, replies) => {
-    const outerThis = this;
-    let content = '';
-    
-    // Check if the stories is empty and replies is not empty
-    if (stories.length === 0 && replies.length > 0) {
-      content = replies.map(reply => outerThis.mapReply(reply)).join('');
-    }
-    else if (stories.length > 0 && replies.length === 0) {
-      content = stories.map(story => outerThis.mapStory(story)).join('');
-    }
-    else {
-      // for each story follow by a reply, if there is any(i.e): append ine story and one reply if either is available else append the other
-      // check the longest array
-      if (stories.length >= replies.length) {
-        for (let i = 0; i < stories.length; i++) {
-          content += outerThis.mapStory(stories[i]);
-          if (replies[i]) {
-            content += outerThis.mapReply(replies[i]);
-          }
-        }
-      }
-      else {
-        for (let i = 0; i < replies.length; i++) {
-          if (stories[i]) {
-            content += outerThis.mapStory(stories[i]);
-          }
-          content += outerThis.mapReply(replies[i]);
-        }
-      }
-    }
-
-    return content;
-  }
-
-  mapStory = story => {
-    const author = story.author;
-    let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
-    // replace all " and ' with &quot; and &apos; to avoid breaking the html
-    bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-    const url = `/p/${story.hash.toLowerCase()}`;
-    const images = story.images ? story.images.join(',') : null;
-    if (story.kind === "post") {
+  #feeds = feed => {
+    return feed.map(post => {
+      const author = post.author;
+      let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
+      // replace all " and ' with &quot; and &apos; to avoid breaking the html
+      bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+      const images = post.images ? post.images.join(',') : null;
+      const preview = this.section === "post" ? `no-preview="true"` : `preview="false"`;
       return /*html*/`
-        <quick-post story="quick" url="${url}" hash="${story.hash}" likes="${story.likes}" images='${images}'
-          replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
-          replies-url="${url}/replies" likes-url="${url}/likes" 
-          author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
-          author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
-          author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
-          author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-          author-bio="${bio}">
-          ${story.content}
-        </quick-post>
+        <post-wrapper kind="${post.kind}" feed="true" ${preview} hash="${post.hash}" url="/r/${post.hash}" 
+          likes="${post.likes}" replies="${post.replies}" liked="${post.liked}" views="${post.views}" 
+          replies-url="/post/${post.hash}/replies" likes-url="/post/${post.hash}/likes" images='${images}'
+          time="${post.createdAt}" options='${post.poll}' votes="${post.votes}"
+          author-hash="${author.hash}" author-you="${post.you}" author-url="/u/${author.hash}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
+          author-stories="${author.stories}" author-replies="${author.replies}" parent="${post.parent}"
+          author-img="${author.picture}" author-verified="${author.verified}" author-name="${author.name}" author-followers="${author.followers}"
+          author-following="${author.following}" author-follow="${author.is_following}" author-bio="${bio}">
+          ${post.content}
+        </post-wrapper>
       `
-    }
-    else if (story.kind === "poll") {
-      return /*html*/`
-        <poll-post story="poll" url="${url}" hash="${story.hash}" likes="${story.likes}" 
-          replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
-          voted="${story.option ? 'true' : 'false'}" selected="${story.option}" end-time="${story.end}" 
-          options='${story.poll}' votes="${story.votes}" likes-url="${url}/likes" replies-url="${url}/replies" 
-          author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
-          author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-img="${author.picture}" 
-          author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" author-followers="${author.followers}" 
-          author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-          author-bio="${bio}">
-          ${story.content}
-        </poll-post>
-      `
-    }
-    else if (story.kind === "story") {
-      return /*html*/`
-        <story-post story="story" hash="${story.hash}" url="${url}" images='${images}'
-          topics="${story.topics.length === 0 ? 'story' : story.topics}" story-title="${story.title}" time="${story.createdAt}" replies-url="${url}/replies" 
-          likes-url="${url}/likes" replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" likes="${story.likes}" 
-          views="${story.views}" slug="${story.slug}"
-          author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
-          author-hash="${author.hash}" author-you="${story.you ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-          author-img="${author.picture}" author-verified="${author.verified ? 'true' : 'false'}" author-name="${author.name}" 
-          author-followers="${author.followers}" author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" 
-          author-bio="${bio}">
-          ${story.content}
-        </story-post>
-      `
-    }
-  }
-
-  mapReply = reply => {
-    const author = reply.author;
-    let bio = author.bio === null ? 'This user has not added a bio yet.' : author.bio;
-    // replace all " and ' with &quot; and &apos; to avoid breaking the html
-    bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-    const images = reply.images ? reply.images.join(',') : null;
-    return /*html*/`
-      <quick-post story="reply" feed="true" hash="${reply.hash}" url="/r/${reply.hash.toLowerCase()}" likes="${reply.likes}" replies="${reply.replies}" liked="${reply.liked}"
-        views="${reply.views}" time="${reply.createdAt}" replies-url="/r/${reply.hash}/replies" likes-url="/r/${reply.hash}/likes"
-        author-hash="${author.hash}" author-you="${reply.you}" author-url="/u/${author.hash}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}'
-        author-stories="${author.stories}" author-replies="${author.replies}" parent="${reply.story ? reply.story : reply.reply}" images='${images}'
-        author-img="${author.picture}" author-verified="${author.verified}" author-name="${author.name}" author-followers="${author.followers}"
-        author-following="${author.following}" author-follow="${author.is_following}" author-bio="${bio}">
-        ${reply.content}
-      </quick-post>
-    `
+    }).join('');
   }
 
   parseToNumber = num_str => {
@@ -325,7 +252,7 @@ export default class HomeFeed extends HTMLElement {
     // Show HTML Here
     return `
       ${this.getBody()}
-      ${this.getStyles()}
+      <link rel="stylesheet" href="/static/css/app/home/feed.css">
     `;
   }
 
@@ -379,183 +306,6 @@ export default class HomeFeed extends HTMLElement {
         </p>
         <button class="finish">Retry</button>
       </div>
-    `;
-  }
-
-
-  getStyles() {
-    return /* css */`
-      <style>
-        *,
-        *:after,
-        *:before {
-          box-sizing: border-box !important;
-          font-family: inherit;
-          -webkit-box-sizing: border-box !important;
-        }
-
-        *:focus {
-          outline: inherit !important;
-        }
-
-        *::-webkit-scrollbar {
-          width: 3px;
-        }
-
-        *::-webkit-scrollbar-track {
-          background: var(--scroll-bar-background);
-        }
-
-        *::-webkit-scrollbar-thumb {
-          width: 3px;
-          background: var(--scroll-bar-linear);
-          border-radius: 50px;
-        }
-
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-          padding: 0;
-          margin: 0;
-          font-family: inherit;
-        }
-
-        p,
-        ul,
-        ol {
-          padding: 0;
-          margin: 0;
-        }
-
-        a {
-          text-decoration: none;
-        }
-
-        :host {
-          font-size: 16px;
-          width: 100%;
-          padding: 0;
-        }
-
-        div.loader-container {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 100%;
-          min-height: 150px;
-          min-width: 100%;
-        }
-
-        div.loader-container > .loader {
-          width: 20px;
-          aspect-ratio: 1;
-          border-radius: 50%;
-          background: var(--accent-linear);
-          display: grid;
-          animation: l22-0 2s infinite linear;
-        }
-
-        div.loader-container > .loader:before {
-          content: "";
-          grid-area: 1/1;
-          margin: 15%;
-          border-radius: 50%;
-          background: var(--second-linear);
-          transform: rotate(0deg) translate(150%);
-          animation: l22 1s infinite;
-        }
-
-        div.loader-container > .loader:after {
-          content: "";
-          grid-area: 1/1;
-          margin: 15%;
-          border-radius: 50%;
-          background: var(--accent-linear);
-          transform: rotate(0deg) translate(150%);
-          animation: l22 1s infinite;
-        }
-
-        div.loader-container > .loader:after {
-          animation-delay: -.5s
-        }
-
-        @keyframes l22-0 {
-          100% {transform: rotate(1turn)}
-        }
-
-        @keyframes l22 {
-          100% {transform: rotate(1turn) translate(150%)}
-        }
-
-        div.stories {
-          padding: 0;
-          width: 100%;
-          display: flex;
-          flex-flow: column;
-          gap: 0;
-        }
-
-        div.finish {
-          padding: 10px 0 40px;
-          width: 100%;
-          min-width: 100%;
-          height: auto;
-          display: flex;
-          flex-flow: column;
-          justify-content: center;
-          align-items: center;
-          gap: 5px;
-        }
-
-        div.finish > h2.finish__title {
-          margin: 10px 0 0 0;
-          font-size: 1rem;
-          font-weight: 500;
-          font-family: var(--font-read), sans-serif;
-          color: var(--text-color);
-        }
-
-        div.finish > p.desc {
-          margin: 0;
-          font-size: 0.85rem;
-          font-family: var(--font-read), sans-serif;
-          color: var(--gray-color);
-          line-height: 1.4;
-          text-align: center;
-        }
-
-        div.finish > button.finish {
-          border: none;
-          background: var(--accent-linear);
-          font-family: var(--font-main), sans-serif;
-          text-decoration: none;
-          color: var(--white-color);
-          margin: 10px 0 0;
-          font-size: 1rem;
-          font-weight: 500;
-          cursor: pointer;
-          display: flex;
-          width: max-content;
-          flex-flow: row;
-          align-items: center;
-          text-transform: capitalize;
-          justify-content: center;
-          padding: 7px 18px 8px;
-          border-radius: 50px;
-          -webkit-border-radius: 50px;
-          -moz-border-radius: 50px;
-        }
-
-        @media screen and (max-width:660px) {
-          a,
-          div.finish > button.finish {
-            cursor: default !important;
-          }
-        }
-      </style>
     `;
   }
 }

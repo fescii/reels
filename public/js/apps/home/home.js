@@ -211,12 +211,7 @@ export default class AppHome extends HTMLElement {
   getAll = () => {
     return /* html */`
       <home-all stories="recent" recent="${this.getAttribute('recent')}" trending="${this.getAttribute('trending')}" following="${this.getAttribute('following')}"
-        stories-trending="${this.getAttribute('stories-trending')}" stories-recent="${this.getAttribute('stories-recent')}"
-        stories-following="${this.getAttribute('stories-following')}"
-        replies-trending="${this.getAttribute('replies-trending')}" replies-recent="${this.getAttribute('replies-recent')}"
-        replies-following="${this.getAttribute('replies-following')}"
-        news="${this.getAttribute('news')}"
-        people="${this.getAttribute('authors-trending')}" people-recent="${this.getAttribute('authors-recent')}">
+        feed="${this.getAttribute('trending')}" people="${this.getAttribute('authors-trending')}" people-recent="${this.getAttribute('authors-recent')}">
       </home-all>
     `
   }
@@ -235,7 +230,7 @@ export default class AppHome extends HTMLElement {
 
   getUsers = () => {
     return /* html */`
-      <people-feed url="${this.getAttribute('users')}" page="1"></people-feed>
+      <people-feed url="${this.getAttribute('authors-trending')}" page="1"></people-feed>
     `
   }
 
@@ -263,7 +258,7 @@ export default class AppHome extends HTMLElement {
           </div>
         </div>
         <div class="side">
-          <topics-container url="/q/trending/topics"></topics-container>
+          <home-news url="${this.getAttribute('news')}"></home-news>
           ${this.getInfo()}
         </div>
       `;

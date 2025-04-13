@@ -46,6 +46,15 @@ export default class HomeStories extends HTMLElement {
     }
   }
 
+  dispatchComponentLoaded = () => {
+    // Dispatch a custom event that parent components can listen for
+    const event = new CustomEvent('component-loaded', {
+      bubbles: true,
+      composed: true
+    });
+    this.dispatchEvent(event);
+  }
+
   fetchStories = async contentContainer => {
     const outerThis = this;
 
@@ -59,6 +68,9 @@ export default class HomeStories extends HTMLElement {
 
         // activate the refresh button
         outerThis.activateRefresh();
+        
+        // Notify that component has loaded even with error
+        this.dispatchComponentLoaded();
         return;
       }
 
@@ -68,6 +80,9 @@ export default class HomeStories extends HTMLElement {
         // display empty message
         const content = outerThis.getEmpty();
         contentContainer.innerHTML = content;
+        
+        // Notify that component has loaded with empty content
+        this.dispatchComponentLoaded();
         return;
       }
 
@@ -77,12 +92,8 @@ export default class HomeStories extends HTMLElement {
       // set the last item border-bottom to none
       outerThis.setLastItem(contentContainer);
 
-      // set next
-      this.all.home = {
-        last: false,
-        next: 3,
-        loaded: true
-      }
+      // Notify that component has successfully loaded
+      this.dispatchComponentLoaded();
     } catch (error) {
       console.log(error)
       // display error message
@@ -90,6 +101,9 @@ export default class HomeStories extends HTMLElement {
 
       // activate the refresh button
       outerThis.activateRefresh();
+      
+      // Notify that component has loaded even with error
+      this.dispatchComponentLoaded();
     };
 	}
 
@@ -103,7 +117,7 @@ export default class HomeStories extends HTMLElement {
       const images = story.images ? story.images.join(',') : ''; 
       if (story.kind === "post") {
         return /*html*/`
-          <quick-post story="quick" url="${url}" hash="${story.hash}" likes="${story.likes}" 
+          <post-wrapper story="quick" url="${url}" hash="${story.hash}" likes="${story.likes}" 
             replies="${story.replies}" liked="${story.liked ? 'true' : 'false'}" views="${story.views}" time="${story.createdAt}" 
             replies-url="${url}/replies" likes-url="${url}/likes" images="${images}"
             author-url="/u/${author.hash}" author-stories="${author.stories}" author-replies="${author.replies}"
@@ -112,7 +126,7 @@ export default class HomeStories extends HTMLElement {
             author-following="${author.following}" author-follow="${author.is_following ? 'true' : 'false'}" author-contact='${author.contact ? JSON.stringify(author.contact) : null}' 
             author-bio="${bio}">
             ${story.content}
-          </quick-post>
+          </post-wrapper>
         `
       }
       else if(story.kind === "poll") {
@@ -162,7 +176,7 @@ export default class HomeStories extends HTMLElement {
     // Show HTML Here
     return `
       ${this.getBody()}
-      ${this.getStyles()}
+      <link rel="stylesheet" href="/static/css/app/home/stories.css">
     `;
   }
 
@@ -216,218 +230,6 @@ export default class HomeStories extends HTMLElement {
         </p>
         <button class="finish">Retry</button>
       </div>
-    `;
-  }
-
-  getStyles() {
-    return /* css */`
-      <style>
-        *,
-        *:after,
-        *:before {
-          box-sizing: border-box !important;
-          font-family: inherit;
-          -webkit-box-sizing: border-box !important;
-        }
-
-        *:focus {
-          outline: inherit !important;
-        }
-
-        *::-webkit-scrollbar {
-          width: 3px;
-        }
-
-        *::-webkit-scrollbar-track {
-          background: var(--scroll-bar-background);
-        }
-
-        *::-webkit-scrollbar-thumb {
-          width: 3px;
-          background: var(--scroll-bar-linear);
-          border-radius: 50px;
-        }
-
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-          padding: 0;
-          margin: 0;
-          font-family: inherit;
-        }
-
-        p,
-        ul,
-        ol {
-          padding: 0;
-          margin: 0;
-        }
-
-        a {
-          text-decoration: none;
-        }
-
-        :host {
-          font-size: 16px;
-          width: 100%;
-        }
-
-        div.loader-container {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 100%;
-          min-height: 150px;
-          min-width: 100%;
-        }
-
-        div.loader-container > .loader {
-          width: 20px;
-          aspect-ratio: 1;
-          border-radius: 50%;
-          background: var(--accent-linear);
-          display: grid;
-          animation: l22-0 2s infinite linear;
-        }
-
-        div.loader-container > .loader:before {
-          content: "";
-          grid-area: 1/1;
-          margin: 15%;
-          border-radius: 50%;
-          background: var(--second-linear);
-          transform: rotate(0deg) translate(150%);
-          animation: l22 1s infinite;
-        }
-
-        div.loader-container > .loader:after {
-          content: "";
-          grid-area: 1/1;
-          margin: 15%;
-          border-radius: 50%;
-          background: var(--accent-linear);
-          transform: rotate(0deg) translate(150%);
-          animation: l22 1s infinite;
-        }
-
-        div.loader-container > .loader:after {
-          animation-delay: -.5s
-        }
-
-        @keyframes l22-0 {
-          100% {transform: rotate(1turn)}
-        }
-
-        @keyframes l22 {
-          100% {transform: rotate(1turn) translate(150%)}
-        }
-
-        div.empty {
-          width: 100%;
-          padding: 15px 0;
-          margin: 0;
-          display: flex;
-          flex-flow: column;
-          gap: 8px;
-        }
-
-        div.empty > p {
-          width: 100%;
-          padding: 15px 0;
-          margin: 0;
-          color: var(--text-color);
-          font-family: var(--font-text), sans-serif;
-          font-size: 1rem;
-          font-weight: 400;
-        }
-
-        div.stories {
-          padding: 0;
-          width: 100%;
-          display: flex;
-          flex-flow: column;
-          gap: 0;
-        }
-
-        div.finish {
-          padding: 10px 0 40px;
-          width: 100%;
-          min-width: 100%;
-          height: auto;
-          display: flex;
-          flex-flow: column;
-          justify-content: center;
-          align-items: center;
-          gap: 5px;
-        }
-
-        div.finish > h2.title {
-          margin: 10px 0 0 0;
-          font-size: 1.15rem;
-          font-weight: 500;
-          font-family: var(--font-read), sans-serif;
-          color: var(--text-color);
-        }
-
-        div.finish > p.desc {
-          margin: 0;
-          font-size: 0.85rem;
-          font-family: var(--font-read), sans-serif;
-          color: var(--gray-color);
-          line-height: 1.4;
-          text-align: center;
-        }
-
-        div.finish > button.finish {
-          border: none;
-          background: var(--accent-linear);
-          font-family: var(--font-main), sans-serif;
-          text-decoration: none;
-          color: var(--white-color);
-          margin: 10px 0 0;
-          font-size: 1rem;
-          font-weight: 500;
-          cursor: pointer;
-          display: flex;
-          width: max-content;
-          flex-flow: row;
-          align-items: center;
-          text-transform: capitalize;
-          justify-content: center;
-          padding: 7px 18px 8px;
-          border-radius: 50px;
-          -webkit-border-radius: 50px;
-          -moz-border-radius: 50px;
-        }
-
-        @media screen and (max-width:660px) {
-          .last {
-            width: 100%;
-            padding: 15px 0;
-            border-bottom: var(--border);
-            display: flex;
-            flex-flow: column;
-            align-items: center;
-            justify-content: center;
-          }
-
-          .empty {
-            width: 100%;
-            padding: 20px 0;
-            display: flex;
-            flex-flow: column;
-            align-items: center;
-            justify-content: center;
-          }
-
-          div.finish > button.finish {
-            cursor: default !important;
-          }
-        }
-      </style>
     `;
   }
 }

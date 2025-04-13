@@ -4,7 +4,7 @@
  * @name Search
  * @description This route will render the themes page for the app.
 */
-const topics = async (req, res) => {
+const shots = async (req, res) => {
   const meta = {
     title: 'Soon | This feature is coming soon',
     description: 'Stay tuned, this feature is coming soon',
@@ -12,7 +12,7 @@ const topics = async (req, res) => {
     image: '/static/img/favi.png',
     url: '/topics',
   }
-  res.render('pages/later', {
+  res.render('pages/shots', {
     meta: meta, data: {
       name: 'topics'
     }
@@ -64,7 +64,7 @@ const comics = async (req, res) => {
 
 // Export all public content controllers
 module.exports = {
-  topics,
+  shots,
   apis,
   comics
 }

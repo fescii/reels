@@ -2,19 +2,15 @@ import uis from "./apps/apps.js"
 import APIManager from "./api.js";
 export default class AppMain extends HTMLElement {
   constructor() {
-    // We are not even going to touch this.
     super();
-    this.content = this.getContent()
-    // let's create our shadow root
+    this.content = this.getContent();
     this.shadowObj = this.attachShadow({ mode: "open" });
-    // register components
     this.registerComponents();
     this.preferences();
     this.api = new APIManager('/api/v1', 9500, 'v1');
     window.app = this;
     this.mql = window.matchMedia('(max-width: 660px)');
     this.render();
-    // Add popstate event listener
     window.addEventListener('popstate', this.handlePopState);
   }
 

@@ -657,14 +657,14 @@ export default class AppUser extends HTMLElement {
   getActivity = () =>  {
     return /* html */`
       <activity-container url="/user/activity" api-all="/c/all" api-users="/c/users"
-        api-stories="/c/stories" api-replies="/c/replies" api-topics="/c/topics">
+        api-posts="/c/posts" api-replies="/c/replies" api-topics="/c/topics">
       </activity-container>
     `;
   }
 
   getStats = () =>  {
     return /* html */`
-      <stat-container url="/user/stats" api="/u/stats" stories-stats="/user/stats/stories" replies-stats="/user/stats/replies"></stat-container>
+      <stat-container url="/user/stats" api="/u/stats" posts-stats="/user/stats/posts" replies-stats="/user/stats/replies"></stat-container>
     `;
   }
 
@@ -880,9 +880,9 @@ export default class AppUser extends HTMLElement {
     url = url.trim().toLowerCase();
 
    return /* html */`
-    <app-profile tab="stories" you="true" url="${url}" tab="stories"
-      stories-url="${this.getAttribute('stories-url')}" replies-url="${this.getAttribute('replies-url')}"
-      stories="${this.getAttribute('stories')}" replies="${this.getAttribute('replies')}"
+    <app-profile tab="posts" you="true" url="${url}" tab="posts"
+      posts-url="${this.getAttribute('posts-url')}" replies-url="${this.getAttribute('replies-url')}"
+      posts="${this.getAttribute('posts')}" replies="${this.getAttribute('replies')}"
       followers-url="${url}/followers" following-url="${url}/following" contact='${this.getAttribute("user-contact")}'
       hash="${this.getAttribute('hash')}" picture="${this.getAttribute('user-img')}" verified="${this.getAttribute('user-verified')}"
       name="${this.getAttribute('user-name')}" followers="${this.getAttribute('user-followers')}"

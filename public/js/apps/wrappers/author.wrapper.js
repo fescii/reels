@@ -548,8 +548,8 @@ export default class AuthorWrapper extends HTMLElement {
     url = url.trim().toLowerCase();
 
    return /* html */`
-      <app-profile tab="stories" you="${this.getAttribute('you')}" url="${url}" tab="stories"
-        stories-url="${url}/stories" replies-url="${url}/replies" stories="${this.getAttribute('stories')}" replies="${this.getAttribute('replies')}"
+      <app-profile tab="posts" you="${this.getAttribute('you')}" url="${url}" tab="posts"
+        posts-url="${url}/posts" replies-url="${url}/replies" posts="${this.getAttribute('posts')}" replies="${this.getAttribute('replies')}"
         followers-url="${url}/followers" following-url="${url}/following"
         hash="${this.getAttribute('hash')}" picture="${this.getAttribute('picture')}" verified="${this.getAttribute('verified')}"
         name="${this.getAttribute('name')}" followers="${this.getAttribute('followers')}" contact='${this.getAttribute("contact")}'
@@ -568,7 +568,7 @@ export default class AuthorWrapper extends HTMLElement {
     return /* html */`
       <stats-popup url="${formattedUrl}/stats" name="${this.getAttribute('name')}"
         followers="${this.getAttribute('followers')}" following="${this.getAttribute('following')}" 
-        stories="${this.getAttribute('stories')}" replies="${this.getAttribute('replies')}">
+        posts="${this.getAttribute('posts')}" replies="${this.getAttribute('replies')}">
       </stats-popup>
     `
   }

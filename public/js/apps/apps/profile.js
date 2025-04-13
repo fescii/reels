@@ -23,7 +23,7 @@ export default class AppProfile extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['url', 'name', 'username', 'you', 'picture', 'verified', 'contact', 'followers', 'following', 'user-follow', 'bio', 'tab', 'stories-url', 'replies-url', 'followers-url', 'following-url', 'search-url', 'auth-url'];
+    return ['url', 'name', 'username', 'you', 'picture', 'verified', 'contact', 'followers', 'following', 'user-follow', 'tab', 'posts-url', 'replies-url', 'followers-url', 'following-url', 'search-url', 'auth-url'];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -228,16 +228,16 @@ export default class AppProfile extends HTMLElement {
   }
 
   getAuthor = () => {
-    // get url
     const url = this.getAttribute('url');
 
     // trim white spaces and convert to lowercase
     let formattedUrl = url.toLowerCase();
     return /* html */`
       <profile-wrapper name="${this.getAttribute('name')}" hash="${this.getAttribute('hash')}" you="${this._you}" replies="${this.getAttribute('replies')}"
-        url="${formattedUrl}" picture="${this.getAttribute('picture')}" verified="${this.getAttribute('verified')}" stories="${this.getAttribute('stories')}"
+        url="${formattedUrl}" picture="${this.getAttribute('picture')}" verified="${this.getAttribute('verified')}" posts="${this.getAttribute('posts')}"
         followers="${this.getAttribute('followers')}" following="${this.getAttribute('following')}" user-follow="${this.getAttribute('user-follow')}"
-        bio="${this.getAttribute('bio')}" contact='${this.getAttribute("contact")}'>
+        contact='${this.getAttribute("contact")}'>
+        ${this.innerHTML}
       </profile-wrapper>
     `
   }
@@ -245,7 +245,7 @@ export default class AppProfile extends HTMLElement {
   getSection = () => {
     return /* html */`
       <profile-section hash="${this.getAttribute('hash')}" url="${this.getAttribute('url')}" active="${this.getAttribute('tab')}" section-title="Profile" 
-        stories-url="${this.getAttribute('stories-url')}" stories="${this.getAttribute('stories')}" contact='${this.getAttribute("contact")}'
+        posts-url="${this.getAttribute('posts-url')}" posts="${this.getAttribute('posts')}" contact='${this.getAttribute("contact")}'
         replies-url="${this.getAttribute('replies-url')}" replies="${this.getAttribute('replies')}"
         followers-url="${this.getAttribute('followers-url')}" followers="${this.getAttribute('followers')}"
         following-url="${this.getAttribute('following-url')}" following="${this.getAttribute('following')}">
@@ -254,7 +254,6 @@ export default class AppProfile extends HTMLElement {
   }
 
   getHighlights = () => {
-    // get url
     const url = this.getAttribute('url');
   
     // trim white spaces and convert to lowercase
@@ -263,7 +262,7 @@ export default class AppProfile extends HTMLElement {
     return /* html */`
       <highlights-container url="${formattedUrl}/stats" name="${this.getAttribute('name')}"
         followers="${this.getAttribute('followers')}" following="${this.getAttribute('following')}" 
-        stories="${this.getAttribute('stories')}" replies="${this.getAttribute('replies')}">
+        posts="${this.getAttribute('posts')}" replies="${this.getAttribute('replies')}">
       </highlights-container>
     `
   }

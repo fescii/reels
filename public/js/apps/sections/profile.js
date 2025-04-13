@@ -75,7 +75,7 @@ export default class ProfileSection extends HTMLElement {
   }
 
   getOrSetActiveTab = tabs => {
-    const tabName = this.getAttribute('active') || 'all';
+    const tabName = this.getAttribute('active') || 'posts';
     // get the tab from the attribute or default to 'all'
     let activeTab = tabs.querySelector('li.active');
 
@@ -110,7 +110,7 @@ export default class ProfileSection extends HTMLElement {
 
   updateContent = (contentContainer, tabName, url) => {
     const contentMap = {
-      'stories': this.getStories(),
+      'posts': this.getPosts(),
       'replies': this.getReplies(),
       'followers': this.getFollowers(),
       'following': this.getFollowing()
@@ -143,10 +143,10 @@ export default class ProfileSection extends HTMLElement {
       // update bar underline
       this.updateBarUnderline(activeTab);
     } catch (error) {
-      const activeTab = tabs.querySelector('li.stories');
+      const activeTab = tabs.querySelector('li.posts');
       activeTab.classList.add('active');
       this.active_tab = activeTab;
-      contentContainer.innerHTML = this.getStories()
+      contentContainer.innerHTML = this.getPosts()
 
       // update bar underline
       this.updateBarUnderline(activeTab);
@@ -187,13 +187,13 @@ export default class ProfileSection extends HTMLElement {
     url = url.toLowerCase();
     return /* html */`
       <ul class="tabs">
-        <li class="tab stories ${tab === "stories" ? "active" : ''}" data-name="stories" url="${url}/stories">
+        <li class="tab posts ${tab === "posts" ? "active" : ''}" data-name="posts" url="${url}/posts">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
             <path d="M10.5 8H18.5M10.5 12H13M18.5 12H16M10.5 16H13M18.5 16H16" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M7 7.5H6C4.11438 7.5 3.17157 7.5 2.58579 8.08579C2 8.67157 2 9.61438 2 11.5V18C2 19.3807 3.11929 20.5 4.5 20.5C5.88071 20.5 7 19.3807 7 18V7.5Z" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M16 3.5H11C10.07 3.5 9.60504 3.5 9.22354 3.60222C8.18827 3.87962 7.37962 4.68827 7.10222 5.72354C7 6.10504 7 6.57003 7 7.5V18C7 19.3807 5.88071 20.5 4.5 20.5H16C18.8284 20.5 20.2426 20.5 21.1213 19.6213C22 18.7426 22 17.3284 22 14.5V9.5C22 6.67157 22 5.25736 21.1213 4.37868C20.2426 3.5 18.8284 3.5 16 3.5Z" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-          <span class="text">Stories</span>
+          <span class="text">Posts</span>
         </li>
         <li class="tab replies ${tab === "replies" ? "active" : ''}" data-name="replies" url="${url}/replies">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none">
@@ -226,8 +226,8 @@ export default class ProfileSection extends HTMLElement {
   getContainer = active => {
     // Switch active tab
     switch (active) {
-      case "stories":
-        return this.getStories();
+      case "posts":
+        return this.getPosts();
       case "replies":
         return this.getReplies();
       case "followers":
@@ -235,15 +235,15 @@ export default class ProfileSection extends HTMLElement {
       case "following":
         return this.getFollowing();
       default:
-        return this.getStories();
+        return this.getPosts();
     }
   }
 
-  getStories = () => {
+  getPosts = () => {
     return /*html*/`
-      <stories-feed hash="${this.getAttribute('hash')}" stories="${this.getAttribute('stories')}" page="1"
-        url="${this.getAttribute('stories-url')}"  kind="user">
-      </stories-feed>
+      <posts-feed hash="${this.getAttribute('hash')}" posts="${this.getAttribute('posts')}" page="1"
+        url="${this.getAttribute('posts-url')}"  kind="user">
+      </posts-feed>
     `
   }
 

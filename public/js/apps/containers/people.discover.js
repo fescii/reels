@@ -96,12 +96,14 @@ export default class DiscoverPeople extends HTMLElement {
 	mapUsers = data => {
     return data.map(user => {
 			let bio = user.bio === null ? 'This user has not added a bio yet.' : user.bio;
-      // replace all " and ' with &quot; and &apos; to avoid breaking the html
-      bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+      
+      // create a paragraph with the \n replaced with <br> if there are more than one \n back to back replace them with one <br>
+      if (bio.includes('\n')) bio = bio.replace(/\n+/g, '<br>');
       return /*html*/`
-				<person-wrapper hash="${user.hash}" you="${user.you}" url="/u/${user.hash}" stories="${user.stories}" replies="${user.replies}" posts="${user.posts}"
+				<person-wrapper hash="${user.hash}" you="${user.you}" url="/u/${user.hash}" posts="${user.posts}" replies="${user.replies}" posts="${user.posts}"
           picture="${user.picture}" verified="${user.verified}" name="${user.name}" followers="${user.followers}" contact='${user.contact ? JSON.stringify(user.contact) : null}'
-          following="${user.following}" user-follow="${user.is_following}" bio="${bio}">
+          following="${user.following}" user-follow="${user.is_following}">
+					${bio}
 				</person-wrapper>
       `
     }).join('');

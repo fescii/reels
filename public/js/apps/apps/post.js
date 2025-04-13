@@ -426,7 +426,7 @@ export default class AppPost extends HTMLElement {
     return /* html */`
 			<hover-author url="${url}" you="${this.getAttribute('author-you')}" hash="${this.getAttribute('author-hash')}"
         picture="${this.getAttribute('author-img')}" name="${this.getAttribute('author-name')}" contact='${this.getAttribute("author-contact")}'
-        stories="${this.getAttribute('author-stories')}" replies="${this.getAttribute('author-replies')}"
+        posts="${this.getAttribute('author-posts')}" replies="${this.getAttribute('author-replies')}"
         followers="${this.getAttribute('author-followers')}" following="${this.getAttribute('author-following')}" user-follow="${this.getAttribute('author-follow')}"
         verified="${this.getAttribute('author-verified')}" bio="${bio}">
       </hover-author>
@@ -439,7 +439,7 @@ export default class AppPost extends HTMLElement {
     bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
     return /* html */`
 			<author-wrapper you="${this.getAttribute('author-you')}" hash="${this.getAttribute('author-hash')}" picture="${this.getAttribute('author-img')}" name="${this.getAttribute('author-name')}"
-        stories="${this.getAttribute('author-stories')}" replies="${this.getAttribute('author-replies')}"
+        posts="${this.getAttribute('author-posts')}" replies="${this.getAttribute('author-replies')}"
         followers="${this.getAttribute('author-followers')}" following="${this.getAttribute('author-following')}" user-follow="${this.getAttribute('author-follow')}" contact='${this.getAttribute("author-contact")}'
         verified="${this.getAttribute('author-verified')}" url="/u/${this.getAttribute('author-hash').toLowerCase()}"
         bio="${bio}">

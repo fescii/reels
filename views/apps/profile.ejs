@@ -1,11 +1,14 @@
 <% var url = "/u/" + data.hash.toLowerCase() %>
 <% var contact = data.contact ? JSON.stringify(data.contact) : null; -%>
 <% var bio = data.bio === null ? 'This user has not added a bio yet.' : data.bio; -%>
+<%# create a paragraph with the \n replaced with <br> if there are more than one \n back to back repace them with one <br> %>
+<% bio = bio.replace(/(\n)+/g, '<br>') -%>
 <%# replace all " and ' with &quot; and &apos; to avoid breaking the html %>
 <% bio = bio.replace(/"/g, '&quot;').replace(/'/g, '&apos;') -%>
-<app-profile tab="<%= data.tab %>" you="<%= data.you ? 'true' : 'false' %>" hash="<%= data.hash %>" url="<%= url %>" stories-url="<%= url %>/stories" 
-  replies-url="<%= url %>/replies" stories="<%= data.stories %>" replies="<%= data.replies %>" 
+<app-profile tab="<%= data.tab %>" you="<%= data.you ? 'true' : 'false' %>" hash="<%= data.hash %>" url="<%= url %>" posts-url="<%= url %>/posts" 
+  replies-url="<%= url %>/replies" posts="<%= data.posts %>" replies="<%= data.replies %>" 
   followers-url="<%= url %>/followers" following-url="<%= url %>/following" contact='<%= contact %>'
   picture="<%= data.picture %>" verified="<%= data.verified ? 'true' : 'false' %>" name="<%= data.name %>" followers="<%= data.followers %>"
-  following="<%= data.following %>" user-follow="<%= data.is_following ? 'true' : 'false' %>" bio="<%= bio %>">
+  following="<%= data.following %>" user-follow="<%= data.is_following ? 'true' : 'false' %>">
+  <%- bio %>
 </app-profile>

@@ -26,13 +26,13 @@ const meta = data => {
 */
 const getPerson = async (req, res) => {
   //get the params from the request
-  let param = req.params.hash;
+  const param = req.params.hash.toUpperCase();
 
   // get header x-access-token
   const token = req.cookies['x-access-token'] || req.headers["x-access-token"]
   
   try {
-    const result = await api.get(`/u/page/${param}`, {
+    const result = await api.get(`/u/${param}`, {
       "x-access-token": token
     });
 
@@ -41,7 +41,7 @@ const getPerson = async (req, res) => {
     }
 
     const user = result.user;
-    user.tab = 'stories';
+    user.tab = 'posts';
 
     const { title, image, description } = meta(user);
 
@@ -71,13 +71,13 @@ const getPerson = async (req, res) => {
 */
 const getUserReplies = async (req, res) => {
   //get the params from the request
-  let param = req.params.hash;
+  const param = req.params.hash.toUpperCase();
 
   // get header x-access-token
   const token = req.cookies['x-access-token'] || req.headers["x-access-token"]
   
   try {
-    const result = await api.get(`/u/page/${param}`, {
+    const result = await api.get(`/u/${param}`, {
       "x-access-token": token
     });
 
@@ -114,13 +114,13 @@ const getUserReplies = async (req, res) => {
 */
 const getUserFollowers = async (req, res) => {
   //get the params from the request
-  let param = req.params.hash;
+  const param = req.params.hash.toUpperCase();
 
   // get header x-access-token
   const token = req.cookies['x-access-token'] || req.headers["x-access-token"]
   
   try {
-    const result = await api.get(`/u/page/${param}`, {
+    const result = await api.get(`/u/${param}`, {
       "x-access-token": token
     });
 
@@ -158,13 +158,13 @@ const getUserFollowers = async (req, res) => {
 */
 const getUserFollowing = async (req, res) => {
   //get the params from the request
-  let param = req.params.hash;
+  let param = req.params.hash.toUpperCase();
 
   // get header x-access-token
   const token = req.cookies['x-access-token'] || req.headers["x-access-token"]
   
   try {
-    const result = await api.get(`/u/page/${param}`, {
+    const result = await api.get(`/u/${param}`, {
       "x-access-token": token
     });
 

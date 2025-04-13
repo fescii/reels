@@ -337,7 +337,7 @@ export default class UserWrapper extends HTMLElement {
           </div>
         </div>
       </div>
-      ${this.getBio()}
+      ${this.getBio(this.innerHTML)}
       ${this.getStats()}
       <div class="actions">
         ${this.checkYou(this._you)}
@@ -369,22 +369,14 @@ export default class UserWrapper extends HTMLElement {
     }
   }
 
-  getBio = () => {
-    // get bio
-    let bio = this.getAttribute('bio') || '';
-
-    bio = bio.trim();
-
+  getBio = bio => {
     // check if bio is empty
-    if (bio === '') {
-      return '';
+    if (bio === '' || bio === null || bio === 'null') {
+      return 'The user has no bio';
     }
     else {
-      // check if bio is greater than 70 characters
-      let displayBio = bio.length > 150 ? `${bio.substring(0, 150)}..` : bio;
-
       return /*html*/`
-        <p class="bio">${displayBio}</p>
+        <div class="bio">${bio}</div>
       `
     }
   }
@@ -473,34 +465,30 @@ export default class UserWrapper extends HTMLElement {
   }
 
   getProfile = () => {
-    // get url
     let url = this.getAttribute('url');
- 
-    // trim white spaces and convert to lowercase
     url = url.trim().toLowerCase();
 
    return /* html */`
-      <app-profile tab="stories" you="${this.getAttribute('you')}" url="${url}"
-        stories-url="${url}/stories" replies-url="${url}/replies" stories="${this.getAttribute('stories')}" replies="${this.getAttribute('replies')}"
+      <app-profile tab="posts" you="${this.getAttribute('you')}" url="${url}"
+        posts-url="${url}/posts" replies-url="${url}/replies" posts="${this.getAttribute('posts')}" replies="${this.getAttribute('replies')}"
         followers-url="${url}/followers" following-url="${url}/following"
         hash="${this.getAttribute('hash')}" picture="${this.getAttribute('picture')}" verified="${this.getAttribute('verified')}"
         name="${this.getAttribute('name')}" followers="${this.getAttribute('followers')}" contact='${this.getAttribute("contact")}'
-        following="${this.getAttribute('following')}" user-follow="${this.getAttribute('user-follow')}" bio="${this.getAttribute('bio')}">
+        following="${this.getAttribute('following')}" user-follow="${this.getAttribute('user-follow')}">
+        ${this.innerHTML}
       </app-profile>
    `
   }
 
   getHighlights = () => {
-    // get url
     const url = this.getAttribute('url');
-  
     // trim white spaces and convert to lowercase
     let formattedUrl = url.toLowerCase();
 
     return /* html */`
       <stats-popup url="${formattedUrl}/stats" name="${this.getAttribute('name')}"
         followers="${this.getAttribute('followers')}" following="${this.getAttribute('following')}" 
-        stories="${this.getAttribute('stories')}" replies="${this.getAttribute('replies')}">
+        posts="${this.getAttribute('posts')}" replies="${this.getAttribute('replies')}">
       </stats-popup>
     `
   }
@@ -692,11 +680,12 @@ export default class UserWrapper extends HTMLElement {
           color: var(--accent-color);
         }
 
-        p.bio {
+        div.bio {
           color: var(--gray-color);
           font-family: var(--font-main), sans-serif;
           font-size: 0.9rem;
           font-weight: 400;
+          line-height: 1.4;
           width: 100%;
           text-align: start;
         }
@@ -744,7 +733,7 @@ export default class UserWrapper extends HTMLElement {
         
         .actions > .action {
           border: var(--action-border);
-          padding: 2.5px 15px 4px;
+          padding: 3px 12px 4px;
           background: none;
           font-family: var(--font-main), sans-serif;
           border: var(--border-mobile);
@@ -766,7 +755,7 @@ export default class UserWrapper extends HTMLElement {
 
         .actions > .action.you {
           text-transform: capitalize;
-          padding: 3px 15px 4px;
+          padding: 3px 12px 4px;
           cursor: default;
           pointer-events: none;
           border: none;
@@ -775,7 +764,7 @@ export default class UserWrapper extends HTMLElement {
         
         .actions > .action.follow {
           border: none;
-          padding: 3px 15px 4px;
+          padding: 3px 12px 4px;
           font-weight: 500;
           background: var(--accent-linear);
           color: var(--white-color);

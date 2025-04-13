@@ -7,7 +7,7 @@ export default class StatsPopup extends HTMLElement {
     this._url = this.getAttribute('url');
 
     // let's create our shadow root
-    this.shadowObj = this.attachShadow({mode: 'open'});
+    this.shadowObj = this.attachShadow({ mode: 'open' });
     this.app = window.app;
     this.api = this.app.api;
     this.render();
@@ -22,83 +22,75 @@ export default class StatsPopup extends HTMLElement {
 
     // Select the close button & overlay
     const overlay = this.shadowObj.querySelector('.overlay');
-    const btns = this.shadowObj.querySelectorAll('.cancel-btn');
+    const btns = this.shadowObj.querySelectorAll('.cancel-btn'); // Assuming .cancel-btn exists in original getStyles/getTemplate
     const contentContainer = this.shadowObj.querySelector('ul.highlights');
 
     // Close the modal
     if (overlay && btns && contentContainer) {
       this.closePopup(overlay, btns);
-      this.fetchTopics(contentContainer);
+      this.#fetch(contentContainer);
     }
+    // Note: Original code didn't explicitly handle the 'else' case here.
   }
 
-  fetchTopics = (contentContainer) => {
+  #fetch = (contentContainer) => {
     const outerThis = this;
-		const topicsLoader = this.shadowObj.querySelector('.loader-container');
+    const topicsLoader = this.shadowObj.querySelector('.loader-container');
     setTimeout(async () => {
       try {
-        const data = await this.api.get(this._url, { content: 'json' });
-        if (data.success) {
+        const result = await this.api.get(this._url, { content: 'json' });
+        if (result.success && result.stats) { // Ensure result.data exists
           // update the content
-          const content = outerThis.getHighlights(data.data);
+          // *** Pass necessary attributes to getHighlights (Removed 'topics') ***
+          const content = outerThis.getHighlights(
+            result.stats,
+            this.getAttribute('followers'),
+            this.getAttribute('posts'),
+            this.getAttribute('replies'),
+            // this.getAttribute('topics'), // Removed topics attribute
+            this.getAttribute('name')
+          );
           // remove the loader
-          topicsLoader.remove();
+          if (this.shadowObj.contains(topicsLoader)) { // Check if loader still exists
+            topicsLoader.remove();
+          }
           // insert the content
           contentContainer.insertAdjacentHTML('beforeend', content);
         } else {
           // display error message
           const content = outerThis.getEmpty();
-          topicsLoader.remove();
+          if (this.shadowObj.contains(topicsLoader)) { topicsLoader.remove(); }
           contentContainer.insertAdjacentHTML('beforeend', content);
         }
       } catch (error) {
         // display error message
+        console.error("StatsPopup Error fetching topics:", error); // Log the actual error
         const content = outerThis.getEmpty();
-        topicsLoader.remove();
+        if (this.shadowObj.contains(topicsLoader)) { topicsLoader.remove(); }
         contentContainer.insertAdjacentHTML('beforeend', content);
       }
     }, 2000);
-	}
+  }
 
   formatNumber = n => {
-    if (n >= 0 && n <= 999) {
-      return n.toString();
-    } else if (n >= 1000 && n <= 9999) {
-      const value = (n / 1000).toFixed(2);
-      return `${value}k`;
-    } else if (n >= 10000 && n <= 99999) {
-      const value = (n / 1000).toFixed(1);
-      return `${value}k`;
-    } else if (n >= 100000 && n <= 999999) {
-      const value = (n / 1000).toFixed(0);
-      return `${value}k`;
-    } else if (n >= 1000000 && n <= 9999999) {
-      const value = (n / 1000000).toFixed(2);
-      return `${value}M`;
-    } else if (n >= 10000000 && n <= 99999999) {
-      const value = (n / 1000000).toFixed(1);
-      return `${value}M`;
-    } else if (n >= 100000000 && n <= 999999999) {
-      const value = (n / 1000000).toFixed(0);
-      return `${value}M`;
-    } else if (n >= 1000000000) {
-      return "1B+";
-    }
-    else {
-      return 0;
-    }
+    if (typeof n !== 'number' || isNaN(n)) { return '0'; }
+    if (n < 0) { return `-${this.formatNumber(Math.abs(n))}`; }
+    if (n >= 0 && n <= 999) { return n.toString(); }
+    if (n >= 1000 && n <= 9999) { const v = (n / 1000).toFixed(2); return `${v}k`; }
+    if (n >= 10000 && n <= 99999) { const v = (n / 1000).toFixed(1); return `${v}k`; }
+    if (n >= 100000 && n <= 999999) { const v = Math.floor(n / 1000); return `${v}k`; }
+    if (n >= 1000000 && n <= 9999999) { const v = (n / 1000000).toFixed(2); return `${v}M`; }
+    if (n >= 10000000 && n <= 99999999) { const v = (n / 1000000).toFixed(1); return `${v}M`; }
+    if (n >= 100000000 && n <= 999999999) { const v = Math.floor(n / 1000000); return `${v}M`; }
+    if (n >= 1000000000 && n <= 999999999999) { const v = (n / 1000000000).toFixed(1); return `${v}B`; }
+    if (n > 999999999999) { return "1T+"; }
+    return '0';
   }
 
   parseToNumber = num_str => {
-    // Try parsing the string to an integer
-    const num = parseInt(num_str);
-
-    // Check if parsing was successful
-    if (!isNaN(num)) {
-      return num;
-    } else {
-      return 0;
-    }
+    const num = parseInt(num_str, 10);
+    if (!isNaN(num) && isFinite(num)) { return num; }
+    return 0;
   }
 
   disconnectedCallback() {
@@ -112,14 +104,14 @@ export default class StatsPopup extends HTMLElement {
     document.body.classList.add("stop-scrolling");
 
     // if any scroll is attempted, set this to the previous value
-    window.onscroll = function() {
+    window.onscroll = function () {
       window.scrollTo(scrollLeft, scrollTop);
     };
   }
 
   enableScroll() {
     document.body.classList.remove("stop-scrolling");
-    window.onscroll = function() {};
+    window.onscroll = function () { };
   }
 
   // close the modal
@@ -138,176 +130,207 @@ export default class StatsPopup extends HTMLElement {
   }
 
   getTemplate() {
-    // Show HTML Here
+    // Show HTML Here (Reverted to original structure)
     return `
       <div class="overlay"></div>
       <section id="content" class="content">
         ${this.getWelcome()}
       </section>
-    ${this.getStyles()}`
+    ${this.getStyles()}` // Assuming getStyles() exists elsewhere and is unchanged
   }
 
   getWelcome() {
+    // Reverted to original structure
     return /* html */`
       <div class="welcome">
-				<ul class="highlights">
+        <ul class="highlights">
           ${this.getLoader()}
         </ul>
-			</div>
-    `
-  }
-
-  getHighlights = data => {
-    // Get the number of followers, views, stories and topics
-    const followers = this.parseToNumber(this.getAttribute('followers'));
-    const views = data.all;
-    const stories = this.parseToNumber(this.getAttribute('stories'));
-    const topics = data.topics;
-
-    const replies = this.parseToNumber(this.getAttribute('replies'));
-
-    // get current and last month views
-    const currentMonthViews = data.current;
-    const lastMonthViews = data.last;
-
-    let name = this.getAttribute('name');
-
-    if (name) {
-      name = name.split(' ');
-
-      name = name[0];
-      name = name.toLowerCase();
-    }
-    else {
-      name = 'User'
-    }
-
-    // calculate the percentage increase or decrease in views
-    const percentage = lastMonthViews === 0 ? 100 : ((currentMonthViews - lastMonthViews) / lastMonthViews) * 100;
-
-    let increaseOrDecrease = this.getLevel(name);
-
-    // check if last month views is 0 and this month views is also 0
-    if (lastMonthViews > 0 || currentMonthViews > 0) {
-      // convert percentage to 1 decimal place if it is a decimal
-      const percentageFormatted = percentage % 1 === 0 ? percentage : percentage.toFixed(1);
-
-      // get the increase or decrease in views
-      increaseOrDecrease = percentage > 0 ? this.getIncrease(percentageFormatted) : this.getDecrease(Math.abs(percentageFormatted));
-    }
-
-    // format the number of followers, views, stories and topics
-    const followersFormatted = this.formatNumber(followers);
-    const viewsFormatted = this.formatNumber(currentMonthViews);
-    const storiesFormatted = this.formatNumber(stories);
-    const topicsFormatted = this.formatNumber(topics);
-
-    return /* html */`
-      <li class="item">
-        <span class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-            <path d="M2 5.5a3.5 3.5 0 1 1 5.898 2.549 5.508 5.508 0 0 1 3.034 4.084.75.75 0 1 1-1.482.235 4 4 0 0 0-7.9 0 .75.75 0 0 1-1.482-.236A5.507 5.507 0 0 1 3.102 8.05 3.493 3.493 0 0 1 2 5.5ZM11 4a3.001 3.001 0 0 1 2.22 5.018 5.01 5.01 0 0 1 2.56 3.012.749.749 0 0 1-.885.954.752.752 0 0 1-.549-.514 3.507 3.507 0 0 0-2.522-2.372.75.75 0 0 1-.574-.73v-.352a.75.75 0 0 1 .416-.672A1.5 1.5 0 0 0 11 5.5.75.75 0 0 1 11 4Zm-5.5-.5a2 2 0 1 0-.001 3.999A2 2 0 0 0 5.5 3.5Z"></path>
-          </svg>
-        </span>
-        <span class="link">
-          <span class="numbers" id="followers">${followersFormatted}</span> ${followers === 1 ? 'person' : 'people'} follows ${name.toLowerCase()}
-        </span>
-      </li>
-      <li class="item">
-        <span class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-            <path d="M6 2c.306 0 .582.187.696.471L10 10.731l1.304-3.26A.751.751 0 0 1 12 7h3.25a.75.75 0 0 1 0 1.5h-2.742l-1.812 4.528a.751.751 0 0 1-1.392 0L6 4.77 4.696 8.03A.75.75 0 0 1 4 8.5H.75a.75.75 0 0 1 0-1.5h2.742l1.812-4.529A.751.751 0 0 1 6 2Z"></path>
-          </svg>
-        </span>
-        <span class="link">
-          <span class="numbers" id="views">${viewsFormatted}</span> content views this month
-        </span>
-      </li>
-      ${increaseOrDecrease}
-      <li class="item">
-        <span class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-            <path d="M0 3.75C0 2.784.784 2 1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14H1.75A1.75 1.75 0 0 1 0 12.25Zm1.75-.25a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25v-8.5a.25.25 0 0 0-.25-.25ZM3.5 6.25a.75.75 0 0 1 .75-.75h7a.75.75 0 0 1 0 1.5h-7a.75.75 0 0 1-.75-.75Zm.75 2.25h4a.75.75 0 0 1 0 1.5h-4a.75.75 0 0 1 0-1.5Z"></path>
-          </svg>
-        </span>
-        <span class="link">
-          <span class="numbers" id="stories">${storiesFormatted}</span> published ${stories === 1 ? 'story' : 'stories'}/${stories === 1 ? 'post' : 'posts'}
-        </span>
-      </li>
-      <li class="item">
-        <span class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-            <path d="M6.78 1.97a.75.75 0 0 1 0 1.06L3.81 6h6.44A4.75 4.75 0 0 1 15 10.75v2.5a.75.75 0 0 1-1.5 0v-2.5a3.25 3.25 0 0 0-3.25-3.25H3.81l2.97 2.97a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L1.47 7.28a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"></path>
-          </svg>
-        </span>
-        <span class="link">
-          <span class="numbers" id="replies">${replies}</span> repl${replies === 1 ? 'y' : 'ies'} added so far
-        </span>
-      </li>
-      <li class="item">
-        <span class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-            <path d="M6.368 1.01a.75.75 0 0 1 .623.859L6.57 4.5h3.98l.46-2.868a.75.75 0 0 1 1.48.237L12.07 4.5h2.18a.75.75 0 0 1 0 1.5h-2.42l-.64 4h2.56a.75.75 0 0 1 0 1.5h-2.8l-.46 2.869a.75.75 0 0 1-1.48-.237l.42-2.632H5.45l-.46 2.869a.75.75 0 0 1-1.48-.237l.42-2.632H1.75a.75.75 0 0 1 0-1.5h2.42l.64-4H2.25a.75.75 0 0 1 0-1.5h2.8l.46-2.868a.75.75 0 0 1 .858-.622ZM9.67 10l.64-4H6.33l-.64 4Z"></path>
-          </svg>
-        </span>
-        <span class="link">
-          subscribed to <span class="numbers" id="topics">${topicsFormatted}</span> topic${topics === 1 ? '' : 's'}
-        </span>
-      </li>
-      <div class="empty">
-        <p class="italics">
-          This is a summary of the user's content and interactions performance on the platform.
-        </p>
       </div>
     `
   }
 
+
+  getHighlights = (data, attrFollowers, attrPosts, attrReplies, /* attrTopics removed */ attrName) => {
+    // 1. Consolidate all stats into a single object
+    const stats = {
+      followers: this.parseToNumber(attrFollowers),
+      postsPublished: this.parseToNumber(attrPosts),
+      repliesAdded: this.parseToNumber(attrReplies),
+      // topicsSubscribed: removed
+      views: {
+        all: this.parseToNumber(data?.all?.total),
+        posts: this.parseToNumber(data?.all?.posts),
+        replies: this.parseToNumber(data?.all?.replies),
+        issues: this.parseToNumber(data?.all?.issues),       // Added from total
+        responses: this.parseToNumber(data?.all?.responses), // Added from total
+        currentMonth: this.parseToNumber(data?.current),
+        lastMonth: this.parseToNumber(data?.last),
+      },
+    };
+
+    // 2. Prepare name
+    let name = attrName || 'User';
+    if (name) {
+      const nameParts = name.split(' ');
+      name = nameParts[0].toLowerCase();
+    } else {
+      name = 'user';
+    }
+
+    // 3. Calculate percentage change for monthly views (using currentMonth & lastMonth)
+    let percentage = 0;
+    if (stats.views.lastMonth !== 0) {
+      percentage = ((stats.views.currentMonth - stats.views.lastMonth) / stats.views.lastMonth) * 100;
+    } else if (stats.views.currentMonth > 0) {
+      percentage = 100; // Treat as 100% increase if starting from 0
+    } // If both are 0, percentage remains 0
+
+    let increaseOrDecreaseHtml = this.getLevel(name); // Default message
+
+    if (stats.views.lastMonth > 0 || stats.views.currentMonth > 0) { // Only show if there's activity
+      const percentageFormatted = percentage % 1 === 0 ? percentage : percentage.toFixed(1);
+      if (percentage > 0) {
+        increaseOrDecreaseHtml = this.getIncrease(percentageFormatted);
+      } else if (percentage < 0) {
+        increaseOrDecreaseHtml = this.getDecrease(Math.abs(percentageFormatted));
+      }
+      // If percentage is 0, the getLevel message remains appropriate
+    }
+
+    // 4. Format all numbers for display
+    const followersFormatted = this.formatNumber(stats.followers);
+    const postsFormatted = this.formatNumber(stats.postsPublished);
+    const repliesFormatted = this.formatNumber(stats.repliesAdded);
+    // topicsFormatted removed
+    const issuesFormatted = this.formatNumber(stats.views.issues);       // Format issues
+    const responsesFormatted = this.formatNumber(stats.views.responses); // Format responses
+    const viewsAllFormatted = this.formatNumber(stats.views.all);
+    const viewsCurrentMonthFormatted = this.formatNumber(stats.views.currentMonth);
+    // Optional: Format last month's views if you want to display it explicitly
+    // const viewsLastMonthFormatted = this.formatNumber(stats.views.lastMonth);
+
+    // 5. Generate HTML output
+    return /* html */`
+        <li class="item">
+            <span class="icon" title="Followers">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                    <path d="M2 5.5a3.5 3.5 0 1 1 5.898 2.549 5.508 5.508 0 0 1 3.034 4.084.75.75 0 1 1-1.482.235 4 4 0 0 0-7.9 0 .75.75 0 0 1-1.482-.236A5.507 5.507 0 0 1 3.102 8.05 3.493 3.493 0 0 1 2 5.5ZM11 4a3.001 3.001 0 0 1 2.22 5.018 5.01 5.01 0 0 1 2.56 3.012.749.749 0 0 1-.885.954.752.752 0 0 1-.549-.514 3.507 3.507 0 0 0-2.522-2.372.75.75 0 0 1-.574-.73v-.352a.75.75 0 0 1 .416-.672A1.5 1.5 0 0 0 11 5.5.75.75 0 0 1 11 4Zm-5.5-.5a2 2 0 1 0-.001 3.999A2 2 0 0 0 5.5 3.5Z"></path>
+                </svg>
+            </span>
+            <span class="link">
+                <span class="numbers" id="followers">${followersFormatted}</span> ${stats.followers === 1 ? 'person follows' : 'people follow'} ${name}
+            </span>
+        </li>
+        <li class="item">
+            <span class="icon" title="Published Posts">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                     <path d="M0 3.75C0 2.784.784 2 1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14H1.75A1.75 1.75 0 0 1 0 12.25Zm1.75-.25a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25v-8.5a.25.25 0 0 0-.25-.25ZM3.5 6.25a.75.75 0 0 1 .75-.75h7a.75.75 0 0 1 0 1.5h-7a.75.75 0 0 1-.75-.75Zm.75 2.25h4a.75.75 0 0 1 0 1.5h-4a.75.75 0 0 1 0-1.5Z"></path>
+                 </svg>
+            </span>
+            <span class="link">
+                <span class="numbers" id="posts">${postsFormatted}</span> published ${stats.postsPublished === 1 ? 'post' : 'posts'}
+            </span>
+        </li>
+        <li class="item">
+            <span class="icon" title="Replies Added">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                    <path d="M6.78 1.97a.75.75 0 0 1 0 1.06L3.81 6h6.44A4.75 4.75 0 0 1 15 10.75v2.5a.75.75 0 0 1-1.5 0v-2.5a3.25 3.25 0 0 0-3.25-3.25H3.81l2.97 2.97a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L1.47 7.28a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"></path>
+                </svg>
+            </span>
+            <span class="link">
+                <span class="numbers" id="replies">${repliesFormatted}</span> ${stats.repliesAdded === 1 ? 'reply' : 'replies'} added
+            </span>
+        </li>
+        <li class="item">
+            <span class="icon" title="Publication Issues">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                     <path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Z"></path><path d="M7.25 8.75a.75.75 0 0 1 .75-.75h.01a.75.75 0 0 1 .75.75v.01a.75.75 0 0 1-.75.75H8a.75.75 0 0 1-.75-.75ZM8 3.75a.75.75 0 0 1 .75.75v2a.75.75 0 0 1-1.5 0v-2A.75.75 0 0 1 8 3.75Z"></path>
+                 </svg>
+            </span>
+            <span class="link">
+                <span class="numbers" id="issues">${issuesFormatted}</span> publication ${stats.views.issues === 1 ? 'issue' : 'issues'}
+            </span>
+        </li>
+         <li class="item">
+            <span class="icon" title="Issue Responses">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                     <path d="M1 2.75C1 1.784 1.784 1 2.75 1h10.5c.966 0 1.75.784 1.75 1.75v7.5A1.75 1.75 0 0 1 13.25 12H9.06l-2.573 2.573A1.458 1.458 0 0 1 4 13.543V12H2.75A1.75 1.75 0 0 1 1 10.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h2.5a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h4.75a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+                </svg>
+            </span>
+            <span class="link">
+                <span class="numbers" id="responses">${responsesFormatted}</span> issue ${stats.views.responses === 1 ? 'response' : 'responses'}
+            </span>
+        </li>
+        <li class="item">
+            <span class="icon" title="Total Content Views (All Time)">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75H1.75a.75.75 0 0 1-.75-.75Zm.75 10.5h12.5V3.5H1.75Z"></path><path d="M4.5 5.75a.75.75 0 0 1 .75-.75h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1-.75-.75Zm0 3a.75.75 0 0 1 .75-.75h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5Z"></path></svg>
+            </span>
+            <span class="link">
+                <span class="numbers" id="views-all">${viewsAllFormatted}</span> total content views
+            </span>
+        </li>
+        <li class="item">
+            <span class="icon" title="Content Views This Month">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                    <path d="M6 2c.306 0 .582.187.696.471L10 10.731l1.304-3.26A.751.751 0 0 1 12 7h3.25a.75.75 0 0 1 0 1.5h-2.742l-1.812 4.528a.751.751 0 0 1-1.392 0L6 4.77 4.696 8.03A.75.75 0 0 1 4 8.5H.75a.75.75 0 0 1 0-1.5h2.742l1.812-4.529A.751.751 0 0 1 6 2Z"></path>
+                </svg>
+            </span>
+            <span class="link">
+                <span class="numbers" id="views-month">${viewsCurrentMonthFormatted}</span> content views this month
+            </span>
+        </li>
+        ${increaseOrDecreaseHtml} <div class="empty"> <p class="italics">
+                This is a summary of the user's content and interactions performance on the platform.
+            </p>
+        </div>
+    `;
+  }
+
+  // ... (getIncrease remains the same - updated version) ...
   getIncrease = percentage => {
     return /*html*/`
-      <li class="item">
-        <span class="icon increase">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-            <path d="M4.53 4.75A.75.75 0 0 1 5.28 4h6.01a.75.75 0 0 1 .75.75v6.01a.75.75 0 0 1-1.5 0v-4.2l-5.26 5.261a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L9.48 5.5h-4.2a.75.75 0 0 1-.75-.75Z"></path>
-          </svg>
-        </span>
-        <span class="link">
-          <span class="numbers" id="percentage">${percentage}%</span> increase in views this month
-        </span>
-      </li>
-    `
+        <li class="item">
+            <span class="icon increase" title="Monthly View Change vs Previous Month">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"> <path d="M4.53 4.75A.75.75 0 0 1 5.28 4h6.01a.75.75 0 0 1 .75.75v6.01a.75.75 0 0 1-1.5 0v-4.2l-5.26 5.261a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L9.48 5.5h-4.2a.75.75 0 0 1-.75-.75Z"></path> </svg>
+            </span>
+            <span class="link">
+                <span class="numbers increase" id="percentage">${percentage}%</span> increase in views this month
+            </span>
+        </li>
+    `;
   }
 
+  // ... (getLevel remains the same - updated version) ...
   getLevel = name => {
     return /*html*/`
-      <li class="item">
-        <span class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-            <path d="M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5Zm-1.43-.75a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"></path>
-          </svg>
-        </span>
-        <span class="link">
-          ${name} has no content views yet
-        </span>
-      </li>
-    `
+        <li class="item">
+            <span class="icon" title="Monthly View Change vs Previous Month">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"> <path d="M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5Zm-1.43-.75a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"></path> </svg>
+            </span>
+            <span class="link">
+                No significant change in ${name}'s content views this month.
+            </span>
+        </li>
+    `;
   }
 
+  // ... (getDecrease remains the same - updated version) ...
   getDecrease = percentage => {
     return /*html*/`
-      <li class="item">
-        <span class="icon decrease">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-            <path d="M4.22 4.179a.75.75 0 0 1 1.06 0l5.26 5.26v-4.2a.75.75 0 0 1 1.5 0v6.01a.75.75 0 0 1-.75.75H5.28a.75.75 0 0 1 0-1.5h4.2L4.22 5.24a.75.75 0 0 1 0-1.06Z"></path>
-          </svg>
-        </span>
-        <span class="link">
-          <span class="numbers" id="percentage">${percentage}%</span> decrease in views this month
-        </span>
-      </li>
-    `
+        <li class="item">
+            <span class="icon decrease" title="Monthly View Change vs Previous Month">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"> <path d="M4.22 4.179a.75.75 0 0 1 1.06 0l5.26 5.26v-4.2a.75.75 0 0 1 1.5 0v6.01a.75.75 0 0 1-.75.75H5.28a.75.75 0 0 1 0-1.5h4.2L4.22 5.24a.75.75 0 0 1 0-1.06Z"></path> </svg>
+            </span>
+            <span class="link">
+                <span class="numbers decrease" id="percentage">${percentage}%</span> decrease in views this month
+            </span>
+        </li>
+    `;
   }
 
   getEmpty = () => {
+    // Reverted to original version
     return /* html */`
       <div class="empty">
         <p>User highlights were not loaded, and error while fetching data</p>
@@ -317,6 +340,7 @@ export default class StatsPopup extends HTMLElement {
   }
 
   getLoader() {
+    // Reverted to original version
     return /* html */`
       <div class="loader-container">
         <span id="btn-loader">
